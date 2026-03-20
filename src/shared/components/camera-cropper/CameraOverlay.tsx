@@ -7,11 +7,12 @@
  * so the mask aligns pixel-perfectly with the vision-camera-cropper crop region.
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
 import { FRAME_W, FRAME_H, SQUARE_LEFT_PCT, SQUARE_TOP_PCT, SQUARE_W } from '@/shared/constants';
+import { Text } from '@/shared/components/typography/Text';
 
 // Absolute pixel coords inside the SVG coordinate system
 const SQ_X = (SQUARE_LEFT_PCT / 100) * FRAME_W;

@@ -127,19 +127,3 @@ export function useIncomingStockTransfer({
         staleTime: 5 * 60 * 1000,
     });
 }
-
-/**
- * Fetches a single stock transfer detail by pondId and transferId.
- * Returns full pond, cycle, and toPonds[].pond data.
- */
-export function useStockTransferDetail(pondId: string | undefined, transferId: string | undefined) {
-    return useQuery<IStockTransferDetail>({
-        queryKey: ['stock-transfer-detail', pondId, transferId],
-        queryFn: async () => {
-            const { data } = await stockTransferApi.getDetail(pondId!, transferId!);
-            return data;
-        },
-        enabled: !!pondId && !!transferId,
-        staleTime: 5 * 60 * 1000,
-    });
-}

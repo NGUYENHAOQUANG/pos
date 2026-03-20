@@ -16,13 +16,13 @@ import React, { useState, useCallback, useMemo } from 'react';
 import {
     View,
     TouchableOpacity,
-    Text,
     StyleSheet,
     ActivityIndicator,
     StatusBar,
     Platform,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GestureHandlerRootView, Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';

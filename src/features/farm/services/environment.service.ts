@@ -1,5 +1,5 @@
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
-import { EnvMetricType, ParameterSetting } from '@/features/farm/api/environmentApi';
+import type { EnvMetricType, ParameterSetting } from '@/features/farm/types/environment.types';
 import {
     IEnvMeasurementDetail,
     IEnvMeasurement,

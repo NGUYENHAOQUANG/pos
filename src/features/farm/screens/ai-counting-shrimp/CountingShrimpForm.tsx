@@ -10,7 +10,7 @@ import { DotingOverlay, DetectionDot } from '@/features/farm/components/boderbox
 import type { CountingResult } from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { CountingResultSection } from '@/features/farm/components/ai-counting-shrimp/CountingResultSection';
 import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
-import { CountingPickerSheet } from '@/features/farm/components/ai-counting-shrimp/CountingPickerSheet';
+import { AIImagePickerSheet } from '@/features/farm/components/ai-common/AIImagePickerSheet';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { Button } from '@/shared/components/buttons/Button';
@@ -227,7 +227,7 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                     </ScrollView>
                 </View>
 
-                <CountingPickerSheet
+                <AIImagePickerSheet
                     visible={isPickerSheetOpen}
                     onClose={() => setIsPickerSheetOpen(false)}
                     onOpenCamera={() => {

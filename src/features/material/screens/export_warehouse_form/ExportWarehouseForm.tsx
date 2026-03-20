@@ -21,10 +21,7 @@ import Animated from 'react-native-reanimated';
 import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 import { Input } from '@/shared/components/forms/Input';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
-import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { useExportMaterialActions } from '@/features/material/hooks/logic/useExportMaterialActions';
-import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
-import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -35,36 +32,31 @@ export interface ExportWarehouseFormProps {
     isEditMode: boolean;
     initialData?: ExportWarehouseFormValues;
     creatorName?: string;
-    availableMaterials: IWarehouseItem[];
-    materialOptions: DropdownOption[];
+    warehouseId?: string;
     fileUploaderRef: React.RefObject<FileUploaderRef | null>;
     onSubmit: (data: ExportWarehouseFormValues, isDraft: boolean) => void;
     onDelete?: () => void;
     onBackPress: () => void;
+    onZoneChange: (zoneId: string) => void;
 }
 
 export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
     isEditMode,
     initialData,
     creatorName,
-    availableMaterials,
-    materialOptions,
+    warehouseId,
     fileUploaderRef,
     onSubmit,
     onDelete,
     onBackPress,
+    onZoneChange,
 }) => {
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
-    const {
-        scrollRef: scrollViewRef,
-        scrollToDropdown,
-        scrollOffset,
-        onScroll,
-    } = useDropdownScroll();
+    const scrollViewRef = useRef<any>(null);
 
     const { control, handleSubmit, reset, setValue, getValues } =
         useForm<ExportWarehouseFormValues>({
@@ -128,7 +120,7 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
         control,
         getValues,
         setValue,
-        availableMaterials
+        [] // Material data now set directly by DropdownWarehouseItem callback
     );
 
     const onError = (formErrors: any) => {
@@ -136,7 +128,6 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
         if (firstErrorKey) {
             let errorMsg = formErrors[firstErrorKey].message;
             if (firstErrorKey === 'exportItems' && Array.isArray(formErrors.exportItems)) {
-                // Find first item error
                 const itemError = formErrors.exportItems.find((e: any) => e);
                 if (itemError) {
                     const fieldErrorKey = Object.keys(itemError)[0];
@@ -147,16 +138,6 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
             }
             showValidationError(errorMsg || 'Vui lòng kiểm tra lại thông tin');
         }
-    };
-
-    const handleDropdownOpen = (index: number) => {
-        scrollToDropdown({
-            index,
-            headerHeight: isEditMode ? 660 : 580,
-            itemHeight: 280,
-            fileCount: watchedForm.files?.length || 0,
-            fileRowHeight: 40,
-        });
     };
 
     // Calculate total amount from items (usually not strictly required for export, but good if UI needs it)
@@ -216,67 +197,60 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
             />
 
             <SafeInputLayoutMaterial>
-                <DropdownScrollContext.Provider value={scrollOffset}>
-                    <Animated.ScrollView
-                        ref={scrollViewRef}
-                        onScroll={onScroll}
-                        scrollEventThrottle={16}
-                        style={styles.contentScroll}
-                        contentContainerStyle={styles.contentContainer}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
+                <Animated.ScrollView
+                    ref={scrollViewRef}
+                    scrollEventThrottle={16}
+                    style={styles.contentScroll}
+                    contentContainerStyle={styles.contentContainer}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <ExportWarehouseInformation
+                        date={watchedForm.date ?? new Date()}
+                        onDateChange={val => setValue('date', val, { shouldValidate: true })}
+                        selectedZone={watchedForm.selectedZone ?? ''}
+                        onZoneChange={val => {
+                            setValue('selectedZone', val, { shouldValidate: true });
+                            onZoneChange(val);
+                        }}
+                        selectedPond={watchedForm.selectedPond ?? ''}
+                        onPondChange={val =>
+                            setValue('selectedPond', val, { shouldValidate: true })
+                        }
                     >
-                        <ExportWarehouseInformation
-                            date={watchedForm.date ?? new Date()}
-                            onDateChange={val => setValue('date', val, { shouldValidate: true })}
-                            selectedZone={watchedForm.selectedZone ?? ''}
-                            onZoneChange={val =>
-                                setValue('selectedZone', val, { shouldValidate: true })
-                            }
-                            selectedPond={watchedForm.selectedPond ?? ''}
-                            onPondChange={val =>
-                                setValue('selectedPond', val, { shouldValidate: true })
-                            }
-                        >
-                            {isEditMode && creatorName ? (
-                                <Input
-                                    label="Người tạo phiếu"
-                                    value={creatorName}
-                                    editable={false}
-                                />
-                            ) : null}
+                        {isEditMode && creatorName ? (
+                            <Input label="Người tạo phiếu" value={creatorName} editable={false} />
+                        ) : null}
 
-                            <Input
-                                label="Ghi chú"
-                                placeholder="Nhập ghi chú xuất kho"
-                                value={watchedForm.note ?? ''}
-                                onChangeText={val => setValue('note', val)}
-                                multiline={true}
-                                numberOfLines={3}
-                                inputContainerStyle={{ height: 100, alignItems: 'flex-start' }}
-                                inputStyle={{ textAlignVertical: 'top', paddingTop: 8 }}
-                            />
-
-                            <FileUploader
-                                ref={fileUploaderRef}
-                                files={(watchedForm.files as DocumentPickerResponse[]) || []}
-                                onFilesSelected={newFiles => setValue('files', newFiles)}
-                                maxFiles={5}
-                            />
-                        </ExportWarehouseInformation>
-
-                        <AddWarehouseMaterial
-                            materials={watchedForm.exportItems as MaterialItem[]}
-                            onUpdateMaterial={update}
-                            onAddMaterial={add}
-                            onRemoveMaterial={remove}
-                            materialOptions={materialOptions}
-                            onDropdownOpen={handleDropdownOpen}
-                            title="Vật tư xuất kho"
-                            isPriceDisabled={true}
+                        <Input
+                            label="Ghi chú"
+                            placeholder="Nhập ghi chú xuất kho"
+                            value={watchedForm.note ?? ''}
+                            onChangeText={val => setValue('note', val)}
+                            multiline={true}
+                            numberOfLines={3}
+                            inputContainerStyle={{ height: 100, alignItems: 'flex-start' }}
+                            inputStyle={{ textAlignVertical: 'top', paddingTop: 8 }}
                         />
-                    </Animated.ScrollView>
-                </DropdownScrollContext.Provider>
+
+                        <FileUploader
+                            ref={fileUploaderRef}
+                            files={(watchedForm.files as DocumentPickerResponse[]) || []}
+                            onFilesSelected={newFiles => setValue('files', newFiles)}
+                            maxFiles={5}
+                        />
+                    </ExportWarehouseInformation>
+
+                    <AddWarehouseMaterial
+                        materials={watchedForm.exportItems as MaterialItem[]}
+                        onUpdateMaterial={update}
+                        onAddMaterial={add}
+                        onRemoveMaterial={remove}
+                        title="Vật tư xuất kho"
+                        isPriceDisabled={true}
+                        warehouseId={warehouseId}
+                    />
+                </Animated.ScrollView>
             </SafeInputLayoutMaterial>
 
             <ExportWarehouseFooter
@@ -321,7 +295,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        paddingVertical: spacing.md,
+        gap: spacing.sm,
         paddingBottom: 100,
     },
 });

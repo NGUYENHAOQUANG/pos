@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
-import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
-import { TextInput } from '@/shared/components/typography/AppTextInput';
-import { Text } from '@/shared/components/typography/Text';
-import CalenderIcon from '@/assets/Icon/Calender.svg';
+import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
+import { DetailRow } from '@/features/material/components/DetailRow';
+import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { RequiredDot } from '@/shared/components/forms/Input';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -18,11 +13,10 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface InventoryGeneralInfoProps {
-    date: string;
+    date: Date;
     note: string;
-    onDatePress: () => void;
+    onDateChange: (date: Date) => void;
     onNoteChange: (text: string) => void;
-    materialGroup?: string;
     createdDate?: string;
     warehouseName?: string;
     creatorName?: string;
@@ -31,9 +25,8 @@ interface InventoryGeneralInfoProps {
 export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     date,
     note,
-    onDatePress,
+    onDateChange,
     onNoteChange,
-    // materialGroup = '---',
     createdDate = '',
     warehouseName = '',
     creatorName = '---',
@@ -47,46 +40,40 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
 
     return (
         <View style={styles.container}>
-            <CollapseHead
-                title="Chi tiết"
-                isExpanded={isExpanded}
-                onToggle={toggleExpand}
-                showIcon={true}
-            />
+            <CollapseHead title="Chi tiết" isExpanded={isExpanded} onToggle={toggleExpand} />
 
             <View style={styles.body}>
                 {/* Read-only info rows */}
-                <InfoRow label="Kho" value={warehouseName || '---'} />
-                <InfoRow label="Ngày tạo phiếu:" value={createdDate} />
-                <InfoRow label="Người tạo phiếu:" value={creatorName} />
-                {/* <InfoRow label="Nhóm vật tư" value={materialGroup} isLast /> */}
+                <DetailRow label="Kho" value={warehouseName || '---'} />
+                <DetailRow label="Ngày tạo phiếu" value={createdDate} />
+                <DetailRow label="Người tạo phiếu" value={creatorName} />
 
-                {/* Input: Ngày kiểm kê (Bấm vào để chọn ngày) */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Ngày kiểm kê
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.dateInput}
-                        onPress={onDatePress}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.inputText}>{date}</Text>
-                        <CalenderIcon width={20} height={20} />
-                    </TouchableOpacity>
-                </View>
+                {/* Date Input */}
+                <DateInputButton
+                    label="Ngày kiểm kê"
+                    required
+                    date={date}
+                    onDateChange={onDateChange}
+                    dateOnly
+                    formatOptions={{ showCurrentLabel: false }}
+                />
 
                 {/* Input: Ghi chú */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
+                <View style={styles.inputContainer}>
+                    <View style={styles.labelContainer}>
+                        <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
+                        <RequiredDot />
+                    </View>
+
                     <TextInput
                         style={styles.textArea}
                         placeholder="Nhập ghi chú"
-                        placeholderTextColor={colors.gray[300]}
-                        multiline
-                        textAlignVertical="top"
+                        placeholderTextColor={colors.borderSubtle}
                         value={note}
                         onChangeText={onNoteChange}
+                        multiline
+                        textAlignVertical="top"
+                        maxLength={2000}
                     />
                 </View>
             </View>
@@ -94,79 +81,47 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     );
 };
 
-// Helper Component cho dòng thông tin
-const InfoRow = ({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) => (
-    <View style={[styles.row, isLast && styles.rowNoMargin]}>
-        <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoValue}>{value}</Text>
-    </View>
-);
-
 const styles = StyleSheet.create({
     container: {
-        margin: spacing.md,
+        marginHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.border,
         zIndex: 10,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
     },
     body: {
-        padding: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
+        gap: spacing.md,
     },
-    row: {
+    inputContainer: {
+        gap: 6,
+    },
+    labelContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 12,
-    },
-    infoLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    infoValue: {
-        fontSize: 14,
-        textAlign: 'right',
-    },
-    inputGroup: {
-        marginTop: 16,
+        alignItems: 'center',
     },
     label: {
         fontSize: 14,
+        fontWeight: '500',
         color: colors.text,
-        marginBottom: 8,
-        fontWeight: '400',
-    },
-    required: {
-        color: colors.red[900],
-    },
-    dateInput: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: 44,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-    },
-    inputText: {
-        fontSize: 14,
-        color: colors.text,
+        lineHeight: 20,
     },
     textArea: {
-        height: 80,
+        minHeight: 104,
+        maxHeight: 160,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        padding: 12,
+        borderRadius: 8,
         fontSize: 14,
+        fontWeight: '400',
+        lineHeight: 24,
         color: colors.text,
-        backgroundColor: colors.white,
-    },
-    rowNoMargin: {
-        marginBottom: 0,
+        textAlignVertical: 'top',
     },
 });

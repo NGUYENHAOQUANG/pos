@@ -1,11 +1,3 @@
-/**
- * @file waterTreatment.types.ts
- * @description Types for Water Treatment API (Xử lý nước)
- * Based on Swagger: /api/v1/pond/{pondId}/water-treatment
- */
-
-// --- Enums ---
-
 /** Treatment type enum from backend */
 export enum TreatmentTypeEnum {
     MineralTreatment = 'MineralTreatment',
