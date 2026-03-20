@@ -19,6 +19,7 @@ import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import { RequiredDot } from '@/shared/components/forms/Input';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
 import type { InfiniteDropdownItem } from '@/shared/hooks/useInfiniteDropdown';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -186,8 +187,10 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                 <View style={styles.skeletonContainer}>
                     {Array.from({ length: 6 }).map((_, i) => (
                         <View key={i} style={styles.skeletonRow}>
-                            <View
-                                style={[styles.skeletonBar, { width: `${55 + (i % 3) * 15}%` }]}
+                            <Skeleton
+                                width={`${55 + (i % 3) * 15}%`}
+                                height={14}
+                                borderRadius={6}
                             />
                         </View>
                     ))}
@@ -478,10 +481,5 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: colors.border,
-    },
-    skeletonBar: {
-        height: 14,
-        backgroundColor: colors.gray[100],
-        borderRadius: 6,
     },
 });

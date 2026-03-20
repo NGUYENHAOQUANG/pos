@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { InventoryMaterialList } from '@/features/material/components/inventory_list/InventoryMaterialList';
-import { useInfiniteInventoryTickets } from '@/features/material/hooks/inventory/useInventory';
+import { useInfiniteInventoryTickets } from '@/features/material/hooks/useInventory';
 import { useMaterialStore } from '@/features/material/store';
 import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 import { useNavigation } from '@react-navigation/native';

@@ -20,7 +20,7 @@ import { MaterialGroupType } from '@/features/material/types/material.types';
 import { ExportWarehouseReceiptItems } from '@/features/material/components/export_warehouse_list/ExportWarehouseReceiptItems';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ExportReceipt, ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
-import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/useExportReceiptItems';
+import { useExportReceiptItems } from '@/features/material/hooks/useExportReceiptItems';
 import { DetailRow } from '../DetailRow';
 import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
