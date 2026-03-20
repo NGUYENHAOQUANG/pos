@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingBottom: 40,
+        paddingBottom: 16,
     },
     container: {
         width: '100%',

@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
         HEALTH_DETAIL: (deviceId: string) => `/device/health/${deviceId}`,
         DEVICE_ID_REFERENCE: '/device/device-id-reference',
         DEVICES_HUB: '/devicehub',
+        DELETE_SCHEDULE: (scheduleTimeId: string) => `/device/schedule/${scheduleTimeId}`,
     },
     POND: {
         CYCLE: {
@@ -242,10 +243,9 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/document/${id}`,
         UPLOAD_BASE64: '/document/upload-base64',
     },
-    AI: {
-        SEEDSTOCK_COUNTING: '/seedstockcounting',
-        ESTIMATED_SIZE: '/estimatedsize',
-        SHRIMP_HEALTH: '/shrimphealth',
+    INFERENCE: {
+        PREDICT: '/inference/predict',
+        GET_RESULT: (requestId: string) => `/inference/${requestId}`,
     },
     REPORT: {
         FEEDING_PRODUCTION: '/report/feeding-production',

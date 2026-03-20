@@ -3,10 +3,11 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 
 export interface CountingResultSectionProps {
     result: string;
+    currentCheckCount: number;
     currentImageCount: number;
     countTimes: number;
     showAddMore: boolean;
@@ -15,6 +16,7 @@ export interface CountingResultSectionProps {
 
 export const CountingResultSection: React.FC<CountingResultSectionProps> = ({
     result,
+    currentCheckCount,
     currentImageCount,
     countTimes,
     showAddMore,
@@ -25,6 +27,12 @@ export const CountingResultSection: React.FC<CountingResultSectionProps> = ({
             <Text style={styles.label}>Tổng lượng thả</Text>
             <Text style={styles.value}>
                 {result !== '0' && result !== '' ? Number(result).toLocaleString('en-US') : '-'}
+            </Text>
+        </View>
+        <View style={styles.row}>
+            <Text style={styles.label}>Lần kiểm tra hiện tại</Text>
+            <Text style={styles.value}>
+                {currentCheckCount > 0 ? Number(currentCheckCount).toLocaleString('en-US') : '-'}
             </Text>
         </View>
         <View style={styles.row}>
@@ -52,10 +60,12 @@ export const CountingResultSection: React.FC<CountingResultSectionProps> = ({
                 </View>
 
                 {showAddMore && (
-                    <OutlineButton
-                        label="Đo thêm"
+                    <Button
+                        title="Kiểm tra thêm"
                         onPress={onAddMore || (() => {})}
-                        labelStyle={styles.addMoreText}
+                        variant="outline"
+                        textStyle={styles.addMoreText}
+                        style={{ borderColor: colors.border }}
                     />
                 )}
             </>
@@ -84,17 +94,23 @@ const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
         padding: 16,
-        borderRadius: 8,
+        borderRadius: 12,
         marginVertical: spacing.md,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         borderColor: colors.border,
         borderWidth: 1,
+        overflow: 'hidden',
     },
     infoIcon: {
         marginRight: 8,
+        flexShrink: 0,
+        marginTop: 2,
     },
     infoText: {
+        flex: 1,
+        flexShrink: 1,
+        flexWrap: 'wrap',
         fontSize: 14,
         color: colors.text,
         lineHeight: 20,

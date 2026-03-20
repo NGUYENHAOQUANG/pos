@@ -8,7 +8,7 @@ import { LeafletMap } from '@/shared/components/map/LeafletMap';
 import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 import { ZoomableImage } from '@/shared/components/image/ZoomableImage';
 
-const Farm3DImage = require('@/assets/images/Farm5KG.jpg');
+const Farm3DImage = require('@/assets/images/Farm5KG.png');
 const farm3DAsset = Image.resolveAssetSource(Farm3DImage);
 
 const TABS: HeadingBarItem[] = [
@@ -49,9 +49,9 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
         code: farm?.code || '{mã trại}',
         area:
             typeof farm?.area === 'number'
-                ? (farm.area as number).toLocaleString('vi-VN')
+                ? `${(farm.area as number).toLocaleString('vi-VN')} m²`
                 : farm?.area
-                ? Number(farm.area).toLocaleString('vi-VN')
+                ? `${Number(farm.area).toLocaleString('vi-VN')} m²`
                 : '',
         address: farm?.address || '',
     };

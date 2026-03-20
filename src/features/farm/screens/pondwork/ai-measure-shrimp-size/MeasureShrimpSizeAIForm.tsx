@@ -1,21 +1,19 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import Animated, { SlideInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '@/styles';
+import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { Loading } from '@/shared/components/ui/Loading';
 import { Button } from '@/shared/components/buttons/Button';
+import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { Input } from '@/shared/components/forms/Input';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import {
-    ShrimpMeasurementBoundingBoxOverlay,
-    MeasurementDetectionBox,
-} from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+import type { MeasurementDetectionBox } from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { formatDecimalInput } from '@/shared/utils/formatters';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
@@ -66,7 +64,7 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     sizePcsPerKg,
     measuredWeight,
     imageUri,
-    detections,
+    detections: _detections,
     imageDimensions,
     displayDimensions,
     hasAnalyzedCurrent,
@@ -84,8 +82,6 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     onCloseSheet,
     onImageAreaLayout,
 }) => {
-    const insets = useSafeAreaInsets();
-
     const aiCount = currentMeasurement?.count ?? null;
     const sizeShrimp1 =
         currentMeasurement?.sizes && currentMeasurement.sizes.length > 0
@@ -121,20 +117,8 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                             displayDimensions={displayDimensions}
                             onImageSelect={onImageSelect}
                             onImageAreaLayout={onImageAreaLayout}
-                        >
-                            {imageUri && detections.length > 0 && (
-                                <ShrimpMeasurementBoundingBoxOverlay
-                                    detections={detections}
-                                    displayWidth={displayDimensions.width}
-                                    displayHeight={
-                                        displayDimensions.width /
-                                        (imageDimensions.width / imageDimensions.height)
-                                    }
-                                    originalWidth={imageDimensions.width}
-                                    originalHeight={imageDimensions.height}
-                                />
-                            )}
-                        </AIImageProcessingSection>
+                        />
+                        {/* Bounding box overlay removed: processed images from AI server already contain annotations */}
                     </SelectionInfoBox>
 
                     <SelectionInfoBox title="Thông tin nhập" style={{ marginTop: 0 }}>
@@ -248,81 +232,77 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                 </ScrollView>
             </Loading>
 
-            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                <View style={styles.checkCountRow}>
-                    <Text style={styles.checkCountLabel}>Số lần đo</Text>
-                    <Text style={styles.checkCountValue}>{countTimes}</Text>
-                </View>
-                <View style={styles.buttonRow}>
-                    {countTimes === 0 ? (
-                        <Button
-                            title="Bắt đầu đo"
-                            variant="primary"
-                            onPress={onAnalyze}
-                            style={styles.flexButton}
-                            disabled={!imageUri}
-                        />
-                    ) : (
-                        <>
-                            <Button
-                                title="Đo lại"
-                                variant="outline"
-                                onPress={onReset}
-                                style={[styles.flexButton, { borderColor: colors.border }]}
-                                textStyle={{ color: colors.textSecondary }}
-                            />
-                            <Button
-                                title="Lấy kết quả đo"
-                                variant="primary"
-                                onPress={onSave}
-                                style={styles.flexButton}
-                                disabled={measurements.length === 0}
-                            />
-                        </>
-                    )}
-                </View>
+            <View style={styles.checkCountRow}>
+                <Text style={styles.checkCountLabel}>Số lần đo</Text>
+                <Text style={styles.checkCountValue}>{countTimes}</Text>
             </View>
+            {countTimes === 0 ? (
+                <ButtonBar
+                    mode="single"
+                    primaryTitle="Bắt đầu đo"
+                    onPrimaryPress={onAnalyze}
+                    primaryButtonDisabled={!imageUri}
+                />
+            ) : (
+                <ButtonBar
+                    mode="double"
+                    secondaryTitle="Đo lại"
+                    primaryTitle="Lấy kết quả đo"
+                    onSecondaryPress={onReset}
+                    onPrimaryPress={onSave}
+                    primaryButtonDisabled={measurements.length === 0}
+                    equalWidth
+                />
+            )}
 
             {/* Size details modal */}
-            <Modal
+            <AnimatedBottomSheet
                 visible={isSheetVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={onCloseSheet}
+                onClose={onCloseSheet}
+                containerStyle={styles.sheetContainer}
             >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={onCloseSheet}
-                >
-                    <Animated.View entering={SlideInDown.duration(300)} style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <View style={styles.modalIndicator} />
-                            <Text style={styles.modalTitle}>
-                                Danh sách kích thước tôm - Lần đo {countTimes}
-                            </Text>
-                        </View>
-                        <ScrollView
-                            style={styles.modalList}
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={styles.modalListContent}
-                        >
-                            {currentMeasurement?.sizes.map((size, index) => (
-                                <Animated.View key={index} style={styles.modalItem}>
-                                    <Text style={styles.modalItemLabel}>Tôm {index + 1}</Text>
-                                    <Text style={styles.modalItemValue}>{size.toFixed(2)} cm</Text>
-                                </Animated.View>
-                            ))}
-                        </ScrollView>
-                    </Animated.View>
-                </TouchableOpacity>
-            </Modal>
+                {/* Header */}
+                <View style={styles.sheetHeader}>
+                    <Text style={styles.sheetHeaderTitle}>Lần đo {countTimes}</Text>
+                    <TouchableOpacity
+                        onPress={onCloseSheet}
+                        activeOpacity={0.7}
+                        style={styles.closeButton}
+                    >
+                        <CloseIcon width={24} height={24} color={colors.text} />
+                    </TouchableOpacity>
+                </View>
 
-            <ConfirmationModal
+                {/* Items list */}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.sheetListContent}
+                >
+                    {currentMeasurement?.sizes.map((size, index) => (
+                        <View key={index} style={styles.sheetItemCard}>
+                            <Text style={styles.sheetItemLabel}>Tôm {index + 1}</Text>
+                            <View style={styles.sizePill}>
+                                <Text style={styles.sizePillText}>{size.toFixed(2)} cm</Text>
+                            </View>
+                        </View>
+                    ))}
+                </ScrollView>
+
+                {/* Footer */}
+                <View style={styles.sheetFooter}>
+                    <Button title="Đóng" variant="outline" onPress={onCloseSheet} />
+                </View>
+            </AnimatedBottomSheet>
+
+            <ConfirmationModalUI
                 visible={isResetModalVisible}
                 onConfirm={onConfirmReset}
                 onCancel={onCancelReset}
-                type="measure_reset"
+                title="Đo lại"
+                message="Bạn có chắc chắn muốn đo lại không? Dữ liệu hiện tại sẽ bị xóa."
+                confirmText="Đồng ý"
+                cancelText="Hủy"
+                showSuccessToast={false}
             />
         </View>
     );
@@ -410,7 +390,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        marginBottom: 12,
+        paddingTop: 12,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
     },
     checkCountLabel: {
         fontSize: 16,
@@ -421,70 +404,64 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: colors.text,
     },
-    buttonRow: {
+    sheetContainer: {
+        maxHeight: '70%',
+        borderRadius: 24,
+        margin: 16,
+        paddingBottom: 24,
+    },
+    sheetHeader: {
         flexDirection: 'row',
-        gap: 12,
-        paddingHorizontal: spacing.md,
-    },
-    flexButton: {
-        flex: 1,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        paddingTop: 16,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.lg,
-        borderTopRightRadius: borderRadius.lg,
-        height: '60%',
-        paddingBottom: spacing.xl,
-    },
-    modalHeader: {
+        justifyContent: 'space-between',
         alignItems: 'center',
+        paddingHorizontal: spacing.md,
         paddingVertical: spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        borderBottomColor: colors.border,
     },
-    modalIndicator: {
-        width: 40,
-        height: 4,
-        backgroundColor: colors.gray[300],
-        borderRadius: 2,
-        marginBottom: spacing.md,
-    },
-    modalTitle: {
-        fontSize: 16,
+    sheetHeaderTitle: {
+        fontSize: 18,
         fontWeight: '700',
         color: colors.text,
     },
-    modalList: {
-        flex: 1,
+    closeButton: {
+        padding: 4,
     },
-    modalListContent: {
+    sheetListContent: {
         padding: spacing.md,
+        gap: spacing.sm,
     },
-    modalItem: {
+    sheetItemCard: {
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
+        paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
     },
-    modalItemLabel: {
-        fontSize: 16,
+    sheetItemLabel: {
+        flex: 1,
+        fontSize: 14,
+        fontWeight: '500',
         color: colors.text,
     },
-    modalItemValue: {
-        fontSize: 16,
-        color: colors.textSecondary,
+    sizePill: {
+        borderRadius: borderRadius.full,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: 4,
+        borderWidth: 1,
+        backgroundColor: colors.green[25],
+        borderColor: colors.green[200],
+    },
+    sizePillText: {
+        fontSize: 13,
         fontWeight: '500',
+        color: colors.green[600],
+    },
+    sheetFooter: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.sm,
     },
 });

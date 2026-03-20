@@ -8,6 +8,8 @@ import {
     Dimensions,
     ActivityIndicator,
     BackHandler,
+    Platform,
+    PermissionsAndroid,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
@@ -24,6 +26,10 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import { borderRadius, colors } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { IconSkipBack, IconSkipForward } from '@/assets/icons';
+import ViewShot from 'react-native-view-shot';
+import RNFS from 'react-native-fs';
+import Toast from 'react-native-toast-message';
+import CameraIcon from '@/assets/Icon/IconFarm/camera.svg';
 
 // ===== Constants =====
 const CONTROLS_TIMEOUT = 5000; // Auto-hide controls after 5s
@@ -133,6 +139,8 @@ export const VideoPlayerScreen: React.FC = () => {
     const videoRef = useRef<any>(null);
     // VLC player ref for proper cleanup
     const vlcRef = useRef<any>(null);
+    // ViewShot ref for snapshot capture
+    const viewShotRef = useRef<ViewShot>(null);
     // Buffering auto-hide timeout for live streams
     const bufferingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -347,68 +355,128 @@ export const VideoPlayerScreen: React.FC = () => {
     // Progress bar percentage
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+    // ===== Snapshot Handler =====
+    const handleSnapshot = useCallback(async () => {
+        try {
+            // Request storage permission on Android
+            if (Platform.OS === 'android') {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+                );
+                // On Android 10+ (SDK 29+), WRITE_EXTERNAL_STORAGE is auto-granted
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED && Platform.Version < 29) {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Không có quyền lưu ảnh',
+                    });
+                    return;
+                }
+            }
+
+            // Capture current frame
+            const uri = await viewShotRef.current?.capture?.();
+            if (!uri) {
+                Toast.show({ type: 'error', text1: 'Không thể chụp ảnh' });
+                return;
+            }
+
+            // Save to Pictures directory
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const fileName = `Camera_${cameraName.replace(/\s/g, '_')}_${timestamp}.jpg`;
+            const picturesDir =
+                Platform.OS === 'android'
+                    ? `${RNFS.ExternalStorageDirectoryPath}/Pictures/MebiOne`
+                    : `${RNFS.DocumentDirectoryPath}/Pictures`;
+
+            // Ensure directory exists
+            const dirExists = await RNFS.exists(picturesDir);
+            if (!dirExists) {
+                await RNFS.mkdir(picturesDir);
+            }
+
+            const destPath = `${picturesDir}/${fileName}`;
+            await RNFS.copyFile(uri, destPath);
+
+            // Scan file so it appears in Gallery (Android only)
+            if (Platform.OS === 'android') {
+                await RNFS.scanFile(destPath);
+            }
+
+            Toast.show({
+                type: 'success',
+                text1: 'Đã lưu ảnh',
+                text2: fileName,
+            });
+        } catch (error) {
+            console.error('[Snapshot] Error:', error);
+            Toast.show({ type: 'error', text1: 'Lỗi khi lưu ảnh' });
+        }
+    }, [cameraName]);
+
     return (
         <GestureHandlerRootView style={styles.root}>
             <Animated.View style={[styles.container, contentAnimatedStyle]}>
                 {/* Video with pinch-to-zoom scale */}
                 <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
-                    {isLiveStream ? (
-                        <VLCPlayer
-                            ref={vlcRef}
-                            source={
-                                {
-                                    initType: 2,
-                                    hwDecoderEnabled: 1,
-                                    hwDecoderForced: 1,
-                                    uri: videoUrl,
-                                    initOptions: [
-                                        '--no-audio',
-                                        '--rtsp-tcp',
-                                        '--network-caching=150',
-                                        '--rtsp-caching=150',
-                                        '--no-stats',
-                                        '--tcp-caching=150',
-                                        '--realrtsp-caching=150',
-                                    ],
-                                } as any
-                            }
-                            style={styles.video}
-                            autoplay={true}
-                            videoAspectRatio="16:9"
-                            resizeMode="contain"
-                            {...({ isLive: true, autoReloadLive: true } as any)}
-                            paused={paused}
-                            onBuffering={() => {
-                                console.log('[VLC] Buffering...', videoUrl);
-                                if (isMountedRef.current) setIsBuffering(true);
-                            }}
-                            onPlaying={() => {
-                                console.log('[VLC] Playing!');
-                                if (isMountedRef.current) setIsBuffering(false);
-                            }}
-                            onError={(e: unknown) => {
-                                console.error('[VLC] Error:', e);
-                                if (isMountedRef.current) setIsBuffering(false);
-                            }}
-                            onStopped={() => {
-                                console.log('[VLC] Stopped');
-                            }}
-                        />
-                    ) : (
-                        <Video
-                            ref={videoRef}
-                            source={{ uri: videoUrl }}
-                            style={styles.video}
-                            resizeMode="contain"
-                            paused={paused}
-                            onLoad={onLoad}
-                            onProgress={onProgress}
-                            onBuffer={onBuffer}
-                            repeat
-                            playInBackground={false}
-                            playWhenInactive={false}
-                        />
-                    )}
+                    <ViewShot
+                        ref={viewShotRef}
+                        options={{ format: 'jpg', quality: 0.95 }}
+                        style={styles.video}
+                    >
+                        {isLiveStream ? (
+                            <VLCPlayer
+                                ref={vlcRef}
+                                source={
+                                    {
+                                        initType: 2,
+                                        hwDecoderEnabled: 1,
+                                        hwDecoderForced: 1,
+                                        uri: videoUrl,
+                                        initOptions: [
+                                            '--no-audio',
+                                            '--rtsp-tcp',
+                                            '--network-caching=150',
+                                            '--rtsp-caching=150',
+                                            '--no-stats',
+                                            '--tcp-caching=150',
+                                            '--realrtsp-caching=150',
+                                        ],
+                                    } as any
+                                }
+                                style={styles.video}
+                                autoplay={true}
+                                videoAspectRatio="16:9"
+                                resizeMode="contain"
+                                {...({ isLive: true, autoReloadLive: true } as any)}
+                                paused={paused}
+                                onBuffering={() => {
+                                    if (isMountedRef.current) setIsBuffering(true);
+                                }}
+                                onPlaying={() => {
+                                    if (isMountedRef.current) setIsBuffering(false);
+                                }}
+                                onError={(e: unknown) => {
+                                    console.error('[VLC] Error:', e);
+                                    if (isMountedRef.current) setIsBuffering(false);
+                                }}
+                                onStopped={() => {}}
+                            />
+                        ) : (
+                            <Video
+                                ref={videoRef}
+                                source={{ uri: videoUrl }}
+                                style={styles.video}
+                                resizeMode="contain"
+                                paused={paused}
+                                onLoad={onLoad}
+                                onProgress={onProgress}
+                                onBuffer={onBuffer}
+                                repeat
+                                playInBackground={false}
+                                playWhenInactive={false}
+                            />
+                        )}
+                    </ViewShot>
                 </Animated.View>
 
                 {/* Buffering indicator */}
@@ -441,9 +509,17 @@ export const VideoPlayerScreen: React.FC = () => {
                                     <Text style={styles.badgeText}>{cameraName}</Text>
                                 </View>
                             </View>
-                            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                                <Text style={styles.closeText}>✕</Text>
-                            </TouchableOpacity>
+                            <View style={styles.badgesRow}>
+                                <TouchableOpacity
+                                    onPress={handleSnapshot}
+                                    style={styles.snapshotButton}
+                                >
+                                    <CameraIcon width={20} height={20} color={colors.white} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                                    <Text style={styles.closeText}>✕</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         {/* Center - Skip back, Play/Pause, Skip forward */}
@@ -606,6 +682,15 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontSize: 18,
         fontWeight: '600',
+    },
+    snapshotButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.overlayBadge,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
     },
     // Center controls
     centerControls: {

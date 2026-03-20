@@ -25,6 +25,7 @@ export interface ButtonBarProps {
     secondaryButtonDisabled?: boolean;
     secondaryButtonLoading?: boolean;
     containerStyle?: ViewStyle;
+    equalWidth?: boolean;
 }
 
 export const ButtonBar: React.FC<ButtonBarProps> = ({
@@ -44,6 +45,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     secondaryButtonDisabled = false,
     secondaryButtonLoading = false,
     containerStyle,
+    equalWidth = false,
 }) => {
     const insets = useSafeAreaInsets();
     // Use actual safe area insets with minimum fallback
@@ -91,6 +93,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             size="medium"
                             style={StyleSheet.flatten([
                                 styles.secondaryButton,
+                                equalWidth && { flex: 1, minWidth: 0 },
                                 secondaryButtonStyle,
                             ])}
                             textStyle={StyleSheet.flatten([
@@ -108,7 +111,11 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             size="medium"
                             disabled={isPrimaryDisabled}
                             loading={isPrimaryLoading}
-                            style={StyleSheet.flatten([styles.flexButton, primaryButtonStyle])}
+                            style={StyleSheet.flatten([
+                                styles.flexButton,
+                                equalWidth && { flex: 1 },
+                                primaryButtonStyle,
+                            ])}
                             textStyle={primaryButtonTextStyle}
                         />
                     </View>

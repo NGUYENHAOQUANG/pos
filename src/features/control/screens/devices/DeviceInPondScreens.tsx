@@ -76,7 +76,10 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     // Scroll sync refs
     const scrollViewRef = useRef<ScrollView>(null);
     const sectionYPositions = useRef<Record<string, number>>({});
-    const isTabPress = useRef(false);
+    // Timestamp of last tab press — scroll handler ignores events within lockout period
+    const lastTabPressTime = useRef(0);
+    // Lockout duration (ms) — scroll handler skips updates within this window after a tab press
+    const TAB_PRESS_LOCKOUT = 1500;
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
@@ -123,22 +126,19 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
 
     // On tab press, scroll to section
     const handleTabSelect = useCallback((tabKey: string) => {
+        lastTabPressTime.current = Date.now();
         setSelectedTab(tabKey);
         const y = sectionYPositions.current[tabKey];
         if (y !== undefined && scrollViewRef.current) {
-            isTabPress.current = true;
             scrollViewRef.current.scrollTo({ y, animated: true });
-            // Reset flag after animation
-            setTimeout(() => {
-                isTabPress.current = false;
-            }, 500);
         }
     }, []);
 
     // On scroll, detect visible section and update tab
     const handleScroll = useCallback(
         (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-            if (isTabPress.current) return; // Skip during programmatic scroll
+            // Skip scroll-based tab updates during lockout period after tab press
+            if (Date.now() - lastTabPressTime.current < TAB_PRESS_LOCKOUT) return;
 
             const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
             const scrollY = contentOffset.y;
@@ -290,10 +290,10 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                                             />
                                         </View>
                                         <View style={styles.mockDeviceInfo}>
-                                            <Text style={styles.mockDeviceName}>{device.name}</Text>
-                                            <Text style={styles.mockDeviceType}>
+                                            <Text style={styles.mockDeviceName}>
                                                 {section.title}
                                             </Text>
+                                            <Text style={styles.mockDeviceType}>{device.name}</Text>
                                         </View>
                                     </View>
                                 );

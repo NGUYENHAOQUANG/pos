@@ -1,215 +1,151 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import Animated, { SlideInDown } from 'react-native-reanimated';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, borderRadius } from '@/styles';
-import {
-    getStatusColor,
-    getStatusIcon,
-    HealthCheckItem,
-    HealthCheckResult,
-} from '@/features/farm/services/shrimp-health-ai.service';
+import { HealthCheckItem } from '@/features/farm/services/shrimp-health-ai.service';
+import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
+import type { HealthCheckEntry } from '@/features/farm/components/ai-shrimp-health/HealthCheckListSection';
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 
 interface Props {
     visible: boolean;
-    countTimes: number;
-    results: HealthCheckResult[];
+    entry: HealthCheckEntry | null;
+    items: HealthCheckItem[];
     onClose: () => void;
 }
 
-export const ShrimpHealthDetailsModal: React.FC<Props> = ({
-    visible,
-    countTimes,
-    results,
-    onClose,
-}) => {
+/**
+ * Bottom sheet modal showing health check details for a specific check entry.
+ * Shows the original image thumbnail and diagnosis per shrimp.
+ */
+export const ShrimpHealthDetailsModal: React.FC<Props> = ({ visible, entry, items, onClose }) => {
+    if (!entry) return null;
+
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback onPress={onClose}>
-                    <View style={StyleSheet.absoluteFill} />
-                </TouchableWithoutFeedback>
-                <Animated.View entering={SlideInDown.duration(300)} style={styles.modalContent}>
-                    <View style={styles.modalHeader}>
-                        <View style={styles.modalIndicator} />
-                        <Text style={styles.modalTitle}>
-                            Chi tiết tình trạng tôm - Lần kiểm tra {countTimes}
-                        </Text>
-                    </View>
-                    <ScrollView
-                        style={styles.modalList}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.modalListContent}
-                    >
-                        {results
-                            .reduce<HealthCheckItem[]>((acc, r) => acc.concat(r.items), [])
-                            .map((item, index) => {
-                                const color = getStatusColor(item.status);
-                                return (
-                                    <View key={item.id} style={styles.cardContainer}>
-                                        <View style={styles.cardRow}>
-                                            <View
-                                                style={[
-                                                    styles.indexBadge,
-                                                    { backgroundColor: color + '20' },
-                                                ]}
-                                            >
-                                                <Text style={[styles.indexText, { color }]}>
-                                                    {index + 1}
-                                                </Text>
-                                            </View>
-
-                                            <View style={styles.cardCenter}>
-                                                <Text style={styles.diagnosisText}>
-                                                    {item.diagnosis}
-                                                </Text>
-                                                <View style={styles.progressRow}>
-                                                    <View style={styles.progressBarBackground}>
-                                                        <View
-                                                            style={[
-                                                                styles.progressBarFill,
-                                                                {
-                                                                    width: `${item.confidence}%`,
-                                                                    backgroundColor: color,
-                                                                },
-                                                            ]}
-                                                        />
-                                                    </View>
-                                                    <Text
-                                                        style={[
-                                                            styles.confidencePercent,
-                                                            { color },
-                                                        ]}
-                                                    >
-                                                        {item.confidence}%
-                                                    </Text>
-                                                </View>
-                                            </View>
-
-                                            <View
-                                                style={[
-                                                    styles.statusIconContainer,
-                                                    { backgroundColor: color + '15' },
-                                                ]}
-                                            >
-                                                <Ionicons
-                                                    name={getStatusIcon(item.status)}
-                                                    size={20}
-                                                    color={color}
-                                                />
-                                            </View>
-                                        </View>
-                                    </View>
-                                );
-                            })}
-                    </ScrollView>
-                </Animated.View>
+        <AnimatedBottomSheet
+            visible={visible}
+            onClose={onClose}
+            containerStyle={styles.sheetContainer}
+        >
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Lần {entry.index}</Text>
+                <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={styles.closeButton}>
+                    <CloseIcon width={24} height={24} color={colors.text} />
+                </TouchableOpacity>
             </View>
-        </Modal>
+
+            {/* Items list */}
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
+            >
+                {items.map((item, idx) => {
+                    const isHealthy = item.status === 'HEALTHY';
+                    const pillBgColor = isHealthy ? colors.green[25] : colors.red[25];
+                    const pillBorderColor = isHealthy ? colors.green[200] : colors.red[200];
+                    const pillTextColor = isHealthy ? colors.green[600] : colors.red[600];
+
+                    return (
+                        <View key={item.id || idx} style={styles.itemCard}>
+                            <Image
+                                source={{ uri: entry.originalImageUri }}
+                                style={styles.itemThumbnail}
+                                resizeMode="cover"
+                            />
+                            <Text style={styles.itemLabel}>Tôm {idx + 1}</Text>
+                            <View
+                                style={[
+                                    styles.diagnosisPill,
+                                    {
+                                        backgroundColor: pillBgColor,
+                                        borderColor: pillBorderColor,
+                                    },
+                                ]}
+                            >
+                                <Text
+                                    style={[styles.diagnosisText, { color: pillTextColor }]}
+                                    numberOfLines={1}
+                                >
+                                    {item.diagnosis} {item.confidence}%
+                                </Text>
+                            </View>
+                        </View>
+                    );
+                })}
+            </ScrollView>
+
+            {/* Close button */}
+            <View style={styles.footer}>
+                <Button title="Đóng" variant="outline" onPress={onClose} />
+            </View>
+        </AnimatedBottomSheet>
     );
 };
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
+    sheetContainer: {
+        maxHeight: '70%',
+        borderRadius: 24,
+        margin: 16,
+        paddingBottom: 24,
     },
-    modalContent: {
-        backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.lg,
-        borderTopRightRadius: borderRadius.lg,
-        height: '60%',
-        paddingBottom: spacing.xl,
-    },
-    modalHeader: {
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
+        paddingHorizontal: spacing.md,
         paddingVertical: spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        borderBottomColor: colors.border,
     },
-    modalIndicator: {
-        width: 40,
-        height: 4,
-        backgroundColor: colors.gray[300],
-        borderRadius: 2,
-        marginBottom: spacing.md,
-    },
-    modalTitle: {
-        fontSize: 16,
+    headerTitle: {
+        fontSize: 18,
         fontWeight: '700',
         color: colors.text,
     },
-    modalList: {
-        flex: 1,
+    closeButton: {
+        padding: 4,
     },
-    modalListContent: {
+    listContent: {
         padding: spacing.md,
+        gap: spacing.sm,
     },
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 14,
-        marginBottom: 10,
-    },
-    cardRow: {
+    itemCard: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
     },
-    indexBadge: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
+    itemThumbnail: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.backgroundSecondary,
     },
-    indexText: {
-        fontSize: 13,
-        fontWeight: '700',
-    },
-    cardCenter: {
+    itemLabel: {
         flex: 1,
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.text,
+        marginLeft: spacing.md,
+    },
+    diagnosisPill: {
+        borderRadius: borderRadius.full,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: 4,
+        borderWidth: 1,
     },
     diagnosisText: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-        marginBottom: 4,
+        fontSize: 13,
+        fontWeight: '500',
     },
-    progressRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    progressBarBackground: {
-        flex: 1,
-        height: 6,
-        backgroundColor: colors.gray[200],
-        borderRadius: 3,
-        overflow: 'hidden',
-    },
-    progressBarFill: {
-        height: '100%',
-        borderRadius: 3,
-    },
-    confidencePercent: {
-        fontSize: 11,
-        fontWeight: '600',
-        width: 32,
-        textAlign: 'right',
-    },
-    statusIconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 8,
+    footer: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.sm,
     },
 });
