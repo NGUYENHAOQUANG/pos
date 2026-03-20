@@ -58,7 +58,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
-                prefixIcon={<DropIcon width={16} height={16} />}
+                prefixIcon={<DropIcon width={20} height={20} />}
             />
 
             {isExpanded && (

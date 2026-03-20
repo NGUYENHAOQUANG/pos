@@ -63,7 +63,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
         <View style={chartStyles.container}>
             {/* Header-Section */}
             <BasicDropDownButton
-                prefixIcon={<HarvestChartIcon width={16} height={16} />}
+                prefixIcon={<HarvestChartIcon width={20} height={20} />}
                 label="Biểu đồ thu hoạch"
                 onPress={() => setIsCollapsed(!isCollapsed)}
                 style={styles.sectionHeader}

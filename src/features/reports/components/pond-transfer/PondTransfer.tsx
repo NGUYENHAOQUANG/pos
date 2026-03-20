@@ -41,7 +41,7 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
     return (
         <View style={chartStyles.container}>
             <BasicDropDownButton
-                prefixIcon={<HarvestStatIcon width={16} height={16} />}
+                prefixIcon={<HarvestStatIcon width={20} height={20} />}
                 label="Thống kê sang ao"
                 style={styles.sectionHeader}
                 onPress={toggleSection}

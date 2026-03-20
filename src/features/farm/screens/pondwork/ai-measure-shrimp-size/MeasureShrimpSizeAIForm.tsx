@@ -275,6 +275,7 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
 
                 {/* Items list */}
                 <ScrollView
+                    style={{ flex: 1 }}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.sheetListContent}
                 >

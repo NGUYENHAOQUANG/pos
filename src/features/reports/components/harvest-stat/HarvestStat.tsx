@@ -41,7 +41,7 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
     return (
         <View style={chartStyles.container}>
             <BasicDropDownButton
-                prefixIcon={<HarvestStatIcon width={16} height={16} />}
+                prefixIcon={<HarvestStatIcon width={20} height={20} />}
                 label="Thống kê thu hoạch"
                 style={styles.sectionHeader}
                 onPress={toggleSection}
