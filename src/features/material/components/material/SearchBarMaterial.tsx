@@ -132,7 +132,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                 <View style={styles.searchInputWrapper}>
                     <Input
                         icon="search-outline"
-                        placeholder="Tìm kiếm tên vật tư"
+                        placeholder="Tìm kiếm tên vật tư​"
                         value={localSearchText}
                         onChangeText={setLocalSearchText}
                         iconRight={localSearchText.length > 0 ? 'close-circle' : undefined}

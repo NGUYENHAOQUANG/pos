@@ -98,10 +98,10 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                 />
                 <View style={styles.content}>
                     <Input
-                        label="Tên vật tư"
+                        label="Tên vật tư​"
                         required
                         // style={styles.input}
-                        placeholder="Nhập tên vật tư"
+                        placeholder="Nhập tên vật tư​"
                         placeholderTextColor={colors.textSecondary}
                         value={name}
                         onChangeText={onNameChange}
@@ -110,7 +110,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                     <View style={[styles.row, styles.rowZ30]}>
                         <View style={styles.halfWidth}>
                             <DropdownMaterial
-                                label="Nhóm vật tư"
+                                label="Nhóm vật tư​"
                                 required
                                 value={group}
                                 options={
@@ -130,7 +130,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                         </View>
                         <View style={styles.halfWidth}>
                             <DropdownMaterial
-                                label="Loại vật tư"
+                                label="Loại vật tư​"
                                 required
                                 onChange={onTypeChange}
                                 value={type}
