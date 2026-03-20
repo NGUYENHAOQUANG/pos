@@ -156,7 +156,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                             <MaterialSelectionBox
                                 selectedMaterials={selectedItems}
                                 onMaterialsChange={handleMaterialsChange}
-                                groupTypes={[MaterialGroupType.FARMING]}
+                                groupTypes={[MaterialGroupType.FARMING, MaterialGroupType.FEED]}
                             />
                         );
                     }}

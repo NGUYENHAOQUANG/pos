@@ -8,6 +8,7 @@ import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-sheet/SelectMaterialBottomSheet';
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
+import { SpecificType } from '@/features/material/types/warehouse.types';
 import { RequiredDot } from '@/shared/components/forms/Input';
 import { useFilteredWarehouseMaterials } from '@/features/farm/hooks/useFilteredWarehouseMaterials';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
@@ -24,12 +25,14 @@ interface MaterialSelectionBoxProps {
     selectedMaterials: SelectedMaterialItem[];
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
     groupTypes?: MaterialGroupType[];
+    specificType?: SpecificType;
 }
 
 export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     selectedMaterials,
     onMaterialsChange,
     groupTypes,
+    specificType,
 }) => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -59,6 +62,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     } = useFilteredWarehouseMaterials({
         materialGroupIds,
         searchText: debouncedSearchText,
+        specificType,
     });
 
     // Exclude already selected materials

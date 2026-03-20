@@ -1,10 +1,17 @@
 import { IApiResponse as IAppResponse, IPaginate } from '@/shared/types/common.types';
 
+export enum SpecificType {
+    Normal = 'Normal',
+    ShrimpSeed = 'ShrimpSeed',
+    ShrimpFeed = 'ShrimpFeed',
+}
+
 export interface GetWarehouseItemsQueryParams {
     WarehouseId?: string;
     SearchText?: string;
     MaterialGroupIds?: string[];
     MaterialTypeIds?: string[];
+    SpecificType?: SpecificType;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;

@@ -1,11 +1,9 @@
-/** Treatment type enum from backend */
 export enum TreatmentTypeEnum {
     MineralTreatment = 'MineralTreatment',
     ProbioticTreatment = 'ProbioticTreatment',
     Disinfection = 'Disinfection',
 }
 
-/** Map TreatmentTypeEnum to Vietnamese display labels */
 export const TREATMENT_TYPE_LABELS: Record<TreatmentTypeEnum, string> = {
     [TreatmentTypeEnum.MineralTreatment]: 'Đánh khoáng',
     [TreatmentTypeEnum.ProbioticTreatment]: 'Đánh vi sinh',

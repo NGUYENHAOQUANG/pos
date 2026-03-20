@@ -110,10 +110,17 @@ interface AnimatedTabItemProps {
     route: { key: string; name: string };
     item: NavigationItem;
     isFocused: boolean;
+    useGlass: boolean;
     onPress: () => void;
 }
 
-const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocused, onPress }) => {
+const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({
+    route,
+    item,
+    isFocused,
+    useGlass,
+    onPress,
+}) => {
     const indicatorScale = useRef(new Animated.Value(0)).current;
 
     // Animate active indicator when tab becomes focused
@@ -131,6 +138,11 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
 
     const IconComponent = isFocused ? item.IconActive : item.Icon;
 
+    // In glass mode: active icon uses accent color, inactive uses muted
+    // In normal mode: active icon uses white (on orange pill), inactive uses default
+    const iconFill = isFocused ? (useGlass ? colors.orange[800] : colors.white) : undefined;
+    const iconColor = isFocused ? (useGlass ? colors.orange[800] : colors.white) : undefined;
+
     return (
         <TouchableOpacity
             key={route.key}
@@ -140,18 +152,17 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
         >
             <View style={[styles.tabItemContent]}>
                 <View style={[styles.iconContainer, isFocused && styles.iconActiveContainer]}>
-                    <IconComponent
-                        width={20}
-                        height={20}
-                        fill={isFocused ? colors.white : undefined}
-                        color={isFocused ? colors.white : undefined}
-                    />
+                    <IconComponent width={20} height={20} fill={iconFill} color={iconColor} />
                 </View>
                 <Text
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     minimumFontScale={0.8}
-                    style={[styles.tabLabel, isFocused && styles.tabLabelActive]}
+                    style={[
+                        styles.tabLabel,
+                        isFocused &&
+                            (useGlass ? styles.tabLabelActiveGlass : styles.tabLabelActive),
+                    ]}
                 >
                     {item.label}
                 </Text>
@@ -187,6 +198,8 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const innerWidth = Math.max(0, barWidth - 10);
     const tabWidth = innerWidth > 0 ? innerWidth / state.routes.length : 0;
 
+    const useGlass = Platform.OS === 'ios' && isLiquidGlassSupported;
+
     // Tab bar items shared between glass and fallback
     const tabBarItems = (
         <>
@@ -207,7 +220,12 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                         },
                     ]}
                 >
-                    <View style={styles.slidingIndicatorInner} />
+                    <View
+                        style={[
+                            styles.slidingIndicatorInner,
+                            useGlass && styles.slidingIndicatorGlass,
+                        ]}
+                    />
                 </Animated.View>
             )}
 
@@ -235,6 +253,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                         route={route}
                         item={item}
                         isFocused={isFocused}
+                        useGlass={useGlass}
                         onPress={onPress}
                     />
                 );
@@ -242,12 +261,10 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
         </>
     );
 
-    const useGlass = Platform.OS === 'ios' && isLiquidGlassSupported;
-
     const tabBarContent = useGlass ? (
         <LiquidGlassView
-            effect="clear"
-            tintColor="rgba(173, 173, 173, 0.13)"
+            effect="regular"
+            //tintColor="rgba(0, 0, 0, 0.07)"
             onLayout={e => {
                 handleLayout(e);
                 onBarLayout(e);
@@ -256,7 +273,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                 styles.bottomContainer,
                 {
                     marginBottom: insets.bottom + 4,
-                    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                    // backgroundColor: 'rgba(255, 255, 255, 0.04)',
                 },
             ]}
         >
@@ -388,6 +405,16 @@ const styles = StyleSheet.create({
         backgroundColor: colors.orange[800],
         borderRadius: borderRadius.full,
     },
+    slidingIndicatorGlass: {
+        backgroundColor: colors.orange[900],
+        borderWidth: 0.5,
+        borderColor: 'rgba(0, 0, 0, 0.08)',
+        shadowColor: 'rgba(0, 0, 0, 0.12)',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 1,
+    },
     iconContainer: {
         marginBottom: 2,
     },
@@ -403,5 +430,9 @@ const styles = StyleSheet.create({
     tabLabelActive: {
         color: colors.white,
         fontWeight: '500',
+    },
+    tabLabelActiveGlass: {
+        color: colors.white,
+        fontWeight: '600',
     },
 });

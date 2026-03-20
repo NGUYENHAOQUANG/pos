@@ -5,13 +5,12 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    Platform,
     Animated,
     Dimensions,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { colors, spacing, typography } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
@@ -93,13 +92,6 @@ export const Filter: React.FC<FilterProps> = ({
     const isAllSelected =
         optionsToRender.length > 0 && selectedTypes.length === optionsToRender.length;
 
-    const insets = useSafeAreaInsets();
-    const headerStyle = {
-        ...styles.header,
-        paddingTop:
-            Platform.OS === 'android' ? spacing.md : Math.max(insets.top, spacing.md) + spacing.sm,
-    };
-
     if (optionsToRender.length === 0) {
         return (
             <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -113,10 +105,10 @@ export const Filter: React.FC<FilterProps> = ({
                         style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
                     >
                         {/* Header */}
-                        <View style={headerStyle}>
+                        <View style={styles.header}>
                             <Text style={styles.headerTitle}>Bộ lọc</Text>
                             <TouchableOpacity onPress={onClose}>
-                                <Ionicons name="close" size={24} color={colors.text} />
+                                <CloseIcon width={20} height={20} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.content}>
@@ -150,7 +142,7 @@ export const Filter: React.FC<FilterProps> = ({
                     style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
                 >
                     {/* Header */}
-                    <View style={headerStyle}>
+                    <View style={styles.header}>
                         <TouchableOpacity onPress={handleReset} style={styles.headerSide}>
                             <Text style={styles.resetText}>Thiết lập lại</Text>
                         </TouchableOpacity>
@@ -161,7 +153,7 @@ export const Filter: React.FC<FilterProps> = ({
                             onPress={onClose}
                             style={[styles.headerSide, { alignItems: 'flex-end' }]}
                         >
-                            <Ionicons name="close" size={24} color={colors.textSecondary} />
+                            <CloseIcon width={20} height={20} />
                         </TouchableOpacity>
                     </View>
 
@@ -198,12 +190,14 @@ export const Filter: React.FC<FilterProps> = ({
                     <ButtonBarFarm
                         primaryTitle="Áp dụng"
                         onPrimaryPress={handleApply}
-                        secondaryTitle="Đóng"
+                        secondaryTitle="Hủy"
                         onSecondaryPress={onClose}
                         secondaryType="default"
                         style={{
-                            paddingHorizontal: 0,
-                            marginTop: spacing.sm,
+                            paddingHorizontal: spacing.md,
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                            marginTop: 0,
                         }}
                     />
                 </Animated.View>
@@ -227,20 +221,22 @@ const styles = StyleSheet.create({
         width: '94%',
         backgroundColor: colors.white,
         borderRadius: 24,
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
+        paddingBottom: spacing.md,
         maxHeight: '80%',
+        overflow: 'hidden',
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        paddingVertical: 6,
+        paddingHorizontal: 16,
     },
     headerTitle: {
         fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
+        fontWeight: typography.fontWeight.semibold,
         color: colors.text,
         textAlign: 'center',
     },
@@ -248,12 +244,12 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     resetText: {
-        fontSize: typography.fontSize.base,
+        fontSize: typography.fontSize.sm,
         color: colors.primary,
-        fontWeight: typography.fontWeight.regular,
+        fontWeight: typography.fontWeight.medium,
     },
     content: {
-        marginVertical: spacing.sm,
+        padding: spacing.md,
     },
     scrollArea: {
         maxHeight: 400,
@@ -262,12 +258,12 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.base,
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
     },
     checkboxRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.md,
+        paddingVertical: spacing.sm,
     },
 
     checkboxLabel: {
