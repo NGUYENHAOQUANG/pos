@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 
@@ -15,6 +15,8 @@ type PondIndexCardVariant = 'default' | 'prodSummary';
 interface PondIndexCardProps {
     item: PondIndexCardData;
     variant?: PondIndexCardVariant;
+    onPress?: () => void;
+    isActive?: boolean;
 }
 
 const parseValueAndUnit = (value: string): { value: string; unit: string } => {
@@ -26,13 +28,26 @@ const parseValueAndUnit = (value: string): { value: string; unit: string } => {
     };
 };
 
-export const PondIndexCard: React.FC<PondIndexCardProps> = ({ item, variant = 'default' }) => {
+export const PondIndexCard: React.FC<PondIndexCardProps> = ({
+    item,
+    variant = 'default',
+    onPress,
+    isActive = true,
+}) => {
     const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
     const isProdSummary = variant === 'prodSummary';
 
-    return (
-        <View style={[styles.card, isProdSummary && styles.cardProd]}>
-            {!isProdSummary && <View style={[styles.indicator, { backgroundColor: item.color }]} />}
+    const content = (
+        <View
+            style={[
+                styles.card,
+                isProdSummary && styles.cardProd,
+                isActive && onPress && item.color ? { borderColor: item.color } : undefined,
+            ]}
+        >
+            {item.color ? (
+                <View style={[styles.indicator, { backgroundColor: item.color }]} />
+            ) : null}
             <Text style={[styles.title, isProdSummary && styles.titleProd]} numberOfLines={1}>
                 {item.name}
             </Text>
@@ -48,6 +63,15 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({ item, variant = 'd
             </View>
         </View>
     );
+
+    if (onPress) {
+        return (
+            <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
+                {content}
+            </TouchableOpacity>
+        );
+    }
+    return content;
 };
 
 const styles = StyleSheet.create({
@@ -66,6 +90,9 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderColor: colors.gray[200],
     },
+    cardInactive: {
+        opacity: 0.4,
+    },
     indicator: {
         width: 8,
         height: 3,
@@ -79,7 +106,8 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     titleProd: {
-        fontSize: 13,
+        fontSize: 14,
+        fontWeight: '400',
         marginBottom: 6,
     },
     valueRow: {
@@ -93,15 +121,16 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     valueNumberProd: {
-        fontSize: 18,
+        fontSize: 16,
+        fontWeight: '700',
     },
     valueUnit: {
         fontSize: 12,
         color: colors.textSecondary,
-        fontWeight: '400',
+        fontWeight: '500',
         marginLeft: 4,
     },
     valueUnitProd: {
-        fontSize: 13,
+        fontSize: 14,
     },
 });

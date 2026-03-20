@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
-import { VlCPlayerView } from 'react-native-vlc-media-player';
+import { VLCPlayer } from 'react-native-vlc-media-player';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Orientation from 'react-native-orientation-locker';
 import Animated, {
@@ -133,6 +133,8 @@ export const VideoPlayerScreen: React.FC = () => {
     const videoRef = useRef<any>(null);
     // VLC player ref for proper cleanup
     const vlcRef = useRef<any>(null);
+    // Buffering auto-hide timeout for live streams
+    const bufferingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Cleanup: stop VLC player and pause Video on unmount to prevent memory leaks
     useEffect(() => {
@@ -146,6 +148,7 @@ export const VideoPlayerScreen: React.FC = () => {
                     // Ignore errors during cleanup
                 }
             }
+            if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
         };
     }, []);
 
@@ -154,6 +157,19 @@ export const VideoPlayerScreen: React.FC = () => {
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [isBuffering, setIsBuffering] = useState(true);
+
+    // Auto-hide buffering indicator after 5s for live streams
+    // VLC's onBuffering fires repeatedly even while playing
+    useEffect(() => {
+        if (isBuffering && isLiveStream) {
+            bufferingTimeoutRef.current = setTimeout(() => {
+                if (isMountedRef.current) setIsBuffering(false);
+            }, 5000);
+            return () => {
+                if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+            };
+        }
+    }, [isBuffering, isLiveStream]);
     const [showControls, setShowControls] = useState(true);
     const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 });
 
@@ -337,18 +353,46 @@ export const VideoPlayerScreen: React.FC = () => {
                 {/* Video with pinch-to-zoom scale */}
                 <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
                     {isLiveStream ? (
-                        <VlCPlayerView
+                        <VLCPlayer
                             ref={vlcRef}
-                            source={{ uri: videoUrl }}
+                            source={
+                                {
+                                    initType: 2,
+                                    hwDecoderEnabled: 1,
+                                    hwDecoderForced: 1,
+                                    uri: videoUrl,
+                                    initOptions: [
+                                        '--no-audio',
+                                        '--rtsp-tcp',
+                                        '--network-caching=150',
+                                        '--rtsp-caching=150',
+                                        '--no-stats',
+                                        '--tcp-caching=150',
+                                        '--realrtsp-caching=150',
+                                    ],
+                                } as any
+                            }
                             style={styles.video}
+                            autoplay={true}
+                            videoAspectRatio="16:9"
+                            resizeMode="contain"
+                            {...({ isLive: true, autoReloadLive: true } as any)}
                             paused={paused}
                             onBuffering={() => {
+                                console.log('[VLC] Buffering...', videoUrl);
                                 if (isMountedRef.current) setIsBuffering(true);
                             }}
                             onPlaying={() => {
+                                console.log('[VLC] Playing!');
                                 if (isMountedRef.current) setIsBuffering(false);
                             }}
-                            autoplay={true}
+                            onError={(e: unknown) => {
+                                console.error('[VLC] Error:', e);
+                                if (isMountedRef.current) setIsBuffering(false);
+                            }}
+                            onStopped={() => {
+                                console.log('[VLC] Stopped');
+                            }}
                         />
                     ) : (
                         <Video

@@ -1,7 +1,6 @@
 import type {
     IApiResponse,
     IPaginate,
-    IDocument,
     PaginationParams,
     ICreatorEditor,
 } from '@/shared/types/common.types';
@@ -30,9 +29,6 @@ export interface UpdateIncidentPayload {
     incidentDetail?: IncidentDetail;
 }
 
-/** @deprecated Use ICreatorEditor from common.types */
-export type IncidentCreator = ICreatorEditor;
-
 /** Single item in create/list response */
 export interface IncidentCreateResult {
     id: string;
@@ -42,15 +38,6 @@ export interface IncidentCreateResult {
     creator?: ICreatorEditor;
     editor?: ICreatorEditor;
     recordId: string;
-}
-
-export interface IncidentDto {
-    id: string;
-    createdAt?: string;
-    editedAt?: string;
-    pondId: string;
-    documentIds?: string[];
-    documents?: IDocument[];
 }
 
 /** Query params for GET /pond/{pondId}/incident – dùng PaginationParams (page, limit) từ common.types */

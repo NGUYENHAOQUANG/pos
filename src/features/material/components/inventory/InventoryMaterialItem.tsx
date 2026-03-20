@@ -3,40 +3,39 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
-import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
+import { DropdownWarehouseItem } from './DropdownWarehouseItem';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { numericStringSchema } from '@/shared/utils/validation';
-import { InventoryItem } from '../inventory/InventoryMaterialList';
+import { InventoryItem } from './InventoryMaterialList';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 interface InventoryMaterialItemProps {
     item: InventoryItem;
     index: number;
-    availableOptions: DropdownOption[];
-    isDropdownOpen: boolean;
+    /** Warehouse ID for fetching items in the dropdown */
+    warehouseId?: string;
+    /** IDs of materials already selected by other rows */
+    usedMaterialIds: Set<string>;
     onUpdateItem: (id: string, field: keyof InventoryItem, value: any) => void;
     onRemoveItem: (id: string) => void;
-    handleToggleDropdown: (id: string, index: number) => void;
 }
 
 export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React.memo(
-    ({
-        item,
-        index,
-        availableOptions,
-        isDropdownOpen,
-        onUpdateItem,
-        onRemoveItem,
-        handleToggleDropdown,
-    }) => {
+    ({ item, index, warehouseId, usedMaterialIds, onUpdateItem, onRemoveItem }) => {
         const diff = item.newStock ? Number(item.newStock) - item.oldStock : -item.oldStock;
 
+        const handleMaterialChange = React.useCallback(
+            (materialId: string, warehouseItem: IWarehouseItem) => {
+                onUpdateItem(item.id, 'materialId', materialId);
+                onUpdateItem(item.id, 'materialName', warehouseItem.materialName || '');
+                onUpdateItem(item.id, 'oldStock', warehouseItem.quantity || 0);
+                onUpdateItem(item.id, 'unit', warehouseItem.unitName || '');
+            },
+            [item.id, onUpdateItem]
+        );
+
         return (
-            <View
-                style={[
-                    styles.materialWrapper,
-                    isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
-                ]}
-            >
+            <View style={styles.materialWrapper}>
                 <View style={styles.materialCard}>
                     <View style={styles.materialHeader}>
                         <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
@@ -50,23 +49,21 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
 
                     <View style={styles.content}>
                         {/* Material Selection */}
-                        <View style={[styles.inputGroup, styles.zIndexMedium]}>
-                            <DropdownMaterial
-                                label="Tên vật tư"
+                        <View style={styles.inputGroup}>
+                            <DropdownWarehouseItem
+                                label="Tên vật tư​"
                                 required
                                 value={item.materialId}
-                                options={availableOptions}
-                                onChange={val => onUpdateItem(item.id, 'materialId', val)}
-                                placeholder="Chọn vật tư"
-                                showAllOption={false}
-                                isOpen={isDropdownOpen}
-                                onToggle={() => handleToggleDropdown(item.id, index)}
                                 displayValue={item.materialName}
+                                onChange={handleMaterialChange}
+                                placeholder="Chọn vật tư​"
+                                warehouseId={warehouseId}
+                                excludeIds={usedMaterialIds}
                             />
                         </View>
 
                         {/* Stock Info */}
-                        <View style={styles.zIndexNormal}>
+                        <View>
                             <View style={styles.stockRow}>
                                 <Text style={styles.label}>Tồn kho cũ:</Text>
                                 <Text style={styles.oldStockValue}>
@@ -154,11 +151,6 @@ const styles = StyleSheet.create({
     inputGroup: {
         marginBottom: 12,
     },
-    row: {
-        flexDirection: 'row',
-        gap: spacing.lg,
-        marginBottom: 12,
-    },
     stockRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -199,14 +191,5 @@ const styles = StyleSheet.create({
     },
     noMarginBottom: {
         marginBottom: 0,
-    },
-    zIndexHigh: {
-        zIndex: 100,
-    },
-    zIndexMedium: {
-        zIndex: 20,
-    },
-    zIndexNormal: {
-        zIndex: 10,
     },
 });

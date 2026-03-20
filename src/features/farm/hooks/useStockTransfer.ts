@@ -144,6 +144,9 @@ export const useCreateStockTransfer = () => {
                 // Invalidate all pond queries to refresh pond list
                 queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
             }
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'stock-transfer-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['pond-status-distribution'] });
         },
         onError: error => handleError(error),
     });
@@ -159,6 +162,9 @@ export const useDeleteStockTransfer = () => {
             showSuccessToast('Đã xoá phiếu sang ao');
             queryClient.invalidateQueries({ queryKey: KEYS.list(variables.pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'stock-transfer-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['pond-status-distribution'] });
         },
         onError: error => {
             const message = getErrorMessage(error, 'Xoá phiếu sang ao thất bại');

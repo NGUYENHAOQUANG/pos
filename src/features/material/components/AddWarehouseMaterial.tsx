@@ -11,12 +11,15 @@ import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from '@/shared/components/buttons/Button';
-import { DropdownMaterial, DropdownOption } from './DropdownMaterial';
+import { DropdownMaterialItem } from './DropdownMaterialItem';
+import { DropdownWarehouseItem } from './inventory/DropdownWarehouseItem';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
+import { IMaterial } from '@/features/material/types/material.types';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -37,10 +40,10 @@ interface AddWarehouseMaterialProps {
     onUpdateMaterial: (id: string, field: keyof MaterialItem, value: any) => void;
     onAddMaterial: () => void;
     onRemoveMaterial?: (id: string) => void;
-    materialOptions?: DropdownOption[];
-    onDropdownOpen?: (itemIndex: number) => void;
-    title?: string; // Optional title prop
-    isPriceDisabled?: boolean; // New prop to control price input state
+    title?: string;
+    isPriceDisabled?: boolean;
+    /** When provided, uses DropdownWarehouseItem (for export flow). Otherwise uses DropdownMaterialItem (for import). */
+    warehouseId?: string;
 }
 
 export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
@@ -48,30 +51,15 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     onUpdateMaterial,
     onAddMaterial,
     onRemoveMaterial,
-    materialOptions = [],
-    onDropdownOpen,
-    title = 'Vật tư nhập kho', // Default value
-    isPriceDisabled = false, // Default to false (editable)
+    title = 'Vật tư nhập kho',
+    isPriceDisabled = false,
+    warehouseId,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
-    };
-
-    // Store refs for each material item to measure position
-    const itemRefs = React.useRef<{ [key: string]: View | null }>({});
-
-    const handleToggleDropdown = (id: string, index: number) => {
-        if (activeDropdownId === id) {
-            setActiveDropdownId(null);
-        } else {
-            setActiveDropdownId(id);
-            // Pass item index for stable scroll calculation
-            onDropdownOpen?.(index);
-        }
     };
 
     const handleQuantityChange = React.useCallback(
@@ -108,29 +96,13 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                         itemTotal > 0
                             ? formatCurrency(itemTotal)
                             : 'Vui lòng nhập số lượng và đơn giá';
-                    const isDropdownOpen = activeDropdownId === item.id;
-
-                    const rowOptions = warehouseFormUtils.getAvailableDropdownOptions(
-                        materials,
-                        materialOptions,
-                        index
-                    );
                     const isOverStock = warehouseFormUtils.isQuantityOverStock(
                         item.quantity,
                         item.availableQuantity
                     );
 
                     return (
-                        <View
-                            key={item.id}
-                            ref={ref => {
-                                itemRefs.current[item.id] = ref;
-                            }}
-                            style={[
-                                styles.materialWrapper,
-                                isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
-                            ]}
-                        >
+                        <View key={item.id} style={styles.materialWrapper}>
                             <View style={styles.materialCard}>
                                 <View style={styles.materialHeader}>
                                     <Text style={styles.materialHeaderTitle}>
@@ -147,20 +119,77 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                 </View>
 
                                 <View style={styles.content}>
-                                    <View style={[styles.inputGroup, styles.zIndexMedium]}>
-                                        <DropdownMaterial
-                                            label="Tên vật tư"
-                                            required
-                                            value={item.materialId} // Use ID
-                                            options={rowOptions} // { label, value: ID }
-                                            onChange={val =>
-                                                onUpdateMaterial(item.id, 'materialId', val)
-                                            }
-                                            placeholder="Chọn vật tư"
-                                            showAllOption={false}
-                                            isOpen={isDropdownOpen}
-                                            onToggle={() => handleToggleDropdown(item.id, index)}
-                                        />
+                                    <View style={styles.inputGroup}>
+                                        {warehouseId ? (
+                                            <DropdownWarehouseItem
+                                                label={'Tên vật tư '}
+                                                required
+                                                value={item.materialId}
+                                                displayValue={item.materialName}
+                                                warehouseId={warehouseId}
+                                                onChange={(
+                                                    materialId: string,
+                                                    warehouseItem: IWarehouseItem
+                                                ) => {
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'materialId',
+                                                        materialId
+                                                    );
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'materialName',
+                                                        warehouseItem.materialName || ''
+                                                    );
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'unit',
+                                                        warehouseItem.unitName || ''
+                                                    );
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'price',
+                                                        (warehouseItem.averagePrice ?? 0).toString()
+                                                    );
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'availableQuantity',
+                                                        warehouseItem.quantity || 0
+                                                    );
+                                                }}
+                                                placeholder="Chọn vật tư​"
+                                            />
+                                        ) : (
+                                            <DropdownMaterialItem
+                                                label={'Tên vật tư\u200B'}
+                                                required
+                                                value={item.materialId}
+                                                displayValue={item.materialName}
+                                                onChange={(
+                                                    materialId: string,
+                                                    material: IMaterial
+                                                ) => {
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'materialId',
+                                                        materialId
+                                                    );
+                                                    onUpdateMaterial(
+                                                        item.id,
+                                                        'materialName',
+                                                        material.name
+                                                    );
+                                                    if (material.unitName) {
+                                                        onUpdateMaterial(
+                                                            item.id,
+                                                            'unit',
+                                                            material.unitName
+                                                        );
+                                                    }
+                                                }}
+                                                placeholder="Chọn vật tư​"
+                                            />
+                                        )}
 
                                         <Input
                                             label="Số lượng"
@@ -224,7 +253,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                 })}
 
                 <Button
-                    title="Thêm vật tư"
+                    title="Thêm vật tư​"
                     variant="outline"
                     onPress={onAddMaterial}
                     renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
@@ -248,11 +277,8 @@ const styles = StyleSheet.create({
     },
     mainContent: {
         paddingHorizontal: 12,
-        paddingTop: spacing.md,
         paddingBottom: 12,
         zIndex: 2,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
     },
     materialWrapper: {
         marginBottom: 12,
@@ -396,25 +422,5 @@ const styles = StyleSheet.create({
     // No margin bottom for inputs
     noMarginBottom: {
         marginBottom: 0,
-    },
-    zIndexHigh: {
-        zIndex: 100,
-    },
-    zIndexMedium: {
-        zIndex: 20,
-    },
-    zIndexNormal: {
-        zIndex: 10,
-    },
-    dropdownHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    addNewText: {
-        color: colors.blue[600],
-        fontSize: 14,
-        fontWeight: '500',
     },
 });

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, typography } from '@/styles';
+import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
@@ -17,7 +17,6 @@ import {
 } from '@/features/reports/components/profit-chart/chartData';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import ProfitChartIcon from '@/assets/Icon/IconReport/ProfitChartIcon.svg';
-import CostArrow from '@/assets/Icon/IconReport/CostArrow.svg';
 
 interface CompilationProfitChartProps {
     zoneId: string;
@@ -33,6 +32,13 @@ const formatCurrency = (value: number) => {
     }
     return `${value.toLocaleString()} đ`;
 };
+
+const LEGEND_ITEMS = [
+    { label: 'Đã thu hoạch', color: '#B7EB8F' },
+    { label: 'Chi phí', color: '#FFD9CC' },
+    { label: 'Chưa thu hoạch', color: '#D9F7BE' },
+    { label: 'Lợi nhuận ước tính', color: '#002A66' },
+];
 
 export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
     zoneId,
@@ -80,6 +86,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                     statsData?.kpis?.totalEstimatedProfit ?? 0
                                 )}
                             />
+                            <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
                             {statsData?.byDate && statsData.byDate.length > 0 ? (
                                 <Chart
                                     chartWidth={chartWidth}
@@ -87,9 +94,19 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                     data={statsData.byDate}
                                 />
                             ) : null}
-                            <View style={styles.breakEvenRow}>
-                                <CostArrow width={72} height={8} />
-                                <Text style={styles.breakEvenText}>Điểm hòa vốn</Text>
+                            {/* Legend (2x2 grid) */}
+                            <View style={styles.legendContainer}>
+                                {LEGEND_ITEMS.map(item => (
+                                    <View key={item.label} style={styles.legendItem}>
+                                        <View
+                                            style={[
+                                                styles.legendDash,
+                                                { backgroundColor: item.color },
+                                            ]}
+                                        />
+                                        <Text style={styles.legendText}>{item.label}</Text>
+                                    </View>
+                                ))}
                             </View>
                         </>
                     )}
@@ -117,26 +134,41 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.borderLight,
         backgroundColor: colors.white,
     },
-    chartSection: {
-        backgroundColor: colors.white,
-    },
     loadingContainer: {
         minHeight: 300,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    breakEvenRow: {
+    chartTitle: {
+        fontSize: 12,
+        color: colors.text,
+        paddingLeft: 16,
+        paddingVertical: 8,
+        backgroundColor: colors.white,
+        lineHeight: 18,
+    },
+    legendContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
+        flexWrap: 'wrap',
         paddingHorizontal: 16,
         paddingTop: 8,
-        paddingBottom: 12,
+        paddingBottom: 16,
         backgroundColor: colors.white,
-        gap: 8,
     },
-    breakEvenText: {
-        fontSize: typography.fontSize.sm,
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '50%',
+        marginBottom: 8,
+    },
+    legendDash: {
+        width: 16,
+        height: 3,
+        borderRadius: 1.5,
+        marginRight: 6,
+    },
+    legendText: {
+        fontSize: 12,
         color: colors.textSecondary,
-        fontFamily: typography.fontFamily.regular,
     },
 });

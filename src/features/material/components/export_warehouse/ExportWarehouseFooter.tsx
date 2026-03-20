@@ -39,12 +39,7 @@ export const ExportWarehouseFooter: React.FC<ExportWarehouseFooterProps> = ({
                 </View>
                 <View style={styles.buttonSpacer} />
                 <View style={styles.buttonWrapper}>
-                    <Button
-                        title="Gửi Phiếu"
-                        variant="primary"
-                        onPress={onSubmit}
-                        disabled={disabled}
-                    />
+                    <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
                 </View>
             </View>
         </View>

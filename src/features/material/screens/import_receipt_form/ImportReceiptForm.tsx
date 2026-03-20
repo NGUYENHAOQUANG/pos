@@ -29,7 +29,6 @@ import {
 } from '@/features/material/schemas/warehouseFormSchema';
 import { useWarehouseMaterialActions } from '@/features/material/hooks/logic/useWarehouseMaterialActions';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
-import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
 import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 
 export type AddImportReceiptUIProps = {
@@ -39,11 +38,9 @@ export type AddImportReceiptUIProps = {
     initialData?: {
         date: Date;
         supplier: string;
+        supplierName?: string;
         warehouseItems: MaterialItem[];
     };
-    supplierOptions: { label: string; value: string }[];
-    materialOptions: any[];
-    availableMaterials: any[];
     onBackPress: () => void;
     onSubmit: (
         data: WarehouseFormValues,
@@ -58,9 +55,6 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     isLoadingDetail,
     isSubmitting,
     initialData,
-    supplierOptions,
-    materialOptions,
-    availableMaterials,
     onBackPress,
     onSubmit,
     onDelete,
@@ -103,12 +97,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     const fileUploaderRef = useRef<FileUploaderRef>(null);
-    const {
-        scrollRef: scrollViewRef,
-        scrollToDropdown,
-        scrollOffset,
-        onScroll,
-    } = useDropdownScroll();
+    const scrollViewRef = useRef<any>(null);
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
 
@@ -121,21 +110,11 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
         control,
         getValues,
         setValue,
-        availableMaterials
+        [] // Material name/unit set directly by DropdownMaterialItem callback
     );
 
-    const handleDropdownOpen = (itemIndex: number) => {
-        scrollToDropdown({
-            index: itemIndex,
-            headerHeight: 280,
-            itemHeight: 280,
-            fileCount: files?.length || 0,
-            fileRowHeight: 40,
-        });
-    };
-
     useEffect(() => {
-        if (isEditMode && initialData && !initializedRef.current && supplierOptions.length > 0) {
+        if (isEditMode && initialData && !initializedRef.current) {
             reset({
                 date: initialData.date,
                 supplier: initialData.supplier,
@@ -154,7 +133,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                 })),
             });
         }
-    }, [isEditMode, initialData, supplierOptions, reset]);
+    }, [isEditMode, initialData, reset]);
 
     // Track changes for edit mode disable
     const hasChanges = useMemo(() => {
@@ -242,44 +221,37 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                     />
 
                     <SafeInputLayoutMaterial>
-                        <DropdownScrollContext.Provider value={scrollOffset}>
-                            <Animated.ScrollView
-                                ref={scrollViewRef}
-                                onScroll={onScroll}
-                                scrollEventThrottle={16}
-                                style={styles.content}
-                                contentContainerStyle={styles.contentContainer}
-                                showsVerticalScrollIndicator={false}
-                                nestedScrollEnabled={true}
-                                keyboardShouldPersistTaps="handled"
+                        <Animated.ScrollView
+                            ref={scrollViewRef}
+                            scrollEventThrottle={16}
+                            style={styles.content}
+                            contentContainerStyle={styles.contentContainer}
+                            showsVerticalScrollIndicator={false}
+                            nestedScrollEnabled={true}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <WarehouseInformation
+                                date={date}
+                                onDateChange={newDate => setValue('date', newDate)}
+                                supplier={supplier}
+                                onSupplierChange={newSupplier => setValue('supplier', newSupplier)}
+                                supplierDisplayValue={initialData?.supplierName}
                             >
-                                <WarehouseInformation
-                                    date={date}
-                                    onDateChange={newDate => setValue('date', newDate)}
-                                    supplier={supplier}
-                                    onSupplierChange={newSupplier =>
-                                        setValue('supplier', newSupplier)
-                                    }
-                                    supplierOptions={supplierOptions}
-                                >
-                                    <FileUploader
-                                        ref={fileUploaderRef}
-                                        files={files || []}
-                                        onFilesSelected={newFiles => setValue('files', newFiles)}
-                                        maxFiles={5}
-                                    />
-                                </WarehouseInformation>
-
-                                <AddWarehouseMaterial
-                                    materials={warehouseItems || []}
-                                    onUpdateMaterial={materialActions.update}
-                                    onAddMaterial={materialActions.add}
-                                    onRemoveMaterial={materialActions.remove}
-                                    materialOptions={materialOptions}
-                                    onDropdownOpen={handleDropdownOpen}
+                                <FileUploader
+                                    ref={fileUploaderRef}
+                                    files={files || []}
+                                    onFilesSelected={newFiles => setValue('files', newFiles)}
+                                    maxFiles={5}
                                 />
-                            </Animated.ScrollView>
-                        </DropdownScrollContext.Provider>
+                            </WarehouseInformation>
+
+                            <AddWarehouseMaterial
+                                materials={warehouseItems || []}
+                                onUpdateMaterial={materialActions.update}
+                                onAddMaterial={materialActions.add}
+                                onRemoveMaterial={materialActions.remove}
+                            />
+                        </Animated.ScrollView>
                     </SafeInputLayoutMaterial>
 
                     <WarehouseFooter
@@ -319,8 +291,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        marginTop: spacing.sm,
         paddingBottom: 100,
+        gap: spacing.sm,
     },
 });
 

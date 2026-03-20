@@ -143,7 +143,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                 )}
 
                 <Button
-                    title="Thêm vật tư"
+                    title="Thêm vật tư​"
                     variant="outline"
                     onPress={() => setModalVisible(true)}
                     renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}

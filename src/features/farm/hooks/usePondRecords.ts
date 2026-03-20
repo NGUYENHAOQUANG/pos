@@ -13,19 +13,6 @@ import type {
 import type { PondRecordListResponse } from '@/features/farm/types/pondRecord.types';
 
 /**
- * Hook to fetch pond records from GET /pond/{pondId}/record
- */
-export const usePondRecords = (pondId: string, params?: IPondRecordListParams) => {
-    const query = useQuery({
-        queryKey: farmKeys.pondRecords.list(pondId, params as Record<string, unknown>),
-        queryFn: () => pondRecordApi.list(pondId, params),
-        enabled: !!pondId,
-    });
-
-    return query;
-};
-
-/**
  * Hook to fetch only the latest pond record activity
  */
 export const useLatestPondActivity = (pondId: string) => {

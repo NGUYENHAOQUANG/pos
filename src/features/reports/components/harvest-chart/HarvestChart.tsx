@@ -38,17 +38,20 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
         return allPonds;
     }, [statsData?.byPond, pondCode]);
 
+    // Convert kg → tấn (1 tấn = 1000 kg)
+    const KG_TO_TAN = 1000;
+
     const totalYield = useMemo(() => {
         if (pondCode) {
-            return byPondData.reduce((sum, p) => sum + p.totalHarvested, 0);
+            return byPondData.reduce((sum, p) => sum + p.totalHarvested, 0) / KG_TO_TAN;
         }
-        return statsData?.kpis?.totalHarvested ?? 0;
+        return (statsData?.kpis?.totalHarvested ?? 0) / KG_TO_TAN;
     }, [byPondData, pondCode, statsData?.kpis?.totalHarvested]);
 
     const chartData: HarvestChartData[] = useMemo(() => {
         return byPondData.map(pondStat => ({
             pond: pondStat.pondName,
-            yield: pondStat.totalHarvested,
+            yield: pondStat.totalHarvested / KG_TO_TAN,
         }));
     }, [byPondData]);
 
@@ -79,7 +82,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
                                         id: 'harvest-yield',
                                         name: 'Sản lượng đã thu hoạch',
                                         value: `${totalYield.toFixed(2)} tấn`,
-                                        color: colors.orange[600],
+                                        color: '',
                                     }}
                                     variant="prodSummary"
                                 />
@@ -128,7 +131,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     chartTitle: {
-        marginBottom: spacing.sm,
+        marginVertical: 12,
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,

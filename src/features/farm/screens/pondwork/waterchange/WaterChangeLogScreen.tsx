@@ -27,7 +27,7 @@ export const WaterSupplyLogScreen = () => {
     const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     // Fetch data using the hook with date params
-    const { jobs, isLoading, refetch } = useWaterSupplyRecordsAsJobs(pondId, {
+    const { jobs, isLoading, isFetching, refetch } = useWaterSupplyRecordsAsJobs(pondId, {
         CreateAtFrom: dateParams.CreateAtFrom,
         CreateAtTo: dateParams.CreateAtTo,
     });
@@ -83,6 +83,9 @@ export const WaterSupplyLogScreen = () => {
             emptyButtonTitle="Bắt đầu thay/cấp nước"
             onEmptyButtonPress={handleCreateNew}
             useFlatCardStyle={true}
+            isLoading={isLoading}
+            isRefreshing={isFetching && !isLoading}
+            onRefresh={refetch}
         />
     );
 };

@@ -125,6 +125,12 @@ export const useCreateHarvestRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'harvest-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'harvest-stats-table'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'production-distribution'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
         },
         onError: handleError,
     });
@@ -153,6 +159,12 @@ export const useUpdateHarvestRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'harvest-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'harvest-stats-table'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'production-distribution'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
         },
         onError: handleError,
     });
@@ -171,6 +183,12 @@ export const useDeleteHarvestRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'harvest-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'harvest-stats-table'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'production-distribution'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
         },
         onError: handleError,
     });

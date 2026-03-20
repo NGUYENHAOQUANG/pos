@@ -4,7 +4,8 @@ import { borderRadius, colors } from '@/styles';
 import { typography } from '@/styles/typography';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import CostChart from './CostChart';
-import { CostItem } from './costChartData';
+import { CostItem, CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from './costChartData';
+import BottomCostChart from './BottomCostChart';
 
 import { Loading } from '@/shared/components/ui/Loading';
 import chartStyles from '@/features/reports/styles/chart.styles';
@@ -12,20 +13,6 @@ import CostChartIcon from '@/assets/Icon/IconReport/CostChartIcon.svg';
 import { PondIndexCard } from '../env-chart/PondIndexCard';
 import { useCostDonut } from '../../hooks/useCostDonut';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
-
-// Color palette for chart slices
-const SLICE_COLORS = [
-    colors.red[600],
-    colors.success,
-    colors.green[800],
-    colors.orange[600],
-    colors.orange[200],
-    colors.blue[700],
-    colors.blue[400],
-    colors.blue[50],
-    '#7B2CBF',
-    '#CA8A04',
-];
 
 /**
  * Format a large number into Vietnamese display: "X tỉ", "X triệu", etc.
@@ -61,14 +48,14 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
     const summary = apiData?.summary;
     const chartData = apiData?.chartData;
 
-    // Map API data to CostItem[]
+    // Map API data to CostItem[] with fixed category colors
     const costItems: CostItem[] = useMemo(() => {
         if (!chartData || chartData.length === 0) return [];
-        return chartData.map((item, index) => ({
+        return chartData.map(item => ({
             label: item.categoryName,
             percentage: item.percentage,
             value: item.amount,
-            color: SLICE_COLORS[index % SLICE_COLORS.length],
+            color: CATEGORY_COLORS[item.categoryName] || DEFAULT_CATEGORY_COLOR,
         }));
     }, [chartData]);
 
@@ -143,6 +130,9 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
                                     totalDisplay={totalDisplay}
                                 />
                             </View>
+
+                            {/* Legend */}
+                            <BottomCostChart data={costItems} />
 
                             {/* Divider */}
                             <View style={styles.divider} />

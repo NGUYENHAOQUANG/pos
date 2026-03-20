@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { borderRadius, colors, spacing } from '@/styles';
-import { DropdownMaterial, DropdownOption } from '../DropdownMaterial';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { InfiniteScrollDropdown } from '@/shared/components/forms/InfiniteScrollDropdown';
+import { useInfiniteDropdown } from '@/shared/hooks/useInfiniteDropdown';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';
+import { useZones } from '@/features/farm/hooks/useZones';
+import { useAllPondsByZone } from '@/features/farm/hooks/usePonds';
+import { Zone } from '@/features/farm/types/farm.types';
+import { PondData } from '@/features/farm/types/pond.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -18,6 +22,10 @@ interface ExportWarehouseInformationProps {
     onZoneChange: (value: string) => void;
     selectedPond: string;
     onPondChange: (value: string) => void;
+    /** Display name for zone in edit mode */
+    zoneDisplayValue?: string;
+    /** Display name for pond in edit mode */
+    pondDisplayValue?: string;
     children?: React.ReactNode;
 }
 
@@ -28,72 +36,46 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     onZoneChange,
     selectedPond,
     onPondChange,
+    zoneDisplayValue,
+    pondDisplayValue,
     children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-    // Get zones and ponds from form store
-    const zones = useFarmStore(state => state.zones);
-    const ponds = useFarmStore(state => state.ponds);
-    const fetchZones = useFarmStore(state => state.fetchZones);
-    const fetchPondsByZone = useFarmStore(state => state.fetchPondsByZone);
-    const isLoadingZones = useFarmStore(state => state.isLoadingZones);
-    const isLoadingPonds = useFarmStore(state => state.isLoadingPonds);
+    // Zone dropdown state
+    const zoneDropdown = useInfiniteDropdown();
+    const { data: zones = [] } = useZones();
 
-    // Fetch initial data (Zones)
-    useEffect(() => {
-        if (zones.length === 0) fetchZones();
-    }, [zones.length, fetchZones]);
+    // Pond dropdown state
+    const pondDropdown = useInfiniteDropdown();
+    const { data: ponds = [] } = useAllPondsByZone(selectedZone);
 
-    // Fetch ponds when selectedZone changes
-    useEffect(() => {
-        if (selectedZone) {
-            fetchPondsByZone(selectedZone);
-        }
-    }, [selectedZone, fetchPondsByZone]);
+    // Filter zones by search
+    const filteredZones = React.useMemo(() => {
+        if (!zoneDropdown.debouncedSearch) return zones;
+        const search = zoneDropdown.debouncedSearch.toLowerCase();
+        return zones.filter((z: Zone) => z.name.toLowerCase().includes(search));
+    }, [zones, zoneDropdown.debouncedSearch]);
 
-    // Auto-select "Trại Kiên Giang" or first zone if available and none selected
+    // Filter ponds by search
+    const filteredPonds = React.useMemo(() => {
+        if (!pondDropdown.debouncedSearch) return ponds;
+        const search = pondDropdown.debouncedSearch.toLowerCase();
+        return ponds.filter((p: PondData) => p.name.toLowerCase().includes(search));
+    }, [ponds, pondDropdown.debouncedSearch]);
+
+    // Auto-select first zone if none selected
     useEffect(() => {
         if (!selectedZone && zones.length > 0) {
             const defaultZone =
-                zones.find(z => z.name.toLowerCase().includes('kiên giang')) || zones[0];
+                zones.find((z: Zone) => z.name.toLowerCase().includes('kiên giang')) || zones[0];
             onZoneChange(defaultZone.id.toString());
         }
     }, [zones, selectedZone, onZoneChange]);
 
-    // Zones Dropdown Options
-    const zoneOptions: DropdownOption[] = useMemo(() => {
-        return zones.map(z => ({
-            label: z.name,
-            value: z.id.toString(),
-        }));
-    }, [zones]);
-
-    // Filter Ponds based on selected Zone
-    // Filter Ponds based on selected Zone
-    const pondOptions: DropdownOption[] = useMemo(() => {
-        if (!selectedZone) return [];
-
-        const filteredPonds = ponds.filter(p => p.zoneId?.toString() === selectedZone);
-
-        return filteredPonds.map(p => ({
-            label: p.name,
-            value: p.id,
-        }));
-    }, [ponds, selectedZone]);
-
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
-    };
-
-    const handleToggleDropdown = (key: string) => {
-        if (activeDropdown === key) {
-            setActiveDropdown(null);
-        } else {
-            setActiveDropdown(key);
-        }
     };
 
     return (
@@ -114,35 +96,50 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                     required
                 />
 
-                <DropdownMaterial
+                {/* Zone Dropdown */}
+                <InfiniteScrollDropdown<Zone>
                     label="Trại nuôi"
+                    required
                     value={selectedZone}
-                    options={zoneOptions}
-                    onChange={newValue => {
-                        onZoneChange(newValue);
+                    displayValue={zoneDisplayValue}
+                    onSelect={zoneId => {
+                        onZoneChange(zoneId);
                         onPondChange('');
                     }}
                     placeholder="Chọn trại nuôi"
-                    showAllOption={false}
-                    isOpen={activeDropdown === 'zone'}
-                    onToggle={() => handleToggleDropdown('zone')}
-                    disabled={isLoadingZones}
-                    inline={false}
-                    required
+                    searchPlaceholder="Tìm trại nuôi"
+                    emptyText="Không tìm thấy trại nuôi"
+                    isOpen={zoneDropdown.isOpen}
+                    onOpen={zoneDropdown.handleOpen}
+                    onClose={zoneDropdown.handleClose}
+                    searchText={zoneDropdown.searchText}
+                    onSearchChange={zoneDropdown.handleSearchChange}
+                    onClearSearch={zoneDropdown.clearSearch}
+                    items={filteredZones}
+                    isLoading={false}
                 />
-                <DropdownMaterial
+
+                {/* Pond Dropdown */}
+                <InfiniteScrollDropdown<PondData>
                     label="Ao nuôi"
-                    value={selectedPond}
-                    options={pondOptions}
-                    onChange={onPondChange}
-                    placeholder={isLoadingPonds ? 'Đang tải danh sách ao...' : 'Chọn ao nuôi'}
-                    showAllOption={false}
-                    isOpen={activeDropdown === 'pond'}
-                    onToggle={() => handleToggleDropdown('pond')}
-                    disabled={!selectedZone || isLoadingPonds}
-                    inline={false}
                     required
+                    value={selectedPond}
+                    displayValue={pondDisplayValue}
+                    onSelect={onPondChange}
+                    placeholder={!selectedZone ? 'Chọn trại nuôi trước' : 'Chọn ao nuôi'}
+                    searchPlaceholder="Tìm ao nuôi"
+                    emptyText="Không tìm thấy ao nuôi"
+                    disabled={!selectedZone}
+                    isOpen={pondDropdown.isOpen}
+                    onOpen={pondDropdown.handleOpen}
+                    onClose={pondDropdown.handleClose}
+                    searchText={pondDropdown.searchText}
+                    onSearchChange={pondDropdown.handleSearchChange}
+                    onClearSearch={pondDropdown.clearSearch}
+                    items={filteredPonds}
+                    isLoading={false}
                 />
+
                 {children}
             </View>
         </View>
@@ -151,23 +148,17 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
 
 const styles = StyleSheet.create({
     cardContainer: {
-        margin: spacing.md,
+        marginHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.border,
         zIndex: 10,
     },
-
     content: {
         paddingHorizontal: 12,
-        paddingTop: spacing.md,
+        // paddingTop: spacing.md,
         paddingBottom: 12,
         gap: 12,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
-    },
-    inputGroup: {
-        marginBottom: spacing.md,
     },
 });

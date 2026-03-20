@@ -202,12 +202,14 @@ export default function EnvChar({ series, metadata, unit = '', pondColors }: Env
         const rawRange = maxVal - minVal;
         const rawStep = rawRange / (TICK_COUNT - 1);
 
-        // Round step up to a "nice" number
+        // Round step up to a "nice" number (finer steps to avoid overshooting)
         const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
         const normalized = rawStep / magnitude;
         let niceStep: number;
         if (normalized <= 1) niceStep = 1 * magnitude;
+        else if (normalized <= 1.5) niceStep = 1.5 * magnitude;
         else if (normalized <= 2) niceStep = 2 * magnitude;
+        else if (normalized <= 2.5) niceStep = 2.5 * magnitude;
         else if (normalized <= 5) niceStep = 5 * magnitude;
         else niceStep = 10 * magnitude;
 
@@ -350,7 +352,17 @@ export default function EnvChar({ series, metadata, unit = '', pondColors }: Env
                                 {xTicks.map((d, i) => {
                                     //show label every 7 days + always show last
                                     const isLast = i === xTicks.length - 1;
-                                    if (i % 7 !== 0 && !isLast) return null;
+                                    const isSeventhDay = i % 7 === 0;
+
+                                    if (!isSeventhDay && !isLast) return null;
+
+                                    // Skip last label if too close to previous 7-day label
+                                    if (isLast && !isSeventhDay) {
+                                        const prevLabelIndex =
+                                            Math.floor((xTicks.length - 1) / 7) * 7;
+                                        if (i - prevLabelIndex < 3) return null;
+                                    }
+
                                     return (
                                         <AnimatedLabel key={`l-${i}`} date={d} baseX={scaleX(d)} />
                                     );
@@ -399,15 +411,15 @@ const styles = StyleSheet.create({
     axisLabel: {
         fontFamily: typography.fontFamily.regular,
         fontSize: 12,
-        color: colors.text,
-        textAlign: 'right',
+        color: colors.textSecondary,
+        textAlign: 'left',
         width: '100%',
-        paddingRight: 4,
+        paddingLeft: 0,
     },
     axisLabelCenter: {
         fontFamily: typography.fontFamily.regular,
         fontSize: 12,
-        color: colors.text,
+        color: colors.textSecondary,
         textAlign: 'center',
         width: '100%',
     },

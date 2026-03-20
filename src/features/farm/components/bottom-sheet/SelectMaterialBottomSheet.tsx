@@ -260,7 +260,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                 <TextInput
                     ref={searchInputRef}
                     style={styles.searchInput}
-                    placeholder="Tìm vật tư"
+                    placeholder="Tìm vật tư​"
                     placeholderTextColor={colors.textTertiary}
                     value={searchText}
                     onChangeText={text => onSearchChange?.(text)}
