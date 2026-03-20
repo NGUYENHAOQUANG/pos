@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
-import { Input, InputFormat } from '@/shared/components/forms/Input';
+import { Input } from '@/shared/components/forms/Input';
 import WarningCircle from '@/assets/Icon/IconMenu/WarningCircle.svg';
 
 interface EditEnvironmentCardProps {
@@ -27,6 +27,33 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     onUpperLimitChange,
     onAlertToggle,
 }) => {
+    /** Non-negative decimal with dot separator, max 10 digits (not counting dot), max 5 decimal places */
+    const handleLimitChange = useCallback(
+        (callback: (text: string) => void) => (text: string) => {
+            // Only allow digits and dot
+            let cleaned = text.replace(/[^0-9.]/g, '');
+            // Remove leading dots
+            cleaned = cleaned.replace(/^\.+/, '');
+            // Keep only first dot
+            const parts = cleaned.split('.');
+            if (parts.length > 2) {
+                cleaned = parts[0] + '.' + parts.slice(1).join('');
+            }
+            // Limit decimal places to 5
+            const splitParts = cleaned.split('.');
+            if (splitParts.length > 1 && splitParts[1].length > 5) {
+                cleaned = splitParts[0] + '.' + splitParts[1].slice(0, 5);
+            }
+            // Count only digits (not dot), max 10
+            const digitCount = cleaned.replace(/\./g, '').length;
+            if (digitCount > 10) {
+                return;
+            }
+            callback(cleaned);
+        },
+        []
+    );
+
     return (
         <View style={styles.container}>
             {/* Parameter Name */}
@@ -44,8 +71,7 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 label="Giới hạn dưới"
                 required
                 value={lowerLimit}
-                onChangeText={onLowerLimitChange}
-                inputFormat={InputFormat.DECIMAL}
+                onChangeText={handleLimitChange(onLowerLimitChange)}
                 keyboardType="numeric"
                 placeholder="Nhập giới hạn dưới"
                 containerStyle={styles.inputGroup}
@@ -56,8 +82,7 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 label="Giới hạn trên"
                 required
                 value={upperLimit}
-                onChangeText={onUpperLimitChange}
-                inputFormat={InputFormat.DECIMAL}
+                onChangeText={handleLimitChange(onUpperLimitChange)}
                 keyboardType="numeric"
                 placeholder="Nhập giới hạn trên"
                 containerStyle={styles.inputGroup}

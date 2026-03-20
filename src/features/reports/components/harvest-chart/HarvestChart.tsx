@@ -81,7 +81,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
                                     item={{
                                         id: 'harvest-yield',
                                         name: 'Sản lượng đã thu hoạch',
-                                        value: `${totalYield.toFixed(2)} tấn`,
+                                        value: `${totalYield.toFixed(3)} tấn`,
                                         color: '',
                                     }}
                                     variant="prodSummary"
