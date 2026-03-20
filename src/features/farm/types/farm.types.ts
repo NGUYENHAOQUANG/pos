@@ -25,13 +25,6 @@ export interface PondType {
     lastModifiedAt?: string;
 }
 
-export interface IStatus {
-    id: number;
-    name: string;
-    code: string;
-    color?: string;
-}
-
 export * from './pondOperation.types';
 export interface Zone {
     id: string;
@@ -50,82 +43,6 @@ export interface Zone {
 }
 
 export type { PondData };
-
-export interface CycleData {
-    id: string;
-    breedSource: string;
-    breedName?: string;
-    season: string | any;
-    cycleName: string;
-    name?: string;
-    stockingDate: string;
-    startDate?: string;
-    endDate?: string;
-    stockingQuantity: number;
-    totalStocking?: number;
-    age: number;
-    ageDays?: number;
-    density: number;
-    estimatedCost: number;
-    notes?: string;
-    pondId?: string;
-    sourcePonds?: string[];
-    receivingPonds?: string[];
-    status?: string;
-    doc?: number;
-    transferInfo?: TransferInfo;
-    warehouseItemId?: string;
-    pond?: any;
-}
-
-export interface CycleApiResponse {
-    id: string;
-    name?: string;
-    cycleName?: string;
-    breedSource?: string;
-    warehouseItemId?: string;
-    stockingDate?: string;
-    createdAt?: string;
-    season: SeasonData | string;
-    stockingQuantity?: number;
-    totalStocking?: number;
-    age?: number;
-    ageDays?: number;
-    density?: number;
-    estimatedCost?: number;
-    notes?: string;
-    status?: string;
-    pondId?: string;
-    [key: string]: any;
-}
-
-export interface CreateCycleCommand {
-    seasonId: string;
-    warehouseItemId: string;
-    name: string;
-    totalStocking: number;
-    ageDays: number;
-    notes?: string;
-}
-
-export type UpdateCycleCommand = Partial<CreateCycleCommand>;
-
-export interface TransferInfo {
-    transferDate: string;
-    shrimpSize: string;
-    totalEstimatedShrimp: number;
-    sourcePondId: string;
-    sourcePondName: string;
-    quantity: number;
-    originalCycle: {
-        cycleName: string;
-        season: string;
-        breedSource: string;
-        stockingDate: string;
-        stockingQuantity: number;
-        doc: number;
-    };
-}
 
 export interface FarmData {
     id: string;
@@ -275,29 +192,7 @@ export type JobMeta =
     | HarvestMeta
     | WaterSupplyMeta
     | WaterSupplyMeta
-    | MeasureSizeMeta
-    | CleanRenovationMeta
-    | DryRenovationMeta;
-
-export interface CleanRenovationMeta {
-    notes?: string;
-    materials?: {
-        warehouseItemId: string;
-        quantity: number;
-    }[];
-    images?: string[];
-    documentIds?: string[];
-}
-
-export interface DryRenovationMeta {
-    notes?: string;
-    materials?: {
-        warehouseItemId: string;
-        quantity: number;
-    }[];
-    images?: string[];
-    documentIds?: string[];
-}
+    | MeasureSizeMeta;
 
 export interface JobExecution {
     id: string;
@@ -316,15 +211,6 @@ export interface JobExecution {
     createdAt?: string;
     waterTreatmentType?: string;
     meta?: JobMeta;
-}
-
-export interface ShrimpInspectionData {
-    id: string;
-    pondId: string;
-    pondName?: string;
-    date?: string;
-    time?: string;
-    notes?: string;
 }
 
 export const ENVIRONMENT_METRIC_IDS = {

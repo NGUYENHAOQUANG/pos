@@ -18,23 +18,21 @@ export interface ProductionAreaData {
     totalAmount: number;
 }
 
-export interface ProductionDocData {
-    label: string;
-    remainingAmount: number;
-    harvestedAmount: number;
-    remainingPercent: number;
-    totalAmount: number;
-}
-
 export interface ProductionDistributionData {
     summary: ProductionSummary;
     areaData: ProductionAreaData[];
-    docData: ProductionDocData[];
+    docData: ProductionAreaData[];
 }
 
 export interface ProductionDistributionParams {
     ZoneId: string;
     Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
 }
 
 export type ProductionDistributionResponse = IApiResponse<ProductionDistributionData>;
@@ -44,12 +42,26 @@ export type ProductionDistributionResponse = IApiResponse<ProductionDistribution
 // ----------------------------------------------------------------------
 
 /** Single bar item data for chart rendering */
-export type ProdChartItemData = { value: number; color: string; label: string } | null;
+export type ProdChartItemData = { value: number; color: string } | null;
 
 /** Group of bar items with an x-axis label */
 export interface ProdChartGroupData {
     label: string;
     items: ProdChartItemData[];
+}
+
+/** Legend item for summary cards */
+export interface ProdLegendItem {
+    label: string;
+    color: string;
+}
+
+/** Summary card data for display */
+export interface ProdSummaryCardData {
+    title: string;
+    value: number;
+    unit: string;
+    legends: ProdLegendItem[];
 }
 
 /** Props for the VisualChart sub-component */
@@ -67,18 +79,10 @@ export interface ProdChartProps {
     pondId?: string;
 }
 
-/** Scale calculation result */
-export interface ProdChartScale {
-    yMax: number;
-    yLabels: string[];
-}
-
 /** Hook return type for production chart data */
 export interface UseProdChartDataResult {
     /** Whether data is loading */
     isLoading: boolean;
-    /** Summary data (harvested / remaining) */
-    summary: ProductionSummary | undefined;
     /** Grouped chart data for active tab */
     activeData: ProdChartGroupData[];
     /** Y-axis labels */
@@ -87,4 +91,6 @@ export interface UseProdChartDataResult {
     yMax: number;
     /** Dynamic chart height */
     chartHeight: number;
+    /** Summary cards with legends */
+    summaryCards: ProdSummaryCardData[];
 }

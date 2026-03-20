@@ -34,5 +34,6 @@ export const useCurrentShrimpBreed = (pondId: string, cycleId: string, warehouse
         breedName,
         currentShrimpSeed,
         cycleData,
+        totalStocking: cycleData?.totalStocking || 0,
     };
 };

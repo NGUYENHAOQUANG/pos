@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,18 +21,16 @@ import {
     useCreateExportReceipt,
     useUpdateExportReceipt,
     useDeleteExportReceipt,
-} from '@/features/material/hooks/exportReceipt/useExportReceipt';
-import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/useExportReceiptItems';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
+} from '@/features/material/hooks/useExportReceipt';
+import { useExportReceiptItems } from '@/features/material/hooks/useExportReceiptItems';
+import { useCurrentWarehouse } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useMaterialOptions } from '@/features/material/hooks/inventory';
 
 export const ExportWarehouseFormScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<RouteProp<AppStackParamList, 'ExportWarehouseForm'>>();
 
-    const params = route.params as any;
-    const exportReceiptId = params?.exportReceiptId;
+    const { exportReceiptId } = route.params ?? {};
     const isEditMode = !!exportReceiptId;
 
     const { setTabBarVisible } = useTabBarVisibility();
@@ -44,7 +42,7 @@ export const ExportWarehouseFormScreen: React.FC = () => {
     // Context & Farm Store
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
@@ -57,17 +55,17 @@ export const ExportWarehouseFormScreen: React.FC = () => {
         exportReceiptId || ''
     );
 
-    const { data: warehouses } = useWarehouses({
-        ZoneId: detailData?.zoneId || selectedZoneId || undefined,
-    });
-    const warehouseId = detailData?.warehouseId || warehouses?.[0]?.id;
+    const [activeZoneId, setActiveZoneId] = useState<string>(selectedZoneId || '');
 
-    const { data: warehouseData } = useWarehouseItems(warehouseId, undefined, {
-        enabled: !!warehouseId,
-    });
+    useEffect(() => {
+        if (isEditMode && detailData?.zoneId) {
+            setActiveZoneId(detailData.zoneId.toString());
+        }
+    }, [isEditMode, detailData?.zoneId]);
 
-    const availableMaterials = useMemo(() => warehouseData?.items || [], [warehouseData]);
-    const materialOptions = useMaterialOptions(availableMaterials);
+    // Derive warehouseId from the zone currently selected in the form
+    const { warehouseId: zoneWarehouseId } = useCurrentWarehouse(activeZoneId || undefined);
+    const warehouseId = detailData?.warehouseId || zoneWarehouseId;
 
     const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItemsData);
 
@@ -119,7 +117,7 @@ export const ExportWarehouseFormScreen: React.FC = () => {
             // Optional: If files were passed directly in initialData that haven't been mapped cleanly, they are tracked here.
             submitWithFiles((data.files as DocumentPickerResponse[]) || [], async documentIds => {
                 const payload = exportReceiptService.mapFormToPayload(
-                    warehouseId,
+                    warehouseId!,
                     data,
                     documentIds,
                     !isDraft
@@ -172,12 +170,12 @@ export const ExportWarehouseFormScreen: React.FC = () => {
                     isEditMode={isEditMode}
                     initialData={initialData}
                     creatorName={detailData?.creator?.fullname}
-                    availableMaterials={availableMaterials}
-                    materialOptions={materialOptions}
                     fileUploaderRef={fileUploaderRef}
                     onSubmit={onSubmit}
                     onDelete={onDelete}
                     onBackPress={handleBackPress}
+                    warehouseId={warehouseId}
+                    onZoneChange={zoneId => setActiveZoneId(zoneId)}
                 />
             </Loading>
         </>

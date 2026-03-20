@@ -7,10 +7,15 @@ import {
     StatusBar,
     Dimensions,
     ActivityIndicator,
+    BackHandler,
+    Platform,
+    PermissionsAndroid,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
+import { VLCPlayer } from 'react-native-vlc-media-player';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import Orientation from 'react-native-orientation-locker';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -21,43 +26,158 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import { borderRadius, colors } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { IconSkipBack, IconSkipForward } from '@/assets/icons';
+import ViewShot from 'react-native-view-shot';
+import RNFS from 'react-native-fs';
+import Toast from 'react-native-toast-message';
+import CameraIcon from '@/assets/Icon/IconFarm/camera.svg';
 
 // ===== Constants =====
 const CONTROLS_TIMEOUT = 5000; // Auto-hide controls after 5s
 const SEEK_STEP = 10; // Seek 10s per double tap
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('screen');
+// Landscape dimensions for gesture calculations
 const LANDSCAPE_W = Math.max(SCREEN_W, SCREEN_H);
 
 type VideoPlayerRouteProp = RouteProp<AppStackParamList, 'CameraPlayer'>;
 
 /**
- * Full-screen landscape video player with:
- * - Auto landscape orientation
- * - Tap to show/hide controls
- * - Auto-hide controls after 5s
- * - Double-tap left/right to seek ±10s
- * - Horizontal pan gesture to seek
- * - Progress bar with scrubbing
+ * Full-screen landscape video player.
+ * Uses react-native-orientation-locker to natively rotate to landscape.
+ * Black overlay covers the rotation transition for a smooth experience.
  */
 export const VideoPlayerScreen: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<VideoPlayerRouteProp>();
     const { videoUrl, cameraName, pondName } = route.params;
 
-    useEffect(() => {
-        return () => {
+    // Detect if the URL is an RTSP live stream
+    const isLiveStream = videoUrl.toLowerCase().startsWith('rtsp://');
+
+    // Track mounted state to guard VLC operations during cleanup
+    const isMountedRef = useRef(true);
+
+    // Track if orientation rotation is complete
+    const [isReady, setIsReady] = useState(false);
+    // Animated opacity for smooth fade-in after rotation completes
+    const contentOpacity = useSharedValue(0);
+
+    const contentAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: contentOpacity.value,
+    }));
+
+    // JS callback to run after fade-out animation completes (called from UI thread)
+    const performClose = useCallback(() => {
+        StatusBar.setHidden(false);
+        Orientation.lockToPortrait();
+        navigation.goBack();
+    }, [navigation]);
+
+    // Handle close: fade out, then restore portrait and go back
+    const handleClose = useCallback(() => {
+        if (isMountedRef.current) {
             setPaused(true);
+        }
+        contentOpacity.value = withTiming(0, { duration: 150 }, finished => {
+            if (finished) {
+                runOnJS(performClose)();
+            }
+        });
+    }, [performClose, contentOpacity]);
+
+    // Lock to landscape on mount, listen for rotation completion
+    useEffect(() => {
+        StatusBar.setHidden(true);
+
+        // Listen for orientation change to detect when landscape is reached
+        const onOrientation = (orientation: string) => {
+            if (orientation === 'LANDSCAPE-LEFT' || orientation === 'LANDSCAPE-RIGHT') {
+                setIsReady(true);
+            }
+        };
+        Orientation.addOrientationListener(onOrientation);
+
+        // Small delay to let the black screen render before rotating
+        let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+        const timer = setTimeout(() => {
+            Orientation.lockToLandscape();
+
+            // Fallback: If orientation event doesn't fire, forcefully show UI anyway
+            fallbackTimer = setTimeout(() => {
+                if (isMountedRef.current) {
+                    setIsReady(true);
+                }
+            }, 600);
+        }, 50);
+
+        return () => {
+            isMountedRef.current = false;
+            clearTimeout(timer);
+            if (fallbackTimer) clearTimeout(fallbackTimer);
+            Orientation.removeOrientationListener(onOrientation);
+            StatusBar.setHidden(false);
+            Orientation.lockToPortrait();
         };
     }, []);
 
+    // Fade in content when orientation rotation is complete
+    useEffect(() => {
+        if (isReady) {
+            contentOpacity.value = withTiming(1, { duration: 250 });
+        }
+    }, [isReady, contentOpacity]);
+
+    // Handle Android hardware back button
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            handleClose();
+            return true;
+        });
+        return () => backHandler.remove();
+    }, [handleClose]);
+
     // Video ref
     const videoRef = useRef<any>(null);
+    // VLC player ref for proper cleanup
+    const vlcRef = useRef<any>(null);
+    // ViewShot ref for snapshot capture
+    const viewShotRef = useRef<ViewShot>(null);
+    // Buffering auto-hide timeout for live streams
+    const bufferingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cleanup: stop VLC player and pause Video on unmount to prevent memory leaks
+    useEffect(() => {
+        const vlcPlayer = vlcRef.current;
+        return () => {
+            // Stop VLC native player to release RTSP stream & decoder buffers
+            if (vlcPlayer) {
+                try {
+                    vlcPlayer.stopPlayer?.();
+                } catch (_e) {
+                    // Ignore errors during cleanup
+                }
+            }
+            if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+        };
+    }, []);
 
     // State
     const [paused, setPaused] = useState(false);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [isBuffering, setIsBuffering] = useState(true);
+
+    // Auto-hide buffering indicator after 5s for live streams
+    // VLC's onBuffering fires repeatedly even while playing
+    useEffect(() => {
+        if (isBuffering && isLiveStream) {
+            bufferingTimeoutRef.current = setTimeout(() => {
+                if (isMountedRef.current) setIsBuffering(false);
+            }, 5000);
+            return () => {
+                if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+            };
+        }
+    }, [isBuffering, isLiveStream]);
     const [showControls, setShowControls] = useState(true);
     const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 });
 
@@ -235,25 +355,128 @@ export const VideoPlayerScreen: React.FC = () => {
     // Progress bar percentage
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+    // ===== Snapshot Handler =====
+    const handleSnapshot = useCallback(async () => {
+        try {
+            // Request storage permission on Android
+            if (Platform.OS === 'android') {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+                );
+                // On Android 10+ (SDK 29+), WRITE_EXTERNAL_STORAGE is auto-granted
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED && Platform.Version < 29) {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Không có quyền lưu ảnh',
+                    });
+                    return;
+                }
+            }
+
+            // Capture current frame
+            const uri = await viewShotRef.current?.capture?.();
+            if (!uri) {
+                Toast.show({ type: 'error', text1: 'Không thể chụp ảnh' });
+                return;
+            }
+
+            // Save to Pictures directory
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const fileName = `Camera_${cameraName.replace(/\s/g, '_')}_${timestamp}.jpg`;
+            const picturesDir =
+                Platform.OS === 'android'
+                    ? `${RNFS.ExternalStorageDirectoryPath}/Pictures/MebiOne`
+                    : `${RNFS.DocumentDirectoryPath}/Pictures`;
+
+            // Ensure directory exists
+            const dirExists = await RNFS.exists(picturesDir);
+            if (!dirExists) {
+                await RNFS.mkdir(picturesDir);
+            }
+
+            const destPath = `${picturesDir}/${fileName}`;
+            await RNFS.copyFile(uri, destPath);
+
+            // Scan file so it appears in Gallery (Android only)
+            if (Platform.OS === 'android') {
+                await RNFS.scanFile(destPath);
+            }
+
+            Toast.show({
+                type: 'success',
+                text1: 'Đã lưu ảnh',
+                text2: fileName,
+            });
+        } catch (error) {
+            console.error('[Snapshot] Error:', error);
+            Toast.show({ type: 'error', text1: 'Lỗi khi lưu ảnh' });
+        }
+    }, [cameraName]);
+
     return (
         <GestureHandlerRootView style={styles.root}>
-            <StatusBar hidden />
-            <View style={styles.container}>
+            <Animated.View style={[styles.container, contentAnimatedStyle]}>
                 {/* Video with pinch-to-zoom scale */}
                 <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
-                    <Video
-                        ref={videoRef}
-                        source={{ uri: videoUrl }}
+                    <ViewShot
+                        ref={viewShotRef}
+                        options={{ format: 'jpg', quality: 0.95 }}
                         style={styles.video}
-                        resizeMode="contain"
-                        paused={paused}
-                        onLoad={onLoad}
-                        onProgress={onProgress}
-                        onBuffer={onBuffer}
-                        repeat
-                        playInBackground={false}
-                        playWhenInactive={false}
-                    />
+                    >
+                        {isLiveStream ? (
+                            <VLCPlayer
+                                ref={vlcRef}
+                                source={
+                                    {
+                                        initType: 2,
+                                        hwDecoderEnabled: 1,
+                                        hwDecoderForced: 1,
+                                        uri: videoUrl,
+                                        initOptions: [
+                                            '--no-audio',
+                                            '--rtsp-tcp',
+                                            '--network-caching=150',
+                                            '--rtsp-caching=150',
+                                            '--no-stats',
+                                            '--tcp-caching=150',
+                                            '--realrtsp-caching=150',
+                                        ],
+                                    } as any
+                                }
+                                style={styles.video}
+                                autoplay={true}
+                                videoAspectRatio="16:9"
+                                resizeMode="contain"
+                                {...({ isLive: true, autoReloadLive: true } as any)}
+                                paused={paused}
+                                onBuffering={() => {
+                                    if (isMountedRef.current) setIsBuffering(true);
+                                }}
+                                onPlaying={() => {
+                                    if (isMountedRef.current) setIsBuffering(false);
+                                }}
+                                onError={(e: unknown) => {
+                                    console.error('[VLC] Error:', e);
+                                    if (isMountedRef.current) setIsBuffering(false);
+                                }}
+                                onStopped={() => {}}
+                            />
+                        ) : (
+                            <Video
+                                ref={videoRef}
+                                source={{ uri: videoUrl }}
+                                style={styles.video}
+                                resizeMode="contain"
+                                paused={paused}
+                                onLoad={onLoad}
+                                onProgress={onProgress}
+                                onBuffer={onBuffer}
+                                repeat
+                                playInBackground={false}
+                                playWhenInactive={false}
+                            />
+                        )}
+                    </ViewShot>
                 </Animated.View>
 
                 {/* Buffering indicator */}
@@ -286,28 +509,32 @@ export const VideoPlayerScreen: React.FC = () => {
                                     <Text style={styles.badgeText}>{cameraName}</Text>
                                 </View>
                             </View>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setPaused(true);
-                                    navigation.goBack();
-                                }}
-                                style={styles.closeButton}
-                            >
-                                <Text style={styles.closeText}>✕</Text>
-                            </TouchableOpacity>
+                            <View style={styles.badgesRow}>
+                                <TouchableOpacity
+                                    onPress={handleSnapshot}
+                                    style={styles.snapshotButton}
+                                >
+                                    <CameraIcon width={20} height={20} color={colors.white} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                                    <Text style={styles.closeText}>✕</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         {/* Center - Skip back, Play/Pause, Skip forward */}
                         <View style={styles.centerControls} pointerEvents="box-none">
-                            <TouchableOpacity
-                                onPress={() => {
-                                    seekTo(currentTime - SEEK_STEP);
-                                    showControlsUI();
-                                }}
-                                style={styles.seekButton}
-                            >
-                                <IconSkipBack width={32} height={32} />
-                            </TouchableOpacity>
+                            {!isLiveStream && (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        seekTo(currentTime - SEEK_STEP);
+                                        showControlsUI();
+                                    }}
+                                    style={styles.seekButton}
+                                >
+                                    <IconSkipBack width={32} height={32} />
+                                </TouchableOpacity>
+                            )}
 
                             <TouchableOpacity
                                 onPress={() => {
@@ -326,48 +553,62 @@ export const VideoPlayerScreen: React.FC = () => {
                                 )}
                             </TouchableOpacity>
 
-                            <TouchableOpacity
-                                onPress={() => {
-                                    seekTo(currentTime + SEEK_STEP);
-                                    showControlsUI();
-                                }}
-                                style={styles.seekButton}
-                            >
-                                <IconSkipForward width={32} height={32} />
-                            </TouchableOpacity>
+                            {!isLiveStream && (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        seekTo(currentTime + SEEK_STEP);
+                                        showControlsUI();
+                                    }}
+                                    style={styles.seekButton}
+                                >
+                                    <IconSkipForward width={32} height={32} />
+                                </TouchableOpacity>
+                            )}
                         </View>
 
-                        {/* Bottom bar - Time + Progress */}
-                        <View style={styles.bottomBar} pointerEvents="box-none">
-                            <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-                            <TouchableWithoutFeedback
-                                onPress={e => {
-                                    const locationX = e.nativeEvent.locationX;
-                                    const barWidth = LANDSCAPE_W - 140;
-                                    const seekPercent = locationX / barWidth;
-                                    seekTo(seekPercent * duration);
-                                    showControlsUI();
-                                }}
-                            >
-                                <View style={styles.progressBarContainer}>
-                                    <View style={styles.progressBarBackground}>
-                                        <View
-                                            style={[
-                                                styles.progressBarFill,
-                                                { width: `${progress}%` },
-                                            ]}
-                                        />
-                                        <View
-                                            style={[styles.progressDot, { left: `${progress}%` }]}
-                                        />
-                                    </View>
+                        {/* Bottom bar - Time + Progress (hidden for live stream) */}
+                        {isLiveStream ? (
+                            <View style={styles.bottomBar} pointerEvents="box-none">
+                                <View style={styles.liveBadge}>
+                                    <View style={styles.liveDot} />
+                                    <Text style={styles.liveText}>LIVE</Text>
                                 </View>
-                            </TouchableWithoutFeedback>
-                            <Text style={styles.timeText}>{formatTime(duration)}</Text>
-                        </View>
+                            </View>
+                        ) : (
+                            <View style={styles.bottomBar} pointerEvents="box-none">
+                                <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+                                <TouchableWithoutFeedback
+                                    onPress={e => {
+                                        const locationX = e.nativeEvent.locationX;
+                                        const barWidth = LANDSCAPE_W - 140;
+                                        const seekPercent = locationX / barWidth;
+                                        seekTo(seekPercent * duration);
+                                        showControlsUI();
+                                    }}
+                                >
+                                    <View style={styles.progressBarContainer}>
+                                        <View style={styles.progressBarBackground}>
+                                            <View
+                                                style={[
+                                                    styles.progressBarFill,
+                                                    { width: `${progress}%` },
+                                                ]}
+                                            />
+                                            <View
+                                                style={[
+                                                    styles.progressDot,
+                                                    { left: `${progress}%` },
+                                                ]}
+                                            />
+                                        </View>
+                                    </View>
+                                </TouchableWithoutFeedback>
+                                <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                            </View>
+                        )}
                     </Animated.View>
                 )}
-            </View>
+            </Animated.View>
         </GestureHandlerRootView>
     );
 };
@@ -377,6 +618,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.black,
     },
+
     container: {
         flex: 1,
         backgroundColor: colors.black,
@@ -440,6 +682,15 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontSize: 18,
         fontWeight: '600',
+    },
+    snapshotButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.overlayBadge,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
     },
     // Center controls
     centerControls: {
@@ -529,6 +780,26 @@ const styles = StyleSheet.create({
         borderRadius: 7,
         backgroundColor: colors.white,
         marginLeft: -6,
+    },
+    liveBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.red[500],
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        gap: 6,
+    },
+    liveDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: colors.white,
+    },
+    liveText: {
+        color: colors.white,
+        fontSize: 13,
+        fontWeight: '700',
     },
 });
 

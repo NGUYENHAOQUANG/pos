@@ -169,7 +169,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
                     onDelete?.();
                 }}
                 onCancel={() => setDeleteModalVisible(false)}
-                title="Xóa vật tư"
+                title="Xóa vật tư​"
                 message="Bạn có chắc chắn muốn xóa vật tư này không?"
                 showSuccessToast={false}
             />
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        paddingVertical: spacing.md,
         paddingBottom: 100,
+        gap: spacing.sm,
     },
 });

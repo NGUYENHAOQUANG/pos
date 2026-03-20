@@ -3,7 +3,7 @@ import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-na
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { borderRadius, colors, spacing } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
-import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
+import { DropdownSupplierItem } from '@/features/material/components/import_receipt_form/DropdownSupplierItem';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -13,8 +13,9 @@ interface WarehouseInformationProps {
     date: Date;
     onDateChange: (date: Date) => void;
     supplier: string;
-    onSupplierChange: (text: string) => void;
-    supplierOptions?: DropdownOption[];
+    onSupplierChange: (supplierId: string) => void;
+    /** Display value for the supplier (e.g. supplier name from initial data) */
+    supplierDisplayValue?: string;
     children?: React.ReactNode;
 }
 
@@ -23,11 +24,10 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
     onDateChange,
     supplier,
     onSupplierChange,
-    supplierOptions = [],
+    supplierDisplayValue,
     children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -55,17 +55,13 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
                     />
 
                     {/* Supplier Dropdown */}
-                    <DropdownMaterial
+                    <DropdownSupplierItem
                         label="Nhà cung cấp"
                         required
                         value={supplier}
-                        options={supplierOptions}
-                        onChange={onSupplierChange}
+                        onChange={supplierId => onSupplierChange(supplierId)}
                         placeholder="Nhập nhà cung cấp"
-                        showAllOption={false}
-                        isOpen={isDropdownOpen}
-                        onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
-                        inline={false}
+                        displayValue={supplierDisplayValue}
                         useAutoScroll={true}
                     />
 
@@ -78,7 +74,7 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
 
 const styles = StyleSheet.create({
     cardContainer: {
-        margin: spacing.md,
+        marginHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
@@ -89,7 +85,6 @@ const styles = StyleSheet.create({
     content: {
         gap: spacing.md,
         paddingHorizontal: 12,
-        paddingTop: spacing.md,
         paddingBottom: 12,
     },
 });

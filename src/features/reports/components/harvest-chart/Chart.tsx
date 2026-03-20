@@ -17,10 +17,24 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Process Data
     const processedData = useMemo(() => {
         const maxValue = Math.max(...data.map(d => d.yield));
-        const roundMax = Math.ceil(maxValue / 10) * 10 || 10;
 
-        // Setup 4 steps
-        const step = roundMax / 4;
+        // Find a nice integer step for 4 intervals (5 tick marks including 0)
+        const INTERVALS = 4;
+        const rawStep = (maxValue || 10) / INTERVALS;
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+        const niceMultiples = [1, 1.5, 2, 2.5, 3, 5, 10];
+        let step = niceMultiples[niceMultiples.length - 1] * magnitude;
+        for (const m of niceMultiples) {
+            if (m * magnitude >= rawStep) {
+                step = m * magnitude;
+                break;
+            }
+        }
+        // Ensure step is integer
+        step = Math.max(1, Math.ceil(step));
+
+        const roundMax = step * INTERVALS;
+
         const yAxisLabels = [
             roundMax,
             roundMax - step,
@@ -40,14 +54,15 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Dimensions
     const PADDING_TOP = 20;
     const PADDING_BOTTOM = 25; // space for x-axis labels
-    const PADDING_LEFT = 85;
+    const PADDING_LEFT = 50;
     const PADDING_RIGHT = 10;
 
     // Use dynamic width to prevent squishing when data is large
-    const MIN_BAR_STEP = 50;
+    const MIN_BAR_STEP = 70;
+    const SCROLL_OFFSET = 16; // Extra left padding inside scroll for first bar
     const actualWidth = Math.max(
         chartWidth,
-        data.length * MIN_BAR_STEP + PADDING_LEFT + PADDING_RIGHT
+        data.length * MIN_BAR_STEP + PADDING_LEFT + PADDING_RIGHT + SCROLL_OFFSET
     );
 
     const drawWidth = actualWidth - PADDING_LEFT - PADDING_RIGHT;
@@ -61,7 +76,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     const getX = (index: number) => {
         const effectiveDataLength = Math.max(data.length, 5);
         const stepLength = drawWidth / effectiveDataLength;
-        return PADDING_LEFT + index * stepLength + stepLength / 2;
+        return PADDING_LEFT + SCROLL_OFFSET + index * stepLength + stepLength / 2;
     };
 
     const barWidth = 32;
@@ -146,7 +161,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                     <SvgText
                                         x={x}
                                         y={y - 8}
-                                        fill={colors.text}
+                                        fill={colors.textSecondary}
                                         fontSize={12}
                                         fontWeight={typography.fontWeight.medium.toString()}
                                         textAnchor="middle"

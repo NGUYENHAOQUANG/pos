@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     indicator: {
-        width: 20,
+        width: 8,
         height: 3,
         borderRadius: 2,
         marginBottom: 8,

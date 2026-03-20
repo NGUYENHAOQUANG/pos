@@ -162,36 +162,6 @@ export const useShrimpHealthChecksAsJobs = (pondId: string, params?: IShrimpHeal
     return { jobs, isLoading, error, refetch };
 };
 
-export const useShrimpHealthCheckData = (pondId: string) => {
-    const queryClient = useQueryClient();
-
-    const {
-        data: response,
-        isLoading,
-        error,
-        refetch,
-    } = useQuery({
-        queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
-        queryFn: async () => {
-            return await shrimpHealthCheckApi.list(pondId);
-        },
-        enabled: !!pondId,
-        staleTime: 30000,
-        gcTime: 5 * 60 * 1000,
-    });
-
-    return {
-        data: response?.data,
-        isLoading,
-        error: error as Error | null,
-        refetch,
-        invalidate: () =>
-            queryClient.invalidateQueries({
-                queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
-            }),
-    };
-};
-
 export const useCreateShrimpHealthCheck = () => {
     const queryClient = useQueryClient();
 

@@ -88,9 +88,9 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     };
 
     return (
-        <View>
+        <View style={styles.container}>
             {/* Basic Info Section */}
-            <View style={[styles.sectionContainer, styles.sectionContainerZ20]}>
+            <View style={[styles.sectionContainer]}>
                 <CollapseHead
                     title="Thông tin cơ bản"
                     isExpanded={isBasicExpanded}
@@ -98,10 +98,10 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                 />
                 <View style={styles.content}>
                     <Input
-                        label="Tên vật tư"
+                        label="Tên vật tư​"
                         required
                         // style={styles.input}
-                        placeholder="Nhập tên vật tư"
+                        placeholder="Nhập tên vật tư​"
                         placeholderTextColor={colors.textSecondary}
                         value={name}
                         onChangeText={onNameChange}
@@ -110,7 +110,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                     <View style={[styles.row, styles.rowZ30]}>
                         <View style={styles.halfWidth}>
                             <DropdownMaterial
-                                label="Nhóm vật tư"
+                                label="Nhóm vật tư​"
                                 required
                                 value={group}
                                 options={
@@ -130,7 +130,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                         </View>
                         <View style={styles.halfWidth}>
                             <DropdownMaterial
-                                label="Loại vật tư"
+                                label="Loại vật tư​"
                                 required
                                 onChange={onTypeChange}
                                 value={type}
@@ -219,8 +219,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 };
 
 const styles = StyleSheet.create({
+    container: {
+        gap: spacing.sm,
+    },
     sectionContainer: {
-        margin: spacing.md,
+        marginHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
@@ -267,9 +270,6 @@ const styles = StyleSheet.create({
     },
     halfWidth: {
         flex: 1,
-    },
-    sectionContainerZ20: {
-        zIndex: 20,
     },
     sectionContainerZ10: {
         zIndex: 10,

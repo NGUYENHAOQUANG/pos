@@ -12,7 +12,7 @@ import { Text } from '@/shared/components/typography/Text';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { IconAICheck, IconAICheckOrange } from '@/assets/icons';
@@ -135,12 +135,14 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                         </TouchableOpacity>
                     </View>
                 ) : null}
-
-                <OutlineButton
-                    label="Kiểm tra tôm bằng AI"
+                <Button
+                    title="Kiểm tra tôm bằng AI"
+                    variant="outline"
                     onPress={onAICheckPress || (() => {})}
-                    prefix={<IconAICheck width={20} height={20} fill={colors.gray[500]} />}
-                    labelStyle={styles.aiButtonText}
+                    renderLeftIcon={
+                        <IconAICheck width={20} height={20} fill={colors.textSecondary} />
+                    }
+                    fullWidth
                 />
             </View>
 
@@ -355,11 +357,6 @@ const styles = StyleSheet.create({
     },
     viewDetailLinkText: {
         color: colors.primary,
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    aiButtonText: {
-        color: colors.textSecondary,
         fontSize: 14,
         fontWeight: '500',
     },

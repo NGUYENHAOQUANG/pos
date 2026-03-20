@@ -1,4 +1,4 @@
-import type { IDocument } from '@/shared/types/common.types';
+import type { IDocument, ICreatorEditor } from '@/shared/types/common.types';
 
 export type LeftoverFeedEnum = 'None' | 'From5To10' | 'From10To15' | 'From15To20';
 export type GutConditionEnum = 'Empty' | 'Full';
@@ -32,23 +32,14 @@ export interface UpdateShrimpHealthCheckPayload {
     documentIds?: string[];
     healthCheck?: ShrimpHealthCheckDetail;
 }
-export interface Creator {
-    id: string;
-    fullname: string;
-    email: string;
-    phoneNumber?: string;
-    avatar?: string;
-    createdAt: string;
-    editedAt: string;
-}
 
 export interface ShrimpHealthCheckResult {
     id: string;
     no: number;
     createdAt: string;
     editedAt: string;
-    creator?: Creator;
-    editor?: Creator;
+    creator?: ICreatorEditor;
+    editor?: ICreatorEditor;
     shrimpHealthCheckId: string;
 }
 
@@ -74,8 +65,8 @@ export interface ShrimpHealthCheckDto {
     value: number;
     createdAt: string;
     editedAt: string;
-    creator?: Creator;
-    editor?: Creator;
+    creator?: ICreatorEditor;
+    editor?: ICreatorEditor;
     pondId: string;
     cycleId?: string;
     documentIds?: string[];

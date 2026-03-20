@@ -307,8 +307,27 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 try {
                                     const res = await deviceApi.createSchedule(payload);
                                     return { success: true as const, data: res.data };
-                                } catch (err) {
-                                    console.error('[Schedule API] Failed:', err);
+                                } catch (err: unknown) {
+                                    // Error is a NormalizedError from the response interceptor
+                                    const normalized = err as {
+                                        type?: string;
+                                        message?: string;
+                                        data?: unknown;
+                                        statusCode?: number;
+                                    };
+                                    console.error(
+                                        '[Schedule API] Failed:',
+                                        '\n  Type:',
+                                        normalized.type ?? 'N/A',
+                                        '\n  Status:',
+                                        normalized.statusCode ?? 'N/A',
+                                        '\n  Message:',
+                                        normalized.message ?? 'No message',
+                                        '\n  Server Data:',
+                                        JSON.stringify(normalized.data ?? 'No data'),
+                                        '\n  Payload Sent:',
+                                        JSON.stringify(payload)
+                                    );
                                     return { success: false as const, error: err };
                                 }
                             })
@@ -317,6 +336,18 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         // Count successes and failures
                         const successCount = results.filter(r => r.success).length;
                         const failCount = results.length - successCount;
+
+                        // Collect unique error messages from all failed results
+                        const errorMessages = results
+                            .filter(r => !r.success)
+                            .map(r => (r.error as { message?: string })?.message)
+                            .filter((msg): msg is string => !!msg);
+                        const uniqueErrors = [...new Set(errorMessages)];
+                        // Prefer specific error messages over generic "Device schedule failed"
+                        const specificError = uniqueErrors.find(
+                            msg => msg !== 'Device schedule failed'
+                        );
+                        const displayError = specificError || uniqueErrors[0];
 
                         if (failCount === 0) {
                             Toast.show({
@@ -327,13 +358,15 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                             Toast.show({
                                 type: 'info',
                                 text1: 'Lưu lịch trình một phần',
-                                text2: `${successCount} thành công, ${failCount} thất bại`,
+                                text2:
+                                    displayError ||
+                                    `${successCount} thành công, ${failCount} thất bại`,
                             });
                         } else {
                             Toast.show({
                                 type: 'error',
                                 text1: 'Lỗi',
-                                text2: 'Không thể lưu lịch trình',
+                                text2: displayError || 'Không thể lưu lịch trình',
                             });
                             setIsSaving(false);
                             return;

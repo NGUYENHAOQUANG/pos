@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
+import { handleError } from '@/shared/utils/errorHandler';
 import { documentApi } from '@/features/material/api/documentApi';
 import {
     useSizeMeasurement,
@@ -9,9 +9,16 @@ import {
     useDeleteSizeMeasurement,
 } from '@/features/farm/hooks/useSizeMeasurement';
 import { JobExecution } from '@/features/farm/types/farm.types';
-import { NormalizedError } from '@/core/api/errorHandler';
 import { numericStringSchema } from '@/shared/utils/validation';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
+import {
+    showAddJobSuccessToast,
+    showEditJobSuccessToast,
+    showDeleteJobSuccessToast,
+    showShrimpSizeErrorToast,
+    showRemainingWeightErrorToast,
+    showPondNotFoundToast,
+} from '@/features/farm/utils/toastMessages';
 
 interface UseMeasureShrimpSizeFormProps {
     pondId?: string;
@@ -188,47 +195,22 @@ export const useMeasureShrimpSizeForm = ({
 
     const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
-    const handleError = (err: unknown) => {
-        const error = err as NormalizedError;
-
-        if (error.type === 'VALIDATION_ERROR') {
-            const firstFieldKey = Object.keys(error.fields)[0];
-            if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
-                Toast.show({
-                    type: 'error',
-                    text1: error.fields[firstFieldKey][0],
-                    visibilityTime: 4000,
-                });
-                return;
-            }
-        }
-
-        if (error.type === 'NOT_FOUND_ERROR') {
-            Toast.show({
-                type: 'error',
-                text1: error.message,
-                visibilityTime: 4000,
-            });
-            return;
-        }
-
-        Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
-    };
-
     const handleSave = (documentIds: string[]) => {
         const isSizeValid = numericStringSchema.safeParse(shrimpSize).success;
         const isWeightValid = numericStringSchema.safeParse(remainingWeight).success;
 
-        if (!isSizeValid || !isWeightValid || !shrimpSize || !remainingWeight) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng nhập đúng định dạng số cho kích thước và trọng lượng',
-            });
+        if (!shrimpSize || !isSizeValid) {
+            showShrimpSizeErrorToast();
+            return;
+        }
+
+        if (!remainingWeight || !isWeightValid) {
+            showRemainingWeightErrorToast();
             return;
         }
 
         if (!pondId) {
-            Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin ao' });
+            showPondNotFoundToast();
             return;
         }
 
@@ -256,7 +238,7 @@ export const useMeasureShrimpSizeForm = ({
                     onSuccess: () => {
                         allowNavigation();
                         onSaveSuccess?.();
-                        Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
+                        showEditJobSuccessToast('MEASURE_SIZE');
                         navigation.goBack();
                     },
                     onError: handleError,
@@ -272,10 +254,7 @@ export const useMeasureShrimpSizeForm = ({
                     onSuccess: () => {
                         allowNavigation();
                         onSaveSuccess?.();
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Đã đo kích thước tôm thành công',
-                        });
+                        showAddJobSuccessToast('MEASURE_SIZE');
                         navigation.goBack();
                     },
                     onError: handleError,
@@ -293,7 +272,7 @@ export const useMeasureShrimpSizeForm = ({
                 onSuccess: () => {
                     allowNavigation();
                     setIsDeleteModalVisible(false);
-                    Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
+                    showDeleteJobSuccessToast('MEASURE_SIZE');
                     navigation.goBack();
                 },
                 onError: handleError,

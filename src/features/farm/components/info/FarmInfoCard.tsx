@@ -1,10 +1,20 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 
 import { Text } from '@/shared/components/typography/Text';
 import { colors, typography } from '@/styles';
 import { FarmData } from '@/features/farm/types/farm.types';
-const BGFarmInfo = require('@/assets/backgrounds/Farm-Infor.png');
+import { LeafletMap } from '@/shared/components/map/LeafletMap';
+import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
+import { ZoomableImage } from '@/shared/components/image/ZoomableImage';
+
+const Farm3DImage = require('@/assets/images/Farm5KG.jpg');
+const farm3DAsset = Image.resolveAssetSource(Farm3DImage);
+
+const TABS: HeadingBarItem[] = [
+    { key: 'map', label: 'Bản đồ' },
+    { key: '3d', label: 'Sơ đồ 3D' },
+];
 
 interface InfoFieldProps {
     label: string;
@@ -25,7 +35,14 @@ interface FarmInfoCardProps {
 }
 
 export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
-    const [mapMode, setMapMode] = React.useState<'map' | 'satellite'>('map');
+    const [activeTab, setActiveTab] = React.useState('map');
+    const [mapMode, setMapMode] = React.useState<'map' | 'satellite'>('satellite');
+    const { width: screenWidth } = useWindowDimensions();
+
+    // Calculate 3D image height based on aspect ratio
+    const containerWidth = screenWidth - 32; // minus marginHorizontal * 2
+    const imageAspectRatio = farm3DAsset.width / farm3DAsset.height;
+    const imageHeight = containerWidth / imageAspectRatio;
 
     const farmInfo = {
         name: farm?.name || '{ten trai nuoi tom}',
@@ -41,46 +58,66 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
 
     return (
         <View style={styles.wrapper}>
-            {/* Map Image - Outside card */}
-            <View style={styles.imageContainer}>
-                <Image source={BGFarmInfo} style={styles.backgroundImage} resizeMode="cover" />
-                <View style={styles.mapControls}>
-                    <TouchableOpacity
-                        style={[
-                            styles.controlButton,
-                            mapMode === 'map' && styles.controlButtonActive,
-                        ]}
-                        onPress={() => setMapMode('map')}
-                    >
-                        <Text
-                            style={[
-                                styles.controlButtonText,
-                                mapMode === 'map' && styles.controlButtonTextActive,
-                            ]}
-                        >
-                            Bản đồ
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.controlButton,
-                            mapMode === 'satellite' && styles.controlButtonActive,
-                        ]}
-                        onPress={() => setMapMode('satellite')}
-                    >
-                        <Text
-                            style={[
-                                styles.controlButtonText,
-                                mapMode === 'satellite' && styles.controlButtonTextActive,
-                            ]}
-                        >
-                            Vệ tinh
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+            {/* Tab bar */}
+            <HeadingBar
+                tabs={TABS}
+                selectedTab={activeTab}
+                onTabSelect={setActiveTab}
+                spreadTabs
+                containerStyle={styles.headingBar}
+            />
+
+            {/* Map / 3D diagram area */}
+            <View style={[styles.imageContainer, activeTab === '3d' && { height: imageHeight }]}>
+                {activeTab === 'map' ? (
+                    <>
+                        <LeafletMap
+                            latitude={10.385187500580814}
+                            longitude={104.53964816229778}
+                            zoom={16}
+                            mode={mapMode}
+                        />
+                        <View style={styles.mapControls}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.controlButton,
+                                    mapMode === 'map' && styles.controlButtonActive,
+                                ]}
+                                onPress={() => setMapMode('map')}
+                            >
+                                <Text
+                                    style={[
+                                        styles.controlButtonText,
+                                        mapMode === 'map' && styles.controlButtonTextActive,
+                                    ]}
+                                >
+                                    Bản đồ
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.controlButton,
+                                    mapMode === 'satellite' && styles.controlButtonActive,
+                                ]}
+                                onPress={() => setMapMode('satellite')}
+                            >
+                                <Text
+                                    style={[
+                                        styles.controlButtonText,
+                                        mapMode === 'satellite' && styles.controlButtonTextActive,
+                                    ]}
+                                >
+                                    Vệ tinh
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </>
+                ) : (
+                    <ZoomableImage source={Farm3DImage} />
+                )}
             </View>
 
-            {/* Info Card - Separate from map */}
+            {/* Info Card */}
             <View style={styles.card}>
                 <InfoField label="Tên trại:" value={farmInfo.name} />
                 <InfoField label="Mã trại:" value={farmInfo.code} />
@@ -94,6 +131,10 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
 const styles = StyleSheet.create({
     wrapper: {
         flex: 1,
+    },
+    headingBar: {
+        marginTop: 12,
+        marginBottom: 16,
     },
     card: {
         backgroundColor: colors.white,
@@ -120,11 +161,13 @@ const styles = StyleSheet.create({
         height: 250,
         borderRadius: 16,
         overflow: 'hidden',
-        marginTop: 16,
+        marginTop: 12,
         backgroundColor: colors.gray[100],
         marginHorizontal: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
-    backgroundImage: {
+    farm3dImage: {
         width: '100%',
         height: '100%',
     },
@@ -167,8 +210,5 @@ const styles = StyleSheet.create({
     controlButtonTextActive: {
         color: colors.black,
         fontWeight: '700',
-    },
-    divider: {
-        display: 'none',
     },
 });

@@ -1,21 +1,19 @@
 import { useMemo } from 'react';
-import { ParameterSetting } from '@/features/farm/api/environmentApi';
-import {
-    useEnvironmentMetricTypes,
-    useEnvironmentSettings,
-} from '@/features/farm/hooks/pondwork/envhooks/useSettingEnvironment';
+import type { ParameterSetting } from '@/features/farm/types/environment.types';
+import { useMetrics } from '@/features/farm/hooks/metric/useMetric';
+import { useEnvironmentSettings } from '@/features/farm/hooks/pondwork/envhooks/useSettingEnvironment';
 
 /**
  * Hook to initialize environment data (Metric Types, Parameter Settings)
  * Uses TanStack Query for data fetching instead of store actions.
  */
 export const useEnvironmentInit = (currentZoneId?: string) => {
-    const { data: metricTypesData, isLoading: isLoadingMetrics } = useEnvironmentMetricTypes();
+    const { data: metricsResponse, isLoading: isLoadingMetrics } = useMetrics();
     const { data: settingsResponse, isLoading: isLoadingSettings } = useEnvironmentSettings(
         currentZoneId || ''
     );
 
-    const metricTypes = useMemo(() => metricTypesData || [], [metricTypesData]);
+    const metricTypes = useMemo(() => metricsResponse?.data || [], [metricsResponse]);
 
     const parameterSettings = useMemo(() => {
         if (!currentZoneId || !settingsResponse?.items) return {};

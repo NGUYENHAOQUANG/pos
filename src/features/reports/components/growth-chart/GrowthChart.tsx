@@ -261,7 +261,7 @@ export const GrowthChart = () => {
             <View style={styles.container}>
                 {/* HEADER */}
                 <BasicDropDownButton
-                    label="BIỂU ĐỒ TĂNG TRƯỞNG"
+                    label="Biều đồ tăng trưởng"
                     isExpanded={expanded}
                     onPress={toggleExpand}
                     style={styles.header}

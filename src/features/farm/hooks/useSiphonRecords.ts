@@ -114,6 +114,9 @@ export const useCreateSiphonRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
         onError: error => handleError(error),
     });
@@ -135,6 +138,9 @@ export const useUpdateSiphonRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
     });
 };
@@ -148,6 +154,9 @@ export const useDeleteSiphonRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
     });
 };

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, borderRadius } from '@/styles';
 
 import { BasicDropDownButton } from '../BasicDropDownButton';
@@ -84,6 +85,15 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
     );
     const unitMetric = chartData?.unitMetric || '';
 
+    // Get selected metric name for chart title
+    const selectedMetricName = useMemo(() => {
+        if (!selectedMetricId || metrics.length === 0) return '';
+        const metric = metrics.find(m => m.id === selectedMetricId);
+        const name = metric?.name || '';
+        if (name.toLowerCase() === 'ph') return `Độ ${name}`;
+        return name;
+    }, [selectedMetricId, metrics]);
+
     // Build color map for ponds (stable per pondId)
     const pondColors = useMemo(() => {
         const colorMap: Record<string, string> = {};
@@ -129,7 +139,7 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
         <View style={chartStyles.container}>
             <BasicDropDownButton
                 prefixIcon={<Peformance width={18} height={18} />}
-                label="BIỂU ĐỒ THÔNG SỐ MÔI TRƯỜNG"
+                label="Biểu đồ thông số môi trường"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
@@ -157,6 +167,9 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
                                 onPress={handlePondPress}
                             />
 
+                            {selectedMetricName ? (
+                                <Text style={styles.chartTitle}>{selectedMetricName}</Text>
+                            ) : null}
                             <View style={styles.chartContainer}>
                                 <EnvChar
                                     series={filteredSeries}
@@ -190,5 +203,12 @@ const styles = StyleSheet.create({
     },
     chartContainer: {
         marginVertical: 16,
+    },
+    chartTitle: {
+        fontSize: 12,
+        color: colors.text,
+        paddingLeft: 0,
+        marginTop: 12,
+        marginBottom: 8,
     },
 });

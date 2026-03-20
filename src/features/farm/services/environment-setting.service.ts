@@ -1,5 +1,5 @@
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
-import { ParameterSetting } from '@/features/farm/api/environmentApi';
+import { ParameterSetting } from '@/features/farm/types/environment.types';
 import { Metric } from '@/features/farm/types/metric.types';
 import { EnvironmentSettingInfo } from '@/features/farm/store/environmentSettingStore';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';

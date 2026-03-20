@@ -1,5 +1,6 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
+import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
 // ===== Response Interfaces =====
 
@@ -21,11 +22,7 @@ export interface CameraStreamData {
 }
 
 /** API response wrapper for camera list */
-export interface CameraListResponse {
-    success: boolean;
-    data: CameraItem[];
-    message: string;
-}
+export type CameraListResponse = IApiResponse<IPaginate<CameraItem>>;
 
 /** API response wrapper for camera stream */
 export interface CameraStreamResponse {

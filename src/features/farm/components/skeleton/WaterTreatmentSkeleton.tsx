@@ -57,7 +57,7 @@ export const WaterTreatmentSkeleton: React.FC = () => {
                 <MaterialItemSkeleton />
                 <MaterialItemSkeleton />
 
-                {/* "Thêm vật tư" button */}
+                {/* "Thêm vật tư​" button */}
                 <Skeleton width="100%" height={48} borderRadius={24} />
             </CardSkeleton>
 
