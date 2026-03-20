@@ -56,14 +56,6 @@ export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovat
     return { jobs, isLoading: isQueryLoading || isProcessing, error, refetch };
 };
 
-export const useCleanRenovation = (pondId: string, id: string) => {
-    return useQuery({
-        queryKey: farmKeys.cleanRenovations.detail(id),
-        queryFn: () => cleanRenovationApi.getById(pondId, id),
-        enabled: !!pondId && !!id,
-    });
-};
-
 export const useCreateCleanRenovation = () => {
     const queryClient = useQueryClient();
 

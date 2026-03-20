@@ -1,30 +1,9 @@
 import React from 'react';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { pondApi } from '@/features/farm/api/pondApi';
-import { pondOperationApi } from '@/features/farm/api/pondOperationApi';
 import { farmKeys } from './farmKeys';
 import { APP_CONFIG } from '@/shared/constants';
 import { PondData, PondStatus } from '@/features/farm/types/pond.types';
-import { PondTypeOperation } from '@/features/farm/types/farm.types';
-
-export const usePondMasterData = () => {
-    const query = useQuery({
-        queryKey: farmKeys.masterData.types(),
-        queryFn: async () => {
-            const types = await pondApi.getPondTypes();
-            let operations: PondTypeOperation[] = [];
-            try {
-                const res = await pondOperationApi.getPondOperations();
-                operations = res?.data || [];
-            } catch {}
-
-            return { types, operations };
-        },
-        staleTime: 60 * 60 * 1000,
-    });
-
-    return query;
-};
 
 export const usePondsByZone = (zoneId: string | null, status?: PondStatus | null) => {
     const key = farmKeys.ponds.byZone(zoneId || 'all');

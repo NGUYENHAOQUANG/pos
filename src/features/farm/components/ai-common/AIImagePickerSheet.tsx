@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -9,6 +8,8 @@ import {
     Animated,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
@@ -9,27 +9,10 @@ interface Props {
     data: CostItem[];
 }
 
-const DISPLAY_ORDER = [
-    'Chất xử lý nước đầu vào',
-    'Trị bệnh',
-    'Chế phẩm sinh học',
-    'Chất cải thiện ao nuôi',
-    'Khoáng chất',
-    'Dinh dưỡng bổ sung',
-    'Thức ăn cho tôm',
-    'Tôm giống',
-];
-
 const BottomCostChart = ({ data }: Props) => {
-    const sortedData = useMemo(() => {
-        return DISPLAY_ORDER.map(label => data.find(item => item.label === label)).filter(
-            (item): item is CostItem => !!item
-        );
-    }, [data]);
-
     return (
         <View style={styles.container}>
-            {sortedData.map((item, index) => (
+            {data.map((item, index) => (
                 <View key={index} style={styles.itemContainer}>
                     <View style={[styles.dot, { backgroundColor: item.color }]} />
                     <Text style={styles.label}>{item.label}</Text>
@@ -43,8 +26,8 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'center',
-        paddingHorizontal: 8, // Reduced padding to fit 3 items
+        justifyContent: 'flex-start',
+        paddingHorizontal: 16,
         paddingVertical: 12,
         gap: 10, // Adjusted gap
     },

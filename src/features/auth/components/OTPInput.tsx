@@ -19,7 +19,7 @@ export interface OTPInputHandle {
 const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
     ({ code, onCodeChanged, isError = false, length = 4 }, ref) => {
         // Refs for each input
-        const inputRefs = useRef<Array<TextInput | null>>([]);
+        const inputRefs = useRef<Array<React.ElementRef<typeof TextInput> | null>>([]);
 
         // Expose functions to parent (for "Resend Code" button)
         useImperativeHandle(ref, () => ({

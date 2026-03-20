@@ -7,19 +7,18 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import {
     useInventoryDetail,
     useInventoryItems,
     useCreateInventoryCheck,
     useUpdateInventoryCheck,
     useDeleteInventoryTicket,
-} from '@/features/material/hooks/inventory/useInventory';
+} from '@/features/material/hooks/useInventory';
 import {
     CreateInventoryCheckRequest,
     UpdateInventoryCheckRequest,
 } from '@/features/material/types/inventoryCheck.types';
-import { useMaterialOptions } from '@/features/material/hooks/inventory/useMaterialOptions';
 import { inventoryService } from '@/features/material/services/inventoryService';
 import { InventoryFormValues } from '@/features/material/schemas/inventoryFormSchema';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
@@ -55,17 +54,6 @@ export const AddInventoryScreen: React.FC = () => {
 
     const warehouseId = inventoryDetail?.warehouseId ?? warehouses?.[0]?.id;
     const warehouseName = inventoryDetail?.warehouseName ?? warehouses?.[0]?.name ?? '---';
-
-    const { data: warehouseItemsResponse } = useWarehouseItems(warehouseId, undefined, {
-        enabled: !!warehouseId,
-    });
-
-    const availableMaterials = useMemo(
-        () => warehouseItemsResponse?.items || [],
-        [warehouseItemsResponse]
-    );
-
-    const materialOptions = useMaterialOptions(availableMaterials);
 
     const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItemsData);
 
@@ -157,8 +145,7 @@ export const AddInventoryScreen: React.FC = () => {
             initialData={initialData}
             warehouseName={warehouseName}
             creatorName={userData?.name || '---'}
-            materialOptions={materialOptions}
-            availableMaterials={availableMaterials}
+            warehouseId={warehouseId}
             onBackPress={handleBackPress}
             onSubmit={onSubmit}
             onDelete={onDelete}

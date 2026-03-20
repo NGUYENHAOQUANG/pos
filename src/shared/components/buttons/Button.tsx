@@ -49,6 +49,8 @@ export interface ButtonProps {
     style?: StyleProp<ViewStyle>;
     /** Custom text styles */
     textStyle?: TextStyle;
+    /** Whether to scale font size to fit width */
+    adjustsFontSizeToFit?: boolean;
 }
 
 /**
@@ -68,6 +70,7 @@ export function Button({
     renderLeftIcon,
     style,
     textStyle,
+    adjustsFontSizeToFit = true,
 }: ButtonProps) {
     const isDisabled = disabled || loading;
 
@@ -159,7 +162,7 @@ export function Button({
                         style={textStyles}
                         maxFontSizeMultiplier={1.1}
                         numberOfLines={1}
-                        adjustsFontSizeToFit
+                        adjustsFontSizeToFit={adjustsFontSizeToFit}
                     >
                         {title}
                     </Text>

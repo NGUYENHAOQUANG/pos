@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -11,6 +12,9 @@ import { useSizeMeasurements } from '@/features/farm/hooks/useSizeMeasurement';
 import { useCurrentShrimpBreed } from '@/features/material/hooks/useShrimpSeeds';
 import { stockTransferService } from '@/features/farm/services/stock-transfer.service';
 import { stockTransferFormSchema } from '@/features/farm/schemas/stockTransferFormSchema';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import { StockTransferSkeleton } from '@/features/farm/components/skeleton/StockTransferSkeleton';
+import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
 import {
     StockTransferForm,
@@ -33,11 +37,12 @@ export const StockTransferFormScreen: React.FC = () => {
 
     const { data: pondsByZoneData } = useAllPondsByZone(zoneId!);
     const { data: categoriesResponse } = usePondCategories();
-    const { data: sizeMeasurementsData } = useSizeMeasurements(pondId, {
-        PageSize: 1,
-        OrderBy: 'CreatedAt desc',
-    });
-    const { breedName } = useCurrentShrimpBreed(pondId, cycleId, warehouseId);
+    const { data: sizeMeasurementsData, isLoading: isSizeMeasurementsLoading } =
+        useSizeMeasurements(pondId, {
+            PageSize: 1,
+            OrderBy: 'CreatedAt desc',
+        });
+    const { breedName, cycleData } = useCurrentShrimpBreed(pondId, cycleId, warehouseId);
 
     const pondOptions = useMemo(
         () =>
@@ -49,18 +54,15 @@ export const StockTransferFormScreen: React.FC = () => {
         [pondsByZoneData, pondId, categoriesResponse]
     );
 
-    const totalShrimpCount = useMemo(() => {
-        const latest = sizeMeasurementsData?.data?.items?.[0];
-        const detail = latest?.sizeMeasurementDetail ?? latest?.sizeMeasurement;
-        return detail?.totalShrimpCount ?? 0;
-    }, [sizeMeasurementsData]);
+    const actualStockingQuantity = cycleData?.totalStocking ?? 0;
 
-    const latestShrimpSize = useMemo(() => {
-        const latest = sizeMeasurementsData?.data?.items?.[0];
-        if (!latest) return undefined;
-        const detail = latest.sizeMeasurementDetail || latest.sizeMeasurement;
-        return stockTransferService.getLatestShrimpSizeFromMeasurement(detail);
-    }, [sizeMeasurementsData]);
+    const sizeMeasurementDetail = sizeMeasurementsData?.data?.items?.[0];
+    const sizeDetail =
+        sizeMeasurementDetail?.sizeMeasurementDetail || sizeMeasurementDetail?.sizeMeasurement;
+    const latestShrimpSize = sizeDetail
+        ? stockTransferService.getLatestShrimpSizeFromMeasurement(sizeDetail)
+        : undefined;
+    const totalEstimatedShrimp = sizeDetail?.totalShrimpCount ?? 0;
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -92,7 +94,7 @@ export const StockTransferFormScreen: React.FC = () => {
             const { shrimpSize, notes, receivingPonds } = formData;
             const apiRequestData = stockTransferService.buildCreateRequest(
                 receivingPonds,
-                totalShrimpCount,
+                actualStockingQuantity,
                 shrimpSize,
                 notes
             );
@@ -100,13 +102,23 @@ export const StockTransferFormScreen: React.FC = () => {
             await createStockTransfer({ pondId, data: apiRequestData, zoneId });
             navigation.goBack();
         },
-        [pondId, zoneId, totalShrimpCount, createStockTransfer, navigation]
+        [pondId, zoneId, actualStockingQuantity, createStockTransfer, navigation]
     );
+
+    if (isSizeMeasurementsLoading) {
+        return (
+            <View style={styles.container}>
+                <HeaderSection title="Sang ao" onBack={handleBack} />
+                <StockTransferSkeleton />
+            </View>
+        );
+    }
 
     return (
         <StockTransferForm
+            totalShrimpCount={totalEstimatedShrimp}
             shrimpBreed={breedName}
-            totalShrimpCount={totalShrimpCount}
+            actualStockingQuantity={actualStockingQuantity}
             latestShrimpSize={latestShrimpSize}
             pondOptions={pondOptions}
             isSubmitting={isCreating}
@@ -115,3 +127,10 @@ export const StockTransferFormScreen: React.FC = () => {
         />
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+});

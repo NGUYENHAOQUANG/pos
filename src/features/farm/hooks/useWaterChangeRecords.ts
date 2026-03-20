@@ -22,7 +22,13 @@ export const useWaterSupplyRecords = (pondId: string, params?: IWaterSupplyParam
 
 export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSupplyParams) => {
     // 1. Fetch List keys
-    const { data: listData, isLoading, error, refetch } = useWaterSupplyRecords(pondId, params);
+    const {
+        data: listData,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
+    } = useWaterSupplyRecords(pondId, params);
 
     // 2. Determine IDs to fetch details for
     const responseData = listData?.data;
@@ -97,7 +103,7 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
         };
     });
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading, isFetching, error, refetch };
 };
 
 export const useCreateWaterSupplyRecord = () => {
@@ -109,6 +115,7 @@ export const useCreateWaterSupplyRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            queryClient.invalidateQueries({ queryKey: ['water-usage-stats'] });
         },
     });
 };
@@ -129,6 +136,7 @@ export const useUpdateWaterSupplyRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            queryClient.invalidateQueries({ queryKey: ['water-usage-stats'] });
         },
     });
 };
@@ -142,6 +150,7 @@ export const useDeleteWaterSupplyRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            queryClient.invalidateQueries({ queryKey: ['water-usage-stats'] });
         },
     });
 };

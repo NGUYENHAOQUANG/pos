@@ -1,13 +1,17 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import Svg, { Line, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Line, Rect, Path, Text as SvgText } from 'react-native-svg';
 import { colors } from '@/styles';
-import {
-    PADDING_LEFT,
-    PADDING_TOP,
-    ProfitLineDataPoint,
-} from '@/features/reports/components/profit-chart/chartData';
+import { PADDING_LEFT, PADDING_TOP } from '@/features/reports/components/profit-chart/chartData';
 import { ProfitStatsByDate } from '@/features/reports/types/profit-stats';
+
+// ---------- constants ----------
+const BAR_COLORS = {
+    harvested: '#B7EB8F', // dark blue — Đã thu hoạch
+    unharvested: '#D9F7BE', // light green — Chưa thu hoạch
+    cost: '#FFD9CC', // light peach — Chi phí
+};
+const PROFIT_LINE_COLOR = '#002A66'; // dark blue — Lợi nhuận ước tính
 
 interface ChartProps {
     chartWidth: number;
@@ -15,27 +19,18 @@ interface ChartProps {
     data: ProfitStatsByDate[];
 }
 
+// Format Y-axis values (already divided by 1e9 — show number only)
 const formatAxisValue = (value: number) => {
     if (value === 0) return '0';
-    const absVal = Math.abs(value);
-    if (absVal >= 1e9) {
-        return `${Number((value / 1e9).toFixed(2))} tỉ`;
-    }
-    if (absVal >= 1e6) {
-        return `${Number((value / 1e6).toFixed(2))} tr`;
-    }
-    return value.toLocaleString('vi-VN');
+    const billionVal = Math.round(value / 1e9);
+    return billionVal.toString();
 };
 
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {
-    // ============================================================================
-    // DATA PROCESSING (Computed from RAW_PROFIT_DATA)
-    // ============================================================================
-
+    // ====================================================================
+    // DATA PROCESSING
+    // ====================================================================
     const processedData = useMemo(() => {
-        /**
-         * Parse date string (YYYY-MM-DD) to Date object
-         */
         const parseDateString = (dateStr: string): Date => {
             const parts = dateStr.split('-');
             if (parts.length === 3) {
@@ -44,14 +39,8 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
             return new Date(dateStr);
         };
 
-        /**
-         * Start date: parsed from first item in RAW_PROFIT_DATA
-         */
         const START_DATE = data.length > 0 ? parseDateString(data[0].date) : new Date();
 
-        /**
-         * Parse date string (MM/DD/YYYY) to day index (0-based)
-         */
         const parseDateToDay = (dateStr: string): number => {
             const date = parseDateString(dateStr);
             const diffTime = date.getTime() - START_DATE.getTime();
@@ -59,214 +48,139 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
             return Math.max(0, diffDays);
         };
 
-        /**
-         * Total days: calculated from last item's day index
-         */
         const TOTAL_DAYS = data.length > 0 ? parseDateToDay(data[data.length - 1].date) : 0;
 
-        /**
-         * Divider position: separates historical and forecast data
-         * Default to TOTAL_DAYS (all data is historical)
-         */
-        const DIVIDER_DAY = TOTAL_DAYS;
-
-        /**
-         * Generate day marks: fixed 7-day intervals + always show last day
-         */
+        // --- Day marks for X-axis (7-day intervals + last) ---
         const generateDayMarks = (totalDays: number): number[] => {
             if (totalDays <= 0) return [0];
-
             const marks: number[] = [];
-            const step = 7; // Fixed 7-day intervals
-
+            const step = 7;
             for (let day = 0; day <= totalDays; day += step) {
                 marks.push(day);
             }
-
-            // Always show the last data day
             if (marks[marks.length - 1] !== totalDays) {
                 marks.push(totalDays);
             }
-
             return marks;
         };
 
-        /**
-         * Get date string for day index (DD/MM format)
-         */
         const getDateForDay = (day: number): string => {
             const date = new Date(START_DATE);
             date.setDate(date.getDate() + day);
-
             const dayStr = String(date.getDate()).padStart(2, '0');
             const monthStr = String(date.getMonth() + 1).padStart(2, '0');
-
             return `${dayStr}/${monthStr}`;
         };
 
-        /**
-         * Day marks: auto-generated based on TOTAL_DAYS
-         */
         const DAY_MARKS = generateDayMarks(TOTAL_DAYS);
-
-        /**
-         * Day labels for X-axis
-         */
         const DAY_LABELS = DAY_MARKS.map(day => getDateForDay(day));
 
-        const PROFIT_LINE_DATA: ProfitLineDataPoint[] = data.map(item => ({
+        // --- Per-date bar + line data ---
+        const barData = data.map(item => ({
             day: parseDateToDay(item.date),
-            value: item.cumulativeEstimatedProfit,
+            harvested: item.actualRevenueOnDate,
+            unharvested: item.estimatedRevenueFromRemainingStockOnDate,
+            cost: item.materialCostOnDate,
+            profit: item.cumulativeEstimatedProfit,
         }));
 
-        /**
-         * Calculate Y-axis maximum based on data range
-         * Y-axis should accommodate both negative (cost) and positive (harvest, profit) values
-         * The result must be divisible by 3
-         */
-        const calculateYMax = (): number => {
-            // Max absolute profit value
-            const maxLineValue = Math.max(...PROFIT_LINE_DATA.map(p => Math.abs(p.value)), 1);
+        // --- Y-axis range: nice round numbers in tỉ đồng ---
+        const allPositive = barData.map(d => d.harvested + d.unharvested);
+        const allNegative = barData.map(d => d.cost);
+        const allProfit = barData.map(d => Math.abs(d.profit));
+        const maxPositive = Math.max(...allPositive, ...allProfit, 1);
+        const maxNegative = Math.max(...allNegative, ...allProfit, 1);
+        const maxAbsValue = Math.max(maxPositive, maxNegative);
 
-            // Round up to nearest number divisible by 3 for nicer ticks
-            let rounded = Math.ceil(maxLineValue);
-            if (rounded % 3 !== 0) {
-                rounded = Math.ceil(rounded / 3) * 3;
+        // Convert to tỉ and find a nice step
+        const maxInBillion = maxAbsValue / 1e9;
+        const TICK_COUNT = 3; // number of ticks above (and below) zero
+
+        const rawStep = maxInBillion / TICK_COUNT;
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+        const niceSteps = [1, 2, 5, 10];
+        let stepInBillion = niceSteps[niceSteps.length - 1] * magnitude;
+        for (const ns of niceSteps) {
+            if (ns * magnitude >= rawStep) {
+                stepInBillion = ns * magnitude;
+                break;
             }
+        }
+        stepInBillion = Math.max(1, Math.ceil(stepInBillion)); // always integer step
 
-            return rounded;
-        };
+        const Y_MAX = stepInBillion * TICK_COUNT * 1e9; // back to raw value
 
-        const Y_MAX = calculateYMax();
-
-        /**
-         * Get Y-axis grid lines from -Y_MAX đến +Y_MAX (bước = Y_MAX / 3)
-         */
-        const getYAxisGridLines = (): number[] => {
+        const getYAxisLines = (): number[] => {
             const lines: number[] = [];
-            const step = Y_MAX / 3;
+            const step = Y_MAX / TICK_COUNT;
             for (let v = -Y_MAX; v <= Y_MAX + 0.001; v += step) {
-                lines.push(v);
+                lines.push(Math.round(v));
             }
             return lines;
         };
 
-        /**
-         * Get Y-axis labels (bao gồm cả -Y_MAX và +Y_MAX)
-         */
-        const getYAxisLabels = (): number[] => {
-            const labels: number[] = [];
-            const step = Y_MAX / 3;
-            for (let v = -Y_MAX; v <= Y_MAX + 0.001; v += step) {
-                labels.push(v);
-            }
-            return labels;
-        };
-
-        return {
-            TOTAL_DAYS,
-            DIVIDER_DAY,
-            DAY_MARKS,
-            DAY_LABELS,
-            PROFIT_LINE_DATA,
-            Y_MAX,
-            getYAxisGridLines,
-            getYAxisLabels,
-        };
+        return { TOTAL_DAYS, DAY_MARKS, DAY_LABELS, barData, Y_MAX, getYAxisLines };
     }, [data]);
 
-    // ============================================================================
+    // ====================================================================
     // CHART RENDERING
-    // ============================================================================
+    // ====================================================================
+    const { TOTAL_DAYS, DAY_MARKS, DAY_LABELS, barData, Y_MAX, getYAxisLines } = processedData;
 
-    const {
-        TOTAL_DAYS,
-        DAY_MARKS,
-        DAY_LABELS,
-        PROFIT_LINE_DATA,
-        Y_MAX,
-        getYAxisGridLines,
-        getYAxisLabels,
-    } = processedData;
-
-    // Use dynamic width to prevent squishing when data is large (many days)
     const MIN_DAY_WIDTH = 12;
     const actualChartWidth = Math.max(chartWidth, TOTAL_DAYS * MIN_DAY_WIDTH);
+    const SCROLL_PADDING = 16;
 
-    const SCROLL_PADDING = 17;
-    // Helper functions
-    const getX = (day: number) => (day / TOTAL_DAYS) * actualChartWidth + PADDING_LEFT;
+    // Coordinate helpers
+    const getX = (day: number) =>
+        (day / Math.max(TOTAL_DAYS, 1)) * actualChartWidth + PADDING_LEFT + SCROLL_PADDING;
     const getY = (value: number) => {
-        // Y-axis is centered at zero
-        // value = -Y_MAX maps to bottom (PADDING_TOP + chartHeight)
-        // value = Y_MAX maps to top (PADDING_TOP)
-        const normalizedValue = (value + Y_MAX) / (Y_MAX * 2); // 0 to 1
+        const normalizedValue = (value + Y_MAX) / (Y_MAX * 2);
         return PADDING_TOP + chartHeight - normalizedValue * chartHeight;
     };
 
-    // Zero line (profit = 0) Y position
     const zeroLineY = getY(0);
 
-    // Create smooth bezier curve path for profit line
-    const createProfitLinePath = () => {
-        if (PROFIT_LINE_DATA.length < 2) return '';
+    // Bar width — proportional but capped
+    const barWidth = Math.max(2, Math.min(8, actualChartWidth / (barData.length * 2)));
 
-        const firstX = getX(PROFIT_LINE_DATA[0].day);
-        const firstY = getY(PROFIT_LINE_DATA[0].value);
-        let path = `M ${firstX} ${firstY}`;
-
-        for (let i = 0; i < PROFIT_LINE_DATA.length - 1; i++) {
-            const p0 = i > 0 ? PROFIT_LINE_DATA[i - 1] : PROFIT_LINE_DATA[i];
-            const p1 = PROFIT_LINE_DATA[i];
-            const p2 = PROFIT_LINE_DATA[i + 1];
-            const p3 =
-                i < PROFIT_LINE_DATA.length - 2 ? PROFIT_LINE_DATA[i + 2] : PROFIT_LINE_DATA[i + 1];
-
-            const x0 = getX(p0.day);
-            const y0 = getY(p0.value);
-            const x1 = getX(p1.day);
-            const y1 = getY(p1.value);
-            const x2 = getX(p2.day);
-            const y2 = getY(p2.value);
-            const x3 = getX(p3.day);
-            const y3 = getY(p3.value);
-
-            const tension = 0.5;
-            const cp1x = x1 + ((x2 - x0) / 6) * tension;
-            const cp1y = y1 + ((y2 - y0) / 6) * tension;
-            const cp2x = x2 - ((x3 - x1) / 6) * tension;
-            const cp2y = y2 - ((y3 - y1) / 6) * tension;
-
-            path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
-        }
-
+    // --- Profit line path ---
+    const profitLinePath = useMemo(() => {
+        if (barData.length < 2) return '';
+        let path = '';
+        barData.forEach((d, i) => {
+            const x = getX(d.day);
+            const y = getY(d.profit);
+            path += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+        });
         return path;
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [barData, actualChartWidth, chartHeight, Y_MAX]);
 
-    // Dynamic height: full range from -Y_MAX đến +Y_MAX
+    // Dynamic height
     const bottomY = getY(-Y_MAX);
-    // PADDING_BOTTOM (40) is sufficient for labels and ticks
     const dynamicHeight = bottomY + 40;
+    const svgWidth = actualChartWidth + PADDING_LEFT + 40;
 
     return (
         <View style={styles.chartContainer}>
             <View style={{ position: 'relative', height: dynamicHeight }}>
-                {/* Scrollable chart content */}
+                {/* Scrollable chart */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingLeft: SCROLL_PADDING }}
                 >
-                    <Svg width={actualChartWidth + PADDING_LEFT + 40} height={dynamicHeight}>
-                        {/* Grid lines (horizontal) */}
-                        {getYAxisGridLines().map(value => {
+                    <Svg width={svgWidth} height={dynamicHeight}>
+                        {/* Horizontal grid lines */}
+                        {getYAxisLines().map(value => {
                             const y = getY(value);
                             return (
                                 <Line
                                     key={`grid-${value}`}
                                     x1={0}
                                     y1={y}
-                                    x2={actualChartWidth + PADDING_LEFT + 40}
+                                    x2={svgWidth}
                                     y2={y}
                                     stroke={colors.gray[200]}
                                     strokeWidth={1}
@@ -274,32 +188,69 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                             );
                         })}
 
-                        {/* Break-even line (Điểm hòa vốn) - dashed red at 0 */}
-                        <Line
-                            x1={0}
-                            y1={zeroLineY}
-                            x2={actualChartWidth + PADDING_LEFT + 40}
-                            y2={zeroLineY}
-                            stroke={colors.red[500]}
-                            strokeWidth={1}
-                            strokeDasharray="6 4"
-                        />
+                        {/* ---- Stacked Bars ---- */}
+                        {barData.map((d, i) => {
+                            const x = getX(d.day) - barWidth / 2;
 
-                        {/* Profit line (smooth bezier curve) */}
-                        <Path
-                            d={createProfitLinePath()}
-                            fill="none"
-                            stroke={colors.orange[900]}
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
+                            // Positive bars (above zero): harvested + unharvested stacked
+                            const harvestedH = Math.abs(getY(0) - getY(d.harvested));
+                            const unharvestedH = Math.abs(getY(0) - getY(d.unharvested));
 
-                        {/* X-axis tick marks (vertical lines below axis) */}
+                            // Negative bar (below zero): cost
+                            const costH = Math.abs(getY(0) - getY(d.cost));
+
+                            return (
+                                <React.Fragment key={`bar-${i}`}>
+                                    {/* Harvested bar (orange) — from zero going up */}
+                                    {d.harvested > 0 && (
+                                        <Rect
+                                            x={x}
+                                            y={zeroLineY - harvestedH}
+                                            width={barWidth}
+                                            height={harvestedH}
+                                            fill={BAR_COLORS.harvested}
+                                        />
+                                    )}
+                                    {/* Unharvested bar (green) — stacked on top of harvested */}
+                                    {d.unharvested > 0 && (
+                                        <Rect
+                                            x={x}
+                                            y={zeroLineY - harvestedH - unharvestedH}
+                                            width={barWidth}
+                                            height={unharvestedH}
+                                            fill={BAR_COLORS.unharvested}
+                                        />
+                                    )}
+                                    {/* Cost bar (red) — from zero going down */}
+                                    {d.cost > 0 && (
+                                        <Rect
+                                            x={x}
+                                            y={zeroLineY}
+                                            width={barWidth}
+                                            height={costH}
+                                            fill={BAR_COLORS.cost}
+                                        />
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+
+                        {/* ---- Profit line (blue) ---- */}
+                        {profitLinePath.length > 0 && (
+                            <Path
+                                d={profitLinePath}
+                                fill="none"
+                                stroke={PROFIT_LINE_COLOR}
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        )}
+
+                        {/* X-axis tick marks */}
                         {DAY_MARKS.map(day => {
                             const x = getX(day);
                             const axisY = getY(-Y_MAX);
-
                             return (
                                 <Line
                                     key={`x-tick-${day}`}
@@ -316,20 +267,17 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
                         {/* X-axis labels */}
                         {DAY_MARKS.map((day, index) => {
-                            let x = getX(day);
-                            let align: 'middle' | 'start' | 'end' = 'middle';
-
+                            const x = getX(day);
                             const axisY = getY(-Y_MAX);
                             const y = axisY + 20;
-
                             return (
                                 <SvgText
                                     key={`x-label-${day}`}
                                     x={x}
                                     y={y}
-                                    fill={colors.text}
+                                    fill={colors.textSecondary}
                                     fontSize={12}
-                                    textAnchor={align}
+                                    textAnchor="middle"
                                 >
                                     {DAY_LABELS[index]}
                                 </SvgText>
@@ -339,7 +287,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                 </ScrollView>
             </View>
 
-            {/* Y-axis overlay to hide scrolled content */}
+            {/* Y-axis overlay */}
             <View
                 style={{
                     position: 'absolute',
@@ -353,14 +301,14 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                 pointerEvents="none"
             >
                 <Svg width={PADDING_LEFT} height={dynamicHeight} style={{ overflow: 'visible' }}>
-                    {getYAxisLabels().map(value => {
+                    {getYAxisLines().map(value => {
                         const y = getY(value);
                         return (
                             <SvgText
                                 key={`y-overlay-${value}`}
                                 x={16}
                                 y={y + 4}
-                                fill={colors.text}
+                                fill={colors.textSecondary}
                                 fontSize={12}
                                 textAnchor="start"
                             >

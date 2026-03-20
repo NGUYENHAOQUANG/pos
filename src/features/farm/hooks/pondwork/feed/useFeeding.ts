@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { feedingRecordApi } from '@/features/farm/api/feedingRecordApi';
 import {
@@ -16,19 +15,6 @@ import type {
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { feedingService } from '@/features/farm/services/feeding.service';
 import { handleError } from '@/shared/utils';
-
-export const useFeeding = () => {
-    const { materials: allMaterials, isLoading } = useFarmMaterials();
-
-    const materials = useMemo(() => {
-        return feedingService.filterFeedingMaterials(allMaterials);
-    }, [allMaterials]);
-
-    return {
-        materials,
-        isLoading,
-    };
-};
 
 export const useFeedingRecords = (pondId: string, params?: FeedingRecordListParams) => {
     return useQuery({
@@ -67,6 +53,10 @@ export const useCreateFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: ['warehouse-items'],
             });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'feeding-production'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
             showAddJobSuccessToast('FEED');
         },
         onError: (error: any) => {
@@ -98,6 +88,10 @@ export const useUpdateFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: ['warehouse-items'],
             });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'feeding-production'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
             showEditJobSuccessToast('FEED');
         },
         onError: (error: any) => {
@@ -120,6 +114,10 @@ export const useDeleteFeedingRecord = () => {
                 queryKey: farmKeys.feedingRecords.detail(id),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'feeding-production'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
             showDeleteJobSuccessToast('FEED');
         },
         onError: (error: any) => {

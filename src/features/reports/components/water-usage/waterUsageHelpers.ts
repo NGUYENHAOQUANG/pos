@@ -24,69 +24,64 @@ export const formatNumberVietnamese = (value: number, abbreviate: boolean = true
     return normalStr;
 };
 
+/** A single bar in the chart — one per day */
+export interface DailyBar {
+    dateLabel: string;
+    value: number;
+    dayIndex: number;
+}
+
 export const parseWaterUsageData = (statsData?: WaterUsageResponse) => {
     if (!statsData?.data) {
         return {
             totalWaterSupplied: 0,
-            cumulativeData: [],
+            bars: [] as DailyBar[],
             yMax: 0,
             yTicks: [0, 1000, 2000, 3000, 4000],
-            xLabels: [],
         };
     }
 
     const { kpi, days } = statsData.data;
 
-    // Map API data to cumulative sum
-    let cumulative = 0;
-    const cumulativeData = days.map(day => {
-        cumulative += day.totalWaterAdded;
-        return {
-            date: dayjs(day.date).format('DD/MM/YYYY'),
-            value: cumulative,
-        };
+    // One bar per day using totalWaterAdded directly
+    const bars: DailyBar[] = [];
+    let maxDayTotal = 0;
+
+    days.forEach((day, dayIndex) => {
+        const dateLabel = dayjs(day.date).format('DD/MM/YYYY');
+        bars.push({
+            dateLabel,
+            value: day.totalWaterAdded,
+            dayIndex,
+        });
+
+        if (day.totalWaterAdded > maxDayTotal) {
+            maxDayTotal = day.totalWaterAdded;
+        }
     });
 
-    // Safe max value
-    const lastValue =
-        cumulativeData.length > 0 ? cumulativeData[cumulativeData.length - 1].value : 0;
-    const maxCumulative = Math.max(lastValue, kpi?.totalWaterAdded || 0);
+    // Calculate nice Y ticks based on max daily total
+    if (maxDayTotal <= 0) maxDayTotal = 1000;
 
-    // Calculate nice Y interval
-    const yMaxEstimation = Math.ceil(maxCumulative * 1.1) || 1000;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(maxDayTotal)));
+    const niceMax = Math.ceil(maxDayTotal / magnitude) * magnitude;
+    const finalMax =
+        niceMax > maxDayTotal * 1.5
+            ? Math.ceil(maxDayTotal / (magnitude / 2)) * (magnitude / 2)
+            : niceMax;
 
-    let power = Math.pow(10, Math.floor(Math.log10(yMaxEstimation)));
-    if (power < 1) power = 1;
+    const TICK_COUNT = 4;
+    const rawInterval = finalMax / TICK_COUNT;
+    const intervalMag = Math.pow(10, Math.floor(Math.log10(rawInterval || 1)));
+    const tickInterval = Math.ceil(rawInterval / intervalMag) * intervalMag;
 
-    let tickInterval = Math.ceil(yMaxEstimation / 4 / power) * power;
-    if (tickInterval === 0) tickInterval = 1000;
-
-    const Y_TICKS = [0, tickInterval, tickInterval * 2, tickInterval * 3, tickInterval * 4];
-    const Y_MAX_ADJUSTED = Y_TICKS[Y_TICKS.length - 1];
-
-    // Distributed X labels (upto 5 dates)
-    const xLabels: string[] = [];
-    if (cumulativeData.length > 0) {
-        const count = cumulativeData.length;
-        const step = Math.max(1, Math.floor(count / 4));
-        for (let i = 0; i < count; i += step) {
-            if (xLabels.length < 4) {
-                xLabels.push(cumulativeData[i].date);
-            }
-        }
-        if (xLabels.length < 5 && count > 1) {
-            const lastDate = cumulativeData[count - 1].date;
-            if (!xLabels.includes(lastDate)) {
-                xLabels.push(lastDate);
-            }
-        }
-    }
+    const yTicks = Array.from({ length: TICK_COUNT + 1 }, (_, i) => tickInterval * i);
+    const yMax = yTicks[yTicks.length - 1];
 
     return {
         totalWaterSupplied: kpi?.totalWaterAdded || 0,
-        cumulativeData,
-        yMax: Y_MAX_ADJUSTED,
-        yTicks: Y_TICKS,
-        xLabels,
+        bars,
+        yMax,
+        yTicks,
     };
 };

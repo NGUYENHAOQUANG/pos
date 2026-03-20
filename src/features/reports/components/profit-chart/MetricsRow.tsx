@@ -21,25 +21,25 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
             id: 'revenue',
             name: 'Doanh thu',
             value: revenue,
-            color: colors.green[600],
+            color: '',
         },
         {
             id: 'estimatedRevenue',
             name: 'Tổng doanh thu ước tính',
             value: estimatedRevenue,
-            color: colors.blue[600],
+            color: '',
         },
         {
             id: 'totalCost',
             name: 'Tổng chi phí',
             value: totalCost,
-            color: colors.volcano[900],
+            color: '',
         },
         {
             id: 'estimatedProfit',
             name: 'Tổng lợi nhuận ước tính',
             value: estimatedProfit,
-            color: colors.green[600],
+            color: '',
         },
     ];
 

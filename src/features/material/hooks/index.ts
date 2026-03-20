@@ -21,7 +21,7 @@ export {
 export {
     useInventoryTickets,
     useInfiniteInventoryTickets,
-} from '@/features/material/hooks/inventory/useInventory';
+} from '@/features/material/hooks/useInventory';
 export {
     useImportReceipts,
     useInfiniteImportReceipts,

@@ -37,7 +37,7 @@ export const BasicDropDownButton: React.FC<BasicDropDownButtonProps> = ({
             <Text style={[styles.text, !label && styles.placeholder]} numberOfLines={1}>
                 {label || placeholder}
             </Text>
-            <View style={[styles.expandedIcon, isExpanded && styles.expandedIconRotate]}>
+            <View style={[styles.expandedIcon, !isExpanded && styles.expandedIconRotate]}>
                 <ExpandedIcon width={10} height={6} />
             </View>
         </TouchableOpacity>

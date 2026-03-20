@@ -1,13 +1,11 @@
+import type { ICreatorEditor } from '@/shared/types/common.types';
+
 export interface ISiphonRecord {
     id: string;
     no?: number;
     createdAt?: string;
-    editor?: {
-        fullName?: string;
-    };
-    creator?: {
-        fullName?: string;
-    };
+    editor?: ICreatorEditor;
+    creator?: ICreatorEditor;
     pondId: string;
     documentIds?: string[];
     value?: number;

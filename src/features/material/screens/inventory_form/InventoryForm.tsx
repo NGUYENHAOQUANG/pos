@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, Platform, StatusBar } from 'react-native';
+import { View, StyleSheet, StatusBar } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -7,14 +7,13 @@ import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import Animated from 'react-native-reanimated';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
-import { colors, spacing } from '@/styles';
-import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
+import { colors } from '@/styles';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import {
     InventoryMaterialList,
     InventoryItem,
 } from '@/features/material/components/inventory/InventoryMaterialList';
-import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
+import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
@@ -27,7 +26,6 @@ import {
 } from '@/features/material/schemas/inventoryFormSchema';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
 import { useInventoryMaterialActions } from '@/features/material/hooks/logic/useInventoryMaterialActions';
-import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
 
 export type InventoryFormProps = {
     isEditMode: boolean;
@@ -36,8 +34,7 @@ export type InventoryFormProps = {
     initialData?: InventoryFormValues;
     warehouseName: string;
     creatorName: string;
-    materialOptions: any[];
-    availableMaterials: any[];
+    warehouseId?: string;
     onBackPress: () => void;
     onSubmit: (data: InventoryFormValues, isDraft: boolean) => void;
     onDelete?: () => void;
@@ -50,8 +47,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
     initialData,
     warehouseName,
     creatorName,
-    materialOptions,
-    availableMaterials,
+    warehouseId,
     onBackPress,
     onSubmit,
     onDelete,
@@ -82,15 +78,9 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
 
     const [date, note, inventoryItems] = formValues as [Date, string, InventoryItem[]];
 
-    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-    const {
-        scrollRef: scrollViewRef,
-        scrollToDropdown,
-        scrollOffset,
-        onScroll,
-    } = useDropdownScroll();
+    const scrollViewRef = React.useRef<any>(null);
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
 
@@ -98,16 +88,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         control,
         getValues,
         setValue,
-        availableMaterials
+        [] // Material data set directly by DropdownWarehouseItem callback
     );
-
-    const handleDropdownOpen = (itemIndex: number) => {
-        scrollToDropdown({
-            index: itemIndex,
-            headerHeight: 300,
-            itemHeight: 400,
-        });
-    };
 
     useEffect(() => {
         if (initialData && !initializedRef.current) {
@@ -205,38 +187,32 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                     />
 
                     <SafeInputLayoutMaterial>
-                        <DropdownScrollContext.Provider value={scrollOffset}>
-                            <Animated.ScrollView
-                                ref={scrollViewRef}
-                                onScroll={onScroll}
-                                scrollEventThrottle={16}
-                                style={styles.scrollView}
-                                contentContainerStyle={styles.contentContainer}
-                                showsVerticalScrollIndicator={false}
-                                keyboardShouldPersistTaps="handled"
-                            >
-                                <InventoryGeneralInfo
-                                    date={formatMaterialDate(date)}
-                                    createdDate={formatMaterialDateTime(date)}
-                                    note={note}
-                                    onDatePress={() => setDatePickerVisible(true)}
-                                    onNoteChange={val => setValue('note', val)}
-                                    warehouseName={warehouseName}
-                                    creatorName={creatorName}
-                                />
+                        <Animated.ScrollView
+                            ref={scrollViewRef}
+                            scrollEventThrottle={16}
+                            style={styles.scrollView}
+                            contentContainerStyle={styles.contentContainer}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <InventoryGeneralInfo
+                                date={date}
+                                createdDate={formatMaterialDateTime(date)}
+                                note={note}
+                                onDateChange={newDate => setValue('date', newDate)}
+                                onNoteChange={val => setValue('note', val)}
+                                warehouseName={warehouseName}
+                                creatorName={creatorName}
+                            />
 
-                                <View style={styles.dropdownSection}>
-                                    <InventoryMaterialList
-                                        items={inventoryItems}
-                                        onUpdateItem={materialActions.update}
-                                        onAddItem={materialActions.add}
-                                        onRemoveItem={materialActions.remove}
-                                        materialOptions={materialOptions}
-                                        onDropdownOpen={handleDropdownOpen}
-                                    />
-                                </View>
-                            </Animated.ScrollView>
-                        </DropdownScrollContext.Provider>
+                            <InventoryMaterialList
+                                items={inventoryItems}
+                                onUpdateItem={materialActions.update}
+                                onAddItem={materialActions.add}
+                                onRemoveItem={materialActions.remove}
+                                warehouseId={warehouseId}
+                            />
+                        </Animated.ScrollView>
                     </SafeInputLayoutMaterial>
 
                     <ButtonBarMaterial
@@ -245,21 +221,11 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                         secondaryTitle="Lưu Nháp"
                         onPrimaryPress={triggerSubmitValidation}
                         onSecondaryPress={handleSaveDraft}
-                        primaryButtonDisabled={isEditMode && !hasChanges}
+                        // primaryButtonDisabled={isEditMode && !hasChanges}
                         secondaryButtonDisabled={isEditMode && !hasChanges}
                         containerStyle={{
                             borderTopWidth: 1,
                             borderTopColor: colors.gray[200],
-                        }}
-                    />
-
-                    <DatePickerModal
-                        visible={isDatePickerVisible}
-                        onClose={() => setDatePickerVisible(false)}
-                        date={date}
-                        onSelectDate={newDate => {
-                            setValue('date', newDate);
-                            setDatePickerVisible(false);
                         }}
                     />
 
@@ -289,15 +255,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        paddingVertical: spacing.md,
         paddingBottom: 100,
-    },
-    dropdownSection: {
-        zIndex: 100,
-        ...Platform.select({
-            android: { elevation: 5 },
-            ios: { zIndex: 100 },
-        }),
     },
 });
 
