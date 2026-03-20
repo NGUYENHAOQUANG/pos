@@ -248,7 +248,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                         selectedTab={selectedTab}
                         onTabSelect={handleTabSelect}
                         containerStyle={styles.headingBar}
-                        flexTabs={false}
+                        spreadTabs
                     />
                 )}
 
@@ -325,7 +325,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     selectedTab={selectedTab}
                     onTabSelect={handleTabSelect}
                     containerStyle={styles.headingBar}
-                    flexTabs={false}
+                    spreadTabs
                 />
             )}
 
@@ -336,8 +336,8 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={[colors.primary]}
-                        tintColor={colors.primary}
+                        colors={[colors.text]}
+                        tintColor={colors.text}
                     />
                 }
                 onScroll={handleScroll}

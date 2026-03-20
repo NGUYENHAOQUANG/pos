@@ -39,8 +39,6 @@ const resolveFontFamily = (style?: TextProps['style']): string => {
 export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
     const resolvedFamily = resolveFontFamily(style);
 
-    const safeChildren = typeof children === 'string' ? children + '\u200A' : children;
-
     return (
         <RNText
             {...props}
@@ -49,12 +47,13 @@ export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
                     fontFamily: resolvedFamily,
                     includeFontPadding: false,
                     textAlignVertical: 'center',
+                    letterSpacing: 0.2,
                 },
                 style,
                 { fontFamily: resolvedFamily },
             ]}
         >
-            {safeChildren}
+            {children}
         </RNText>
     );
 };

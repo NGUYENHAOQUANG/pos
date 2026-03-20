@@ -40,8 +40,8 @@ export default function ModalAddTurn({
                             style={[
                                 styles.input,
                                 {
-                                    color: colors.text,
-                                    fontSize: 14,
+                                    color: colors.textSecondary,
+                                    fontSize: 16,
                                 },
                             ]}
                             numberOfLines={1}
@@ -87,11 +87,12 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         height: 40,
-        paddingHorizontal: 15,
+        paddingHorizontal: 8,
     },
     input: {
         flex: 1,
         color: colors.text,
+        textAlign: 'center',
     },
     activeInput: {
         color: colors.text,
