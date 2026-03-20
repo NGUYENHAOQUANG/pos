@@ -23,12 +23,19 @@ interface CompilationProfitChartProps {
     pondId?: string;
 }
 
+const truncateToDecimals = (value: number, decimals: number) => {
+    const multiplier = Math.pow(10, decimals);
+    return Math.trunc(value * multiplier) / multiplier;
+};
+
 const formatCurrency = (value: number) => {
     if (value >= 1e9) {
-        return `${(value / 1e9).toFixed(2)} tỉ`;
+        const truncated = truncateToDecimals(value / 1e9, 2);
+        return `${truncated.toFixed(2)} tỉ`;
     }
     if (value >= 1e6) {
-        return `${(value / 1e6).toFixed(2)} tr`;
+        const truncated = truncateToDecimals(value / 1e6, 2);
+        return `${truncated.toFixed(2)} tr`;
     }
     return `${value.toLocaleString()} đ`;
 };
