@@ -349,7 +349,7 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
     return (
         <View style={chartStyles.container}>
             <BasicDropDownButton
-                prefixIcon={<ProdChartIcon width={16} height={16} />}
+                prefixIcon={<ProdChartIcon width={20} height={20} />}
                 label="Biểu đồ sản lượng"
                 isExpanded={isExpanded}
                 onPress={handleToggle}

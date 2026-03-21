@@ -1,16 +1,6 @@
 import React from 'react';
-import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    Modal,
-    Pressable,
-    Platform,
-    Animated,
-    Dimensions,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     launchCamera,
     launchImageLibrary,
@@ -19,14 +9,14 @@ import {
 } from 'react-native-image-picker';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
+import { Button } from '@/shared/components/buttons/Button';
 
 interface ImagePickerActionSheetProps {
     visible: boolean;
     onClose: () => void;
-    onTakePhoto?: () => void; // Keeping for compatibility, though we might handle it internally
-    onChooseFromLibrary?: () => void; // Keeping for compatibility
+    onTakePhoto?: () => void;
+    onChooseFromLibrary?: () => void;
     onImageSelected?: (
         uri: string,
         asset?: { fileName?: string; type?: string; width?: number; height?: number }
@@ -40,28 +30,6 @@ export function ImagePickerActionSheet({
     onChooseFromLibrary,
     onImageSelected,
 }: ImagePickerActionSheetProps) {
-    const insets = useSafeAreaInsets();
-    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
-    // Slide-up on open, slide-down on close (same pattern as ConfirmationModalUI)
-    React.useEffect(() => {
-        if (visible) {
-            slideAnim.setValue(SCREEN_HEIGHT);
-            Animated.spring(slideAnim, {
-                toValue: 0,
-                tension: 50,
-                friction: 8,
-                useNativeDriver: true,
-            }).start();
-        } else {
-            Animated.timing(slideAnim, {
-                toValue: SCREEN_HEIGHT,
-                duration: 200,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [visible, slideAnim]);
-
     const handleResponse = (response: ImagePickerResponse) => {
         if (response.didCancel) {
             // User cancelled image picker
@@ -109,7 +77,7 @@ export function ImagePickerActionSheet({
                     const result = await launchImageLibrary({
                         mediaType: 'photo',
                         quality: 0.8,
-                        selectionLimit: 1, // Single image selection
+                        selectionLimit: 1,
                     });
                     handleResponse(result);
                 }
@@ -119,107 +87,81 @@ export function ImagePickerActionSheet({
     };
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable style={styles.backdrop} onPress={onClose}>
-                <Animated.View
-                    style={[
-                        styles.card,
-                        {
-                            paddingBottom: Math.max(insets.bottom, spacing.lg),
-                            transform: [{ translateY: slideAnim }],
-                        },
-                    ]}
+        <AnimatedBottomSheet
+            visible={visible}
+            onClose={onClose}
+            containerStyle={styles.sheetContainer}
+        >
+            {/* Indicator */}
+            <View style={styles.indicator} />
+
+            {/* Title */}
+            <Text style={styles.title}>Chụp hoặc chọn ảnh thiết bị</Text>
+
+            {/* Options */}
+            <View style={styles.content}>
+                <TouchableOpacity
+                    style={styles.optionButton}
+                    onPress={handleTakePhoto}
+                    activeOpacity={0.7}
                 >
-                    <Pressable onPress={e => e.stopPropagation()}>
-                        <View style={styles.header}>
-                            <View style={styles.indicator} />
-                            <Text style={styles.title}>Chọn ảnh thiết bị</Text>
-                        </View>
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="camera" size={22} color={colors.text} />
+                    </View>
+                    <Text style={styles.optionText}>Chụp ảnh mới</Text>
+                    <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+                </TouchableOpacity>
 
-                        <View style={styles.content}>
-                            <TouchableOpacity
-                                style={styles.optionButton}
-                                onPress={handleTakePhoto}
-                                activeOpacity={0.7}
-                            >
-                                <View
-                                    style={[
-                                        styles.iconContainer,
-                                        { backgroundColor: colors.primary + '15' },
-                                    ]}
-                                >
-                                    <Ionicons name="camera" size={24} color={colors.primary} />
-                                </View>
-                                <Text style={styles.optionText}>Chụp ảnh mới</Text>
-                                <Ionicons
-                                    name="chevron-forward"
-                                    size={20}
-                                    color={colors.gray[400]}
-                                />
-                            </TouchableOpacity>
+                <View style={styles.divider} />
 
-                            <View style={styles.divider} />
+                <TouchableOpacity
+                    style={styles.optionButton}
+                    onPress={handleChooseLibrary}
+                    activeOpacity={0.7}
+                >
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="images" size={22} color={colors.text} />
+                    </View>
+                    <Text style={styles.optionText}>Chọn từ thư viện</Text>
+                    <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+                </TouchableOpacity>
+            </View>
 
-                            <TouchableOpacity
-                                style={styles.optionButton}
-                                onPress={handleChooseLibrary}
-                                activeOpacity={0.7}
-                            >
-                                <View
-                                    style={[
-                                        styles.iconContainer,
-                                        { backgroundColor: colors.info + '15' },
-                                    ]}
-                                >
-                                    <Ionicons name="images" size={24} color={colors.info} />
-                                </View>
-                                <Text style={styles.optionText}>Chọn từ thư viện</Text>
-                                <Ionicons
-                                    name="chevron-forward"
-                                    size={20}
-                                    color={colors.gray[400]}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </Pressable>
-                </Animated.View>
-            </Pressable>
-        </Modal>
+            {/* Close button */}
+            <View style={styles.footer}>
+                <Button title="Đóng" variant="outline" onPress={onClose} />
+            </View>
+        </AnimatedBottomSheet>
     );
 }
 
 const styles = StyleSheet.create({
-    backdrop: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.xl,
-        borderTopRightRadius: borderRadius.xl,
-        paddingTop: spacing.sm,
-        width: '100%',
-        overflow: 'hidden',
-    },
-    header: {
-        alignItems: 'center',
-        paddingBottom: spacing.lg,
+    sheetContainer: {
+        borderRadius: 24,
+        margin: 16,
+        paddingBottom: 24,
+        padding: spacing.md,
     },
     indicator: {
         width: 40,
         height: 4,
         backgroundColor: colors.gray[300],
         borderRadius: 2,
-        marginBottom: spacing.md,
+        alignSelf: 'center',
+        marginTop: spacing.sm,
     },
     title: {
         fontSize: 18,
         fontWeight: '700',
         color: colors.text,
+        textAlign: 'center',
+        paddingVertical: spacing.md,
     },
     content: {
-        paddingHorizontal: spacing.lg,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.md,
+        paddingHorizontal: spacing.md,
     },
     optionButton: {
         flexDirection: 'row',
@@ -233,6 +175,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,
+        backgroundColor: colors.gray[100],
     },
     optionText: {
         flex: 1,
@@ -243,6 +186,8 @@ const styles = StyleSheet.create({
     divider: {
         height: 1,
         backgroundColor: colors.gray[100],
-        marginLeft: 60, // Align with text
+    },
+    footer: {
+        paddingTop: spacing.md,
     },
 });

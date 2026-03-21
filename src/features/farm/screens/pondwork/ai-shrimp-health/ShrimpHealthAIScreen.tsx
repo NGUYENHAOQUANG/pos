@@ -1,47 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { useDocumentUploadV2 } from '@/shared/hooks/useDocumentUpload';
-import { usePredictShrimpHealth } from '@/features/farm/hooks/useAI';
-import { StorageType } from '@/shared/types/common.types';
+import { useInferencePredict, useGetInferenceResult } from '@/features/farm/hooks/useAI';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { HealthDetectionBox } from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
 import {
-    HealthCheckItem,
     HealthCheckResult,
+    HealthCheckItem,
     shrimpHealthAIService,
+    ShrimpHealthApiResponse,
 } from '@/features/farm/services/shrimp-health-ai.service';
 import { ShrimpHealthAIForm } from './ShrimpHealthAIForm';
 import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
+import { downloadAzureBlobImage } from '@/shared/utils/azureBlobUrl';
+import type { HealthCheckEntry } from '@/features/farm/components/ai-shrimp-health/HealthCheckListSection';
 import { ShrimpHealthStatusLabel } from '@/features/farm/types/ai.types';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+
+// Polling config
+const POLLING_INTERVAL_MS = 2000;
+const MAX_POLLING_ATTEMPTS = 30;
 
 export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
 
     // ── Hooks ────────────────────────────────────
-    const { mutate: uploadDoc, isPending: isUploading } = useDocumentUploadV2();
-    const { mutate: predictHealth, isPending: isPredicting } = usePredictShrimpHealth();
+    const { mutate: predict, isPending: isPredicting } = useInferencePredict();
+    const { mutate: getResult, isPending: isFetchingResult } = useGetInferenceResult();
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
     // ── State ────────────────────────────────────
     const [results, setResults] = useState<HealthCheckResult[]>([]);
     const [imageUri, _setImageUri] = useState<string | null>(null);
+    const [processedImageUri, setProcessedImageUri] = useState<string | null>(null);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
     const [isResetModalVisible, setIsResetModalVisible] = useState(false);
     const [hasAnalyzedCurrent, setHasAnalyzedCurrent] = useState(false);
     const [detections, setDetections] = useState<HealthDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
+    const [isPolling, setIsPolling] = useState(false);
+    const [checkEntries, setCheckEntries] = useState<HealthCheckEntry[]>([]);
+    const [selectedEntry, setSelectedEntry] = useState<HealthCheckEntry | null>(null);
+
+    // ── Unsaved changes guard ────────────────────
+    const { UnsavedChangesModal } = useUnsavedChanges(results.length > 0);
 
     // ── Derived ──────────────────────────────────
-    const isLoading = isUploading || isPredicting;
+    const isLoading = isPredicting || isFetchingResult || isPolling;
     const currentResult = results.length > 0 ? results[results.length - 1] : null;
     const previousResult = results.length > 1 ? results[results.length - 2] : null;
     const countTimes = results.length;
+
+    // Display processed image if available, otherwise original
+    const displayImageUri = processedImageUri || imageUri;
 
     // ── Toast on new results ─────────────────────
     React.useEffect(() => {
@@ -56,14 +74,130 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
         }
     }, [results]);
 
+    // ── Polling for inference result ──────────────
+    const pollForResult = useCallback(
+        (requestId: string, attempt: number = 0) => {
+            if (attempt >= MAX_POLLING_ATTEMPTS) {
+                setIsPolling(false);
+                Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
+                return;
+            }
+
+            setTimeout(() => {
+                getResult(requestId, {
+                    onSuccess: async data => {
+                        console.log('[AI Health] getResult status:', data.status);
+
+                        if (data.status === 'Success' && data.imageProcessedUrl) {
+                            setIsPolling(false);
+
+                            // Download processed image
+                            const localImageUri = await downloadAzureBlobImage(
+                                data.imageProcessedUrl
+                            );
+                            console.log('[AI Health] processedImageUri:', localImageUri);
+                            if (localImageUri) {
+                                setProcessedImageUri(localImageUri);
+                            }
+
+                            // Parse annotations for health results
+                            // API returns snake_case: { id, bbox, seg_conf, prediction: { top1_class, top1_conf, all_classes } }
+                            // Service expects camelCase: { id, bbox, segConf, prediction: { top1Class, top1Conf } }
+                            interface RawHealthAnnotation {
+                                id: number;
+                                bbox: number[];
+                                seg_conf: number;
+                                prediction: {
+                                    top1_class: string;
+                                    top1_conf: number;
+                                    all_classes?: Record<string, number>;
+                                };
+                            }
+
+                            let rawAnnotations: RawHealthAnnotation[] = [];
+                            try {
+                                const parsed = JSON.parse(data.annotationJson || '[]');
+                                console.log(
+                                    '[AI Health] annotationJson parsed:',
+                                    typeof parsed,
+                                    parsed
+                                );
+                                if (Array.isArray(parsed)) {
+                                    rawAnnotations = parsed;
+                                } else if (parsed && typeof parsed === 'object') {
+                                    const possibleArray =
+                                        parsed.detections ||
+                                        parsed.results ||
+                                        parsed.annotations ||
+                                        parsed.data;
+                                    if (Array.isArray(possibleArray)) {
+                                        rawAnnotations = possibleArray;
+                                    }
+                                }
+                            } catch (_e) {
+                                console.warn('[AI Health] Failed to parse annotationJson');
+                                rawAnnotations = [];
+                            }
+
+                            // Convert snake_case → camelCase for the service
+                            const healthResponse: ShrimpHealthApiResponse = {
+                                results: rawAnnotations.map(a => ({
+                                    id: a.id,
+                                    bbox: a.bbox,
+                                    segConf: a.seg_conf,
+                                    prediction: {
+                                        top1Class: a.prediction?.top1_class ?? 'Unknown',
+                                        top1Conf: a.prediction?.top1_conf ?? 0,
+                                    },
+                                })),
+                            };
+
+                            const { result: newResult, detections: newDetections } =
+                                shrimpHealthAIService.mapPredictResponse(healthResponse);
+
+                            setResults(prev => [...prev, newResult]);
+                            setDetections(newDetections);
+                            setHasAnalyzedCurrent(true);
+
+                            // Add entry to check history
+                            if (imageUri) {
+                                setCheckEntries(prev => [
+                                    ...prev,
+                                    {
+                                        index: prev.length + 1,
+                                        originalImageUri: imageUri,
+                                        processedImageUri: localImageUri || undefined,
+                                        result: newResult,
+                                    },
+                                ]);
+                            }
+
+                            Toast.show(TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.SUCCESS);
+                        } else if (data.status === 'Failed') {
+                            setIsPolling(false);
+                            Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
+                        } else {
+                            pollForResult(requestId, attempt + 1);
+                        }
+                    },
+                    onError: () => {
+                        pollForResult(requestId, attempt + 1);
+                    },
+                });
+            }, POLLING_INTERVAL_MS);
+        },
+        [getResult, imageUri]
+    );
+
     // ── Handlers ─────────────────────────────────
     const handleImageSelect = (
         uri: string,
         _base64?: string,
-        _file?: any,
+        _file?: unknown,
         dimensions?: { width: number; height: number }
     ) => {
         _setImageUri(uri);
+        setProcessedImageUri(null);
         if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
             setImageDimensions(dimensions);
         }
@@ -77,35 +211,34 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             return;
         }
 
-        // 1. Upload image
-        uploadDoc(
+        if (!selectedZoneId) {
+            Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
+            return;
+        }
+
+        // Step 1: Upload image via inference predict endpoint
+        predict(
             {
-                files: [{ uri: imageUri, type: 'image/jpeg' }],
-                storageType: StorageType.Azure,
+                Image: {
+                    uri: imageUri,
+                    type: 'image/jpeg',
+                    name: `health_${Date.now()}.jpg`,
+                },
+                ZoneId: selectedZoneId,
+                ModuleId: 'module3',
+                ClientTimestamp: new Date().toISOString(),
             },
             {
-                onSuccess: uploadResult => {
-                    const documentId = uploadResult.documents?.[0]?.id;
-                    if (!documentId) {
+                onSuccess: predictResult => {
+                    console.log('[AI Health] Predict result:', predictResult);
+                    if (!predictResult.requestId) {
                         Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
                         return;
                     }
 
-                    // 2. Call AI health prediction
-                    predictHealth(
-                        { documentId },
-                        {
-                            onSuccess: response => {
-                                const { result: newResult, detections: newDetections } =
-                                    shrimpHealthAIService.mapPredictResponse(response);
-
-                                setResults(prev => [...prev, newResult]);
-                                setDetections(newDetections);
-                                setHasAnalyzedCurrent(true);
-                                Toast.show(TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.SUCCESS);
-                            },
-                        }
-                    );
+                    // Step 2: Poll for result
+                    setIsPolling(true);
+                    pollForResult(predictResult.requestId);
                 },
             }
         );
@@ -117,10 +250,12 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
     const handleConfirmReset = () => {
         _setImageUri(null);
+        setProcessedImageUri(null);
         setResults([]);
         setDetections([]);
         setHasAnalyzedCurrent(false);
         setIsResetModalVisible(false);
+        setCheckEntries([]);
     };
 
     const handleShowDetails = () => {
@@ -161,7 +296,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 name: 'ShrimpInspectionScreen',
                 params,
                 merge: true,
-            } as any);
+            } as never);
         } else {
             navigation.goBack();
         }
@@ -175,7 +310,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 currentResult={currentResult}
                 previousResult={previousResult}
                 countTimes={countTimes}
-                imageUri={imageUri}
+                imageUri={displayImageUri}
                 detections={detections}
                 imageDimensions={imageDimensions}
                 displayDimensions={displayDimensions}
@@ -192,7 +327,17 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 onCancelReset={() => setIsResetModalVisible(false)}
                 onImageAreaLayout={size => setDisplayDimensions(size)}
                 hasAnalyzedCurrent={hasAnalyzedCurrent}
+                checkEntries={checkEntries}
+                onViewCheckEntry={(entry: HealthCheckEntry) => {
+                    if (entry.processedImageUri) {
+                        setProcessedImageUri(entry.processedImageUri);
+                    }
+                    setSelectedEntry(entry);
+                    setIsSheetVisible(true);
+                }}
+                selectedEntry={selectedEntry}
             />
+            {UnsavedChangesModal}
         </View>
     );
 };

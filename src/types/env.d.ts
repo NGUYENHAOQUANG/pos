@@ -8,6 +8,7 @@ declare module '@env' {
     export const API_URL: string;
     export const API_URL_AI: string;
     export const API_KEY_AI: string;
+    export const AZURE_BLOB_SAS_KEY: string;
     export const NODE_ENV: string;
     export const API_TIMEOUT: string;
 }

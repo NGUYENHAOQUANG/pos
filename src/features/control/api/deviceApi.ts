@@ -140,4 +140,9 @@ export const deviceApi = {
     getHealthCheck: () => {
         return apiClient.get<HealthCheckResponse>(API_ENDPOINTS.DEVICE.HEALTH);
     },
+
+    /** Delete a schedule time by ID */
+    deleteSchedule: (scheduleTimeId: string) => {
+        return apiClient.delete(API_ENDPOINTS.DEVICE.DELETE_SCHEDULE(scheduleTimeId));
+    },
 };

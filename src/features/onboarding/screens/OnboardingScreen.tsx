@@ -97,7 +97,7 @@ export default function OnboardingScreen() {
             content: (
                 <SlideContent
                     title="Trợ lý AI – Luôn sẵn sàng hỗ trợ bạn"
-                    description={`Khi có thắc mắc về tình trạng ao, lượng ăn hay cách xử lý sự cố,\nchỉ cần hỏi – Mebione AI sẽ giúp bạn đưa ra giải pháp chính xác, nhanh chóng.`}
+                    description={`Khi có thắc mắc về tình trạng ao, lượng ăn hay cách xử lý sự cố,\nchỉ cần hỏi – Mebieco AI sẽ giúp bạn đưa ra giải pháp chính xác, nhanh chóng.`}
                 />
             ),
             background: <OnboardingBackgroundThree />,

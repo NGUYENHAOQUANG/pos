@@ -9,7 +9,7 @@ import {
 } from '@/features/farm/services/shrimp-health-ai.service';
 
 import InfoIcon from '@/assets/Icon/information-circle.svg';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 
 interface Props {
     results: HealthCheckResult[];
@@ -24,7 +24,7 @@ interface Props {
 export const ShrimpHealthSummarySection: React.FC<Props> = ({
     results,
     currentResult,
-    previousResult,
+    previousResult: _previousResult,
     onShowDetailsPress,
     countTimes,
     showAddMore,
@@ -44,7 +44,7 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
             <View style={styles.row}>
                 <Text style={styles.label}>Lần kiểm tra trước</Text>
                 <Text style={styles.value}>
-                    {previousResult ? previousResult.totalCount.toString() : '-'}
+                    {countTimes > 1 ? (countTimes - 1).toString() : '-'}
                 </Text>
             </View>
 
@@ -122,15 +122,15 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
                     <View style={styles.infoBox}>
                         <InfoIcon width={20} height={20} style={styles.infoIcon} />
                         <Text style={styles.infoText}>
-                            Bạn có thể chụp thêm hình để đo thêm nếu cần.
+                            Bạn có thể chụp thêm hình để kiểm tra thêm nếu cần.
                         </Text>
                     </View>
 
                     {showAddMore && (
-                        <OutlineButton
-                            label="Đo thêm"
+                        <Button
+                            title="Kiểm tra thêm"
                             onPress={onAddMore || (() => {})}
-                            labelStyle={styles.addMoreText}
+                            variant="outline"
                         />
                     )}
                 </>
@@ -193,15 +193,18 @@ const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
         padding: 16,
-        borderRadius: 8,
+        borderRadius: 12,
         marginVertical: spacing.md,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         borderColor: colors.border,
         borderWidth: 1,
+        overflow: 'hidden',
     },
     infoIcon: {
         marginRight: 8,
+        flexShrink: 0,
+        marginTop: 2,
     },
     infoText: {
         fontSize: 14,

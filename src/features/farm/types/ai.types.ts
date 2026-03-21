@@ -101,3 +101,48 @@ export interface ShrimpHealthResponse {
     };
     results: ShrimpHealthResult[];
 }
+
+// ── Inference (new flow) ────────────────────────────────────────────────────
+
+export interface InferencePredictRequest {
+    Image: {
+        uri: string;
+        type: string;
+        name: string;
+    };
+    ZoneId: string;
+    ModuleId: string;
+    ClientTimestamp: string;
+}
+
+export interface InferencePredictResponse {
+    requestId: string;
+    imageId: string;
+    status: string;
+    message: string;
+}
+
+export interface ShrimpAnnotation {
+    id: number;
+    bbox: number[]; // [x_min, y_min, x_max, y_max]
+    length_cm: number;
+    confidence: number;
+}
+
+export interface InferenceResultResponse {
+    id: string;
+    requestId: string;
+    imageId: string;
+    zoneId: string;
+    moduleId: string;
+    env: string;
+    documentId: string;
+    clientTimestamp: string;
+    status: string;
+    totalPipelineTime: number;
+    imageRawUrl: string;
+    imageProcessedUrl: string;
+    annotationJson: string;
+    processedAt: string;
+    createdAt: string;
+}

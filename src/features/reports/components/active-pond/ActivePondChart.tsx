@@ -226,13 +226,13 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                 activeOpacity={0.7}
             >
                 <View style={styles.headerTitleRow}>
-                    <ActivePondChartIcon width={16} height={16} color={colors.text} />
+                    <ActivePondChartIcon width={20} height={20} color={colors.text} />
                     <Text style={styles.headerTitleText}>Tổng số ao hoạt động</Text>
                     <View style={styles.badge}>
                         <Text style={styles.badgeText}>{totalPonds}</Text>
                     </View>
                 </View>
-                <View style={[styles.expandedIcon, expanded && styles.expandedIconRotate]}>
+                <View style={[styles.expandedIcon, !expanded && styles.expandedIconRotate]}>
                     <ExpandedIcon width={10} height={6} />
                 </View>
             </TouchableOpacity>

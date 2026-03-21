@@ -1,17 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    Dimensions,
-    ActivityIndicator,
-    Image,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { BlurView } from '@react-native-community/blur';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { colors, spacing, borderRadius } from '@/styles';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import { useCameraStream } from '@/features/control/hooks/useCameras';
+import RNFS from 'react-native-fs';
+import { downloadWithDigestAuth } from '@/shared/utils/digestAuthFetch';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_HORIZONTAL_PADDING = spacing.md * 2;
@@ -19,23 +15,24 @@ const CARD_WIDTH = SCREEN_WIDTH - CARD_HORIZONTAL_PADDING;
 const CARD_HEIGHT = CARD_WIDTH * 0.56; // ~16:9 aspect ratio
 
 // Snapshot auto-refresh interval (ms)
-const SNAPSHOT_REFRESH_INTERVAL = 10000;
+const SNAPSHOT_REFRESH_INTERVAL = 60000;
+
+// Cache directory for snapshots
+const SNAPSHOT_CACHE_DIR = `${RNFS.CachesDirectoryPath}/camera_snapshots`;
 
 /**
- * Parse RTSP URL to build HTTP snapshot URL for Dahua cameras.
+ * Parse RTSP URL to build HTTP snapshot URL with embedded credentials for Dahua cameras.
  * RTSP format: rtsp://user:pass@host:port/cam/realmonitor?channel=1&subtype=1
- * Snapshot format: http://user:pass@host/cgi-bin/snapshot.cgi?channel=1
+ * Snapshot: http://user:pass@host/cgi-bin/snapshot.cgi?channel=1
  */
 const getSnapshotUrl = (rtspUrl: string): string | null => {
     try {
-        // Extract credentials and host from RTSP URL
         const match = rtspUrl.match(/rtsp:\/\/([^@]+)@([^:/]+)/i);
         if (!match) return null;
 
         const credentials = match[1]; // user:pass
         const host = match[2]; // IP address
 
-        // Extract channel from query params (default to 1)
         const channelMatch = rtspUrl.match(/channel=(\d+)/);
         const channel = channelMatch ? channelMatch[1] : '1';
 
@@ -53,39 +50,81 @@ interface CameraCardProps {
 export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     const isOnline = camera.status === 'Online';
     const { data: streamData } = useCameraStream(camera.deviceSn);
+    const [localImageUri, setLocalImageUri] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
-    // Append timestamp to URL to force refresh (bypass cache)
-    const [refreshKey, setRefreshKey] = useState(Date.now());
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const isMountedRef = useRef(true);
 
     const snapshotUrl = streamData?.url ? getSnapshotUrl(streamData.url) : null;
+
+    // Download snapshot using Digest Auth
+    const downloadSnapshot = useCallback(async () => {
+        if (!snapshotUrl || !isOnline) return;
+
+        try {
+            // Ensure cache directory exists
+            const dirExists = await RNFS.exists(SNAPSHOT_CACHE_DIR);
+            if (!dirExists) {
+                await RNFS.mkdir(SNAPSHOT_CACHE_DIR);
+            }
+
+            const filePath = `${SNAPSHOT_CACHE_DIR}/${camera.deviceSn}.jpg`;
+
+            // Download via Digest Auth
+            const success = await downloadWithDigestAuth(snapshotUrl, filePath);
+
+            if (!isMountedRef.current) return;
+
+            if (success) {
+                // Force Image re-render with cache-busting timestamp
+                setLocalImageUri(`file://${filePath}?t=${Date.now()}`);
+                setIsLoading(false);
+                setHasError(false);
+            } else {
+                setIsLoading(false);
+                setHasError(true);
+            }
+        } catch {
+            if (!isMountedRef.current) return;
+            setIsLoading(false);
+            setHasError(true);
+        }
+    }, [snapshotUrl, isOnline, camera.deviceSn]);
+
+    // Initial download when snapshot URL becomes available
+    useEffect(() => {
+        if (snapshotUrl && isOnline) {
+            setIsLoading(true);
+            downloadSnapshot();
+        }
+    }, [snapshotUrl, isOnline, downloadSnapshot]);
 
     // Auto-refresh snapshot periodically
     useEffect(() => {
         if (!snapshotUrl || !isOnline) return;
 
         intervalRef.current = setInterval(() => {
-            setRefreshKey(Date.now());
+            downloadSnapshot();
         }, SNAPSHOT_REFRESH_INTERVAL);
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [snapshotUrl, isOnline]);
+    }, [snapshotUrl, isOnline, downloadSnapshot]);
 
-    const handleLoadEnd = useCallback(() => {
-        setIsLoading(false);
-        setHasError(false);
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
     }, []);
 
-    const handleError = useCallback(() => {
-        setIsLoading(false);
-        setHasError(true);
-    }, []);
-
-    // Build image URI with cache-busting timestamp
-    const imageUri = snapshotUrl ? `${snapshotUrl}&t=${refreshKey}` : null;
+    // Determine what to show
+    const showSnapshot = localImageUri && isOnline && !hasError;
+    const showSkeleton = isOnline && isLoading && !hasError;
+    const showPlaceholder = !isOnline || (!isLoading && hasError);
 
     return (
         <TouchableOpacity
@@ -93,32 +132,21 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             onPress={() => onPress(camera)}
             style={styles.container}
         >
-            {/* Snapshot preview or placeholder */}
-            {imageUri && isOnline ? (
-                <View style={styles.streamContainer}>
-                    <Image
-                        source={{ uri: imageUri }}
-                        style={styles.snapshot}
-                        resizeMode="cover"
-                        onLoadEnd={handleLoadEnd}
-                        onError={handleError}
-                    />
-                    {isLoading && (
-                        <View style={styles.bufferingOverlay}>
-                            <ActivityIndicator size="small" color={colors.white} />
-                        </View>
-                    )}
-                    {hasError && (
-                        <View style={styles.placeholderBg}>
-                            <Text style={styles.snText}>{camera.deviceSn}</Text>
-                            <Text style={styles.modelText}>Không thể tải ảnh</Text>
-                        </View>
-                    )}
-                </View>
+            {/* Snapshot preview / Skeleton / Placeholder */}
+            {showSnapshot ? (
+                <Image source={{ uri: localImageUri }} style={styles.snapshot} resizeMode="cover" />
+            ) : showSkeleton ? (
+                <Skeleton width={CARD_WIDTH} height={CARD_HEIGHT} borderRadius={0} />
             ) : (
                 <View style={styles.placeholderBg}>
-                    <Text style={styles.snText}>{camera.deviceSn}</Text>
-                    <Text style={styles.modelText}>{camera.modelCode}</Text>
+                    {showPlaceholder && (
+                        <>
+                            <Text style={styles.snText}>{camera.deviceSn}</Text>
+                            <Text style={styles.modelText}>
+                                {hasError ? 'Không thể tải ảnh' : camera.modelCode}
+                            </Text>
+                        </>
+                    )}
                 </View>
             )}
 
@@ -150,20 +178,9 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
         alignSelf: 'center',
     },
-    streamContainer: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: colors.gray[800],
-    },
     snapshot: {
         width: '100%',
         height: '100%',
-    },
-    bufferingOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.3)',
     },
     placeholderBg: {
         width: '100%',

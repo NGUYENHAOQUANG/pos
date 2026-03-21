@@ -1,45 +1,31 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
 import { aiApi } from '@/features/farm/api/aiApi';
 import type {
-    AIPredictRequest,
-    SeedstockCountingResponse,
-    EstimatedSizeResponse,
-    ShrimpHealthResponse,
+    InferencePredictRequest,
+    InferencePredictResponse,
+    InferenceResultResponse,
 } from '@/features/farm/types/ai.types';
 import { handleError } from '@/shared/utils/errorHandler';
-
-export const useCountSeedstock = (): UseMutationResult<
-    SeedstockCountingResponse,
+export const useInferencePredict = (): UseMutationResult<
+    InferencePredictResponse,
     Error,
-    AIPredictRequest,
+    InferencePredictRequest,
     unknown
 > => {
-    return useMutation<SeedstockCountingResponse, Error, AIPredictRequest>({
-        mutationFn: aiApi.countSeedstock,
+    return useMutation<InferencePredictResponse, Error, InferencePredictRequest>({
+        mutationFn: aiApi.inferencePredict,
         onError: handleError,
     });
 };
 
-export const useEstimateShrimpSize = (): UseMutationResult<
-    EstimatedSizeResponse,
+export const useGetInferenceResult = (): UseMutationResult<
+    InferenceResultResponse,
     Error,
-    AIPredictRequest,
+    string,
     unknown
 > => {
-    return useMutation<EstimatedSizeResponse, Error, AIPredictRequest>({
-        mutationFn: aiApi.estimateSize,
-        onError: handleError,
-    });
-};
-
-export const usePredictShrimpHealth = (): UseMutationResult<
-    ShrimpHealthResponse,
-    Error,
-    AIPredictRequest,
-    unknown
-> => {
-    return useMutation<ShrimpHealthResponse, Error, AIPredictRequest>({
-        mutationFn: aiApi.predictHealth,
+    return useMutation<InferenceResultResponse, Error, string>({
+        mutationFn: aiApi.getInferenceResult,
         onError: handleError,
     });
 };

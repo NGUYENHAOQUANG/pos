@@ -1,18 +1,10 @@
-/**
- * @file AIImagePickerSheet.tsx
- * @description Bottom sheet chọn nguồn ảnh (camera / thư viện) dùng chung cho
- *              tất cả các tính năng AI: kiểm đếm, sức khoẻ tôm, đo kích thước.
- *
- * Đây là phiên bản generic của CountingPickerSheet — title/subtitle có thể
- * tuỳ chỉnh qua props để phù hợp từng feature.
- */
 import React from 'react';
 import {
     View,
     StyleSheet,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     Modal,
-    Pressable,
     Animated,
     Dimensions,
 } from 'react-native';
@@ -125,75 +117,77 @@ export function AIImagePickerSheet({
         <>
             {/* ── Bottom sheet ── */}
             <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-                <Pressable style={styles.backdrop} onPress={onClose}>
-                    <Animated.View
-                        style={[
-                            styles.card,
-                            {
-                                paddingBottom: Math.max(insets.bottom, spacing.lg),
-                                transform: [{ translateY: slideAnim }],
-                            },
-                        ]}
-                    >
-                        <Pressable onPress={e => e.stopPropagation()}>
-                            {/* Handle & title */}
-                            <View style={styles.header}>
-                                <View style={styles.indicator} />
-                                <Text style={styles.title}>{title}</Text>
-                                <Text style={styles.subtitle}>{subtitle}</Text>
-                            </View>
+                <TouchableWithoutFeedback onPress={onClose}>
+                    <View style={styles.backdrop}>
+                        <TouchableWithoutFeedback>
+                            <Animated.View
+                                style={[
+                                    styles.card,
+                                    {
+                                        paddingBottom: Math.max(insets.bottom, spacing.lg),
+                                        transform: [{ translateY: slideAnim }],
+                                    },
+                                ]}
+                            >
+                                {/* Handle & title */}
+                                <View style={styles.header}>
+                                    <View style={styles.indicator} />
+                                    <Text style={styles.title}>{title}</Text>
+                                    <Text style={styles.subtitle}>{subtitle}</Text>
+                                </View>
 
-                            {/* Options */}
-                            <View style={styles.options}>
-                                {/* Camera */}
-                                <TouchableOpacity
-                                    style={styles.optionCard}
-                                    onPress={handleCamera}
-                                    activeOpacity={0.75}
-                                >
-                                    <View style={[styles.iconBox, styles.iconBoxCamera]}>
-                                        <Ionicons name="camera" size={26} color={colors.primary} />
-                                    </View>
-                                    <View style={styles.optionText}>
-                                        <Text style={styles.optionTitle}>Chụp ảnh mới</Text>
-                                        <Text style={styles.optionDesc}>
-                                            Camera có khung căn chỉnh &amp; tự động cắt ảnh
-                                        </Text>
-                                    </View>
-                                    <Ionicons
-                                        name="chevron-forward"
-                                        size={18}
-                                        color={colors.gray[400]}
-                                    />
-                                </TouchableOpacity>
+                                {/* Options */}
+                                <View style={styles.options}>
+                                    {/* Camera */}
+                                    <TouchableOpacity
+                                        style={styles.optionCard}
+                                        onPress={handleCamera}
+                                        activeOpacity={0.75}
+                                    >
+                                        <View style={[styles.iconBox, styles.iconBoxCamera]}>
+                                            <Ionicons name="camera" size={26} color={colors.text} />
+                                        </View>
+                                        <View style={styles.optionText}>
+                                            <Text style={styles.optionTitle}>Chụp ảnh mới</Text>
+                                            <Text style={styles.optionDesc}>
+                                                Camera có khung căn chỉnh &amp; tự động cắt ảnh
+                                            </Text>
+                                        </View>
+                                        <Ionicons
+                                            name="chevron-forward"
+                                            size={18}
+                                            color={colors.gray[400]}
+                                        />
+                                    </TouchableOpacity>
 
-                                <View style={styles.divider} />
+                                    <View style={styles.divider} />
 
-                                {/* Gallery → ImageCropperView */}
-                                <TouchableOpacity
-                                    style={styles.optionCard}
-                                    onPress={handleGallery}
-                                    activeOpacity={0.75}
-                                >
-                                    <View style={[styles.iconBox, styles.iconBoxGallery]}>
-                                        <Ionicons name="images" size={26} color={colors.info} />
-                                    </View>
-                                    <View style={styles.optionText}>
-                                        <Text style={styles.optionTitle}>Chọn từ thư viện</Text>
-                                        <Text style={styles.optionDesc}>
-                                            Chọn ảnh &amp; cắt vùng hình vuông tuỳ ý
-                                        </Text>
-                                    </View>
-                                    <Ionicons
-                                        name="chevron-forward"
-                                        size={18}
-                                        color={colors.gray[400]}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </Pressable>
-                    </Animated.View>
-                </Pressable>
+                                    {/* Gallery → ImageCropperView */}
+                                    <TouchableOpacity
+                                        style={styles.optionCard}
+                                        onPress={handleGallery}
+                                        activeOpacity={0.75}
+                                    >
+                                        <View style={[styles.iconBox, styles.iconBoxGallery]}>
+                                            <Ionicons name="images" size={26} color={colors.text} />
+                                        </View>
+                                        <View style={styles.optionText}>
+                                            <Text style={styles.optionTitle}>Chọn từ thư viện</Text>
+                                            <Text style={styles.optionDesc}>
+                                                Chọn ảnh &amp; cắt vùng hình vuông tuỳ ý
+                                            </Text>
+                                        </View>
+                                        <Ionicons
+                                            name="chevron-forward"
+                                            size={18}
+                                            color={colors.gray[400]}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
             </Modal>
 
             {/* ── ImageCropperView full-screen (sibling Modal, không lồng vào trong) ── */}
@@ -224,21 +218,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.overlay,
         justifyContent: 'flex-end',
+        padding: 16,
     },
     card: {
         backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.xl,
-        borderTopRightRadius: borderRadius.xl,
+        borderRadius: 24,
         paddingTop: spacing.sm,
+        paddingBottom: 24,
+        padding: spacing.md,
         overflow: 'hidden',
     },
     header: {
         alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.lg,
+        paddingBottom: spacing.md,
     },
     indicator: {
-        width: 40,
+        width: 60,
         height: 4,
         backgroundColor: colors.gray[300],
         borderRadius: 2,
@@ -257,8 +252,7 @@ const styles = StyleSheet.create({
         lineHeight: 18,
     },
     options: {
-        marginHorizontal: spacing.md,
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.border,
         overflow: 'hidden',
@@ -271,18 +265,19 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
     },
     iconBox: {
-        width: 50,
-        height: 50,
+        width: 44,
+        height: 44,
         borderRadius: borderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,
+        backgroundColor: colors.gray[100],
     },
     iconBoxCamera: {
-        backgroundColor: colors.primary + '15',
+        backgroundColor: colors.gray[100],
     },
     iconBoxGallery: {
-        backgroundColor: colors.info + '15',
+        backgroundColor: colors.gray[100],
     },
     optionText: {
         flex: 1,
@@ -300,7 +295,6 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: colors.border,
-        marginLeft: 50 + spacing.md * 2,
+        backgroundColor: colors.gray[100],
     },
 });

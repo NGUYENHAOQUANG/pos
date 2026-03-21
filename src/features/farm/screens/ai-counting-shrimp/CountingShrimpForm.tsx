@@ -6,18 +6,17 @@ import { TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { Loading } from '@/shared/components/ui/Loading';
-import { DotingOverlay, DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
+import type { DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
 import type { CountingResult } from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { CountingResultSection } from '@/features/farm/components/ai-counting-shrimp/CountingResultSection';
 import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
 import { AIImagePickerSheet } from '@/features/farm/components/ai-common/AIImagePickerSheet';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import { Button } from '@/shared/components/buttons/Button';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { CameraView } from '@/shared/components/camera-cropper';
 import { useCameraCapture } from '@/features/farm/hooks/camera-capture/useCameraCapture';
 import type { CapturedImage } from '@/features/farm/hooks/camera-capture/useCameraCapture';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface CountingShrimpFormProps {
     isLoading: boolean;
@@ -45,18 +44,19 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
 
     // ──── Image state ────
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const [processedImageUri, setProcessedImageUri] = useState<string | null>(null);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
-    const [detections, setDetections] = useState<DetectionDot[]>([]);
+    const [_detections, setDetections] = useState<DetectionDot[]>([]);
 
     // ──── UI state ────
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [isPickerSheetOpen, setIsPickerSheetOpen] = useState(false);
-    const insets = useSafeAreaInsets();
 
     // ──── Camera logic ────
     const handleImageCaptured = useCallback((img: CapturedImage) => {
         setImageUri(img.uri);
+        setProcessedImageUri(null);
         setImageDimensions({ width: img.width, height: img.height });
         setDetections([]);
         setCurrentImageCount(0);
@@ -77,6 +77,7 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
         ) => {
             onImageChange();
             setImageUri(uri);
+            setProcessedImageUri(null);
             if (dimensions?.width && dimensions?.height) {
                 setImageDimensions(dimensions);
             } else {
@@ -101,6 +102,10 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
             setDetections(lastCountingResult.detections);
             setCountTimes(c => c + 1);
             setResult(prev => String(parseInt(prev || '0', 10) + lastCountingResult.count));
+            // Use processed image if available
+            if (lastCountingResult.processedImageUri) {
+                setProcessedImageUri(lastCountingResult.processedImageUri);
+            }
             Toast.show(TOAST_MESSAGES_CONFIG.AI_COUNTING.SUCCESS);
         }
     }, [lastCountingResult, currentImageCount]);
@@ -123,6 +128,7 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
         lastCompletedCount.current = 0;
         setDetections([]);
         setImageUri(null);
+        setProcessedImageUri(null);
         setImageDimensions({ width: 1, height: 1 });
         setIsConfirmVisible(false);
         onImageChange();
@@ -180,36 +186,21 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                         <View style={styles.card}>
                             <SelectionInfoBox title="Hình ảnh xử lý">
                                 <AIImageProcessingSection
-                                    imageUri={imageUri}
+                                    imageUri={processedImageUri || imageUri}
                                     imageDimensions={imageDimensions}
                                     displayDimensions={displayDimensions}
                                     onImageSelect={handleImageSelect}
                                     onTakePhoto={camera.openCamera}
                                     onOpenPickerSheet={() => setIsPickerSheetOpen(true)}
                                     onImageAreaLayout={size => setDisplayDimensions(size)}
-                                >
-                                    {imageUri && detections.length > 0 && (
-                                        <DotingOverlay
-                                            detections={detections}
-                                            displayWidth={displayDimensions.width}
-                                            displayHeight={
-                                                imageDimensions.width > 0 &&
-                                                imageDimensions.height > 0
-                                                    ? displayDimensions.width /
-                                                      (imageDimensions.width /
-                                                          imageDimensions.height)
-                                                    : displayDimensions.width
-                                            }
-                                            originalWidth={imageDimensions.width}
-                                            originalHeight={imageDimensions.height}
-                                        />
-                                    )}
-                                </AIImageProcessingSection>
+                                />
+                                {/* DotingOverlay removed: processed images from AI server already contain annotations */}
                             </SelectionInfoBox>
 
                             <SelectionInfoBox title="Kết quả kiểm tra từ AI">
                                 <CountingResultSection
                                     result={result}
+                                    currentCheckCount={currentImageCount}
                                     currentImageCount={previousImageCount}
                                     countTimes={countTimes}
                                     showAddMore={showAddMore}
@@ -217,11 +208,15 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                                 />
                             </SelectionInfoBox>
 
-                            <ConfirmationModal
+                            <ConfirmationModalUI
                                 visible={isConfirmVisible}
                                 onConfirm={handleConfirmReset}
                                 onCancel={() => setIsConfirmVisible(false)}
-                                type="counting_reset"
+                                title="Xác nhận đếm lại"
+                                message="Đếm lại sẽ ghi đè lên TẤT CẢ các lần đếm trước đó, bạn có chắc chắn muốn đếm lại?"
+                                confirmText="Đồng ý"
+                                cancelText="Hủy"
+                                showSuccessToast={false}
                             />
                         </View>
                     </ScrollView>
@@ -240,78 +235,67 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                     }}
                 />
 
-                <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                    <View style={styles.checkCountRow}>
-                        <Text style={styles.checkCountLabel}>Số lần kiểm tra</Text>
-                        <Text style={styles.checkCountValue}>{countTimes}</Text>
-                    </View>
-                    <View style={styles.buttonRow}>
-                        {countTimes === 0 ? (
-                            <>
-                                <Button
-                                    title="Chụp lại"
-                                    variant="outline"
-                                    onPress={handleRetakePhoto}
-                                    style={[styles.flexButton, { borderColor: colors.border }]}
-                                    textStyle={{ color: colors.textSecondary }}
-                                />
-                                <Button
-                                    title="Bắt đầu đếm"
-                                    variant="primary"
-                                    onPress={handleRequestStartCounting}
-                                    style={styles.flexButton}
-                                    disabled={!imageUri}
-                                />
-                            </>
-                        ) : (
-                            <>
-                                <Button
-                                    title="Đếm lại"
-                                    variant="outline"
-                                    onPress={handleReset}
-                                    style={[styles.flexButton, { borderColor: colors.border }]}
-                                    textStyle={{ color: colors.textSecondary }}
-                                />
-                                <Button
-                                    title="Lưu kết quả"
-                                    variant="primary"
-                                    onPress={() => onSave(result)}
-                                    style={styles.flexButton}
-                                />
-                            </>
-                        )}
-                    </View>
+                <View style={styles.checkCountRow}>
+                    <Text style={styles.checkCountLabel}>Số lần kiểm tra</Text>
+                    <Text style={styles.checkCountValue}>{countTimes}</Text>
                 </View>
+                {countTimes === 0 ? (
+                    <ButtonBar
+                        mode="double"
+                        secondaryTitle="Chụp lại"
+                        primaryTitle="Bắt đầu đếm"
+                        onSecondaryPress={handleRetakePhoto}
+                        onPrimaryPress={handleRequestStartCounting}
+                        primaryButtonDisabled={!imageUri}
+                        equalWidth
+                    />
+                ) : (
+                    <ButtonBar
+                        mode="double"
+                        secondaryTitle="Đếm lại"
+                        primaryTitle="Lưu kết quả"
+                        onSecondaryPress={handleReset}
+                        onPrimaryPress={() => onSave(result)}
+                        equalWidth
+                    />
+                )}
             </Loading>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.backgroundPrimary },
-    content: { flex: 1 },
-    scrollContent: { paddingBottom: 100 },
-    card: { backgroundColor: colors.white, marginTop: 8 },
-    footer: {
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    content: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 100,
+    },
+    card: {
         backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        paddingTop: 16,
+        marginTop: 8,
     },
     checkCountRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        marginBottom: 12,
+        paddingTop: 12,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
     },
-    checkCountLabel: { fontSize: 16, color: colors.textSecondary },
-    checkCountValue: { fontSize: 16, fontWeight: '500', color: colors.text },
-    buttonRow: {
-        flexDirection: 'row',
-        gap: 12,
-        paddingHorizontal: spacing.md,
-        paddingBottom: 4,
+    checkCountLabel: {
+        fontSize: 16,
+        color: colors.textSecondary,
     },
-    flexButton: { flex: 1 },
+    checkCountValue: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.text,
+    },
 });

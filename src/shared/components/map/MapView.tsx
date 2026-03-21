@@ -1,14 +1,3 @@
-/**
- * @file MapView.tsx
- * @description Reusable Map component using OpenStreetMap (free, no API key required)
- * @author Auto
- * @created 2025-01-27
- *
- * @note This component requires react-native-webview to be installed:
- * npm install react-native-webview
- *
- * For iOS: cd ios && pod install
- */
 import React, { useState, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';

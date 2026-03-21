@@ -2,35 +2,38 @@ import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import type { IApiResponse } from '@/shared/types/common.types';
 import type {
-    AIPredictRequest,
-    SeedstockCountingResponse,
-    EstimatedSizeResponse,
-    ShrimpHealthResponse,
+    InferencePredictRequest,
+    InferencePredictResponse,
+    InferenceResultResponse,
 } from '@/features/farm/types/ai.types';
 
 export const aiApi = {
-    countSeedstock: async (data: AIPredictRequest): Promise<SeedstockCountingResponse> => {
-        const response = await apiClient.post<IApiResponse<SeedstockCountingResponse>>(
-            API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
-            data,
-            { timeout: 60000 }
+    inferencePredict: async (data: InferencePredictRequest): Promise<InferencePredictResponse> => {
+        const formData = new FormData();
+        formData.append('Image', {
+            uri: data.Image.uri,
+            type: data.Image.type,
+            name: data.Image.name,
+        } as unknown as Blob);
+        formData.append('ZoneId', data.ZoneId);
+        formData.append('ModuleId', data.ModuleId);
+        formData.append('ClientTimestamp', data.ClientTimestamp);
+
+        const response = await apiClient.post<IApiResponse<InferencePredictResponse>>(
+            API_ENDPOINTS.INFERENCE.PREDICT,
+            formData,
+            {
+                timeout: 60000,
+                headers: { 'Content-Type': 'multipart/form-data' },
+            }
         );
-        return response.data?.data || { totalCount: 0, detections: [] };
+        return response.data?.data || { requestId: '', imageId: '', status: '', message: '' };
     },
-    estimateSize: async (data: AIPredictRequest): Promise<EstimatedSizeResponse> => {
-        const response = await apiClient.post<IApiResponse<EstimatedSizeResponse>>(
-            API_ENDPOINTS.AI.ESTIMATED_SIZE,
-            data,
+    getInferenceResult: async (requestId: string): Promise<InferenceResultResponse> => {
+        const response = await apiClient.get<IApiResponse<InferenceResultResponse>>(
+            API_ENDPOINTS.INFERENCE.GET_RESULT(requestId),
             { timeout: 60000 }
         );
-        return response.data?.data || {};
-    },
-    predictHealth: async (data: AIPredictRequest): Promise<ShrimpHealthResponse> => {
-        const response = await apiClient.post<IApiResponse<ShrimpHealthResponse>>(
-            API_ENDPOINTS.AI.SHRIMP_HEALTH,
-            data,
-            { timeout: 60000 }
-        );
-        return response.data?.data || { results: [] };
+        return response.data?.data || ({} as InferenceResultResponse);
     },
 };

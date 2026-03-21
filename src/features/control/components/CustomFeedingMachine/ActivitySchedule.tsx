@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import IconAdd from 'react-native-vector-icons/Ionicons';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import ModalAddTurn from '@/features/control/components/CustomFeedingMachine/ModalAddTurn';
 import { AddTurnModalUI } from '@/features/control/components/CustomFeedingMachine/AddTurnModalUI';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { colors } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
+import { deviceApi } from '@/features/control/api/deviceApi';
+import Toast from 'react-native-toast-message';
 
 const MAX_TURNS = 15;
 
@@ -31,18 +34,16 @@ export default function ActivitySchedule({
     titleStyle,
 }: ActivityScheduleProps) {
     const [isModalVisible, setModalVisible] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<ScheduleItem | null>(null);
 
-    // Mở modal
     const openAddModal = () => {
         setModalVisible(true);
     };
 
-    // Đóng modal
     const closeAddModal = () => {
         setModalVisible(false);
     };
 
-    // Xác nhận thêm từ Modal
     const handleConfirmAdd = (startTime: Date | null, endTime: Date | null) => {
         const newTurn: ScheduleItem = {
             id: Date.now().toString(),
@@ -54,12 +55,38 @@ export default function ActivitySchedule({
         closeAddModal();
     };
 
-    // Xóa lượt
-    const handleDeleteTurn = (id: string) => {
-        onUpdateSchedules(schedules.filter(item => item.id !== id));
-    };
+    // Show confirmation modal before deleting
+    const handleDeletePress = useCallback((item: ScheduleItem) => {
+        setDeleteTarget(item);
+    }, []);
 
-    // Sửa giờ trực tiếp trên danh sách
+    // Confirm delete — call API for existing schedules, remove from list
+    const handleConfirmDelete = useCallback(async () => {
+        if (!deleteTarget) return;
+
+        // Only call API for schedules that exist on server (not new ones)
+        if (!deleteTarget.isNew) {
+            try {
+                await deviceApi.deleteSchedule(deleteTarget.id);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đã xóa lịch trình',
+                });
+            } catch {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Không thể xóa lịch trình',
+                });
+                setDeleteTarget(null);
+                return;
+            }
+        }
+
+        onUpdateSchedules(schedules.filter(item => item.id !== deleteTarget.id));
+        setDeleteTarget(null);
+    }, [deleteTarget, schedules, onUpdateSchedules]);
+
+    // Edit time directly on the list
     const handleTimeChange = (id: string, type: 'start' | 'end', newDate: Date) => {
         const updatedSchedules = schedules.map(item => {
             if (item.id === id) {
@@ -85,7 +112,6 @@ export default function ActivitySchedule({
                     </Text>
                 </View>
 
-                {/* Danh sách các lượt đã thêm */}
                 {schedules.map((item, index) => (
                     <View key={item.id} style={styles.rowItem}>
                         <Text style={styles.labelTurn}>Lần {index + 1}</Text>
@@ -108,7 +134,7 @@ export default function ActivitySchedule({
 
                         <TouchableOpacity
                             style={styles.deleteButton}
-                            onPress={() => handleDeleteTurn(item.id)}
+                            onPress={() => handleDeletePress(item)}
                             activeOpacity={0.7}
                         >
                             <DeleteIcon width={20} height={20} color={colors.text} />
@@ -116,7 +142,6 @@ export default function ActivitySchedule({
                     </View>
                 ))}
 
-                {/* Nút mở Popup thêm lượt - hidden when max reached */}
                 {!isMaxReached && (
                     <Button
                         title="Thêm lượt"
@@ -128,12 +153,24 @@ export default function ActivitySchedule({
                 )}
             </View>
 
-            {/* --- MODAL POPUP --- */}
+            {/* Add turn modal */}
             <AddTurnModalUI
                 visible={isModalVisible}
                 onClose={closeAddModal}
                 onConfirm={handleConfirmAdd}
                 turnIndex={schedules.length + 1}
+            />
+
+            {/* Delete confirmation modal */}
+            <ConfirmationModalUI
+                visible={!!deleteTarget}
+                title="Xóa lịch trình"
+                message="Bạn có chắc chắn muốn xóa lịch trình này không?"
+                confirmText="Xóa"
+                cancelText="Hủy"
+                showSuccessToast={false}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setDeleteTarget(null)}
             />
         </View>
     );
@@ -162,7 +199,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: colors.textSecondary,
     },
-
     card: {
         backgroundColor: colors.white,
         padding: 16,
