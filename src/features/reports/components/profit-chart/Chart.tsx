@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Rect, Path, Text as SvgText } from 'react-native-svg';
 import { colors } from '@/styles';
 import { PADDING_LEFT, PADDING_TOP } from '@/features/reports/components/profit-chart/chartData';
@@ -26,7 +27,17 @@ const formatAxisValue = (value: number) => {
     return billionVal.toString();
 };
 
+const formatTooltipValue = (value: number) => {
+    return value.toLocaleString('vi-VN') + ' đ';
+};
+
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {
+    const [selectedBarIndex, setSelectedBarIndex] = useState<number | null>(null);
+
+    const handleBarPress = useCallback((index: number) => {
+        setSelectedBarIndex(prev => (prev === index ? null : index));
+    }, []);
+
     // ====================================================================
     // DATA PROCESSING
     // ====================================================================
@@ -78,6 +89,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
         // --- Per-date bar + line data ---
         const barData = data.map(item => ({
             day: parseDateToDay(item.date),
+            date: item.date,
             harvested: item.actualRevenueOnDate,
             unharvested: item.estimatedRevenueFromRemainingStockOnDate,
             cost: item.materialCostOnDate,
@@ -143,6 +155,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
     // Bar width — proportional but capped
     const barWidth = Math.max(2, Math.min(8, actualChartWidth / (barData.length * 2)));
+    const hitAreaWidth = Math.max(barWidth * 3, 20); // Wider hit area for easier tapping
 
     // --- Profit line path ---
     const profitLinePath = useMemo(() => {
@@ -162,6 +175,10 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
     const dynamicHeight = bottomY + 40;
     const svgWidth = actualChartWidth + PADDING_LEFT + 40;
 
+    // Tooltip position calculation
+    const selectedTooltipData = selectedBarIndex !== null ? barData[selectedBarIndex] : null;
+    const tooltipX = selectedTooltipData ? getX(selectedTooltipData.day) : 0;
+
     return (
         <View style={styles.chartContainer}>
             <View style={{ position: 'relative', height: dynamicHeight }}>
@@ -171,119 +188,218 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingLeft: SCROLL_PADDING }}
                 >
-                    <Svg width={svgWidth} height={dynamicHeight}>
-                        {/* Horizontal grid lines */}
-                        {getYAxisLines().map(value => {
-                            const y = getY(value);
-                            return (
+                    <View style={{ width: svgWidth, height: dynamicHeight }}>
+                        <Svg width={svgWidth} height={dynamicHeight}>
+                            {/* Horizontal grid lines */}
+                            {getYAxisLines().map(value => {
+                                const y = getY(value);
+                                return (
+                                    <Line
+                                        key={`grid-${value}`}
+                                        x1={0}
+                                        y1={y}
+                                        x2={svgWidth}
+                                        y2={y}
+                                        stroke={colors.gray[200]}
+                                        strokeWidth={1}
+                                    />
+                                );
+                            })}
+
+                            {/* ---- Stacked Bars ---- */}
+                            {barData.map((d, i) => {
+                                const x = getX(d.day) - barWidth / 2;
+
+                                // Positive bars (above zero): harvested + unharvested stacked
+                                const harvestedH = Math.abs(getY(0) - getY(d.harvested));
+                                const unharvestedH = Math.abs(getY(0) - getY(d.unharvested));
+
+                                // Negative bar (below zero): cost
+                                const costH = Math.abs(getY(0) - getY(d.cost));
+
+                                return (
+                                    <React.Fragment key={`bar-${i}`}>
+                                        {/* Harvested bar (orange) — from zero going up */}
+                                        {d.harvested > 0 && (
+                                            <Rect
+                                                x={x}
+                                                y={zeroLineY - harvestedH}
+                                                width={barWidth}
+                                                height={harvestedH}
+                                                fill={BAR_COLORS.harvested}
+                                            />
+                                        )}
+                                        {/* Unharvested bar (green) — stacked on top of harvested */}
+                                        {d.unharvested > 0 && (
+                                            <Rect
+                                                x={x}
+                                                y={zeroLineY - harvestedH - unharvestedH}
+                                                width={barWidth}
+                                                height={unharvestedH}
+                                                fill={BAR_COLORS.unharvested}
+                                            />
+                                        )}
+                                        {/* Cost bar (red) — from zero going down */}
+                                        {d.cost > 0 && (
+                                            <Rect
+                                                x={x}
+                                                y={zeroLineY}
+                                                width={barWidth}
+                                                height={costH}
+                                                fill={BAR_COLORS.cost}
+                                            />
+                                        )}
+                                        {/* Invisible hit area for tapping */}
+                                        <Rect
+                                            x={getX(d.day) - hitAreaWidth / 2}
+                                            y={PADDING_TOP}
+                                            width={hitAreaWidth}
+                                            height={chartHeight}
+                                            fill="transparent"
+                                            onPress={() => handleBarPress(i)}
+                                        />
+                                    </React.Fragment>
+                                );
+                            })}
+
+                            {/* ---- Profit line (blue) ---- */}
+                            {profitLinePath.length > 0 && (
+                                <Path
+                                    d={profitLinePath}
+                                    fill="none"
+                                    stroke={PROFIT_LINE_COLOR}
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            )}
+
+                            {/* X-axis tick marks */}
+                            {DAY_MARKS.map(day => {
+                                const x = getX(day);
+                                const axisY = getY(-Y_MAX);
+                                return (
+                                    <Line
+                                        key={`x-tick-${day}`}
+                                        x1={x}
+                                        y1={axisY}
+                                        x2={x}
+                                        y2={axisY + 8}
+                                        stroke="black"
+                                        strokeOpacity={0.25}
+                                        strokeWidth={0.5}
+                                    />
+                                );
+                            })}
+
+                            {/* X-axis labels */}
+                            {DAY_MARKS.map((day, index) => {
+                                const x = getX(day);
+                                const axisY = getY(-Y_MAX);
+                                const y = axisY + 20;
+                                return (
+                                    <SvgText
+                                        key={`x-label-${day}`}
+                                        x={x}
+                                        y={y}
+                                        fill={colors.textSecondary}
+                                        fontSize={12}
+                                        textAnchor="middle"
+                                    >
+                                        {DAY_LABELS[index]}
+                                    </SvgText>
+                                );
+                            })}
+
+                            {/* Selected bar highlight line */}
+                            {selectedBarIndex !== null && (
                                 <Line
-                                    key={`grid-${value}`}
-                                    x1={0}
-                                    y1={y}
-                                    x2={svgWidth}
-                                    y2={y}
-                                    stroke={colors.gray[200]}
+                                    x1={tooltipX}
+                                    y1={PADDING_TOP}
+                                    x2={tooltipX}
+                                    y2={PADDING_TOP + chartHeight}
+                                    stroke={colors.gray[400]}
                                     strokeWidth={1}
+                                    strokeDasharray="4,3"
                                 />
-                            );
-                        })}
+                            )}
+                        </Svg>
 
-                        {/* ---- Stacked Bars ---- */}
-                        {barData.map((d, i) => {
-                            const x = getX(d.day) - barWidth / 2;
-
-                            // Positive bars (above zero): harvested + unharvested stacked
-                            const harvestedH = Math.abs(getY(0) - getY(d.harvested));
-                            const unharvestedH = Math.abs(getY(0) - getY(d.unharvested));
-
-                            // Negative bar (below zero): cost
-                            const costH = Math.abs(getY(0) - getY(d.cost));
-
-                            return (
-                                <React.Fragment key={`bar-${i}`}>
-                                    {/* Harvested bar (orange) — from zero going up */}
-                                    {d.harvested > 0 && (
-                                        <Rect
-                                            x={x}
-                                            y={zeroLineY - harvestedH}
-                                            width={barWidth}
-                                            height={harvestedH}
-                                            fill={BAR_COLORS.harvested}
-                                        />
-                                    )}
-                                    {/* Unharvested bar (green) — stacked on top of harvested */}
-                                    {d.unharvested > 0 && (
-                                        <Rect
-                                            x={x}
-                                            y={zeroLineY - harvestedH - unharvestedH}
-                                            width={barWidth}
-                                            height={unharvestedH}
-                                            fill={BAR_COLORS.unharvested}
-                                        />
-                                    )}
-                                    {/* Cost bar (red) — from zero going down */}
-                                    {d.cost > 0 && (
-                                        <Rect
-                                            x={x}
-                                            y={zeroLineY}
-                                            width={barWidth}
-                                            height={costH}
-                                            fill={BAR_COLORS.cost}
-                                        />
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        {/* ---- Profit line (blue) ---- */}
-                        {profitLinePath.length > 0 && (
-                            <Path
-                                d={profitLinePath}
-                                fill="none"
-                                stroke={PROFIT_LINE_COLOR}
-                                strokeWidth={2}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        )}
-
-                        {/* X-axis tick marks */}
-                        {DAY_MARKS.map(day => {
-                            const x = getX(day);
-                            const axisY = getY(-Y_MAX);
-                            return (
-                                <Line
-                                    key={`x-tick-${day}`}
-                                    x1={x}
-                                    y1={axisY}
-                                    x2={x}
-                                    y2={axisY + 8}
-                                    stroke="black"
-                                    strokeOpacity={0.25}
-                                    strokeWidth={0.5}
-                                />
-                            );
-                        })}
-
-                        {/* X-axis labels */}
-                        {DAY_MARKS.map((day, index) => {
-                            const x = getX(day);
-                            const axisY = getY(-Y_MAX);
-                            const y = axisY + 20;
-                            return (
-                                <SvgText
-                                    key={`x-label-${day}`}
-                                    x={x}
-                                    y={y}
-                                    fill={colors.textSecondary}
-                                    fontSize={12}
-                                    textAnchor="middle"
-                                >
-                                    {DAY_LABELS[index]}
-                                </SvgText>
-                            );
-                        })}
-                    </Svg>
+                        {/* Tooltip overlay (rendered in View layer for better styling) */}
+                        {selectedBarIndex !== null &&
+                            selectedTooltipData &&
+                            (() => {
+                                const TOOLTIP_WIDTH = 170;
+                                const isOverflowRight = tooltipX + 8 + TOOLTIP_WIDTH > svgWidth;
+                                return (
+                                    <View
+                                        style={[
+                                            styles.barTooltip,
+                                            isOverflowRight
+                                                ? {
+                                                      right: svgWidth - tooltipX + 8,
+                                                      top: PADDING_TOP + 4,
+                                                  }
+                                                : { left: tooltipX + 8, top: PADDING_TOP + 4 },
+                                        ]}
+                                    >
+                                        <Text style={styles.barTooltipTitle}>
+                                            {selectedTooltipData.date}
+                                        </Text>
+                                        <View style={styles.barTooltipRow}>
+                                            <View
+                                                style={[
+                                                    styles.barTooltipDot,
+                                                    { backgroundColor: BAR_COLORS.harvested },
+                                                ]}
+                                            />
+                                            <Text style={styles.barTooltipLabel}>Thu hoạch:</Text>
+                                            <Text style={styles.barTooltipValue}>
+                                                {formatTooltipValue(selectedTooltipData.harvested)}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.barTooltipRow}>
+                                            <View
+                                                style={[
+                                                    styles.barTooltipDot,
+                                                    { backgroundColor: BAR_COLORS.unharvested },
+                                                ]}
+                                            />
+                                            <Text style={styles.barTooltipLabel}>Chưa thu:</Text>
+                                            <Text style={styles.barTooltipValue}>
+                                                {formatTooltipValue(
+                                                    selectedTooltipData.unharvested
+                                                )}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.barTooltipRow}>
+                                            <View
+                                                style={[
+                                                    styles.barTooltipDot,
+                                                    { backgroundColor: BAR_COLORS.cost },
+                                                ]}
+                                            />
+                                            <Text style={styles.barTooltipLabel}>Chi phí:</Text>
+                                            <Text style={styles.barTooltipValue}>
+                                                {formatTooltipValue(selectedTooltipData.cost)}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.barTooltipRow}>
+                                            <View
+                                                style={[
+                                                    styles.barTooltipDot,
+                                                    { backgroundColor: PROFIT_LINE_COLOR },
+                                                ]}
+                                            />
+                                            <Text style={styles.barTooltipLabel}>Lợi nhuận:</Text>
+                                            <Text style={styles.barTooltipValue}>
+                                                {formatTooltipValue(selectedTooltipData.profit)}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                );
+                            })()}
+                    </View>
                 </ScrollView>
             </View>
 
@@ -326,5 +442,47 @@ const styles = StyleSheet.create({
     chartContainer: {
         backgroundColor: colors.white,
         position: 'relative',
+    },
+    barTooltip: {
+        position: 'absolute',
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 6,
+        zIndex: 20,
+        minWidth: 160,
+    },
+    barTooltipTitle: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.text,
+        marginBottom: 6,
+    },
+    barTooltipRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 3,
+    },
+    barTooltipDot: {
+        width: 8,
+        height: 3,
+        borderRadius: 1.5,
+        marginRight: 6,
+    },
+    barTooltipLabel: {
+        fontSize: 11,
+        color: colors.textSecondary,
+        marginRight: 4,
+    },
+    barTooltipValue: {
+        fontSize: 11,
+        fontWeight: '500',
+        color: colors.text,
+        flexShrink: 1,
     },
 });

@@ -23,5 +23,6 @@ export const useCostDonut = ({
                 CycleId,
             }),
         enabled: Boolean(ZoneId) && enabled,
+        staleTime: 0,
     });
 };

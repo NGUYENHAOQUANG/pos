@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -49,6 +49,29 @@ export const EditEnvironmentScreens: React.FC = () => {
     const [lowerLimit, setLowerLimit] = useState(getInitialMin());
     const [upperLimit, setUpperLimit] = useState(getInitialMax());
     const [isAlertEnabled, setIsAlertEnabled] = useState(getInitialAlertEnabled());
+
+    const initialName = parameter?.name || '';
+    const initialMin = getInitialMin();
+    const initialMax = getInitialMax();
+    const initialAlert = getInitialAlertEnabled();
+
+    const hasChanges = useMemo(() => {
+        return (
+            name !== initialName ||
+            lowerLimit !== initialMin ||
+            upperLimit !== initialMax ||
+            isAlertEnabled !== initialAlert
+        );
+    }, [
+        name,
+        lowerLimit,
+        upperLimit,
+        isAlertEnabled,
+        initialName,
+        initialMin,
+        initialMax,
+        initialAlert,
+    ]);
 
     const addChange = useEnvironmentSettingStore(state => state.addChange);
 
@@ -129,7 +152,8 @@ export const EditEnvironmentScreens: React.FC = () => {
                     secondaryTitle="Thiết lập lại"
                     onPrimaryPress={handleSave}
                     onSecondaryPress={handleReset}
-                    primaryButtonDisabled={false}
+                    primaryButtonDisabled={!hasChanges}
+                    secondaryButtonDisabled={!hasChanges}
                     secondaryButtonStyle={styles.resetButton}
                     secondaryButtonTextStyle={styles.resetButtonText}
                 />
