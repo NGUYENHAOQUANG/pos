@@ -78,6 +78,7 @@ export const useInfiniteWarehouseItems = (
                 Page: pageParam,
                 PageSize: pageSize,
             };
+            console.log('currentParams', currentParams);
             const response = await warehouseApi.getItems(warehouseId, currentParams);
             if (response.success && response.data?.items) {
                 return response.data;

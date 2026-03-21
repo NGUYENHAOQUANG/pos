@@ -28,7 +28,8 @@ import {
 } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { documentApi } from '@/features/material/api/documentApi';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { MaterialGroupType } from '@/features/material/types/material.types';
+import { SpecificType } from '@/features/material/types/warehouse.types';
+
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -417,10 +418,11 @@ export const AddSiphonScreen: React.FC = () => {
 
                         <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
 
+                        {/* 3. Chọn vật tư */}
                         <MaterialSelectionBox
                             selectedMaterials={selectedMaterials}
                             onMaterialsChange={setSelectedMaterials}
-                            groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
+                            specificType={SpecificType.Normal}
                         />
 
                         <SelectionNotesBox notes={notes} onNotesChange={setNotes} />

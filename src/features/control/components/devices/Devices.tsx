@@ -131,7 +131,7 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                         <TouchableOpacity
                             style={[
                                 styles.modeBadge,
-                                getModeLabel(effectiveMode) ? { gap: 4 } : { gap: 0 },
+                                getModeLabel(effectiveMode) ? { gap: 2 } : { gap: 0 },
                             ]}
                             activeOpacity={effectiveMode === EControlMode.LOCAL ? 0.7 : 1}
                             onPress={

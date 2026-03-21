@@ -41,8 +41,8 @@ import {
     useDeleteWaterSupplyRecord,
 } from '@/features/farm/hooks/useWaterChangeRecords';
 import { CreateWaterSupplyCommand } from '@/features/farm/types/waterChange.types';
+import { SpecificType } from '@/features/material/types/warehouse.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { MaterialGroupType } from '@/features/material/types/material.types';
 
 import { documentApi } from '@/features/material/api/documentApi';
 import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
@@ -430,7 +430,7 @@ export const WaterSupplyScreen = () => {
                     <MaterialSelectionBox
                         selectedMaterials={selectedMaterials}
                         onMaterialsChange={setSelectedMaterials}
-                        groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
+                        specificType={SpecificType.Normal}
                     />
 
                     {/* 4. Ghi chú */}

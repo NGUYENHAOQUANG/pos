@@ -325,11 +325,10 @@ export const AppStack: React.FC = () => {
                 name="CameraPlayer"
                 component={VideoPlayerScreen}
                 options={{
-                    headerShown: false,
                     gestureEnabled: false,
-                    presentation: 'fullScreenModal',
-                    animation: 'none',
-                    contentStyle: { backgroundColor: '#000' },
+                    animation: 'fade',
+                    // animationDuration: 200,
+                    // contentStyle: { backgroundColor: '#000' },
                 }}
             />
 

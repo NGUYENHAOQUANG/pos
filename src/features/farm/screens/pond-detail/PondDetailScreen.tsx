@@ -46,6 +46,7 @@ export const PondDetailScreen: React.FC = () => {
     useEffect(() => {
         console.log('pondId', pondId);
         console.log('zoneId', zoneId);
+        // console.log('warehouseId', warehouseId);
     }, [pondId, zoneId]);
 
     const [selectedTab, setSelectedTab] = useState<string>('work');

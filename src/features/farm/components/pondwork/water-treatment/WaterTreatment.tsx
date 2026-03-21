@@ -3,8 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
-import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialSelectionBox } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
+import { SpecificType } from '@/features/material/types/warehouse.types';
 
 interface WaterTreatmentProps {
     executionDate: Date;
@@ -49,7 +49,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
             <MaterialSelectionBox
                 selectedMaterials={selectedMaterials}
                 onMaterialsChange={onSelectedMaterialsChange}
-                groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
+                specificType={SpecificType.Normal}
             />
 
             <SelectionNotesBox notes={note} onNotesChange={onNoteChange} />

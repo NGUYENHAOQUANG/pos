@@ -2,7 +2,10 @@ import { useMemo } from 'react';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useInfiniteWarehouseItems, useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { IMaterial } from '@/features/material/types/material.types';
-import { GetWarehouseItemsQueryParams } from '@/features/material/types/warehouse.types';
+import {
+    GetWarehouseItemsQueryParams,
+    SpecificType,
+} from '@/features/material/types/warehouse.types';
 
 interface UseFilteredWarehouseMaterialsOptions {
     /** Filter by material group IDs */
@@ -11,6 +14,8 @@ interface UseFilteredWarehouseMaterialsOptions {
     materialTypeIds?: string[];
     /** Search text */
     searchText?: string;
+    /** Filter by specific type (Normal, ShrimpSeed, ShrimpFeed) */
+    specificType?: SpecificType;
 }
 
 /**
@@ -37,9 +42,17 @@ export const useFilteredWarehouseMaterials = (options?: UseFilteredWarehouseMate
         if (options?.searchText?.trim()) {
             params.SearchText = options.searchText.trim();
         }
+        if (options?.specificType) {
+            params.SpecificType = options.specificType;
+        }
 
         return params;
-    }, [options?.materialGroupIds, options?.materialTypeIds, options?.searchText]);
+    }, [
+        options?.materialGroupIds,
+        options?.materialTypeIds,
+        options?.searchText,
+        options?.specificType,
+    ]);
 
     const {
         data: warehouseItems = [],
@@ -52,6 +65,8 @@ export const useFilteredWarehouseMaterials = (options?: UseFilteredWarehouseMate
     } = useInfiniteWarehouseItems(defaultWarehouseId, queryParams, {
         enabled: !!defaultWarehouseId,
     });
+
+    console.log('warehouseItems', warehouseItems);
 
     const materials: IMaterial[] = useMemo(() => {
         return warehouseItems.map(
