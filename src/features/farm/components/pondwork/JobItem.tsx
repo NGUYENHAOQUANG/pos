@@ -76,7 +76,7 @@ export const JOB_CONFIG: Record<JobType, JobConfig> = {
     SIPHON: {
         icon: IconXyPhong,
         backgroundColor: colors.blue[50],
-        defaultTitle: 'Xi - phông',
+        defaultTitle: 'Xi - phông(Siphon)',
     },
     TROUBLESHOOTING: {
         icon: IconTroubleshooting,

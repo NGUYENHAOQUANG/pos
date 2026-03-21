@@ -51,6 +51,8 @@ export interface BaseLogScreenProps {
     rightIcon?: ReactNode;
     /** Right press handler */
     onRightPress?: () => void;
+    /** Number of lines for the title */
+    titleNumberOfLines?: number;
 }
 
 /**
@@ -97,6 +99,7 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
     rightAction,
     rightIcon,
     onRightPress,
+    titleNumberOfLines,
 }) => {
     const navigation = useNavigation<NavigationProp>();
     const insets = useSafeAreaInsets();
@@ -138,6 +141,7 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
                     onRightPress={onRightPress}
                     showBackButton={true}
                     containerStyle={{ backgroundColor: colors.backgroundPrimary }}
+                    titleNumberOfLines={titleNumberOfLines}
                 />
 
                 {/* Date range filter */}
