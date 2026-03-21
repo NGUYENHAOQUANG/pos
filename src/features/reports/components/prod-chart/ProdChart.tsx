@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
@@ -14,32 +14,24 @@ import {
     ProdVisualChartProps,
     ProdChartGroupData,
     ProdSummaryCardData,
-    ProdLegendItem,
+    ProdChartViewMode,
 } from '../../types/production-distribution';
+import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 
 // ----------------------------------------------------------------------
 // CONSTANTS
 // ----------------------------------------------------------------------
 
 const X_AXIS_HEIGHT = 24;
-const DEFAULT_BAR_WIDTH = 24;
+const DEFAULT_BAR_WIDTH = 26.25;
 
-// ----------------------------------------------------------------------
-// SUB-COMPONENT: LEGEND DOT
-// ----------------------------------------------------------------------
-
-interface LegendDotProps {
-    item: ProdLegendItem;
-}
-
-const LegendDot = React.memo(({ item }: LegendDotProps) => (
-    <View style={legendStyles.container}>
-        <View style={[legendStyles.dot, { backgroundColor: item.color }]} />
-        <Text style={legendStyles.label}>{item.label}</Text>
-    </View>
-));
-
-LegendDot.displayName = 'LegendDot';
+const formatNumber = (value: number) => {
+    // Tự động mở rộng 3 số thập phân nếu khối lượng quá nhỏ (< 10kg = 0.01 tấn)
+    const decimals = value > 0 && value < 0.01 ? 3 : 2;
+    const [intPart, decPart] = value.toFixed(decimals).split('.');
+    const withSeparator = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${withSeparator},${decPart}`;
+};
 
 // ----------------------------------------------------------------------
 // SUB-COMPONENT: SUMMARY CARD
@@ -50,15 +42,11 @@ interface SummaryCardProps {
 }
 
 const SummaryCard = React.memo(({ card }: SummaryCardProps) => {
-    // Format number: thousand separator (.) + decimal separator (,)
-    const formattedValue = useMemo(() => {
-        const [intPart, decPart] = card.value.toFixed(2).split('.');
-        const withSeparator = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        return `${withSeparator},${decPart}`;
-    }, [card.value]);
+    const formattedValue = useMemo(() => formatNumber(card.value), [card.value]);
 
     return (
         <View style={summaryStyles.card}>
+            <View style={[summaryStyles.dot, { backgroundColor: card.color }]} />
             <Text style={summaryStyles.title}>{card.title}</Text>
             <View style={summaryStyles.valueRow}>
                 <Text
@@ -69,15 +57,8 @@ const SummaryCard = React.memo(({ card }: SummaryCardProps) => {
                 >
                     {formattedValue}
                 </Text>
-                <Text style={summaryStyles.valueUnit}> {card.unit}</Text>
+                <Text style={summaryStyles.valueUnit}>{card.unit}</Text>
             </View>
-            {card.legends.length > 0 && (
-                <View style={summaryStyles.legendRow}>
-                    {card.legends.map((legend, index) => (
-                        <LegendDot key={index} item={legend} />
-                    ))}
-                </View>
-            )}
         </View>
     );
 });
@@ -90,36 +71,123 @@ SummaryCard.displayName = 'SummaryCard';
 
 interface BarGroupProps {
     group: ProdChartGroupData;
+    index: number;
     maxValue: number;
     chartHeight: number;
     barWidth: number;
     columnWidth: number;
+    isSelected?: boolean;
+    onPress?: (index: number) => void;
+    isLast?: boolean;
 }
 
 const BarGroup = React.memo(
-    ({ group, maxValue, chartHeight, barWidth, columnWidth }: BarGroupProps) => (
-        <View style={[barStyles.column, { width: columnWidth }]}>
-            <View style={barStyles.barsRow}>
-                {group.items.map((item, itemIndex) => {
-                    if (!item) return <View key={itemIndex} style={{ width: barWidth }} />;
-                    const bHeight = Math.max(2, (item.value / maxValue) * chartHeight);
-                    return (
-                        <View key={itemIndex} style={[barStyles.wrapper, { width: barWidth }]}>
-                            <View
-                                style={[
-                                    barStyles.bar,
-                                    {
-                                        height: bHeight,
-                                        backgroundColor: item.color,
-                                    },
-                                ]}
-                            />
+    ({
+        group,
+        index,
+        maxValue,
+        chartHeight,
+        barWidth,
+        columnWidth,
+        isSelected,
+        onPress,
+        isLast,
+    }: BarGroupProps) => {
+        const maxItemValue = Math.max(0, ...group.items.map(item => item?.value || 0));
+        // Add 8px buffer hovering above the top of the bar. Caps at chart height limits (so it doesn't get clipped)
+        const highestBarPx = Math.max(
+            2,
+            maxValue > 0 ? (maxItemValue / maxValue) * chartHeight : 2
+        );
+        const tooltipBottomPosition = Math.min(highestBarPx + 12, chartHeight - 85);
+
+        const handlePress = useCallback(() => {
+            onPress?.(index);
+        }, [onPress, index]);
+
+        return (
+            <TouchableOpacity
+                activeOpacity={1}
+                onPress={handlePress}
+                style={[
+                    barStyles.column,
+                    { minWidth: columnWidth, flex: 1 },
+                    isSelected && barStyles.columnSelected,
+                ]}
+            >
+                {isSelected && (
+                    <View
+                        style={[
+                            barStyles.tooltipContainer,
+                            isLast ? { right: '50%' } : { left: '50%' },
+                            { bottom: tooltipBottomPosition },
+                        ]}
+                    >
+                        <Text style={barStyles.tooltipTitle}>{group.label}</Text>
+                        <View style={barStyles.tooltipItems}>
+                            {group.items.filter(Boolean).map((item, idx) => (
+                                <View key={idx} style={barStyles.tooltipRow}>
+                                    <View style={barStyles.tooltipLeft}>
+                                        <View
+                                            style={[
+                                                barStyles.tooltipDot,
+                                                { backgroundColor: item!.color },
+                                            ]}
+                                        />
+                                        <Text style={barStyles.tooltipLabel}>{item!.label}</Text>
+                                    </View>
+                                    <View style={barStyles.tooltipValueContainer}>
+                                        <Text style={barStyles.tooltipValue}>
+                                            {formatNumber(item!.value)}
+                                        </Text>
+                                        <Text style={barStyles.tooltipUnit}>tấn</Text>
+                                    </View>
+                                </View>
+                            ))}
+                            {group.remainingPercent !== undefined && (
+                                <View style={barStyles.tooltipRow}>
+                                    <View style={barStyles.tooltipLeft}>
+                                        <View
+                                            style={[
+                                                barStyles.tooltipDot,
+                                                { backgroundColor: colors.gray[400] },
+                                            ]}
+                                        />
+                                        <Text style={barStyles.tooltipLabel}>Tỷ lệ còn lại</Text>
+                                    </View>
+                                    <View style={barStyles.tooltipValueContainer}>
+                                        <Text style={barStyles.tooltipValue}>
+                                            {formatNumber(group.remainingPercent)}
+                                        </Text>
+                                        <Text style={barStyles.tooltipUnit}>%</Text>
+                                    </View>
+                                </View>
+                            )}
                         </View>
-                    );
-                })}
-            </View>
-        </View>
-    )
+                    </View>
+                )}
+                <View style={barStyles.barsRow}>
+                    {group.items.map((item, itemIndex) => {
+                        if (!item) return <View key={itemIndex} style={{ width: barWidth }} />;
+                        const bHeight = Math.max(2, (item.value / maxValue) * chartHeight);
+                        return (
+                            <View key={itemIndex} style={[barStyles.wrapper, { width: barWidth }]}>
+                                <View
+                                    style={[
+                                        barStyles.bar,
+                                        {
+                                            height: bHeight,
+                                            backgroundColor: item.color,
+                                        },
+                                    ]}
+                                />
+                            </View>
+                        );
+                    })}
+                </View>
+            </TouchableOpacity>
+        );
+    }
 );
 
 BarGroup.displayName = 'BarGroup';
@@ -135,13 +203,23 @@ const VisualChart = React.memo(
         maxValue,
         height = 220,
         barWidth = DEFAULT_BAR_WIDTH,
+        viewMode = 'area',
     }: ProdVisualChartProps) => {
+        const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
         const columnWidth = useMemo(() => {
             const maxItems = data.reduce((max, g) => Math.max(max, g.items.length), 0);
-            return Math.max(barWidth * maxItems + 16, 60);
-        }, [data, barWidth]);
+            if (viewMode === 'doc') {
+                return Math.max(barWidth * maxItems + 16, 60);
+            }
+            return Math.max(barWidth * maxItems + 40, 96);
+        }, [data, barWidth, viewMode]);
 
-        const totalWidth = useMemo(() => data.length * columnWidth, [data.length, columnWidth]);
+        const handleBarGroupPress = useCallback((index: number) => {
+            setSelectedIndex(prev => (prev === index ? null : index));
+        }, []);
+
+        const minTotalWidth = useMemo(() => data.length * columnWidth, [data.length, columnWidth]);
 
         const gridLines = useMemo(
             () =>
@@ -167,17 +245,6 @@ const VisualChart = React.memo(
             [yLabels, height]
         );
 
-        const renderXLabel = useCallback(
-            (group: ProdChartGroupData, index: number) => (
-                <View key={index} style={[barStyles.column, { width: columnWidth }]}>
-                    <Text style={chartInnerStyles.xAxisLabel} numberOfLines={1}>
-                        {group.label}
-                    </Text>
-                </View>
-            ),
-            [columnWidth]
-        );
-
         return (
             <View style={chartInnerStyles.mainArea}>
                 <View style={[chartInnerStyles.yAxisContainer, { height }]}>{yAxisElements}</View>
@@ -185,15 +252,16 @@ const VisualChart = React.memo(
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    removeClippedSubviews
                     nestedScrollEnabled
+                    contentContainerStyle={{ flexGrow: 1 }}
                 >
                     <View
                         style={[
                             chartInnerStyles.contentContainer,
                             {
                                 height: height + X_AXIS_HEIGHT,
-                                width: totalWidth,
+                                minWidth: minTotalWidth,
+                                flex: 1,
                             },
                         ]}
                     >
@@ -205,16 +273,39 @@ const VisualChart = React.memo(
                             {data.map((group, groupIndex) => (
                                 <BarGroup
                                     key={groupIndex}
+                                    index={groupIndex}
                                     group={group}
                                     maxValue={maxValue}
                                     chartHeight={height}
                                     barWidth={barWidth}
                                     columnWidth={columnWidth}
+                                    isSelected={selectedIndex === groupIndex}
+                                    isLast={groupIndex >= data.length - 2 && groupIndex > 0}
+                                    onPress={handleBarGroupPress}
                                 />
                             ))}
                         </View>
 
-                        <View style={chartInnerStyles.xAxisRow}>{data.map(renderXLabel)}</View>
+                        <View style={chartInnerStyles.xAxisRow}>
+                            {data.map((group, index) => (
+                                <View
+                                    key={index}
+                                    style={[
+                                        barStyles.column,
+                                        {
+                                            minWidth: columnWidth,
+                                            flex: 1,
+                                            justifyContent: 'center',
+                                            paddingHorizontal: 8,
+                                        },
+                                    ]}
+                                >
+                                    <Text style={chartInnerStyles.xAxisLabel} numberOfLines={1}>
+                                        {group.label}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
                     </View>
                 </ScrollView>
             </View>
@@ -228,17 +319,28 @@ VisualChart.displayName = 'VisualChart';
 // MAIN COMPONENT
 // ----------------------------------------------------------------------
 
+const VIEW_MODE_TABS: HeadingBarItem[] = [
+    { key: 'doc', label: 'Ngày tuổi' },
+    { key: 'area', label: 'Khu vực' },
+];
+
 export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [viewMode, setViewMode] = useState<ProdChartViewMode>('area');
 
     const { isLoading, activeData, yLabels, yMax, chartHeight, summaryCards } = useProdChartData(
         zoneId,
         pondId,
-        isExpanded
+        isExpanded,
+        viewMode
     );
 
     const handleToggle = useCallback(() => {
         setIsExpanded(prev => !prev);
+    }, []);
+
+    const handleTabSelect = useCallback((tab: string) => {
+        setViewMode(tab as ProdChartViewMode);
     }, []);
 
     // Only show chart when there is valid data
@@ -256,6 +358,15 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
 
             {isExpanded && (
                 <View style={styles.content}>
+                    {/* Tab: Ngày tuổi / Khu vực */}
+                    <HeadingBar
+                        tabs={VIEW_MODE_TABS}
+                        selectedTab={viewMode}
+                        onTabSelect={handleTabSelect}
+                        flexTabs
+                        containerStyle={styles.tabContainer}
+                    />
+
                     {isLoading ? (
                         <View style={styles.loadingContainer}>
                             <Loading />
@@ -276,11 +387,13 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
                                 <View style={styles.chartSection}>
                                     <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
                                     <VisualChart
+                                        key={viewMode}
                                         data={activeData}
                                         yLabels={yLabels}
                                         maxValue={yMax}
                                         height={chartHeight}
                                         barWidth={DEFAULT_BAR_WIDTH}
+                                        viewMode={viewMode}
                                     />
                                 </View>
                             )}
@@ -303,6 +416,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: colors.white,
     },
+    tabContainer: {
+        marginHorizontal: -12,
+    },
     content: {
         paddingTop: 12,
         paddingRight: 16,
@@ -311,7 +427,7 @@ const styles = StyleSheet.create({
         gap: 24,
     },
     summaryContainer: {
-        flexDirection: 'column',
+        flexDirection: 'row',
         gap: 4,
     },
     chartSection: {
@@ -336,12 +452,18 @@ const styles = StyleSheet.create({
 
 const summaryStyles = StyleSheet.create({
     card: {
+        flex: 1,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: colors.gray[200],
         padding: 8,
         gap: 2,
         backgroundColor: colors.white,
+    },
+    dot: {
+        width: 12,
+        height: 4,
+        borderRadius: 3,
     },
     title: {
         fontSize: 12,
@@ -354,10 +476,10 @@ const summaryStyles = StyleSheet.create({
         alignItems: 'baseline',
     },
     valueNumber: {
-        fontSize: 14,
+        fontSize: 18,
         color: colors.gray[950],
         fontWeight: '700',
-        lineHeight: 20,
+        lineHeight: 24,
         flexShrink: 1,
     },
     valueUnit: {
@@ -365,37 +487,8 @@ const summaryStyles = StyleSheet.create({
         color: colors.textSecondary,
         fontWeight: '400',
         lineHeight: 20,
-        marginLeft: 2,
+        marginLeft: 4,
         flexShrink: 0,
-    },
-    legendRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 20,
-    },
-});
-
-// ----------------------------------------------------------------------
-// STYLES: LEGEND DOT
-// ----------------------------------------------------------------------
-
-const legendStyles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 18,
-        gap: 4,
-    },
-    dot: {
-        width: 8,
-        height: 3,
-        borderRadius: 8,
-    },
-    label: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        fontWeight: '400',
-        lineHeight: 18,
     },
 });
 
@@ -406,23 +499,78 @@ const legendStyles = StyleSheet.create({
 const barStyles = StyleSheet.create({
     column: {
         alignItems: 'center',
-        justifyContent: 'flex-start',
+        justifyContent: 'flex-end',
+    },
+    columnSelected: {
+        backgroundColor: 'rgba(243, 244, 246, 0.5)',
+        zIndex: 10,
     },
     barsRow: {
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'center',
         alignSelf: 'center',
-        flex: 1,
     },
     wrapper: {
         alignItems: 'center',
         marginHorizontal: 1,
         justifyContent: 'flex-end',
-        flex: 1,
     },
     bar: {
         width: '100%',
+    },
+    tooltipContainer: {
+        position: 'absolute',
+        backgroundColor: colors.gray[950],
+        borderRadius: 8,
+        padding: 8,
+        gap: 4,
+        minWidth: 110,
+        zIndex: 100,
+        elevation: 12,
+    },
+    tooltipTitle: {
+        color: colors.white,
+        fontWeight: '500',
+        fontSize: 12,
+        lineHeight: 20,
+    },
+    tooltipItems: {
+        gap: 4,
+    },
+    tooltipRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+    },
+    tooltipLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    tooltipDot: {
+        width: 12,
+        height: 4,
+        borderRadius: 2,
+        marginRight: 6,
+    },
+    tooltipLabel: {
+        color: colors.gray[400],
+        fontSize: 12,
+    },
+    tooltipValueContainer: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+    },
+    tooltipValue: {
+        color: colors.white,
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    tooltipUnit: {
+        color: colors.gray[400],
+        fontSize: 12,
+        marginLeft: 2,
     },
 });
 
@@ -471,12 +619,14 @@ const chartInnerStyles = StyleSheet.create({
     },
     barsArea: {
         flexDirection: 'row',
-        alignItems: 'flex-end',
+        alignItems: 'stretch',
+        width: '100%',
     },
     xAxisRow: {
         flexDirection: 'row',
         height: X_AXIS_HEIGHT,
         alignItems: 'center',
+        width: '100%',
     },
     xAxisLabel: {
         fontSize: 12,
