@@ -3,6 +3,7 @@ import { View, StyleSheet, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 import { Chart, HarvestChartData } from './Chart';
@@ -74,6 +75,8 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
                 <View style={[styles.body, isLoading ? styles.loadingContainer : undefined]}>
                     {isLoading ? (
                         <Loading />
+                    ) : chartData.length === 0 ? (
+                        <EmptyStateCard message="Không có dữ liệu thu hoạch" />
                     ) : (
                         <>
                             <View style={styles.summaryContainer}>
@@ -81,7 +84,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
                                     item={{
                                         id: 'harvest-yield',
                                         name: 'Sản lượng đã thu hoạch',
-                                        value: `${totalYield.toFixed(2)} tấn`,
+                                        value: `${totalYield.toFixed(3)} tấn`,
                                         color: '',
                                     }}
                                     variant="prodSummary"
@@ -90,13 +93,11 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
 
                             <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
 
-                            {chartData.length > 0 ? (
-                                <Chart
-                                    data={chartData}
-                                    chartWidth={chartWidth}
-                                    chartHeight={CHART_CONTENT_HEIGHT}
-                                />
-                            ) : null}
+                            <Chart
+                                data={chartData}
+                                chartWidth={chartWidth}
+                                chartHeight={CHART_CONTENT_HEIGHT}
+                            />
                         </>
                     )}
                 </View>

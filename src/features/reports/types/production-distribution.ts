@@ -26,6 +26,11 @@ export interface ProductionDistributionData {
 
 export interface ProductionDistributionParams {
     ZoneId: string;
+    PondIds?: string[];
+    PondCategoryIds?: string[];
+    SeasonId?: string;
+    StartDate?: string;
+    EndDate?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
@@ -42,18 +47,13 @@ export type ProductionDistributionResponse = IApiResponse<ProductionDistribution
 // ----------------------------------------------------------------------
 
 /** Single bar item data for chart rendering */
-export type ProdChartItemData = { value: number; color: string } | null;
+export type ProdChartItemData = { value: number; color: string; label: string } | null;
 
 /** Group of bar items with an x-axis label */
 export interface ProdChartGroupData {
     label: string;
     items: ProdChartItemData[];
-}
-
-/** Legend item for summary cards */
-export interface ProdLegendItem {
-    label: string;
-    color: string;
+    remainingPercent?: number;
 }
 
 /** Summary card data for display */
@@ -61,7 +61,7 @@ export interface ProdSummaryCardData {
     title: string;
     value: number;
     unit: string;
-    legends: ProdLegendItem[];
+    color: string;
 }
 
 /** Props for the VisualChart sub-component */
@@ -71,7 +71,11 @@ export interface ProdVisualChartProps {
     maxValue: number;
     height?: number;
     barWidth?: number;
+    viewMode?: ProdChartViewMode;
 }
+
+/** View mode for production chart: doc = by DOC age, area = by zone/area */
+export type ProdChartViewMode = 'doc' | 'area';
 
 /** Props for the ProdChart main component */
 export interface ProdChartProps {

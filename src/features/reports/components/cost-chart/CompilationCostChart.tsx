@@ -14,16 +14,21 @@ import { PondIndexCard } from '../env-chart/PondIndexCard';
 import { useCostDonut } from '../../hooks/useCostDonut';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
+const truncateToDecimals = (value: number, decimals: number) => {
+    const multiplier = Math.pow(10, decimals);
+    return Math.trunc(value * multiplier) / multiplier;
+};
+
 /**
  * Format a large number into Vietnamese display: "X tỉ", "X triệu", etc.
  */
 const formatCurrency = (value: number, unit: string): string => {
-    if (!unit) return value.toLocaleString('vi-VN');
-    return `${value.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} ${unit}`;
+    if (!unit) return truncateToDecimals(value, 2).toLocaleString('vi-VN');
+    return `${truncateToDecimals(value, 2).toLocaleString('vi-VN')} ${unit}`;
 };
 
 const formatWeight = (value: number, unit: string): string => {
-    return `${value.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} ${unit}`;
+    return `${truncateToDecimals(value, 2).toLocaleString('vi-VN')} ${unit}`;
 };
 
 interface CompilationCostChartProps {
@@ -62,7 +67,16 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
     // Format total display
     const totalDisplay = useMemo(() => {
         if (!summary) return '0';
-        return formatCurrency(summary.totalCost, summary.currencyUnit);
+        console.log('[COST CHART] Raw data:', {
+            totalCost: summary.totalCost,
+            currencyUnit: summary.currencyUnit,
+            totalFoodUsage: summary.totalFoodUsage,
+            weightUnit: summary.weightUnit,
+            fcr: summary.fcr,
+        });
+        const formatted = formatCurrency(summary.totalCost, summary.currencyUnit);
+        console.log('[COST CHART] Formatted totalCost:', formatted);
+        return formatted;
     }, [summary]);
 
     const showLoading = isLoading || isRefetching;
@@ -108,6 +122,13 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
                                         value: totalDisplay,
                                         color: '',
                                     }}
+                                    tooltipValue={
+                                        summary?.totalCost !== undefined
+                                            ? summary.totalCost.toLocaleString('vi-VN') +
+                                              ' ' +
+                                              (summary.currencyUnit || 'đ')
+                                            : undefined
+                                    }
                                 />
                                 <PondIndexCard
                                     variant="prodSummary"

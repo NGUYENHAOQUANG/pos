@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { reportApi } from '../api/reportApi';
 import { colors } from '@/styles/colors';
+import { abbreviateNumber } from '@/shared/utils/formatters';
 import {
     ProductionAreaData,
     ProdChartGroupData,
-    ProdLegendItem,
     ProdSummaryCardData,
     UseProdChartDataResult,
+    ProdChartViewMode,
 } from '../types/production-distribution';
 
 // ----------------------------------------------------------------------
@@ -33,16 +34,8 @@ const HEIGHT_PER_LABEL = 40;
 /** Conversion factor: 1 Tấn = 1000 Kg */
 const KG_TO_TON = 1000;
 
-/**
- * Color palette for "Còn lại" legends ordered by DOC range
- * (darkest → lightest, maps to highest DOC → lowest DOC)
- */
-const REMAINING_COLOR_PALETTE: string[] = [
-    '#102A56',
-    colors.blue[700],
-    colors.blue[600],
-    colors.blue[400],
-];
+/** Color for "Còn lại" bars and legend */
+const REMAINING_COLOR = colors.blue[600];
 
 // ----------------------------------------------------------------------
 // API HOOK
@@ -70,10 +63,7 @@ export const useProductionDistribution = (params: {
  */
 const formatLabel = (value: number): string => {
     if (value === 0) return '0';
-    if (value >= 1000000000) return `${(value / 1000000000).toFixed(1).replace(/\.0$/, '')} Tỷ`;
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')} Tr`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')} Ng`;
-    return Math.round(value).toString();
+    return abbreviateNumber(value).abbreviated.replace('Triệu', 'Tr').replace('Nghìn', 'Ng');
 };
 
 /**
@@ -117,7 +107,8 @@ const calculateScale = (values: number[]): ProdChartScale => {
 export const useProdChartData = (
     zoneId: string,
     pondId?: string,
-    enabled = true
+    enabled = true,
+    viewMode: ProdChartViewMode = 'area'
 ): UseProdChartDataResult => {
     const { data: response, isLoading } = useProductionDistribution({
         ZoneId: enabled ? zoneId : null,
@@ -127,29 +118,38 @@ export const useProdChartData = (
     const apiData = response?.data;
 
     const activeData = useMemo((): ProdChartGroupData[] => {
-        if (!apiData?.areaData) return [];
-        return apiData.areaData.map((d: ProductionAreaData) => {
+        if (!apiData) return [];
+
+        const sourceData = viewMode === 'doc' ? apiData.docData : apiData.areaData;
+        if (!sourceData) return [];
+
+        return sourceData.map((d: ProductionAreaData) => {
             const remaining = d.remainingAmount / KG_TO_TON;
             const harvested = d.harvestedAmount / KG_TO_TON;
+
             return {
                 label: d.label,
+                remainingPercent:
+                    viewMode === 'area' && d.totalAmount > 0 ? d.remainingPercent ?? 0 : undefined,
                 items: [
                     remaining > 0
                         ? {
                               value: remaining,
-                              color: REMAINING_COLOR_PALETTE[2],
+                              color: REMAINING_COLOR,
+                              label: 'Còn lại',
                           }
                         : null,
                     harvested > 0
                         ? {
                               value: harvested,
                               color: HARVESTED_COLOR,
+                              label: 'Đã thu',
                           }
                         : null,
                 ],
             };
         });
-    }, [apiData]);
+    }, [apiData, viewMode]);
 
     const { yMax, yLabels } = useMemo(() => {
         const allValues: number[] = [];
@@ -173,27 +173,18 @@ export const useProdChartData = (
     const summaryCards = useMemo((): ProdSummaryCardData[] => {
         if (!apiData?.summary) return [];
 
-        const reversedDocData = [...(apiData.docData || [])].reverse();
-
-        const remainingLegends: ProdLegendItem[] = reversedDocData.map(
-            (doc: ProductionAreaData, index: number): ProdLegendItem => ({
-                label: doc.label,
-                color: REMAINING_COLOR_PALETTE[index % REMAINING_COLOR_PALETTE.length],
-            })
-        );
-
         return [
-            {
-                title: 'Còn lại',
-                value: apiData.summary.totalRemaining / KG_TO_TON,
-                unit: 'tấn',
-                legends: remainingLegends,
-            },
             {
                 title: 'Đã thu',
                 value: apiData.summary.totalHarvested / KG_TO_TON,
                 unit: 'tấn',
-                legends: [{ label: '> 80', color: HARVESTED_COLOR }],
+                color: HARVESTED_COLOR,
+            },
+            {
+                title: 'Còn lại',
+                value: apiData.summary.totalRemaining / KG_TO_TON,
+                unit: 'tấn',
+                color: REMAINING_COLOR,
             },
         ];
     }, [apiData]);

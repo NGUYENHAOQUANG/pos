@@ -7,6 +7,31 @@ import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { CostItem } from './costChartData';
 
+// Truncate to N decimal places without rounding
+const truncateToDecimals = (value: number, decimals: number): number => {
+    const factor = Math.pow(10, decimals);
+    return Math.trunc(value * factor) / factor;
+};
+
+const formatCompactCurrency = (value: number): string => {
+    if (value === 0) return '0 đ';
+    const absValue = Math.abs(value);
+    const sign = value < 0 ? '-' : '';
+    if (absValue >= 1e9) {
+        const val = truncateToDecimals(absValue / 1e9, 2);
+        return `${sign}${val.toLocaleString('vi-VN')} Tỉ`;
+    }
+    if (absValue >= 1e6) {
+        const val = truncateToDecimals(absValue / 1e6, 2);
+        return `${sign}${val.toLocaleString('vi-VN')} Tr`;
+    }
+    if (absValue >= 1e3) {
+        const val = truncateToDecimals(absValue / 1e3, 2);
+        return `${sign}${val.toLocaleString('vi-VN')} K`;
+    }
+    return `${sign}${truncateToDecimals(absValue, 2).toLocaleString('vi-VN')} đ`;
+};
+
 interface CostChartProps {
     size?: number; // Currently passed as 300
     data: CostItem[];
@@ -174,17 +199,28 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                                         },
                                     ]}
                                 >
-                                    <View
-                                        style={[
-                                            styles.tooltipColor,
-                                            { backgroundColor: data[selectedIndex].color },
-                                        ]}
-                                    />
-                                    <Text style={styles.tooltipName}>
-                                        {data[selectedIndex].label}
+                                    <View style={styles.tooltipTitleRow}>
+                                        <View
+                                            style={[
+                                                styles.tooltipColorDot,
+                                                { backgroundColor: data[selectedIndex].color },
+                                            ]}
+                                        />
+                                        <Text style={styles.tooltipTitle}>
+                                            {data[selectedIndex].label}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.tooltipDetail}>
+                                        Chi phí:{' '}
+                                        <Text style={styles.tooltipDetailBold}>
+                                            {formatCompactCurrency(data[selectedIndex].value)}
+                                        </Text>
                                     </Text>
-                                    <Text style={styles.tooltipPercentage}>
-                                        {data[selectedIndex].percentage}%
+                                    <Text style={styles.tooltipDetail}>
+                                        Tỉ trọng:{' '}
+                                        <Text style={styles.tooltipDetailBold}>
+                                            {data[selectedIndex].percentage}%
+                                        </Text>
                                     </Text>
                                 </View>
                             </View>
@@ -226,31 +262,39 @@ const styles = StyleSheet.create({
     },
     tooltip: {
         backgroundColor: colors.white,
-        padding: 8,
+        padding: 10,
         borderRadius: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 10,
         elevation: 6,
     },
-    tooltipColor: {
-        width: 8,
-        height: 4,
-        borderRadius: 2,
-        marginRight: 2,
+    tooltipTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
     },
-    tooltipName: {
+    tooltipColorDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginRight: 6,
+    },
+    tooltipTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.black,
+    },
+    tooltipDetail: {
         fontSize: 12,
         color: colors.gray[600],
-        marginRight: 8,
-        fontWeight: '400',
+        marginBottom: 2,
     },
-    tooltipPercentage: {
+    tooltipDetailBold: {
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '600',
         color: colors.black,
     },
 });

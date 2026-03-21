@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
 import { MetricsRow } from '@/features/reports/components/profit-chart/MetricsRow';
@@ -23,12 +24,19 @@ interface CompilationProfitChartProps {
     pondId?: string;
 }
 
+const truncateToDecimals = (value: number, decimals: number) => {
+    const multiplier = Math.pow(10, decimals);
+    return Math.trunc(value * multiplier) / multiplier;
+};
+
 const formatCurrency = (value: number) => {
     if (value >= 1e9) {
-        return `${(value / 1e9).toFixed(2)} tỉ`;
+        const truncated = truncateToDecimals(value / 1e9, 2);
+        return `${truncated.toFixed(2)} tỉ`;
     }
     if (value >= 1e6) {
-        return `${(value / 1e6).toFixed(2)} tr`;
+        const truncated = truncateToDecimals(value / 1e6, 2);
+        return `${truncated.toFixed(2)} tr`;
     }
     return `${value.toLocaleString()} đ`;
 };
@@ -74,8 +82,26 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                         <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
+                    ) : !statsData?.byDate || statsData.byDate.length === 0 ? (
+                        <EmptyStateCard message="Không có dữ liệu lợi nhuận" />
                     ) : (
                         <>
+                            {console.log('[PROFIT CHART] Raw data:', {
+                                totalActualRevenue: statsData?.kpis?.totalActualRevenue,
+                                totalEstimatedRevenue: statsData?.kpis?.totalEstimatedRevenue,
+                                totalMaterialCost: statsData?.kpis?.totalMaterialCost,
+                                totalEstimatedProfit: statsData?.kpis?.totalEstimatedProfit,
+                            })}
+                            {console.log('[PROFIT CHART] Formatted:', {
+                                revenue: formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0),
+                                estimatedRevenue: formatCurrency(
+                                    statsData?.kpis?.totalEstimatedRevenue ?? 0
+                                ),
+                                totalCost: formatCurrency(statsData?.kpis?.totalMaterialCost ?? 0),
+                                estimatedProfit: formatCurrency(
+                                    statsData?.kpis?.totalEstimatedProfit ?? 0
+                                ),
+                            })}
                             <MetricsRow
                                 revenue={formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0)}
                                 estimatedRevenue={formatCurrency(
@@ -85,15 +111,17 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                 estimatedProfit={formatCurrency(
                                     statsData?.kpis?.totalEstimatedProfit ?? 0
                                 )}
+                                rawRevenue={statsData?.kpis?.totalActualRevenue}
+                                rawEstimatedRevenue={statsData?.kpis?.totalEstimatedRevenue}
+                                rawTotalCost={statsData?.kpis?.totalMaterialCost}
+                                rawEstimatedProfit={statsData?.kpis?.totalEstimatedProfit}
                             />
                             <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
-                            {statsData?.byDate && statsData.byDate.length > 0 ? (
-                                <Chart
-                                    chartWidth={chartWidth}
-                                    chartHeight={chartHeight}
-                                    data={statsData.byDate}
-                                />
-                            ) : null}
+                            <Chart
+                                chartWidth={chartWidth}
+                                chartHeight={chartHeight}
+                                data={statsData.byDate}
+                            />
                             {/* Legend (2x2 grid) */}
                             <View style={styles.legendContainer}>
                                 {LEGEND_ITEMS.map(item => (

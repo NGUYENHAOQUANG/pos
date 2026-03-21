@@ -31,6 +31,7 @@ export interface HeaderSectionProps {
     rightIcon?: React.ReactNode;
     onRightPress?: () => void;
     rightButtonStyle?: StyleProp<ViewStyle>;
+    titleNumberOfLines?: number;
 }
 
 export const HeaderSection: React.FC<HeaderSectionProps> = ({
@@ -47,6 +48,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     rightIcon,
     onRightPress,
     rightButtonStyle,
+    titleNumberOfLines = 1,
 }) => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
@@ -86,9 +88,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
                         titleAlign === 'left' ? styles.titleLeft : styles.titleCenter,
                         titleStyle,
                     ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit={true} // Bật tính năng tự co giãn
-                    minimumFontScale={0.99}
+                    numberOfLines={titleNumberOfLines}
                 >
                     {title}
                 </Text>

@@ -15,5 +15,6 @@ export const useProfitStats = (params: {
             });
         },
         enabled: !!params.ZoneId,
+        staleTime: 0,
     });
 };

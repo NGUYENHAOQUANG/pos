@@ -15,6 +15,7 @@ import {
 } from '@/features/reports/components/feed-prod/feedprodData';
 
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import FeedChart from '@/assets/Icon/IconReport/FeedChart.svg';
 import { useFeedingProduction } from '@/features/reports/hooks/useFeedingProduction';
@@ -99,6 +100,8 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
                 <View style={[styles.content, isLoading && styles.loadingContainer]}>
                     {isLoading ? (
                         <Loading />
+                    ) : chartDataList.length === 0 ? (
+                        <EmptyStateCard message="Không có dữ liệu sản lượng" />
                     ) : (
                         <>
                             <MetricsRow
@@ -109,14 +112,12 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
                                 activeFilters={activeFilters}
                                 onToggleFilter={handleToggleFilter}
                             />
-                            {chartDataList.length > 0 ? (
-                                <Chart
-                                    chartWidth={chartWidth}
-                                    chartHeight={chartHeight}
-                                    data={chartDataList}
-                                    hiddenSeries={hiddenSeries}
-                                />
-                            ) : null}
+                            <Chart
+                                chartWidth={chartWidth}
+                                chartHeight={chartHeight}
+                                data={chartDataList}
+                                hiddenSeries={hiddenSeries}
+                            />
                             <FeedProdInfoCard />
                         </>
                     )}
