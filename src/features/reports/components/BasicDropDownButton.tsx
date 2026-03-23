@@ -52,7 +52,7 @@ export const BasicDropDownButton: React.FC<BasicDropDownButtonProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        height: 40,
+        height: 44,
         width: '100%',
         flexDirection: 'row',
         alignItems: 'center',

@@ -399,13 +399,13 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.sm,
         fontWeight: '400',
         color: colors.text,
-        lineHeight: 22,
         letterSpacing: 0,
         paddingVertical: 0,
         height: '100%',
         ...Platform.select({
             android: {
                 textAlignVertical: 'center',
+                lineHeight: 22,
             },
         }),
     },
