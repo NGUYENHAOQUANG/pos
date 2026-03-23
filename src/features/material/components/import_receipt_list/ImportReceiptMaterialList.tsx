@@ -18,66 +18,68 @@ interface ImportReceiptMaterialListProps {
     onPressCreate?: () => void;
 }
 
-export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps> = ({
-    receipts,
-    isLoading,
-    refreshing,
-    onRefresh,
-    onLoadMore,
-    isFetchingNextPage,
-    hasNextPage,
-    onPressCreate,
-}) => {
-    const handleLoadMore = useCallback(() => {
-        if (hasNextPage && !isFetchingNextPage && onLoadMore) {
-            onLoadMore();
+export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps> = React.memo(
+    ({
+        receipts,
+        isLoading,
+        refreshing,
+        onRefresh,
+        onLoadMore,
+        isFetchingNextPage,
+        hasNextPage,
+        onPressCreate,
+    }) => {
+        const handleLoadMore = useCallback(() => {
+            if (hasNextPage && !isFetchingNextPage && onLoadMore) {
+                onLoadMore();
+            }
+        }, [hasNextPage, isFetchingNextPage, onLoadMore]);
+
+        const renderItem = useCallback(({ item }: { item: ImportReceipt }) => {
+            return <ImportReceiptCard item={item} />;
+        }, []);
+
+        const keyExtractor = useCallback((item: ImportReceipt) => item.id, []);
+
+        if (isLoading) {
+            return (
+                <View style={materialListStyles.containerWithPadding}>
+                    <MaterialLoadingState />
+                </View>
+            );
         }
-    }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
-    const renderItem = useCallback(({ item }: { item: ImportReceipt }) => {
-        return <ImportReceiptCard item={item} />;
-    }, []);
-
-    const keyExtractor = useCallback((item: ImportReceipt) => item.id, []);
-
-    if (isLoading) {
         return (
             <View style={materialListStyles.containerWithPadding}>
-                <MaterialLoadingState />
+                <FlatList
+                    data={receipts}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
+                    contentContainerStyle={[
+                        materialListStyles.listContent,
+                        receipts.length === 0 && materialListStyles.emptyContent,
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                        isFetchingNextPage ? (
+                            <View style={materialListStyles.loaderFooter}>
+                                <ActivityIndicator color={colors.primary} />
+                            </View>
+                        ) : null
+                    }
+                    ListEmptyComponent={
+                        <EmptyStateCard
+                            message="Chưa có phiếu nhập kho nào được tạo."
+                            buttonTitle="Tạo phiếu nhập kho"
+                            onPress={onPressCreate || (() => {})}
+                        />
+                    }
+                />
             </View>
         );
     }
-
-    return (
-        <View style={materialListStyles.containerWithPadding}>
-            <FlatList
-                data={receipts}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                contentContainerStyle={[
-                    materialListStyles.listContent,
-                    receipts.length === 0 && materialListStyles.emptyContent,
-                ]}
-                showsVerticalScrollIndicator={false}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    isFetchingNextPage ? (
-                        <View style={materialListStyles.loaderFooter}>
-                            <ActivityIndicator color={colors.primary} />
-                        </View>
-                    ) : null
-                }
-                ListEmptyComponent={
-                    <EmptyStateCard
-                        message="Chưa có phiếu nhập kho nào được tạo."
-                        buttonTitle="Tạo phiếu nhập kho"
-                        onPress={onPressCreate || (() => {})}
-                    />
-                }
-            />
-        </View>
-    );
-};
+);

@@ -7,11 +7,11 @@ import {
 } from '@/features/material/components/material/ButtonMaterial';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
-import { ImportReceiptList } from '@/features/material/screens/import_receipt_list/ImportReceiptList';
+import { ImportReceiptListScreen } from '@/features/material/screens/import_receipt_list/ImportReceiptListScreen';
 import { ExportWarehouseListScreen } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouse_item/WarehouseItemListScreen';
 import { MaterialMasterListTab } from '@/features/material/screens/material_list/MaterialMasterListTab';
-import { InventoryScreen } from '@/features/material/screens/inventory_list/InventoryList';
+import { InventoryListScreen } from '@/features/material/screens/inventory_list/InventoryListScreen';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { colors } from '@/styles';
@@ -112,9 +112,9 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                         onPressCreate={actions.createMaterial}
                     />
                 )}
-                {selectedTab === TabType.Import && <ImportReceiptList />}
+                {selectedTab === TabType.Import && <ImportReceiptListScreen />}
                 {selectedTab === TabType.Export && <ExportWarehouseListScreen />}
-                {selectedTab === TabType.Inventory && <InventoryScreen />}
+                {selectedTab === TabType.Inventory && <InventoryListScreen />}
             </View>
 
             <MaterialMenuOverlay
