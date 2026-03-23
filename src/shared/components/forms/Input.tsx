@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
         height: 4,
         borderRadius: 3,
         backgroundColor: colors.error,
-        marginLeft: 6,
+        marginLeft: 2,
     },
     labelWrapper: {
         flexDirection: 'row',

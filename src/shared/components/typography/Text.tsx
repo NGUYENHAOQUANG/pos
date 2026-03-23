@@ -53,7 +53,9 @@ export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
                 { fontFamily: resolvedFamily },
             ]}
         >
-            {children}
+            {typeof children === 'string' || typeof children === 'number'
+                ? `${children} `
+                : children}
         </RNText>
     );
 };
