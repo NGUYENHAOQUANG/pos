@@ -61,20 +61,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
         const TOTAL_DAYS = data.length > 0 ? parseDateToDay(data[data.length - 1].date) : 0;
 
-        // --- Day marks for X-axis (7-day intervals + last) ---
-        const generateDayMarks = (totalDays: number): number[] => {
-            if (totalDays <= 0) return [0];
-            const marks: number[] = [];
-            const step = 7;
-            for (let day = 0; day <= totalDays; day += step) {
-                marks.push(day);
-            }
-            if (marks[marks.length - 1] !== totalDays) {
-                marks.push(totalDays);
-            }
-            return marks;
-        };
-
+        // --- Day marks for X-axis: show every data point's date ---
         const getDateForDay = (day: number): string => {
             const date = new Date(START_DATE);
             date.setDate(date.getDate() + day);
@@ -83,7 +70,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
             return `${dayStr}/${monthStr}`;
         };
 
-        const DAY_MARKS = generateDayMarks(TOTAL_DAYS);
+        const DAY_MARKS = data.map(item => parseDateToDay(item.date));
         const DAY_LABELS = DAY_MARKS.map(day => getDateForDay(day));
 
         // --- Per-date bar + line data ---
@@ -139,7 +126,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
     // ====================================================================
     const { TOTAL_DAYS, DAY_MARKS, DAY_LABELS, barData, Y_MAX, getYAxisLines } = processedData;
 
-    const MIN_DAY_WIDTH = 12;
+    const MIN_DAY_WIDTH = 40;
     const actualChartWidth = Math.max(chartWidth, TOTAL_DAYS * MIN_DAY_WIDTH);
     const SCROLL_PADDING = 16;
 
@@ -154,7 +141,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
     const zeroLineY = getY(0);
 
     // Bar width — proportional but capped
-    const barWidth = Math.max(2, Math.min(8, actualChartWidth / (barData.length * 2)));
+    const barWidth = Math.max(6, Math.min(16, actualChartWidth / (barData.length * 2)));
     const hitAreaWidth = Math.max(barWidth * 3, 20); // Wider hit area for easier tapping
 
     // --- Profit line path ---
@@ -299,11 +286,11 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                 const y = axisY + 20;
                                 return (
                                     <SvgText
-                                        key={`x-label-${day}`}
+                                        key={`x-label-${day}-${index}`}
                                         x={x}
                                         y={y}
                                         fill={colors.textSecondary}
-                                        fontSize={12}
+                                        fontSize={10}
                                         textAnchor="middle"
                                     >
                                         {DAY_LABELS[index]}
@@ -329,8 +316,10 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                         {selectedBarIndex !== null &&
                             selectedTooltipData &&
                             (() => {
-                                const TOOLTIP_WIDTH = 170;
-                                const isOverflowRight = tooltipX + 8 + TOOLTIP_WIDTH > svgWidth;
+                                const TOOLTIP_WIDTH = 220;
+                                const TOOLTIP_MARGIN = 30;
+                                const isOverflowRight =
+                                    tooltipX + 8 + TOOLTIP_WIDTH + TOOLTIP_MARGIN > svgWidth;
                                 return (
                                     <View
                                         style={[
