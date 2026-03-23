@@ -41,11 +41,25 @@ export const reportApi = {
     getHarvestStats: async (params: {
         ZoneId: string;
         Id?: string;
+        PondIds?: string[];
     }): Promise<HarvestStatsResponse> => {
         const { data } = await apiClient.get<HarvestStatsResponse>(
             API_ENDPOINTS.REPORT.HARVEST_STATS,
             {
                 params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
             }
         );
         return data;
@@ -96,13 +110,34 @@ export const reportApi = {
      */
     getDailyWaterStats: async (params: {
         zoneId: string;
+        pondIds?: string[];
         startDate?: string;
         endDate?: string;
     }): Promise<WaterUsageResponse> => {
+        const queryParams: Record<string, any> = {
+            ZoneId: params.zoneId,
+        };
+        if (params.startDate) queryParams.StartDate = params.startDate;
+        if (params.endDate) queryParams.EndDate = params.endDate;
+        if (params.pondIds?.length) queryParams.PondIds = params.pondIds;
+
         const { data } = await apiClient.get<WaterUsageResponse>(
             API_ENDPOINTS.REPORT.DAILY_WATER_STATS,
             {
-                params,
+                params: queryParams,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
             }
         );
         return data;

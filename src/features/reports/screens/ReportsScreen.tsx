@@ -87,7 +87,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
+            <WaterUsageChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <FoodChart />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
@@ -119,14 +122,13 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
-            {/* TODO: API /report/harvest-stats hiện tại không hỗ trợ filter theo pondId,
-                chỉ trả về tất cả ao. Đang filter client-side bằng pondCode.
-                Khi BE cập nhật hỗ trợ filter theo pondId thì sửa lại dùng pondId. */}
+            <WaterUsageChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <HarvestChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                pondCode={selectedPond.id !== '1' ? selectedPond.value : undefined}
             />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}

@@ -21,9 +21,10 @@ const DRAW_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
 interface WaterUsageChartProps {
     zoneId?: string;
+    pondIds?: string[];
 }
 
-const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
+const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const {
@@ -32,6 +33,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
         isError,
     } = useWaterUsageStats({
         zoneId: zoneId || '',
+        pondIds,
         enabled: isExpanded,
     });
 
