@@ -90,7 +90,6 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
 
 const styles = StyleSheet.create({
     sectionHeader: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,

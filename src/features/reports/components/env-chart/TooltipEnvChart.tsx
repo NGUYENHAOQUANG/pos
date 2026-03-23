@@ -17,7 +17,8 @@ interface TooltipEnvChartProps {
     data: TooltipItem[];
     position: { x: number; y: number };
     onClose: () => void;
-    chartWidth: number; // To handle boundary checks
+    chartWidth: number;
+    chartHeight: number;
 }
 
 export const TooltipEnvChart = ({
@@ -27,6 +28,7 @@ export const TooltipEnvChart = ({
     position,
     onClose,
     chartWidth,
+    chartHeight,
 }: TooltipEnvChartProps) => {
     if (!visible) return null;
 
@@ -38,22 +40,27 @@ export const TooltipEnvChart = ({
     };
 
     // --- Positioning Logic ---
-    // If x is too close to right edge, shift tooltip to left
-    const tooltipWidth = 140; // Approx width
-    let left = position.x + 10; // Default: right of tap
+    const tooltipWidth = 140;
+    let left = position.x + 10;
 
     if (left + tooltipWidth > chartWidth) {
         left = position.x - tooltipWidth - 10;
     }
-
-    // Ensure not off-screen left
     if (left < 0) left = 10;
 
-    // Y position: try to keep it somewhat centered on tap or fixed?
-    // User asked "popup points there". Let's use the tap Y or specific logic.
-    // For now, let's just respect the passed Y, but clamp it to chart area.
-    let top = Math.max(10, position.y - 100); // Shift up a bit to not cover finger
-    if (top < 0) top = 10;
+    // Estimate tooltip height: header ~30px + each row ~20px + padding 16px
+    const estimatedHeight = 30 + data.length * 20 + 16;
+    const tapGap = 12; // Gap between tap point and tooltip
+
+    // Show below tap if enough space, otherwise show above
+    let top: number;
+    if (position.y + tapGap + estimatedHeight < chartHeight) {
+        // Show below tap point
+        top = position.y + tapGap;
+    } else {
+        // Show above tap point
+        top = Math.max(0, position.y - estimatedHeight - tapGap);
+    }
 
     return (
         <View style={[styles.tooltipContainer, { left, top }]}>
@@ -84,12 +91,12 @@ export const TooltipEnvChart = ({
 const styles = StyleSheet.create({
     tooltipContainer: {
         position: 'absolute',
-        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        backgroundColor: colors.white,
         borderRadius: 8,
         padding: 8,
         borderWidth: 1,
-        borderColor: colors.borderLight,
-        shadowColor: '#000',
+        borderColor: colors.border,
+        shadowColor: colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,

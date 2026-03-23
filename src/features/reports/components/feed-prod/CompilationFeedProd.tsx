@@ -133,13 +133,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
         backgroundColor: colors.white,
     },
     headerCollapsed: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
