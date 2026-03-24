@@ -187,7 +187,7 @@ export type AppStackParamList = {
     CountingShrimp: { pondId: string; zoneId: string };
 
     // ============== Material Screens (Tab Bar hidden) ==============
-    MaterialForm: { materialId?: string; onSave?: (data: any) => void };
+    MaterialForm: { materialId?: string };
     ImportReceiptFormScreen: {
         importReceiptId?: string;
         availableMaterials?: IMaterial[];
