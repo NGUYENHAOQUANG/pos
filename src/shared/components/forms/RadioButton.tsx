@@ -97,6 +97,8 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
+        flexWrap: 'wrap',
+        rowGap: spacing.sm,
     },
     radioItem: {
         flexDirection: 'row',
