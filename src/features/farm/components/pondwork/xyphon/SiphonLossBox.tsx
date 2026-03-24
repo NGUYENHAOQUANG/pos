@@ -18,6 +18,7 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
                 keyboardType="numeric"
                 inputFormat={InputFormat.DECIMAL}
                 maxDigits={20}
+                maxDecimalPlaces={5}
                 required
                 containerStyle={{ marginBottom: 0 }}
                 maxLength={20}
