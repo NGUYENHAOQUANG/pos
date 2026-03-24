@@ -43,6 +43,13 @@ export const useUnsavedChanges = (hasUnsavedChanges: boolean, onDiscard?: () => 
         return unsubscribe;
     }, [navigation, hasUnsavedChanges]);
 
+    // Handle iOS swipe back gesture dynamically
+    useEffect(() => {
+        navigation.setOptions({
+            gestureEnabled: !hasUnsavedChanges,
+        });
+    }, [navigation, hasUnsavedChanges]);
+
     const handleConfirmLeave = () => {
         setShowModal(false);
         if (onDiscard) {

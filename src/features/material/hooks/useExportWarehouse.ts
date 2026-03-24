@@ -95,7 +95,6 @@ export const useAddExportWarehouseReceipt = () => {
             });
         },
         onError: error => {
-            console.log(error);
             handleError(error);
         },
     });

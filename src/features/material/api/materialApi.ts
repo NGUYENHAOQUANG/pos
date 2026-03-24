@@ -44,13 +44,6 @@ export const materialApi = {
             API_ENDPOINTS.MATERIAL.CREATE,
             request
         );
-        if (!data.success) {
-            const errorMessage = getErrorMessage(
-                { response: { data } },
-                data.message || 'Tạo vật tư thất bại'
-            );
-            throw new Error(errorMessage);
-        }
         return data;
     },
 

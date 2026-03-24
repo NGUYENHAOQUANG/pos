@@ -105,7 +105,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     onShrimpSizeChange(formatDecimalInput(text, 15, 5));
                 }}
                 keyboardType="numeric"
-                inputFormat={InputFormat.DECIMAL}
+                inputFormat={InputFormat.INTEGER}
                 required
                 maxLength={21}
                 containerStyle={{ marginBottom: 0 }}

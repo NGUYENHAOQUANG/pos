@@ -66,8 +66,6 @@ export const useFilteredWarehouseMaterials = (options?: UseFilteredWarehouseMate
         enabled: !!defaultWarehouseId,
     });
 
-    console.log('warehouseItems', warehouseItems);
-
     const materials: IMaterial[] = useMemo(() => {
         return warehouseItems.map(
             item =>

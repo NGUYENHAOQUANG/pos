@@ -53,7 +53,6 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                     value={selectedSeason}
                     onChange={value => {
                         setSelectedSeason(value);
-                        console.log(value, 'value');
                     }}
                     placeholder="Chọn vụ nuôi"
                     isOpen={dropdownOpen}
