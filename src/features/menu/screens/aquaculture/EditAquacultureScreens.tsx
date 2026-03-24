@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '@/styles';
@@ -187,7 +188,7 @@ export const EditAquacultureScreens: React.FC = () => {
                 />
 
                 {aquaculture && (
-                    <View style={styles.content}>
+                    <SafeInputLayout extraScrollHeight={150}>
                         <AquacultureForm
                             ref={formRef}
                             isEditMode={true}
@@ -198,7 +199,7 @@ export const EditAquacultureScreens: React.FC = () => {
                             onSubmit={handleSubmit}
                             onHasChangesChange={setFormHasChanges}
                         />
-                    </View>
+                    </SafeInputLayout>
                 )}
 
                 {aquaculture && (

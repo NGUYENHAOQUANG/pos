@@ -28,9 +28,14 @@ const generateCnonce = (): string => {
     return Math.random().toString(36).substring(2, 10);
 };
 
+/**
+ * Download a file using HTTP Digest Authentication.
+ * Uses RNFS.downloadFile instead of fetch/blob/FileReader for reliable
+ * binary file handling on real Android devices (Hermes engine).
+ */
 export const downloadWithDigestAuth = async (url: string, savePath: string): Promise<boolean> => {
     try {
-        // Parse credentials from URL
+        // Parse credentials from URL (format: http://user:pass@host/path)
         const urlMatch = url.match(/http:\/\/([^:]+):([^@]+)@(.+)/);
         if (!urlMatch) return false;
 
@@ -43,26 +48,22 @@ export const downloadWithDigestAuth = async (url: string, savePath: string): Pro
         const uri = pathMatch ? pathMatch[1] : '/';
 
         // Step 1: Send initial request to get 401 challenge
-        const initialResponse = await fetch(cleanUrl, { method: 'GET' });
+        const initialResponse = await fetch(cleanUrl, {
+            method: 'GET',
+            // Prevent following redirects and body download
+            headers: { Range: 'bytes=0-0' },
+        });
 
         if (initialResponse.status !== 401) {
-            // If not 401, maybe auth not required - try to save directly
+            // If not 401, auth not required - download directly via RNFS
             if (initialResponse.ok) {
-                const blob = await initialResponse.blob();
-                const reader = new FileReader();
-                return new Promise(resolve => {
-                    reader.onload = async () => {
-                        const base64 = (reader.result as string).split(',')[1];
-                        if (base64) {
-                            await RNFS.writeFile(savePath, base64, 'base64');
-                            resolve(true);
-                        } else {
-                            resolve(false);
-                        }
-                    };
-                    reader.onerror = () => resolve(false);
-                    reader.readAsDataURL(blob);
-                });
+                const result = await RNFS.downloadFile({
+                    fromUrl: cleanUrl,
+                    toFile: savePath,
+                    connectionTimeout: 10000,
+                    readTimeout: 10000,
+                }).promise;
+                return result.statusCode === 200 && result.bytesWritten > 0;
             }
             return false;
         }
@@ -96,37 +97,19 @@ export const downloadWithDigestAuth = async (url: string, savePath: string): Pro
             authHeader += `, opaque="${challenge.opaque}"`;
         }
 
-        // Step 5: Send authenticated request
-        const authResponse = await fetch(cleanUrl, {
-            method: 'GET',
+        // Step 5: Download authenticated file via RNFS (native layer)
+        // This avoids the unreliable fetch → blob → FileReader → base64 pipeline
+        const downloadResult = await RNFS.downloadFile({
+            fromUrl: cleanUrl,
+            toFile: savePath,
             headers: {
                 Authorization: authHeader,
             },
-        });
+            connectionTimeout: 10000,
+            readTimeout: 10000,
+        }).promise;
 
-        if (!authResponse.ok) return false;
-
-        // Step 6: Save response as file
-        const blob = await authResponse.blob();
-        const reader = new FileReader();
-
-        return new Promise(resolve => {
-            reader.onload = async () => {
-                try {
-                    const base64 = (reader.result as string).split(',')[1];
-                    if (base64) {
-                        await RNFS.writeFile(savePath, base64, 'base64');
-                        resolve(true);
-                    } else {
-                        resolve(false);
-                    }
-                } catch {
-                    resolve(false);
-                }
-            };
-            reader.onerror = () => resolve(false);
-            reader.readAsDataURL(blob);
-        });
+        return downloadResult.statusCode === 200 && downloadResult.bytesWritten > 0;
     } catch (error) {
         console.error('[DigestAuth] Error:', error);
         return false;

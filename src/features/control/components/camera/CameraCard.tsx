@@ -8,6 +8,7 @@ import { CameraItem } from '@/features/control/api/cameraApi';
 import { useCameraStream } from '@/features/control/hooks/useCameras';
 import RNFS from 'react-native-fs';
 import { downloadWithDigestAuth } from '@/shared/utils/digestAuthFetch';
+import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_HORIZONTAL_PADDING = spacing.md * 2;
@@ -124,13 +125,15 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     // Determine what to show
     const showSnapshot = localImageUri && isOnline && !hasError;
     const showSkeleton = isOnline && isLoading && !hasError;
-    const showPlaceholder = !isOnline || (!isLoading && hasError);
 
     return (
         <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => onPress(camera)}
+            activeOpacity={isOnline ? 0.85 : 1}
+            onPress={() => {
+                if (isOnline) onPress(camera);
+            }}
             style={styles.container}
+            disabled={!isOnline}
         >
             {/* Snapshot preview / Skeleton / Placeholder */}
             {showSnapshot ? (
@@ -139,26 +142,41 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
                 <Skeleton width={CARD_WIDTH} height={CARD_HEIGHT} borderRadius={0} />
             ) : (
                 <View style={styles.placeholderBg}>
-                    {showPlaceholder && (
-                        <>
-                            <Text style={styles.snText}>{camera.deviceSn}</Text>
-                            <Text style={styles.modelText}>
-                                {hasError ? 'Không thể tải ảnh' : camera.modelCode}
-                            </Text>
-                        </>
-                    )}
+                    {/* VideoPlayer SVG as full background */}
+                    <VideoPlayerBg
+                        width={CARD_WIDTH}
+                        height={CARD_HEIGHT}
+                        preserveAspectRatio="xMidYMid slice"
+                    />
+                    {/* Camera code + camera name badges */}
+                    <View style={styles.placeholderBadgesRow}>
+                        <View style={styles.placeholderBadge}>
+                            <Text style={styles.placeholderBadgeText}>{camera.deviceSn}</Text>
+                        </View>
+                        <View style={styles.placeholderBadge}>
+                            <Text style={styles.placeholderBadgeText}>{camera.name}</Text>
+                        </View>
+                    </View>
                 </View>
             )}
 
-            {/* Labels overlay at bottom-left */}
-            <View style={styles.labelsContainer}>
-                <View style={styles.badgeWrapper}>
-                    <BlurView blurType="dark" blurAmount={24} style={styles.blurView} />
-                    <View style={styles.badgeContent}>
-                        <Text style={styles.labelText}>{camera.name}</Text>
+            {/* Labels overlay at bottom-left (only on snapshot view) */}
+            {showSnapshot && (
+                <View style={styles.labelsContainer}>
+                    <View style={styles.badgeWrapper}>
+                        <BlurView blurType="dark" blurAmount={24} style={styles.blurView} />
+                        <View style={styles.badgeContent}>
+                            <Text style={styles.labelText}>{camera.deviceSn}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.badgeWrapper}>
+                        <BlurView blurType="dark" blurAmount={24} style={styles.blurView} />
+                        <View style={styles.badgeContent}>
+                            <Text style={styles.labelText}>{camera.name}</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
+            )}
 
             {/* Online/Offline indicator */}
             <View style={[styles.statusBadge, isOnline ? styles.onlineBadge : styles.offlineBadge]}>
@@ -185,19 +203,26 @@ const styles = StyleSheet.create({
     placeholderBg: {
         width: '100%',
         height: '100%',
-        backgroundColor: colors.gray[800],
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: colors.gray[200],
+        overflow: 'hidden',
     },
-    snText: {
-        color: colors.gray[400],
+    placeholderBadgesRow: {
+        position: 'absolute',
+        bottom: spacing.sm + 2,
+        left: spacing.sm + 2,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    placeholderBadge: {
+        backgroundColor: 'rgba(102, 112, 133, 0.7)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    placeholderBadgeText: {
+        color: colors.white,
         fontSize: 12,
         fontWeight: '500',
-    },
-    modelText: {
-        color: colors.gray[500],
-        fontSize: 10,
-        marginTop: 4,
     },
     labelsContainer: {
         position: 'absolute',

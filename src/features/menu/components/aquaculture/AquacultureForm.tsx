@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
@@ -59,13 +59,11 @@ interface StatusOption {
 export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureFormProps>(
     ({ isEditMode, initialData, zoneOptions, onSubmit, onHasChangesChange }, ref) => {
         const initializedRef = useRef(false);
-        const [showFullCode, setShowFullCode] = useState(false);
 
         const {
             control,
             handleSubmit,
             reset,
-            watch,
             formState: { errors, isDirty },
         } = useForm<AquacultureFormValues>({
             resolver: zodResolver(aquacultureFormSchema),
@@ -88,8 +86,6 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                 initializedRef.current = true;
             }
         }, [initialData, reset]);
-
-        const currentCode = watch('code');
 
         // Notify parent of dirty state changes
         useEffect(() => {
@@ -176,78 +172,55 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                         )}
                     </View>
 
-                    {/* Cycle Name & Code */}
-                    <View style={[styles.row, styles.zIndex10]}>
-                        <View style={styles.flex1}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.label}>Tên vụ nuôi</Text>
-                                <RequiredDot />
-                            </View>
-                            <Controller
-                                name="name"
-                                control={control}
-                                render={({ field: { onChange, value } }) => (
-                                    <FarmInput
-                                        value={value}
-                                        onChangeText={onChange}
-                                        placeholder="Tên vụ nuôi"
-                                        containerStyle={styles.noMarginBottom}
-                                        inputContainerStyle={styles.customInputBox}
-                                        inputStyle={
-                                            value
-                                                ? styles.inputTextFilled
-                                                : styles.inputTextPlaceholder
-                                        }
-                                        placeholderTextColor={colors.gray[400]}
-                                        error={errors.name?.message}
-                                    />
-                                )}
-                            />
+                    {/* Cycle Name */}
+                    <View style={styles.fieldContainer}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Tên vụ nuôi</Text>
+                            <RequiredDot />
                         </View>
-                        <View style={[styles.flex1, styles.zIndex10]}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.label}>Mã vụ nuôi</Text>
-                                <RequiredDot />
-                            </View>
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() =>
-                                    currentCode ? setShowFullCode(!showFullCode) : null
-                                }
-                            >
-                                <View pointerEvents="none">
-                                    <Controller
-                                        name="code"
-                                        control={control}
-                                        render={({ field: { value } }) => (
-                                            <Input
-                                                value={value || ''}
-                                                placeholder="Mã vụ nuôi"
-                                                containerStyle={styles.noMarginBottom}
-                                                inputContainerStyle={styles.customInputDisabledBox}
-                                                inputStyle={
-                                                    value
-                                                        ? styles.inputTextFilled
-                                                        : styles.inputTextPlaceholder
-                                                }
-                                                placeholderTextColor={colors.gray[400]}
-                                                disabled
-                                            />
-                                        )}
-                                    />
-                                </View>
-                            </TouchableOpacity>
+                        <Controller
+                            name="name"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <FarmInput
+                                    value={value}
+                                    onChangeText={onChange}
+                                    placeholder="Tên vụ nuôi"
+                                    containerStyle={styles.noMarginBottom}
+                                    inputContainerStyle={styles.customInputBox}
+                                    inputStyle={
+                                        value ? styles.inputTextFilled : styles.inputTextPlaceholder
+                                    }
+                                    placeholderTextColor={colors.gray[400]}
+                                    error={errors.name?.message}
+                                />
+                            )}
+                        />
+                    </View>
 
-                            {/* Full Code Display Popup */}
-                            {showFullCode && currentCode ? (
-                                <View style={styles.fullCodeContainer}>
-                                    <Text style={styles.fullCodeText} selectable>
-                                        Mã vụ nuôi:{' '}
-                                        <Text style={styles.fullCodeValue}>{currentCode}</Text>
-                                    </Text>
-                                </View>
-                            ) : null}
+                    {/* Cycle Code */}
+                    <View style={[styles.fieldContainer, styles.zIndex10]}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Mã vụ nuôi</Text>
+                            <RequiredDot />
                         </View>
+                        <Controller
+                            name="code"
+                            control={control}
+                            render={({ field: { value } }) => (
+                                <Input
+                                    value={value || ''}
+                                    placeholder="Mã vụ nuôi"
+                                    containerStyle={styles.noMarginBottom}
+                                    inputContainerStyle={styles.customInputDisabledBox}
+                                    inputStyle={
+                                        value ? styles.inputTextFilled : styles.inputTextPlaceholder
+                                    }
+                                    placeholderTextColor={colors.gray[400]}
+                                    disabled
+                                />
+                            )}
+                        />
                     </View>
 
                     {/* Start Date */}
