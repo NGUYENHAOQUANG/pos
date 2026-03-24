@@ -1,8 +1,3 @@
-/**
- * @file SelectMaterialBottomSheet.tsx
- * @description Bottom sheet for selecting material with slide-up animation.
- * Uses inline view swapping instead of nested Modals to avoid iOS issues.
- */
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
@@ -376,7 +371,7 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
     },
     containerProduct: {
-        height: SCREEN_HEIGHT * 0.7,
+        flex: 0.7,
     },
     header: {
         flexDirection: 'row',
@@ -474,7 +469,7 @@ const styles = StyleSheet.create({
         padding: 0,
     },
     list: {
-        flexGrow: 0,
+        flex: 1,
     },
     itemRow: {
         flexDirection: 'row',
