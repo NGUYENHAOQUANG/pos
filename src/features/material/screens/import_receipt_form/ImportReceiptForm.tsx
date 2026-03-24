@@ -50,7 +50,7 @@ export type AddImportReceiptUIProps = {
     onDelete?: () => void;
 };
 
-const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
+const ImportReceiptFormComponent: React.FC<AddImportReceiptUIProps> = ({
     isEditMode,
     isLoadingDetail,
     isSubmitting,
@@ -126,7 +126,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
             initialSnapshotRef.current = JSON.stringify({
                 date: new Date(initialData.date).getTime(),
                 supplier: initialData.supplier || '',
-                warehouseItems: (initialData.warehouseItems || []).map((item: any) => ({
+                warehouseItems: (initialData.warehouseItems || []).map((item: MaterialItem) => ({
                     materialId: item.materialId || '',
                     quantity: item.quantity || '',
                     price: item.price || '',
@@ -138,8 +138,8 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     // Track changes for edit mode disable
     const hasChanges = useMemo(() => {
         if (!isEditMode || !initialSnapshotRef.current) return true;
-        const normalizeItems = (items: any[]) =>
-            (items || []).map((item: any) => ({
+        const normalizeItems = (items: MaterialItem[]) =>
+            (items || []).map((item: MaterialItem) => ({
                 materialId: item.materialId || '',
                 quantity: item.quantity || '',
                 price: item.price || '',
@@ -155,7 +155,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     }, [isEditMode, date, supplier, warehouseItems, files]);
 
     const onError = useCallback(
-        (errors: any) => warehouseFormUtils.handleFormError(errors, showValidationError),
+        (errors: unknown) => warehouseFormUtils.handleFormError(errors, showValidationError),
         []
     );
 
@@ -195,6 +195,18 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
         [handleSubmit, onError]
     );
 
+    const handleDateChange = useCallback((newDate: Date) => setValue('date', newDate), [setValue]);
+    const handleSupplierChange = useCallback(
+        (newSupplier: string) => setValue('supplier', newSupplier),
+        [setValue]
+    );
+    const handleFilesSelected = useCallback(
+        (newFiles: DocumentPickerResponse[]) => setValue('files', newFiles),
+        [setValue]
+    );
+    const handleCloseConfirmModal = useCallback(() => setIsConfirmModalVisible(false), []);
+    const handleCancelDeleteModal = useCallback(() => setDeleteModalVisible(false), []);
+
     if (isLoadingDetail) {
         return (
             <>
@@ -232,15 +244,15 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                         >
                             <WarehouseInformation
                                 date={date}
-                                onDateChange={newDate => setValue('date', newDate)}
+                                onDateChange={handleDateChange}
                                 supplier={supplier}
-                                onSupplierChange={newSupplier => setValue('supplier', newSupplier)}
+                                onSupplierChange={handleSupplierChange}
                                 supplierDisplayValue={initialData?.supplierName}
                             >
                                 <FileUploader
                                     ref={fileUploaderRef}
                                     files={files || []}
-                                    onFilesSelected={newFiles => setValue('files', newFiles)}
+                                    onFilesSelected={handleFilesSelected}
                                     maxFiles={5}
                                 />
                             </WarehouseInformation>
@@ -264,14 +276,14 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
 
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
-                        onClose={() => setIsConfirmModalVisible(false)}
+                        onClose={handleCloseConfirmModal}
                         onConfirm={handleConfirmSubmit}
                     />
 
                     <ConfirmationModalUI
                         visible={deleteModalVisible}
                         onConfirm={handleConfirmDelete}
-                        onCancel={() => setDeleteModalVisible(false)}
+                        onCancel={handleCancelDeleteModal}
                         title="Xóa phiếu nhập kho"
                         message="Bạn có chắc chắn muốn xóa phiếu nhập kho này không?"
                         showSuccessToast={false}
@@ -296,4 +308,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default React.memo(ImportReceiptForm);
+export const ImportReceiptForm = React.memo(ImportReceiptFormComponent);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -37,9 +37,7 @@ export const MaterialFormScreen: React.FC = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const params = route.params as
-        | { materialId?: string; onSave?: (data: any) => void }
-        | undefined;
+    const params = route.params as { materialId?: string };
     const materialId = params?.materialId || null;
     const isEditMode = !!materialId;
 
@@ -74,44 +72,52 @@ export const MaterialFormScreen: React.FC = () => {
     }, [units]);
 
     // Handlers
-    const handleGroupChange = (groupName: string) => {
+    const handleGroupChange = useCallback((groupName: string) => {
         setSelectedGroupId(groupName);
-    };
+    }, []);
 
-    const handleBackPress = () => {
+    const handleBackPress = useCallback(() => {
         navigation.goBack();
-    };
+    }, [navigation]);
 
-    const onSubmit = (formData: MaterialFormValues) => {
-        if (isEditMode && initialMaterial?.id) {
-            const payload = materialService.mapFormToUpdatePayload(formData);
-            updateMaterial(
-                { id: initialMaterial.id, request: payload },
-                {
+    const onSubmit = useCallback(
+        (formData: MaterialFormValues) => {
+            if (isEditMode && initialMaterial?.id) {
+                const payload = materialService.mapFormToUpdatePayload(formData);
+                updateMaterial(
+                    { id: initialMaterial.id, request: payload },
+                    {
+                        onSuccess: () => {
+                            queryClient.invalidateQueries({ queryKey: ['materials'] });
+                            navigation.goBack();
+                        },
+                    }
+                );
+            } else {
+                const payload = materialService.mapFormToCreatePayload(
+                    formData,
+                    currentWarehouseId ?? ''
+                );
+                createMaterial(payload, {
                     onSuccess: () => {
                         queryClient.invalidateQueries({ queryKey: ['materials'] });
                         navigation.goBack();
                     },
-                }
-            );
-        } else {
-            const payload = materialService.mapFormToCreatePayload(
-                formData,
-                currentWarehouseId ?? ''
-            );
-            createMaterial(payload, {
-                onSuccess: (response: any) => {
-                    if (response?.data && params?.onSave) {
-                        params.onSave(response.data);
-                    }
-                    queryClient.invalidateQueries({ queryKey: ['materials'] });
-                    navigation.goBack();
-                },
-            });
-        }
-    };
+                });
+            }
+        },
+        [
+            isEditMode,
+            currentWarehouseId,
+            initialMaterial,
+            updateMaterial,
+            createMaterial,
+            queryClient,
+            navigation,
+        ]
+    );
 
-    const onDelete = () => {
+    const onDelete = useCallback(() => {
         if (isEditMode && initialMaterial?.id) {
             deleteMaterial(initialMaterial.id, {
                 onSuccess: () => {
@@ -123,7 +129,7 @@ export const MaterialFormScreen: React.FC = () => {
                 },
             });
         }
-    };
+    }, [isEditMode, initialMaterial, deleteMaterial, queryClient, navigation]);
 
     const isSubmitting = isCreating || isUpdating || isDeleting;
     const isLoading = isSubmitting || isLoadingMaterialGroups || isLoadingDetail;

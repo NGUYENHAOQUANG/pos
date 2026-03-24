@@ -13,36 +13,32 @@ interface WarehouseFooterProps {
     disabled?: boolean;
 }
 
-export const WarehouseFooter: React.FC<WarehouseFooterProps> = ({
-    safeBottom,
-    totalAmount,
-    onSaveDraft,
-    onSubmit,
-    disabled = false,
-}) => {
-    return (
-        <View style={[styles.footer, { paddingBottom: safeBottom }]}>
-            <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Tổng tiền:</Text>
-                <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
-            </View>
-            <View style={styles.buttonRow}>
-                <View style={styles.buttonWrapper}>
-                    <Button
-                        title="Lưu Nháp"
-                        variant="outline"
-                        onPress={onSaveDraft}
-                        disabled={disabled}
-                    />
+export const WarehouseFooter: React.FC<WarehouseFooterProps> = React.memo(
+    ({ safeBottom, totalAmount, onSaveDraft, onSubmit, disabled = false }) => {
+        return (
+            <View style={[styles.footer, { paddingBottom: safeBottom }]}>
+                <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Tổng tiền:</Text>
+                    <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
                 </View>
-                <View style={styles.buttonSpacer} />
-                <View style={styles.buttonWrapper}>
-                    <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                <View style={styles.buttonRow}>
+                    <View style={styles.buttonWrapper}>
+                        <Button
+                            title="Lưu Nháp"
+                            variant="outline"
+                            onPress={onSaveDraft}
+                            disabled={disabled}
+                        />
+                    </View>
+                    <View style={styles.buttonSpacer} />
+                    <View style={styles.buttonWrapper}>
+                        <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                    </View>
                 </View>
             </View>
-        </View>
-    );
-};
+        );
+    }
+);
 
 const styles = StyleSheet.create({
     footer: {

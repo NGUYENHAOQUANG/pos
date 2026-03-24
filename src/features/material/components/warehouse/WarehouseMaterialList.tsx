@@ -23,80 +23,92 @@ interface WarehouseMaterialListProps {
     showStatus?: boolean;
 }
 
-export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
-    materials,
-    isLoading,
-    refreshing,
-    onRefresh,
-    onLoadMore,
-    isFetchingNextPage,
-    hasNextPage,
-    onHistoryPress,
-    onAdjustmentPress,
-    onPressCreate,
-    hideRemaining,
-    alwaysExpanded,
-    showStatus,
-}) => {
-    const handleLoadMore = () => {
-        if (hasNextPage && !isFetchingNextPage && onLoadMore) {
-            onLoadMore();
-        }
-    };
+export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = React.memo(
+    ({
+        materials,
+        isLoading,
+        refreshing,
+        onRefresh,
+        onLoadMore,
+        isFetchingNextPage,
+        hasNextPage,
+        onHistoryPress,
+        onAdjustmentPress,
+        onPressCreate,
+        hideRemaining,
+        alwaysExpanded,
+        showStatus,
+    }) => {
+        const handleLoadMore = React.useCallback(() => {
+            if (hasNextPage && !isFetchingNextPage && onLoadMore) {
+                onLoadMore();
+            }
+        }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
-    if (isLoading) {
+        const renderItem = React.useCallback(
+            ({ item }: { item: IWarehouseItem }) => (
+                <WarehouseMaterialItem
+                    item={item}
+                    onHistoryPress={onHistoryPress}
+                    onAdjustmentPress={onAdjustmentPress}
+                    hideRemaining={hideRemaining}
+                    alwaysExpanded={alwaysExpanded}
+                    showStatus={showStatus}
+                />
+            ),
+            [onHistoryPress, onAdjustmentPress, hideRemaining, alwaysExpanded, showStatus]
+        );
+
+        const keyExtractor = React.useCallback((item: IWarehouseItem) => item.id, []);
+
+        const renderSkeleton = React.useCallback(() => <MaterialItemSkeleton />, []);
+        const skeletonKeyExtractor = React.useCallback((item: number) => item.toString(), []);
+
+        if (isLoading) {
+            return (
+                <View style={materialListStyles.container}>
+                    <FlatList
+                        data={[1, 2, 3, 4, 5]}
+                        renderItem={renderSkeleton}
+                        keyExtractor={skeletonKeyExtractor}
+                        contentContainerStyle={materialListStyles.listContent}
+                        showsVerticalScrollIndicator={false}
+                    />
+                </View>
+            );
+        }
+
         return (
             <View style={materialListStyles.container}>
                 <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    renderItem={() => <MaterialItemSkeleton />}
-                    keyExtractor={item => item.toString()}
-                    contentContainerStyle={materialListStyles.listContent}
+                    data={materials}
+                    keyExtractor={keyExtractor}
+                    renderItem={renderItem}
+                    contentContainerStyle={[
+                        materialListStyles.listContent,
+                        materials.length === 0 && materialListStyles.emptyContent,
+                    ]}
                     showsVerticalScrollIndicator={false}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                        isFetchingNextPage ? (
+                            <View style={materialListStyles.loaderFooter}>
+                                <ActivityIndicator color={colors.primary} />
+                            </View>
+                        ) : null
+                    }
+                    ListEmptyComponent={
+                        <EmptyStateCard
+                            message="Chưa có vật tư nào trong kho."
+                            buttonTitle="Thêm vật tư vào kho"
+                            onPress={onPressCreate || (() => {})}
+                        />
+                    }
                 />
             </View>
         );
     }
-
-    return (
-        <View style={materialListStyles.container}>
-            <FlatList
-                data={materials}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <WarehouseMaterialItem
-                        item={item}
-                        onHistoryPress={onHistoryPress}
-                        onAdjustmentPress={onAdjustmentPress}
-                        hideRemaining={hideRemaining}
-                        alwaysExpanded={alwaysExpanded}
-                        showStatus={showStatus}
-                    />
-                )}
-                contentContainerStyle={[
-                    materialListStyles.listContent,
-                    materials.length === 0 && materialListStyles.emptyContent,
-                ]}
-                showsVerticalScrollIndicator={false}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    isFetchingNextPage ? (
-                        <View style={materialListStyles.loaderFooter}>
-                            <ActivityIndicator color={colors.primary} />
-                        </View>
-                    ) : null
-                }
-                ListEmptyComponent={
-                    <EmptyStateCard
-                        message="Chưa có vật tư nào trong kho."
-                        buttonTitle="Thêm vật tư vào kho"
-                        onPress={onPressCreate || (() => {})}
-                    />
-                }
-            />
-        </View>
-    );
-};
+);
