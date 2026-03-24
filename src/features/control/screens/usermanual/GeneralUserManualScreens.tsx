@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
 
-// Import device card SVGs
+// Import device card data
 import { MANUAL_DATA, ManualItem } from '@/features/control/data/GeneraluserManualData';
 
 // Helper function to get highlight color
@@ -55,15 +55,13 @@ const DescriptionRow: React.FC<{ index: number; text: string }> = ({ index, text
     );
 };
 
-// Manual row component
-const ManualRow: React.FC<{ item: ManualItem }> = ({ item }) => {
-    const CardSvg = item.CardSvg;
-
+// Manual row component - renders each item with image and description
+const ManualRow: React.FC<{ item: ManualItem; isLast: boolean }> = ({ item, isLast }) => {
     return (
-        <View style={styles.row}>
+        <View style={[styles.row, isLast && styles.rowLast]}>
             {/* Device Card Column */}
             <View style={styles.deviceCell}>
-                <CardSvg width={140} height={105} />
+                <item.CardSvg width={120} height={80} style={{ marginTop: -17 }} />
             </View>
 
             {/* Description Column */}
@@ -100,20 +98,27 @@ export const GeneralUserManualScreens: React.FC = () => {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Table Header */}
-                <View style={styles.tableHeader}>
-                    <View style={styles.headerDevice}>
-                        <Text style={styles.headerText}>Hình minh họa</Text>
+                {/* Single card wrapping the entire table */}
+                <View style={styles.tableCard}>
+                    {/* Table Header */}
+                    <View style={styles.tableHeader}>
+                        <View style={styles.headerDevice}>
+                            <Text style={styles.headerText}>Hình minh họa</Text>
+                        </View>
+                        <View style={styles.headerDescription}>
+                            <Text style={styles.headerText}>Mô tả</Text>
+                        </View>
                     </View>
-                    <View style={styles.headerDescription}>
-                        <Text style={styles.headerText}>Mô tả</Text>
-                    </View>
-                </View>
 
-                {/* Table Rows */}
-                {MANUAL_DATA.map(item => (
-                    <ManualRow key={item.id} item={item} />
-                ))}
+                    {/* Table Rows */}
+                    {MANUAL_DATA.map((item, index) => (
+                        <ManualRow
+                            key={item.id}
+                            item={item}
+                            isLast={index === MANUAL_DATA.length - 1}
+                        />
+                    ))}
+                </View>
             </ScrollView>
         </View>
     );
@@ -128,46 +133,60 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
         paddingBottom: 40,
     },
-    // Table Header
+    // Single card container wrapping full table
+    tableCard: {
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.white,
+        overflow: 'hidden',
+    },
+    // Table Header - bg: gray/100 (#F3F4F6), border: gray/200 (#E6E8EC)
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: colors.backgroundPrimary,
-        borderBottomWidth: 2,
-        borderBottomColor: colors.orange[600],
-        paddingVertical: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        backgroundColor: colors.gray[100],
     },
     headerDevice: {
-        width: 150,
+        width: 134,
         justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.xs,
+        alignItems: 'flex-start',
+        padding: 8,
+        borderRightWidth: 1,
+        borderRightColor: colors.border,
     },
     headerDescription: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.xs,
+        alignItems: 'flex-start',
+        padding: 8,
     },
     headerText: {
         fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
-        textAlign: 'center',
+        fontWeight: '500',
+        color: colors.gray[950],
+        lineHeight: 20,
     },
     // Table Row
     row: {
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
-        minHeight: 130,
+        minHeight: 120,
+    },
+    rowLast: {
+        borderBottomWidth: 0,
     },
     deviceCell: {
-        width: 150,
-        justifyContent: 'center',
+        width: 134,
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        paddingVertical: spacing.sm,
+        paddingBottom: spacing.sm,
         paddingHorizontal: 4,
         borderRightWidth: 1,
         borderRightColor: colors.border,
@@ -184,7 +203,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     descriptionNumber: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '400',
         color: colors.text,
         marginRight: 4,
@@ -192,7 +211,7 @@ const styles = StyleSheet.create({
     },
     descriptionText: {
         flex: 1,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '400',
         color: colors.text,
         lineHeight: 18,
@@ -203,7 +222,7 @@ const styles = StyleSheet.create({
     // Note
     noteText: {
         flex: 1,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '400',
         color: colors.orange[600],
         lineHeight: 18,

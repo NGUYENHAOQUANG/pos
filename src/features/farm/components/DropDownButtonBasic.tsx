@@ -13,9 +13,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ChevronDownIcon from '@/assets/Icon/ChevronDown.svg';
 import ChevronUpIcon from '@/assets/Icon/ChevronUp.svg';
 
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
 import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
+import { RequiredDot } from '@/shared/components/forms/Input';
 
 export interface DropDownItem {
     id: string | number;
@@ -33,6 +34,8 @@ interface DropDownButtonBasicProps {
     borderRadius?: number;
     disabled?: boolean;
     placeholder?: string;
+    label?: string;
+    required?: boolean;
 }
 
 const DEFAULT_DATA: DropDownItem[] = [
@@ -51,6 +54,8 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     borderRadius: customBorderRadius = spacing.sm,
     disabled = false,
     placeholder = 'Chọn',
+    label,
+    required = false,
 }) => {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value);
@@ -106,6 +111,15 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
 
     return (
         <View style={style}>
+            {label && (
+                <View style={[styles.labelWrapper, { marginBottom: 6 }]}>
+                    <Text style={styles.labelText} maxFontSizeMultiplier={1.1}>
+                        {label}
+                    </Text>
+                    {required && <RequiredDot />}
+                </View>
+            )}
+
             {/* Dropdown Picker */}
             <View ref={dropdownButtonRef} collapsable={false}>
                 <TouchableOpacity
@@ -178,6 +192,16 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
 };
 
 const styles = StyleSheet.create({
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    labelText: {
+        fontSize: typography.fontSize.sm,
+        fontWeight: '500',
+        color: colors.text,
+        lineHeight: 20,
+    },
     locationButton: {
         flexDirection: 'row',
         alignItems: 'center',

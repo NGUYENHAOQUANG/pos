@@ -186,6 +186,5 @@ const styles = StyleSheet.create({
     },
     expandedContent: {
         gap: 6,
-        marginTop: 4,
     },
 });
