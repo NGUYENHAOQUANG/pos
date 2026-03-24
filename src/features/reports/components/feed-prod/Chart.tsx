@@ -183,7 +183,7 @@ export const Chart: React.FC<ChartProps> = ({
     } = processedData;
 
     // Helper functions
-    const INNER_PADDING_LEFT = 20; // Khoảng cách từ trục Y đến điểm dữ liệu đầu tiên
+    const INNER_PADDING_LEFT = 18; // Khoảng cách từ trục Y đến điểm dữ liệu đầu tiên
     const INNER_PADDING_RIGHT = 30; // Khoảng cách từ điểm dữ liệu cuối đến bên phải
     const availableWidth = actualWidth - INNER_PADDING_LEFT - INNER_PADDING_RIGHT;
 
@@ -300,11 +300,11 @@ export const Chart: React.FC<ChartProps> = ({
                             return (
                                 <SvgText
                                     key={`y-label-sticky-${value}`}
-                                    x={16}
+                                    x={0}
                                     y={y + 4}
                                     fill={CHART_THEME.text}
                                     fontSize={12}
-                                    textAnchor="end"
+                                    textAnchor="start"
                                 >
                                     {Math.round(value * 100) / 100}
                                 </SvgText>

@@ -97,8 +97,19 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
         if (sanitized.length > 7) {
             sanitized = sanitized.substring(0, 7);
         }
+
+        // If user typed just a dot, treat it as 0
+        if (sanitized === '.') {
+            sanitized = '0';
+        }
+
+        let numericValue = sanitized === '' ? 0 : Number(sanitized);
+        if (Number.isNaN(numericValue)) {
+            numericValue = 0;
+        }
+
         const updated = selectedMaterials.map((item, i) =>
-            i === index ? { ...item, quantity: sanitized === '' ? 0 : Number(sanitized) } : item
+            i === index ? { ...item, quantity: numericValue } : item
         );
         onMaterialsChange(updated);
     };

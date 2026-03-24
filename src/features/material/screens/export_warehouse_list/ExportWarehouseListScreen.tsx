@@ -18,7 +18,7 @@ export const ExportWarehouseListScreen: React.FC = () => {
 
     // 2. Prepare Params
     const exportWarehouseParams = React.useMemo(() => {
-        const params: any = {};
+        const params: Record<string, string | number> = {};
 
         if (searchText?.trim()) {
             params.Search = searchText.trim();
@@ -57,13 +57,17 @@ export const ExportWarehouseListScreen: React.FC = () => {
         itemsCount: receipts.length,
     });
 
+    const handlePressCreate = React.useCallback(() => {
+        navigation.navigate('ExportWarehouseForm', {});
+    }, [navigation]);
+
     return (
         <ExportWarehouseMaterialList
             receipts={receipts}
             isLoading={showSkeleton}
             refreshing={isRefreshing}
             onRefresh={refetch}
-            onPressCreate={() => navigation.navigate('ExportWarehouseForm', {})}
+            onPressCreate={handlePressCreate}
             onLoadMore={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}

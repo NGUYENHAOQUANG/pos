@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Platform, UIManager } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,143 +39,171 @@ export interface MaterialFormProps {
     onGroupChangeTrigger: (groupName: string) => void;
 }
 
-export const MaterialForm: React.FC<MaterialFormProps> = ({
-    isEditMode,
-    isSubmitting,
-    initialData,
-    groupOptions = [],
-    unitOptions = [],
-    materialGroupsData = [],
-    typesByGroup = [],
-    groupDisabled = false,
-    onSubmit,
-    onDelete,
-    onBackPress,
-    onGroupChangeTrigger,
-}) => {
-    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const initializedRef = useRef(false);
-    const scrollViewRef = useRef<ScrollView>(null);
+export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
+    ({
+        isEditMode,
+        isSubmitting,
+        initialData,
+        groupOptions = [],
+        unitOptions = [],
+        materialGroupsData = [],
+        typesByGroup = [],
+        groupDisabled = false,
+        onSubmit,
+        onDelete,
+        onBackPress,
+        onGroupChangeTrigger,
+    }) => {
+        const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+        const initializedRef = useRef(false);
+        const scrollViewRef = useRef<ScrollView>(null);
 
-    const { control, handleSubmit, reset, setValue } = useForm<MaterialFormValues>({
-        resolver: zodResolver(materialFormSchema),
-        defaultValues: {
-            name: '',
-            group: '',
-            type: '',
-            unit: '',
-            usage: '',
-            manufacturer: '',
-            isActive: true,
-        },
-    });
+        const { control, handleSubmit, reset, setValue } = useForm<MaterialFormValues>({
+            resolver: zodResolver(materialFormSchema),
+            defaultValues: {
+                name: '',
+                group: '',
+                type: '',
+                unit: '',
+                usage: '',
+                manufacturer: '',
+                isActive: true,
+            },
+        });
 
-    const watchedForm = useWatch({ control });
+        const watchedForm = useWatch({ control });
 
-    useEffect(() => {
-        if (watchedForm.group) {
-            onGroupChangeTrigger(watchedForm.group);
-        }
-    }, [watchedForm.group, onGroupChangeTrigger]);
+        useEffect(() => {
+            if (watchedForm.group) {
+                onGroupChangeTrigger(watchedForm.group);
+            }
+        }, [watchedForm.group, onGroupChangeTrigger]);
 
-    useEffect(() => {
-        if (initialData && !initializedRef.current) {
-            reset(initialData);
-            initializedRef.current = true;
-        }
-    }, [initialData, reset]);
+        useEffect(() => {
+            if (initialData && !initializedRef.current) {
+                reset(initialData);
+                initializedRef.current = true;
+            }
+        }, [initialData, reset]);
 
-    const onError = (formErrors: any) => {
-        const firstErrorKey = Object.keys(formErrors)[0];
-        if (firstErrorKey) {
-            showValidationError(
-                formErrors[firstErrorKey].message || 'Vui lòng kiểm tra lại thông tin'
-            );
-        }
-    };
+        const onError = useCallback((formErrors: unknown) => {
+            const errors = formErrors as Record<string, { message?: string }>;
+            const firstErrorKey = Object.keys(errors)[0];
+            if (firstErrorKey && errors[firstErrorKey]) {
+                showValidationError(
+                    errors[firstErrorKey].message || 'Vui lòng kiểm tra lại thông tin'
+                );
+            }
+        }, []);
 
-    return (
-        <View style={styles.container}>
-            <HeaderMeterial
-                title={isEditMode ? 'Sửa Thông Tin Vật Tư' : 'Tạo Vật Tư'}
-                onBackPress={onBackPress}
-                rightIcon={
-                    isEditMode && onDelete ? (
-                        <IconTrashOutlined width={20} height={20} color={colors.text} />
-                    ) : undefined
-                }
-                onRightPress={
-                    isEditMode && onDelete ? () => setDeleteModalVisible(true) : undefined
-                }
-            />
+        const handleNameChange = useCallback(
+            (val: string) => setValue('name', val, { shouldValidate: true }),
+            [setValue]
+        );
+        const handleGroupChange = useCallback(
+            (val: string) => {
+                setValue('group', val, { shouldValidate: true });
+                setValue('type', '');
+            },
+            [setValue]
+        );
+        const handleTypeChange = useCallback(
+            (val: string) => setValue('type', val, { shouldValidate: true }),
+            [setValue]
+        );
+        const handleUnitChange = useCallback(
+            (val: string) => setValue('unit', val, { shouldValidate: true }),
+            [setValue]
+        );
+        const handleUsageChange = useCallback(
+            (val: string) => setValue('usage', val, { shouldValidate: true }),
+            [setValue]
+        );
+        const handleManufacturerChange = useCallback(
+            (val: string) => setValue('manufacturer', val, { shouldValidate: true }),
+            [setValue]
+        );
+        const handleUnitDropdownOpen = useCallback(() => {
+            setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        }, []);
+        const handleDeletePress = useCallback(() => setDeleteModalVisible(true), []);
+        const handleConfirmDelete = useCallback(() => {
+            setDeleteModalVisible(false);
+            onDelete?.();
+        }, [onDelete]);
+        const handleCancelDelete = useCallback(() => setDeleteModalVisible(false), []);
 
-            <SafeInputLayoutMaterial>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.contentScroll}
-                    contentContainerStyle={styles.contentContainer}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <AddMaterial
-                        name={watchedForm.name}
-                        onNameChange={val => setValue('name', val, { shouldValidate: true })}
-                        group={watchedForm.group}
-                        onGroupChange={val => {
-                            setValue('group', val, { shouldValidate: true });
-                            setValue('type', '');
-                        }}
-                        type={watchedForm.type}
-                        onTypeChange={val => setValue('type', val, { shouldValidate: true })}
-                        unit={watchedForm.unit}
-                        onUnitChange={val => setValue('unit', val, { shouldValidate: true })}
-                        unitOptions={unitOptions}
-                        groupOptions={groupOptions}
-                        materialGroupsData={materialGroupsData}
-                        groupDisabled={groupDisabled}
-                        typesByGroup={typesByGroup}
-                        usage={watchedForm.usage}
-                        onUsageChange={val => setValue('usage', val, { shouldValidate: true })}
-                        manufacturer={watchedForm.manufacturer}
-                        onManufacturerChange={val =>
-                            setValue('manufacturer', val, { shouldValidate: true })
-                        }
-                        onUnitDropdownOpen={() => {
-                            setTimeout(() => {
-                                scrollViewRef.current?.scrollToEnd({ animated: true });
-                            }, 100);
-                        }}
-                    />
-                </ScrollView>
-            </SafeInputLayoutMaterial>
+        return (
+            <View style={styles.container}>
+                <HeaderMeterial
+                    title={isEditMode ? 'Sửa Thông Tin Vật Tư' : 'Tạo Vật Tư'}
+                    onBackPress={onBackPress}
+                    rightIcon={
+                        isEditMode && onDelete ? (
+                            <IconTrashOutlined width={20} height={20} color={colors.text} />
+                        ) : undefined
+                    }
+                    onRightPress={isEditMode && onDelete ? handleDeletePress : undefined}
+                />
 
-            <ButtonBar
-                mode="double"
-                primaryTitle="Lưu thông tin"
-                secondaryTitle="Huỷ"
-                containerStyle={{
-                    borderTopWidth: 1,
-                    borderTopColor: colors.border,
-                }}
-                onPrimaryPress={handleSubmit(onSubmit, onError)}
-                onSecondaryPress={onBackPress}
-                primaryButtonDisabled={isSubmitting}
-            />
+                <SafeInputLayoutMaterial>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.contentScroll}
+                        contentContainerStyle={styles.contentContainer}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <AddMaterial
+                            name={watchedForm.name}
+                            onNameChange={handleNameChange}
+                            group={watchedForm.group}
+                            onGroupChange={handleGroupChange}
+                            type={watchedForm.type}
+                            onTypeChange={handleTypeChange}
+                            unit={watchedForm.unit}
+                            onUnitChange={handleUnitChange}
+                            unitOptions={unitOptions}
+                            groupOptions={groupOptions}
+                            materialGroupsData={materialGroupsData}
+                            groupDisabled={groupDisabled}
+                            typesByGroup={typesByGroup}
+                            usage={watchedForm.usage}
+                            onUsageChange={handleUsageChange}
+                            manufacturer={watchedForm.manufacturer}
+                            onManufacturerChange={handleManufacturerChange}
+                            onUnitDropdownOpen={handleUnitDropdownOpen}
+                        />
+                    </ScrollView>
+                </SafeInputLayoutMaterial>
 
-            <ConfirmationModalUI
-                visible={deleteModalVisible}
-                onConfirm={() => {
-                    setDeleteModalVisible(false);
-                    onDelete?.();
-                }}
-                onCancel={() => setDeleteModalVisible(false)}
-                title="Xóa vật tư​"
-                message="Bạn có chắc chắn muốn xóa vật tư này không?"
-                showSuccessToast={false}
-            />
-        </View>
-    );
-};
+                <ButtonBar
+                    mode="double"
+                    primaryTitle="Lưu thông tin"
+                    secondaryTitle="Huỷ"
+                    containerStyle={{
+                        borderTopWidth: 1,
+                        borderTopColor: colors.border,
+                    }}
+                    onPrimaryPress={handleSubmit(onSubmit, onError)}
+                    onSecondaryPress={onBackPress}
+                    primaryButtonDisabled={isSubmitting}
+                />
+
+                <ConfirmationModalUI
+                    visible={deleteModalVisible}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={handleCancelDelete}
+                    title="Xóa vật tư​"
+                    message="Bạn có chắc chắn muốn xóa vật tư này không?"
+                    showSuccessToast={false}
+                />
+            </View>
+        );
+    }
+);
 
 const styles = StyleSheet.create({
     container: {

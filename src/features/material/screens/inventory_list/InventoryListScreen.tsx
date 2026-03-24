@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const InventoryScreen: React.FC = () => {
+export const InventoryListScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
@@ -17,7 +17,7 @@ export const InventoryScreen: React.FC = () => {
 
     // 2. Prepare Params
     const inventoryParams = React.useMemo(() => {
-        const params: any = {};
+        const params: Record<string, string | number> = {};
 
         if (searchText?.trim()) {
             params.Search = searchText.trim();
@@ -52,6 +52,10 @@ export const InventoryScreen: React.FC = () => {
         itemsCount: inventoryList.length,
     });
 
+    const handlePressCreate = React.useCallback(() => {
+        navigation.navigate('AddInventory', {});
+    }, [navigation]);
+
     return (
         <InventoryMaterialList
             inventoryList={inventoryList}
@@ -61,7 +65,7 @@ export const InventoryScreen: React.FC = () => {
             onLoadMore={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}
-            onPressCreate={() => navigation.navigate('AddInventory', {})}
+            onPressCreate={handlePressCreate}
         />
     );
 };

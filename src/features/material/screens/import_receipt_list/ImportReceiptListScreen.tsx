@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const ImportReceiptList: React.FC = () => {
+export const ImportReceiptListScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
@@ -16,14 +16,23 @@ export const ImportReceiptList: React.FC = () => {
     const { warehouseId, getListState } = useMaterialListState();
 
     // 2. Prepare Params
-    const warehouseParams = useMemo(
-        () => ({
-            ReceiptCode: searchText || undefined,
-            WarehouseId: warehouseId || undefined,
-            Status: importReceiptStatusFilter || undefined,
-        }),
-        [searchText, warehouseId, importReceiptStatusFilter]
-    );
+    const warehouseParams = useMemo(() => {
+        const params: Record<string, string | number> = {};
+
+        if (searchText?.trim()) {
+            params.ReceiptCode = searchText.trim();
+        }
+
+        if (warehouseId) {
+            params.WarehouseId = warehouseId;
+        }
+
+        if (importReceiptStatusFilter) {
+            params.Status = importReceiptStatusFilter;
+        }
+
+        return params;
+    }, [searchText, warehouseId, importReceiptStatusFilter]);
 
     // 3. Fetch Data
     const {

@@ -41,6 +41,10 @@ export const MaterialMasterListTab: React.FC = () => {
         itemsCount: masterMaterials.length,
     });
 
+    const handlePressCreate = React.useCallback(() => {
+        navigation.navigate('MaterialForm', {});
+    }, [navigation]);
+
     return (
         <MaterialMasterList
             materials={masterMaterials}
@@ -50,7 +54,7 @@ export const MaterialMasterListTab: React.FC = () => {
             onLoadMore={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}
-            onPressCreate={() => navigation.navigate('MaterialForm', {})}
+            onPressCreate={handlePressCreate}
         />
     );
 };

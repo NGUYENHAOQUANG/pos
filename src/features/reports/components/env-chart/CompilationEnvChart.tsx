@@ -176,6 +176,7 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
                                     metadata={metadata}
                                     unit={unitMetric}
                                     pondColors={pondColors}
+                                    showSinglePointDots={!!selectedPondId}
                                 />
                             </View>
                         </>

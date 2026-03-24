@@ -126,7 +126,7 @@ const StockingInfoSection: React.FC<Props> = ({
                             value={value || ''}
                             onChangeText={onChange}
                             inputFormat={InputFormat.INTEGER}
-                            maxDigits={10}
+                            maxDigits={15}
                         />
                     )}
                 />
@@ -144,7 +144,7 @@ const StockingInfoSection: React.FC<Props> = ({
                             value={value || ''}
                             onChangeText={onChange}
                             inputFormat={InputFormat.INTEGER}
-                            maxDigits={5}
+                            maxDigits={4}
                         />
                     )}
                 />

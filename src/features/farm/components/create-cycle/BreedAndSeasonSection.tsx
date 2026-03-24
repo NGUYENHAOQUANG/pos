@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
 import BreedInfoCard from '@/features/farm/components/BreedInfoCard';
-import { Input, RequiredDot } from '@/shared/components/forms/Input';
+import { Input } from '@/shared/components/forms/Input';
 
 import { Control, Controller, useWatch } from 'react-hook-form';
 import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema';
@@ -39,11 +38,9 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                     name="breedSource"
                     render={({ field: { onChange, value } }) => (
                         <View style={styles.inputGroup}>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Chọn tôm giống</Text>
-                                <RequiredDot />
-                            </View>
                             <DropDownButtonBasic
+                                label="Chọn tôm giống"
+                                required
                                 data={breedOptions.map(opt => ({
                                     id: String(opt.value),
                                     label: opt.label,
@@ -82,11 +79,9 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                     name="season"
                     render={({ field: { onChange, value } }) => (
                         <View style={styles.inputGroup}>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Chọn vụ nuôi</Text>
-                                <RequiredDot />
-                            </View>
                             <DropDownButtonBasic
+                                label="Chọn vụ nuôi"
+                                required
                                 data={seasonOptions.map(opt => ({
                                     id: opt.value,
                                     label: opt.label,
@@ -118,11 +113,9 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                     name="cycleName"
                     render={({ field: { onChange, value } }) => (
                         <View style={styles.inputGroup}>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Tên chu kỳ</Text>
-                                <RequiredDot />
-                            </View>
                             <Input
+                                label="Tên chu kỳ"
+                                required
                                 containerStyle={{ marginBottom: 0 }}
                                 placeholder="Tên chu kỳ"
                                 value={value || ''}
@@ -146,25 +139,6 @@ const styles = StyleSheet.create({
     inputGroup: {
         width: '100%',
         gap: 4,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
-        includeFontPadding: false,
-        textAlignVertical: 'center',
-    },
-    required: {
-        color: colors.error,
-    },
-    errorText: {
-        color: colors.error,
-        fontSize: 12,
     },
     dropdown: {
         width: '100%',

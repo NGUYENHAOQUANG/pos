@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: SCREEN_HEIGHT < 800 ? 20 : 34,
         width: SCREEN_WIDTH,
-        marginBottom: 48,
+        marginBottom: 20,
     },
     logoContainer: {
         alignItems: 'center',
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 14,
+        paddingTop: 8,
         paddingBottom: 20,
         gap: 8,
     },
@@ -309,9 +309,9 @@ const styles = StyleSheet.create({
         paddingBottom: 24,
     },
     backButton: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        width: 40,
+        height: 40,
+        borderRadius: 26,
         borderWidth: 1,
         borderColor: colors.border,
         justifyContent: 'center',
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     mainButton: {
         flexGrow: 1,
         flexShrink: 1,
-        height: 64,
+        height: 40,
     },
     mainButtonText: {
         fontSize: 18,
