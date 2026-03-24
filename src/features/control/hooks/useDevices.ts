@@ -208,8 +208,8 @@ export const useDevices = () => {
             ];
             return sortPondsByCategory(allPonds);
         },
-        staleTime: 1000 * 30,
-        refetchInterval: 30000,
+        staleTime: 1000 * 10,
+        refetchInterval: 10000,
     });
 };
 

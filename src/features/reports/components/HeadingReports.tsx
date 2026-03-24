@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropDownHeaderItem } from '@/shared/components/forms/DropdownHeaderButton';
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
-import { FarmActionMenu } from '@/features/reports/components/FarmActionMenu';
 import { Logo } from '@/shared/components/brand/Logo';
 
 interface HeadingReportsProps {
@@ -32,7 +31,6 @@ export const HeadingReports = ({
     farmData,
     selectedFarm,
     onSelectFarm,
-    onRightPress,
     // pondTypeData and selectedPondType are hidden in the new UI but kept in props for state compatibility
     pondData,
     selectedPond,
@@ -43,16 +41,6 @@ export const HeadingReports = ({
     seasonDisabled,
 }: HeadingReportsProps) => {
     const insets = useSafeAreaInsets();
-    const [menuVisible, setMenuVisible] = useState(false);
-
-    const menuPosition = { top: insets.top + 56, right: 16 };
-
-    const handleFarmInfoPress = () => {
-        setMenuVisible(false);
-        if (onRightPress) {
-            onRightPress();
-        }
-    };
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -61,18 +49,12 @@ export const HeadingReports = ({
                 <Logo size="squareXs" />
                 <TouchableOpacity
                     style={styles.notificationButton}
-                    onPress={() => setMenuVisible(true)}
+                    // TODO: Navigate to notification screen
+                    onPress={() => {}}
                 >
                     <Ionicons name="notifications-outline" size={20} color={colors.text} />
                 </TouchableOpacity>
             </View>
-
-            <FarmActionMenu
-                visible={menuVisible}
-                onClose={() => setMenuVisible(false)}
-                onFarmInfo={handleFarmInfoPress}
-                position={menuPosition}
-            />
 
             {/* Row 1: Farm Selector */}
             <View style={styles.row}>

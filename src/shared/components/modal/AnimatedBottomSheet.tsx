@@ -3,7 +3,7 @@ import {
     Modal,
     View,
     StyleSheet,
-    TouchableWithoutFeedback,
+    Pressable,
     Animated,
     Dimensions,
     StyleProp,
@@ -83,21 +83,20 @@ export const AnimatedBottomSheet: React.FC<AnimatedBottomSheetProps> = ({
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <TouchableWithoutFeedback onPress={onClose}>
+            <Pressable onPress={onClose} style={{ flex: 1 }}>
                 <View style={[styles.overlay, overlayStyle]}>
-                    <TouchableWithoutFeedback>
-                        <Animated.View
-                            style={[
-                                styles.container,
-                                containerStyle,
-                                { transform: [{ translateY: slideAnim }] },
-                            ]}
-                        >
-                            {children}
-                        </Animated.View>
-                    </TouchableWithoutFeedback>
+                    <Animated.View
+                        style={[
+                            styles.container,
+                            containerStyle,
+                            { transform: [{ translateY: slideAnim }] },
+                        ]}
+                        onStartShouldSetResponder={() => true}
+                    >
+                        {children}
+                    </Animated.View>
                 </View>
-            </TouchableWithoutFeedback>
+            </Pressable>
         </Modal>
     );
 };

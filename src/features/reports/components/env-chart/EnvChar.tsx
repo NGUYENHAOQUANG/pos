@@ -369,19 +369,20 @@ export default function EnvChar({ series, metadata, unit = '', pondColors }: Env
                                 })}
                             </View>
                         </Animated.View>
-
-                        {/* Tooltip (Extracted) */}
-                        <TooltipEnvChart
-                            visible={selectedIndex !== null && !!selectedDate}
-                            date={selectedDate || new Date()}
-                            data={tooltipData}
-                            position={tooltipPos}
-                            onClose={handleCloseTooltip}
-                            chartWidth={layout.width}
-                        />
                     </View>
                 </GestureDetector>
             </View>
+
+            {/* Tooltip rendered outside chartArea to avoid overflow:hidden clipping */}
+            <TooltipEnvChart
+                visible={selectedIndex !== null && !!selectedDate}
+                date={selectedDate || new Date()}
+                data={tooltipData}
+                position={tooltipPos}
+                onClose={handleCloseTooltip}
+                chartWidth={layout.width}
+                chartHeight={layout.height || GRAPH_HEIGHT}
+            />
         </GestureHandlerRootView>
     );
 }

@@ -94,7 +94,6 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
 
 const styles = StyleSheet.create({
     sectionHeader: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,

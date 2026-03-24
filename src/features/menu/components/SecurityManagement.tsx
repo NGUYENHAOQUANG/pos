@@ -4,9 +4,14 @@ import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
 import { SvgProps } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
 import GavelIcon from '@/assets/Icon/IconMenu/Gavel.svg';
 import ArticleIcon from '@/assets/Icon/IconMenu/Article.svg';
+
+const POLICY_URL = 'https://mebieco.vn/policy-page';
 
 interface SecurityManagementItemProps {
     Icon: React.FC<SvgProps>;
@@ -32,16 +37,28 @@ const SecurityManagementItem: React.FC<SecurityManagementItemProps> = ({
 };
 
 export const SecurityManagement: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+
     const internalItems = [
         {
             id: 'privacy',
             title: 'Chính sách bảo mật',
             Icon: GavelIcon,
+            onPress: () =>
+                navigation.navigate('PolicyWebView', {
+                    url: POLICY_URL,
+                    title: 'Chính sách bảo mật',
+                }),
         },
         {
             id: 'terms',
             title: 'Điều khoản và điều kiện',
             Icon: ArticleIcon,
+            onPress: () =>
+                navigation.navigate('PolicyWebView', {
+                    url: POLICY_URL,
+                    title: 'Điều khoản và điều kiện',
+                }),
         },
     ];
 
@@ -55,7 +72,7 @@ export const SecurityManagement: React.FC = () => {
                         key={item.id}
                         Icon={item.Icon}
                         title={item.title}
-                        onPress={'onPress' in item ? (item.onPress as any) : undefined}
+                        onPress={item.onPress}
                     />
                 ))}
             </View>
