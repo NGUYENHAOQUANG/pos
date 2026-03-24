@@ -25,12 +25,25 @@ import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBa
 const X_AXIS_HEIGHT = 24;
 const DEFAULT_BAR_WIDTH = 26.25;
 
-const formatNumber = (value: number) => {
-    // Tự động mở rộng 3 số thập phân nếu khối lượng quá nhỏ (< 10kg = 0.01 tấn)
-    const decimals = value > 0 && value < 0.01 ? 3 : 2;
-    const [intPart, decPart] = value.toFixed(decimals).split('.');
+/** Format for summary cards: truncate to 2 decimals without rounding */
+const formatSummary = (value: number) => {
+    const factor = 100;
+    const truncated = Math.floor(value * factor + 1e-9) / factor;
+    const [intPart, decPart] = truncated.toFixed(2).split('.');
     const withSeparator = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     return `${withSeparator},${decPart}`;
+};
+
+/** Format for tooltip: preserve all significant decimals from backend */
+const formatTooltip = (value: number) => {
+    const cleanStr = parseFloat(value.toFixed(10)).toString();
+    const dotIndex = cleanStr.indexOf('.');
+    const naturalDecimals = dotIndex === -1 ? 0 : cleanStr.length - dotIndex - 1;
+    const decimals = Math.max(2, naturalDecimals);
+    const [intPart, decPart = ''] = cleanStr.split('.');
+    const paddedDec = decPart.padEnd(decimals, '0');
+    const withSeparator = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${withSeparator},${paddedDec}`;
 };
 
 // ----------------------------------------------------------------------
@@ -42,7 +55,7 @@ interface SummaryCardProps {
 }
 
 const SummaryCard = React.memo(({ card }: SummaryCardProps) => {
-    const formattedValue = useMemo(() => formatNumber(card.value), [card.value]);
+    const formattedValue = useMemo(() => formatSummary(card.value), [card.value]);
 
     return (
         <View style={summaryStyles.card}>
@@ -138,7 +151,7 @@ const BarGroup = React.memo(
                                     </View>
                                     <View style={barStyles.tooltipValueContainer}>
                                         <Text style={barStyles.tooltipValue}>
-                                            {formatNumber(item!.value)}
+                                            {formatTooltip(item!.value)}
                                         </Text>
                                         <Text style={barStyles.tooltipUnit}>tấn</Text>
                                     </View>
@@ -157,7 +170,7 @@ const BarGroup = React.memo(
                                     </View>
                                     <View style={barStyles.tooltipValueContainer}>
                                         <Text style={barStyles.tooltipValue}>
-                                            {formatNumber(group.remainingPercent)}
+                                            {formatTooltip(group.remainingPercent)}
                                         </Text>
                                         <Text style={barStyles.tooltipUnit}>%</Text>
                                     </View>
