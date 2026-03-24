@@ -267,33 +267,30 @@ export const convertWaterSupplyMetaToActivityData = (
     const data: ActivityData[] = [];
 
     if (meta.targetLevel !== undefined) {
-        data.push({ label: 'Mực nước mục tiêu (cm)', value: meta.targetLevel || '-', unit: 'cm' });
+        data.push({ label: 'Mực nước mục tiêu (cm)', value: meta.targetLevel || '0' });
     }
     if (meta.supplyLevel !== undefined) {
-        data.push({ label: 'Số cm cấp', value: meta.supplyLevel || '-', unit: 'cm' });
+        data.push({ label: 'Số cm cấp', value: meta.supplyLevel || '0' });
     }
     if (meta.drainLevel !== undefined) {
-        data.push({ label: 'Mực nước xả xuống (cm)', value: meta.drainLevel || '-', unit: 'cm' });
+        data.push({ label: 'Mực nước xả xuống (cm)', value: meta.drainLevel || '-' });
     }
     if (meta.volumeAfterDrain !== undefined) {
         data.push({
             label: 'Thể tích sau xả (m³)',
             value: meta.volumeAfterDrain || '-',
-            unit: 'm³',
         });
     }
     if (meta.volumeSupply !== undefined) {
         data.push({
             label: 'Thể tích nước cấp vào (m³)',
             value: meta.volumeSupply || '-',
-            unit: 'm³',
         });
     }
     if (meta.volumeAfterSupply !== undefined) {
         data.push({
             label: 'Thể tích nước sau cấp (m³)',
             value: meta.volumeAfterSupply || '-',
-            unit: 'm³',
         });
     }
 

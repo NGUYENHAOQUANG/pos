@@ -23,7 +23,10 @@ export const DataRow: React.FC<DataRowProps> = ({ label, value, unit, isWarning 
 
             {/* Value bên phải */}
             <View style={styles.valueWrapper}>
-                <Text style={styles.value}>{value}</Text>
+                <Text style={styles.value}>
+                    {value}
+                    {unit ? ` ${unit}` : ''}
+                </Text>
             </View>
         </View>
     );
