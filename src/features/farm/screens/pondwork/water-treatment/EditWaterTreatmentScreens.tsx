@@ -177,8 +177,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const handleSave = async () => {
         if (!targetPondId || !targetJobId) return;
 
-        // Validate material quantities must be greater than 0
-        if (selectedMaterials.some(m => m.quantity <= 0)) {
+        // Validate material quantities must be greater than 0 (only when materials selected)
+        if (selectedMaterials.length > 0 && selectedMaterials.some(m => m.quantity <= 0)) {
             showMaterialQuantityZeroToast();
             return;
         }

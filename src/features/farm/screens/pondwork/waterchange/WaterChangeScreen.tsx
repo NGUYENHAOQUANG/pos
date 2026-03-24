@@ -282,17 +282,8 @@ export const WaterSupplyScreen = () => {
             return;
         }
 
-        if (selectedMaterials.length === 0) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng chọn vật tư',
-                visibilityTime: 3000,
-            });
-            return;
-        }
-
-        // Validate material quantities must be greater than 0
-        if (selectedMaterials.some(m => m.quantity <= 0)) {
+        // Validate material quantities must be greater than 0 (only when materials selected)
+        if (selectedMaterials.length > 0 && selectedMaterials.some(m => m.quantity <= 0)) {
             showMaterialQuantityZeroToast();
             return;
         }
@@ -431,6 +422,7 @@ export const WaterSupplyScreen = () => {
                         selectedMaterials={selectedMaterials}
                         onMaterialsChange={setSelectedMaterials}
                         specificType={SpecificType.Normal}
+                        isRequired={false}
                     />
 
                     {/* 4. Ghi chú */}

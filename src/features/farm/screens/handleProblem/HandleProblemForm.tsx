@@ -26,6 +26,8 @@ export interface HandleProblemFormProps {
     onBack: () => void;
     onSubmit: (data: HandleProblemFormValues, documentIds: string[]) => void;
     onDelete: () => void;
+    /** Whether material selection is required. Default: true */
+    isMaterialRequired?: boolean;
 }
 
 export const HandleProblemForm = ({
@@ -36,6 +38,7 @@ export const HandleProblemForm = ({
     onBack,
     onSubmit,
     onDelete,
+    isMaterialRequired = true,
 }: HandleProblemFormProps) => {
     const { control, handleSubmit, reset, watch } = useForm<HandleProblemFormValues>({
         resolver: zodResolver(handleProblemSchema),
@@ -151,6 +154,7 @@ export const HandleProblemForm = ({
                                     selectedMaterials={value}
                                     onMaterialsChange={onChange}
                                     specificType={SpecificType.Normal}
+                                    isRequired={isMaterialRequired}
                                 />
                             )}
                         />

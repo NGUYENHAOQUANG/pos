@@ -50,6 +50,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
                 selectedMaterials={selectedMaterials}
                 onMaterialsChange={onSelectedMaterialsChange}
                 specificType={SpecificType.Normal}
+                isRequired={false}
             />
 
             <SelectionNotesBox notes={note} onNotesChange={onNoteChange} />

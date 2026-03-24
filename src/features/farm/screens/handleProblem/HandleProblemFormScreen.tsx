@@ -145,7 +145,8 @@ export const HandleProblemFormScreen = () => {
     const onSubmit = async (data: HandleProblemFormValues, documentIds: string[]) => {
         if (!pondId) return;
 
-        if (data.selectedMaterials.length === 0) {
+        // Material required only for CLEAN_POND (Rửa ao)
+        if (currentJobType === 'CLEAN_POND' && data.selectedMaterials.length === 0) {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng chọn vật tư',
@@ -154,8 +155,11 @@ export const HandleProblemFormScreen = () => {
             return;
         }
 
-        // Validate material quantities must be greater than 0
-        if (data.selectedMaterials.some(m => m.quantity <= 0)) {
+        // Validate material quantities must be greater than 0 (only when materials selected)
+        if (
+            data.selectedMaterials.length > 0 &&
+            data.selectedMaterials.some(m => m.quantity <= 0)
+        ) {
             showMaterialQuantityZeroToast();
             return;
         }
@@ -308,6 +312,7 @@ export const HandleProblemFormScreen = () => {
             onBack={() => navigation.goBack()}
             onSubmit={onSubmit}
             onDelete={onDelete}
+            isMaterialRequired={currentJobType === 'CLEAN_POND'}
         />
     );
 };

@@ -94,7 +94,7 @@ export const StockTransferFormScreen: React.FC = () => {
             const { shrimpSize, notes, receivingPonds } = formData;
             const apiRequestData = stockTransferService.buildCreateRequest(
                 receivingPonds,
-                actualStockingQuantity,
+                totalEstimatedShrimp,
                 shrimpSize,
                 notes
             );
@@ -102,7 +102,7 @@ export const StockTransferFormScreen: React.FC = () => {
             await createStockTransfer({ pondId, data: apiRequestData, zoneId });
             navigation.goBack();
         },
-        [pondId, zoneId, actualStockingQuantity, createStockTransfer, navigation]
+        [pondId, zoneId, totalEstimatedShrimp, createStockTransfer, navigation]
     );
 
     if (isSizeMeasurementsLoading) {

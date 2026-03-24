@@ -26,6 +26,8 @@ interface MaterialSelectionBoxProps {
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
     groupTypes?: MaterialGroupType[];
     specificType?: SpecificType;
+    /** Show required dot (*) next to title. Default: true */
+    isRequired?: boolean;
 }
 
 export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
@@ -33,6 +35,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     onMaterialsChange,
     groupTypes,
     specificType,
+    isRequired = true,
 }) => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -120,7 +123,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                 title={
                     <View style={styles.titleRow}>
                         <Text style={styles.titleText}>Chọn vật tư</Text>
-                        <RequiredDot />
+                        {isRequired && <RequiredDot />}
                     </View>
                 }
             >
