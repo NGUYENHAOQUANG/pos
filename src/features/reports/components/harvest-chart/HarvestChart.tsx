@@ -19,35 +19,30 @@ interface Props {
     pondCode?: string;
 }
 
-export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
+export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
 
     const { data: response, isLoading: queryLoading } = useHarvestStats({
         ZoneId: zoneId,
+        PondIds: pondId ? [pondId] : undefined,
     });
     const isLoading = !isCollapsed && queryLoading;
 
     const statsData = response?.data;
 
-    // TODO: API /report/harvest-stats không hỗ trợ filter theo pondId, luôn trả tất cả ao.
-    // Đang filter client-side bằng pondCode. Khi BE cập nhật thì sửa lại dùng pondId.
     const byPondData = useMemo(() => {
-        const allPonds = statsData?.byPond ?? [];
-        if (pondCode) {
-            return allPonds.filter(p => p.pondCode === pondCode);
-        }
-        return allPonds;
-    }, [statsData?.byPond, pondCode]);
+        return statsData?.byPond ?? [];
+    }, [statsData?.byPond]);
 
     // Convert kg → tấn (1 tấn = 1000 kg)
     const KG_TO_TAN = 1000;
 
     const totalYield = useMemo(() => {
-        if (pondCode) {
+        if (pondId) {
             return byPondData.reduce((sum, p) => sum + p.totalHarvested, 0) / KG_TO_TAN;
         }
         return (statsData?.kpis?.totalHarvested ?? 0) / KG_TO_TAN;
-    }, [byPondData, pondCode, statsData?.kpis?.totalHarvested]);
+    }, [byPondData, pondId, statsData?.kpis?.totalHarvested]);
 
     const chartData: HarvestChartData[] = useMemo(() => {
         return byPondData.map(pondStat => ({
@@ -84,7 +79,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
                                     item={{
                                         id: 'harvest-yield',
                                         name: 'Sản lượng đã thu hoạch',
-                                        value: `${totalYield.toFixed(3)} tấn`,
+                                        value: `${totalYield.toFixed(3).replace('.', ',')} tấn`,
                                         color: '',
                                     }}
                                     variant="prodSummary"
@@ -108,7 +103,6 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
 
 const styles = StyleSheet.create({
     sectionHeader: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,

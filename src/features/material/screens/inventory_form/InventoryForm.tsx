@@ -40,7 +40,7 @@ export type InventoryFormProps = {
     onDelete?: () => void;
 };
 
-export const InventoryForm: React.FC<InventoryFormProps> = ({
+const InventoryFormComponent: React.FC<InventoryFormProps> = ({
     isEditMode,
     isLoadingDetail,
     isSubmitting,
@@ -103,7 +103,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             initialSnapshotRef.current = JSON.stringify({
                 date: new Date(initialData.date || new Date()).getTime(),
                 note: initialData.note || '',
-                inventoryItems: (initialData.inventoryItems || []).map((item: any) => ({
+                inventoryItems: (initialData.inventoryItems || []).map(item => ({
                     materialId: item.materialId || '',
                     newStock: item.newStock || '',
                 })),
@@ -114,8 +114,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
     // Track changes for edit mode disable
     const hasChanges = useMemo(() => {
         if (!isEditMode || !initialSnapshotRef.current) return true;
-        const normalizeItems = (items: any[]) =>
-            (items || []).map((item: any) => ({
+        const normalizeItems = (items: InventoryFormValues['inventoryItems']) =>
+            (items || []).map(item => ({
                 materialId: item.materialId || '',
                 newStock: item.newStock || '',
             }));
@@ -128,7 +128,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
     }, [isEditMode, date, note, inventoryItems]);
 
     const onError = useCallback(
-        (errors: any) => warehouseFormUtils.handleFormError(errors, showValidationError),
+        (errors: unknown) => warehouseFormUtils.handleFormError(errors, showValidationError),
         []
     );
 
@@ -147,6 +147,15 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         () => handleSubmit(data => processSubmit(data, false), onError),
         [handleSubmit, processSubmit, onError]
     );
+
+    const handleDateChange = useCallback((newDate: Date) => setValue('date', newDate), [setValue]);
+    const handleNoteChange = useCallback((val: string) => setValue('note', val), [setValue]);
+    const handleDeletePress = useCallback(() => setDeleteModalVisible(true), []);
+    const handleConfirmDelete = useCallback(() => {
+        setDeleteModalVisible(false);
+        onDelete?.();
+    }, [onDelete]);
+    const handleCancelDelete = useCallback(() => setDeleteModalVisible(false), []);
 
     if (isLoadingDetail) {
         return (
@@ -180,9 +189,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                         }
                         onBackPress={onBackPress}
                         rightComponent={
-                            isEditMode ? (
-                                <DeleteButton onPress={() => setDeleteModalVisible(true)} />
-                            ) : undefined
+                            isEditMode ? <DeleteButton onPress={handleDeletePress} /> : undefined
                         }
                     />
 
@@ -199,8 +206,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                                 date={date}
                                 createdDate={formatMaterialDateTime(date)}
                                 note={note}
-                                onDateChange={newDate => setValue('date', newDate)}
-                                onNoteChange={val => setValue('note', val)}
+                                onDateChange={handleDateChange}
+                                onNoteChange={handleNoteChange}
                                 warehouseName={warehouseName}
                                 creatorName={creatorName}
                             />
@@ -231,11 +238,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
 
                     <ConfirmationModalUI
                         visible={deleteModalVisible}
-                        onConfirm={() => {
-                            setDeleteModalVisible(false);
-                            onDelete?.();
-                        }}
-                        onCancel={() => setDeleteModalVisible(false)}
+                        onConfirm={handleConfirmDelete}
+                        onCancel={handleCancelDelete}
                         title="Xóa phiếu kiểm kho"
                         message="Bạn có chắc chắn muốn xóa phiếu kiểm kho này không?"
                         showSuccessToast={false}
@@ -259,4 +263,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default React.memo(InventoryForm);
+export const InventoryForm = React.memo(InventoryFormComponent);

@@ -8,6 +8,7 @@ import { Text } from '@/shared/components/typography/Text';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { HarvestItemCard } from './HarvestItemCard';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import HarvestStatIcon from '@/assets/Icon/IconReport/Vector (8).svg';
@@ -55,9 +56,7 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
                     {isLoading ? (
                         <Loading />
                     ) : dataList.length === 0 ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>Chưa có dữ liệu thu hoạch</Text>
-                        </View>
+                        <EmptyStateCard message="Không có dữ liệu thu hoạch" />
                     ) : (
                         <>
                             {dataList.map((item, index) => (
@@ -94,7 +93,6 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
 
 const styles = StyleSheet.create({
     sectionHeader: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import Svg, { Path, Line } from 'react-native-svg';
+import Svg, { Path, Line, Circle } from 'react-native-svg';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 import * as shape from 'd3-shape';
@@ -62,6 +62,8 @@ interface EnvCharProps {
     unit?: string;
     /** Map of pondId → color */
     pondColors: Record<string, string>;
+    /** Whether to show dots for series with only 1 data point (default: true) */
+    showSinglePointDots?: boolean;
 }
 
 const GRAPH_HEIGHT = 380;
@@ -77,7 +79,13 @@ const AnimatedLabel = ({ date, baseX }: { date: Date; baseX: number }) => {
     );
 };
 
-export default function EnvChar({ series, metadata, unit = '', pondColors }: EnvCharProps) {
+export default function EnvChar({
+    series,
+    metadata,
+    unit = '',
+    pondColors,
+    showSinglePointDots = true,
+}: EnvCharProps) {
     // --- Data Preparation ---
     // Convert API series to chart format
     const seriesData: SeriesEntry[] = useMemo(() => {
@@ -334,6 +342,20 @@ export default function EnvChar({ series, metadata, unit = '', pondColors }: Env
                                             strokeWidth={2}
                                         />
                                     ))}
+
+                                    {/* Single-point dots for series with only 1 value */}
+                                    {showSinglePointDots &&
+                                        seriesData
+                                            .filter(s => s.data.length === 1)
+                                            .map(s => (
+                                                <Circle
+                                                    key={`dot-${s.pond}`}
+                                                    cx={scaleX(s.data[0].date)}
+                                                    cy={scaleY(s.data[0].value)}
+                                                    r={4}
+                                                    fill={pondColors[s.pond] || '#f97316'}
+                                                />
+                                            ))}
                                 </Svg>
                             </View>
 
@@ -369,19 +391,20 @@ export default function EnvChar({ series, metadata, unit = '', pondColors }: Env
                                 })}
                             </View>
                         </Animated.View>
-
-                        {/* Tooltip (Extracted) */}
-                        <TooltipEnvChart
-                            visible={selectedIndex !== null && !!selectedDate}
-                            date={selectedDate || new Date()}
-                            data={tooltipData}
-                            position={tooltipPos}
-                            onClose={handleCloseTooltip}
-                            chartWidth={layout.width}
-                        />
                     </View>
                 </GestureDetector>
             </View>
+
+            {/* Tooltip rendered outside chartArea to avoid overflow:hidden clipping */}
+            <TooltipEnvChart
+                visible={selectedIndex !== null && !!selectedDate}
+                date={selectedDate || new Date()}
+                data={tooltipData}
+                position={tooltipPos}
+                onClose={handleCloseTooltip}
+                chartWidth={layout.width}
+                chartHeight={layout.height || GRAPH_HEIGHT}
+            />
         </GestureHandlerRootView>
     );
 }

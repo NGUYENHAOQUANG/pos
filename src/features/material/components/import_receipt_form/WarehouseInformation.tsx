@@ -14,63 +14,62 @@ interface WarehouseInformationProps {
     onDateChange: (date: Date) => void;
     supplier: string;
     onSupplierChange: (supplierId: string) => void;
-    /** Display value for the supplier (e.g. supplier name from initial data) */
     supplierDisplayValue?: string;
     children?: React.ReactNode;
 }
 
-export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
-    date,
-    onDateChange,
-    supplier,
-    onSupplierChange,
-    supplierDisplayValue,
-    children,
-}) => {
-    const [isExpanded, setIsExpanded] = useState(true);
+export const WarehouseInformation: React.FC<WarehouseInformationProps> = React.memo(
+    ({ date, onDateChange, supplier, onSupplierChange, supplierDisplayValue, children }) => {
+        const [isExpanded, setIsExpanded] = useState(true);
 
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsExpanded(!isExpanded);
-    };
+        const toggleExpand = React.useCallback(() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setIsExpanded(prev => !prev);
+        }, []);
 
-    return (
-        <View style={styles.cardContainer}>
-            <CollapseHead
-                title="Thông tin nhập kho"
-                isExpanded={isExpanded}
-                onToggle={toggleExpand}
-            />
+        const handleSupplierChange = React.useCallback(
+            (supplierId: string) => onSupplierChange(supplierId),
+            [onSupplierChange]
+        );
 
-            {isExpanded && (
-                <View style={styles.content}>
-                    {/* Date Input */}
-                    <DateInputButton
-                        label="Ngày nhập"
-                        required
-                        date={date}
-                        onDateChange={onDateChange}
-                        dateOnly
-                        formatOptions={{ showCurrentLabel: false }}
-                    />
+        return (
+            <View style={styles.cardContainer}>
+                <CollapseHead
+                    title="Thông tin nhập kho"
+                    isExpanded={isExpanded}
+                    onToggle={toggleExpand}
+                />
 
-                    {/* Supplier Dropdown */}
-                    <DropdownSupplierItem
-                        label="Nhà cung cấp"
-                        required
-                        value={supplier}
-                        onChange={supplierId => onSupplierChange(supplierId)}
-                        placeholder="Nhập nhà cung cấp"
-                        displayValue={supplierDisplayValue}
-                        useAutoScroll={true}
-                    />
+                {isExpanded && (
+                    <View style={styles.content}>
+                        {/* Date Input */}
+                        <DateInputButton
+                            label="Ngày nhập"
+                            required
+                            date={date}
+                            onDateChange={onDateChange}
+                            dateOnly
+                            formatOptions={{ showCurrentLabel: false }}
+                        />
 
-                    {children}
-                </View>
-            )}
-        </View>
-    );
-};
+                        {/* Supplier Dropdown */}
+                        <DropdownSupplierItem
+                            label="Nhà cung cấp"
+                            required
+                            value={supplier}
+                            onChange={handleSupplierChange}
+                            placeholder="Nhập nhà cung cấp"
+                            displayValue={supplierDisplayValue}
+                            useAutoScroll={true}
+                        />
+
+                        {children}
+                    </View>
+                )}
+            </View>
+        );
+    }
+);
 
 const styles = StyleSheet.create({
     cardContainer: {

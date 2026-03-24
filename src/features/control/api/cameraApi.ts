@@ -10,6 +10,7 @@ export interface CameraItem {
     name: string;
     status: string;
     ipAddress: string;
+    lanIpAddress: string | null;
     modelCode: string;
 }
 

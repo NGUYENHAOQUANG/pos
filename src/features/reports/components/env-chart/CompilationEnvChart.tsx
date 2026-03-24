@@ -176,6 +176,7 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
                                     metadata={metadata}
                                     unit={unitMetric}
                                     pondColors={pondColors}
+                                    showSinglePointDots={!!selectedPondId}
                                 />
                             </View>
                         </>
@@ -190,7 +191,6 @@ export default CompilationEnvChart;
 
 const styles = StyleSheet.create({
     header: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,

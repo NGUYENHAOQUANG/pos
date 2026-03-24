@@ -166,7 +166,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                         fontWeight={typography.fontWeight.medium.toString()}
                                         textAnchor="middle"
                                     >
-                                        {item.yield.toFixed(3)}
+                                        {item.yield.toFixed(3).replace('.', ',')}
                                     </SvgText>
 
                                     {/* Category Label below the X axis */}

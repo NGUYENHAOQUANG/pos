@@ -1,12 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { scaleLinear } from 'd3-scale';
-import { colors, borderRadius } from '@/styles';
-import { typography } from '@/styles/typography';
+import { colors } from '@/styles';
 import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.svg';
-import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
 import { usePondStatusDistribution } from '@/features/reports/hooks/usePondStatusDistribution';
 
@@ -220,22 +219,17 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 
     return (
         <View style={chartStyles.container} onLayout={onLayout}>
-            <TouchableOpacity
-                style={styles.headerButton}
+            <BasicDropDownButton
+                prefixIcon={<ActivePondChartIcon width={20} height={20} color={colors.text} />}
+                label="Tổng số ao hoạt động"
+                isExpanded={expanded}
                 onPress={handleToggle}
-                activeOpacity={0.7}
-            >
-                <View style={styles.headerTitleRow}>
-                    <ActivePondChartIcon width={20} height={20} color={colors.text} />
-                    <Text style={styles.headerTitleText}>Tổng số ao hoạt động</Text>
+                suffixContent={
                     <View style={styles.badge}>
                         <Text style={styles.badgeText}>{totalPonds}</Text>
                     </View>
-                </View>
-                <View style={[styles.expandedIcon, !expanded && styles.expandedIconRotate]}>
-                    <ExpandedIcon width={10} height={6} />
-                </View>
-            </TouchableOpacity>
+                }
+            />
 
             {expanded && (
                 <>
@@ -416,50 +410,17 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerButton: {
-        height: 48,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    headerTitleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    headerTitleText: {
-        fontSize: 14,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
     badge: {
         backgroundColor: colors.gray[900],
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,
+        marginRight: 8,
     },
     badgeText: {
         color: colors.white,
         fontSize: 12,
         fontWeight: '600',
-    },
-    expandedIcon: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    expandedIconRotate: {
-        transform: [{ rotate: '180deg' }],
     },
 
     contentContainer: { paddingBottom: 16 },

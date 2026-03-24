@@ -18,60 +18,68 @@ interface InventoryMaterialListProps {
     onPressCreate?: () => void;
 }
 
-export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
-    inventoryList,
-    isLoading,
-    refreshing,
-    onRefresh,
-    onLoadMore,
-    isFetchingNextPage,
-    hasNextPage,
-    onPressCreate,
-}) => {
-    const handleLoadMore = () => {
-        if (hasNextPage && !isFetchingNextPage && onLoadMore) {
-            onLoadMore();
-        }
-    };
+export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = React.memo(
+    ({
+        inventoryList,
+        isLoading,
+        refreshing,
+        onRefresh,
+        onLoadMore,
+        isFetchingNextPage,
+        hasNextPage,
+        onPressCreate,
+    }) => {
+        const handleLoadMore = React.useCallback(() => {
+            if (hasNextPage && !isFetchingNextPage && onLoadMore) {
+                onLoadMore();
+            }
+        }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
-    if (isLoading) {
+        const renderItem = React.useCallback(({ item }: { item: IInventoryCheck }) => {
+            return <InventoryCard data={item} />;
+        }, []);
+
+        const keyExtractor = React.useCallback((item: IInventoryCheck) => item.id, []);
+
+        if (isLoading) {
+            return (
+                <View style={materialListStyles.containerWithPadding}>
+                    <MaterialLoadingState />
+                </View>
+            );
+        }
+
         return (
-            <View style={materialListStyles.containerWithPadding}>
-                <MaterialLoadingState />
+            <View style={materialListStyles.container}>
+                <FlatList
+                    data={inventoryList}
+                    keyExtractor={keyExtractor}
+                    renderItem={renderItem}
+                    ListEmptyComponent={
+                        <EmptyStateCard
+                            message="Chưa có phiếu điều chỉnh tồn kho nào được tạo."
+                            buttonTitle="Tạo Phiếu Điều Chỉnh Tồn Kho"
+                            onPress={onPressCreate || (() => {})}
+                        />
+                    }
+                    contentContainerStyle={[
+                        materialListStyles.listContent,
+                        inventoryList.length === 0 && materialListStyles.emptyContent,
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                        isFetchingNextPage ? (
+                            <View style={materialListStyles.loaderFooter}>
+                                <ActivityIndicator color={colors.primary} />
+                            </View>
+                        ) : null
+                    }
+                />
             </View>
         );
     }
-
-    return (
-        <View style={materialListStyles.container}>
-            <FlatList
-                data={inventoryList}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => <InventoryCard data={item} />}
-                ListEmptyComponent={
-                    <EmptyStateCard
-                        message="Chưa có phiếu điều chỉnh tồn kho nào được tạo."
-                        buttonTitle="Tạo Phiếu Điều Chỉnh Tồn Kho"
-                        onPress={onPressCreate || (() => {})}
-                    />
-                }
-                contentContainerStyle={[
-                    materialListStyles.listContent,
-                    inventoryList.length === 0 && materialListStyles.emptyContent,
-                ]}
-                showsVerticalScrollIndicator={false}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    isFetchingNextPage ? (
-                        <View style={materialListStyles.loaderFooter}>
-                            <ActivityIndicator color={colors.primary} />
-                        </View>
-                    ) : null
-                }
-            />
-        </View>
-    );
-};
+);

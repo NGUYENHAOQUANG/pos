@@ -44,7 +44,7 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
 
     // 3. Prepare Params
     const materialParams = React.useMemo(() => {
-        const params: any = {};
+        const params: Record<string, string | string[]> = {};
 
         if (searchText && searchText.trim()) {
             params.SearchText = searchText.trim();

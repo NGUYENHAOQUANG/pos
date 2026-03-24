@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
 
@@ -24,14 +24,18 @@ import { useScrollToTop } from '@react-navigation/native';
 import { spacing } from '@/styles/spacing';
 import { FarmData } from '@/features/farm/types/farm.types';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
+import { useQueryClient } from '@tanstack/react-query';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
 export const ReportsScreen = ({ navigation }: Props) => {
     const bottomBarHeight = useBottomTabBarHeight();
+    const queryClient = useQueryClient();
     // Ref for scroll to top
     const scrollViewRef = useRef<ScrollView>(null);
     useScrollToTop(scrollViewRef as any);
+
+    const [refreshing, setRefreshing] = useState(false);
 
     const {
         selectedZoneId,
@@ -49,6 +53,12 @@ export const ReportsScreen = ({ navigation }: Props) => {
         selectedPondType,
         handleSelectPondType,
     } = useReportsScreen();
+
+    const handleRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await queryClient.invalidateQueries();
+        setRefreshing(false);
+    }, [queryClient]);
 
     const handleRightPress = () => {
         const farmData: FarmData = {
@@ -87,7 +97,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
+            <WaterUsageChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <FoodChart />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
@@ -119,14 +132,13 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
-            {/* TODO: API /report/harvest-stats hiện tại không hỗ trợ filter theo pondId,
-                chỉ trả về tất cả ao. Đang filter client-side bằng pondCode.
-                Khi BE cập nhật hỗ trợ filter theo pondId thì sửa lại dùng pondId. */}
+            <WaterUsageChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <HarvestChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                pondCode={selectedPond.id !== '1' ? selectedPond.value : undefined}
             />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
@@ -163,6 +175,13 @@ export const ReportsScreen = ({ navigation }: Props) => {
                     ref={scrollViewRef}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: bottomBarHeight, gap: 6 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={handleRefresh}
+                            colors={[colors.primary]}
+                        />
+                    }
                 >
                     {selectedPondType.label === 'Ao vèo'
                         ? renderAoVeoContent()

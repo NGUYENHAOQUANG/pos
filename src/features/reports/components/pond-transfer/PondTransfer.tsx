@@ -8,6 +8,7 @@ import { Text } from '@/shared/components/typography/Text';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { TransferItemCard } from './TransferItemCard';
 import { useInfiniteStockTransferStats } from '@/features/reports/hooks/useStockTransferStats';
 import chartStyles from '@/features/reports/styles/chart.styles';
@@ -55,9 +56,7 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
                     {isLoading ? (
                         <Loading />
                     ) : dataList.length === 0 ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>Chưa có dữ liệu sang ao</Text>
-                        </View>
+                        <EmptyStateCard message="Không có dữ liệu sang ao" />
                     ) : (
                         <>
                             {dataList.map((item, index) => (
@@ -90,7 +89,6 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
 
 const styles = StyleSheet.create({
     sectionHeader: {
-        paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
