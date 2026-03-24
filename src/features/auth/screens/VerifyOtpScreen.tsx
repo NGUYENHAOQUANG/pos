@@ -336,5 +336,5 @@ const styles = StyleSheet.create({
     footerKeyboardOpen: {
         paddingBottom: spacing.md,
     },
-    submitButton: { backgroundColor: colors.primary, borderRadius: 25, height: 52 },
+    submitButton: { backgroundColor: colors.primary, borderRadius: 25, height: 40 },
 });

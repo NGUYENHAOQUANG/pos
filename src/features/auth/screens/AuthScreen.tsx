@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     loginButton: {
         backgroundColor: colors.primary,
         borderRadius: 25,
-        height: 52,
+        height: 40,
     },
     footer: {
         paddingHorizontal: spacing.md,
