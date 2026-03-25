@@ -10,7 +10,7 @@ import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
-import { colors, typography } from '@/styles';
+import { borderRadius, colors, typography } from '@/styles';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -309,9 +309,9 @@ const styles = StyleSheet.create({
         paddingBottom: 24,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 26,
+        width: 48,
+        height: 48,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: colors.border,
         justifyContent: 'center',

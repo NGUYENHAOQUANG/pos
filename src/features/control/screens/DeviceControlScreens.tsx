@@ -262,7 +262,7 @@ export const DeviceControlScreens = () => {
     return (
         <View style={styles.container}>
             <View style={[styles.headerContainer, { paddingTop: insets.top + 12 }]}>
-                <Text style={styles.headerTitle}>Điều Khiển Thiết Bị1</Text>
+                <Text style={styles.headerTitle}>Điều Khiển Thiết Bị</Text>
             </View>
             <HeadingBar
                 tabs={[

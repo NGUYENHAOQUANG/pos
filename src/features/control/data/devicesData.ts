@@ -1507,25 +1507,4 @@ export const MOCK_PONDS: Pond[] = [
             pump: { active: 0, warning: 0, inactive: 1 },
         },
     },
-    {
-        id: 'mock-ss02',
-        name: 'Ao SS02',
-        hasDevices: true,
-        devices: [
-            {
-                id: 'ss02-mb',
-                name: 'SS02-MB',
-                type: 'pump',
-                mode: EControlMode.SCHEDULE,
-                isOn: false,
-            },
-        ],
-        deviceStats: {
-            fan: { active: 0, warning: 0, inactive: 0 },
-            feeder: { active: 0, warning: 0, inactive: 0 },
-            oxy: { active: 0, warning: 0, inactive: 0 },
-            syphon: { active: 0, warning: 0, inactive: 0 },
-            pump: { active: 0, warning: 0, inactive: 1 },
-        },
-    },
 ];

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import ChevronRight from '@/assets/Icon/ChevronRight.svg';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { CycleData } from '@/features/farm/types/cycle.types';
@@ -54,12 +54,7 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                         label={status}
                         style={{ paddingHorizontal: 8, paddingVertical: 4 }}
                     />
-                    <Ionicons
-                        name="chevron-forward"
-                        size={18}
-                        color={colors.gray[400]}
-                        style={styles.arrowIcon}
-                    />
+                    <ChevronRight width={18} height={18} style={styles.arrowIcon} />
                 </View>
             </View>
 

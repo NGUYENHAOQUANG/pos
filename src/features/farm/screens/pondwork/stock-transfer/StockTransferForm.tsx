@@ -75,7 +75,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
         );
     }, [notes, shrimpSize, transferMethod, receivingPonds, totalShrimpCount, latestShrimpSize]);
 
-    const { UnsavedChangesModal } = useUnsavedChanges(hasChanges);
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     useEffect(() => {
         if (!hasInitialized.current && totalShrimpCount > 0) {
@@ -101,8 +101,17 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
 
     const handleConfirmSave = useCallback(() => {
         setIsConfirmationModalVisible(false);
+        allowNavigation();
         onSubmit({ selectedDate, notes, shrimpSize, transferMethod, receivingPonds });
-    }, [onSubmit, selectedDate, notes, shrimpSize, transferMethod, receivingPonds]);
+    }, [
+        onSubmit,
+        selectedDate,
+        notes,
+        shrimpSize,
+        transferMethod,
+        receivingPonds,
+        allowNavigation,
+    ]);
 
     const handleCancelConfirmation = useCallback(() => {
         setIsConfirmationModalVisible(false);
