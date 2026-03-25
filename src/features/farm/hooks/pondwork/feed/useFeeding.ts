@@ -54,6 +54,7 @@ export const useCreateFeedingRecord = () => {
                 queryKey: ['warehouse-items'],
             });
             // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['report', 'feeding-production'] });
             queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
             queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
@@ -89,6 +90,7 @@ export const useUpdateFeedingRecord = () => {
                 queryKey: ['warehouse-items'],
             });
             // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['report', 'feeding-production'] });
             queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
             queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
