@@ -56,7 +56,8 @@ export const PondCycleListScreen = () => {
 
     const getBreedLabel = useCallback(
         (cycle: CycleData) => {
-            const itemId = warehouseItemMap.get(cycle.id) || cycle.warehouseItemId;
+            const cycleItem = cycle.shrimpData?.warehouseItemId || cycle.warehouseItemId;
+            const itemId = warehouseItemMap.get(cycle.id) || cycleItem;
             if (!itemId || !shrimpSeeds?.length) return 'N/A';
             return shrimpSeeds.find((s: any) => s.id === itemId)?.materialName || 'N/A';
         },

@@ -120,7 +120,12 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                                     />
                                     <DetailRow
                                         label="Số lượng thả (Pls):"
-                                        value={cycle.totalStocking?.toLocaleString() || '0'}
+                                        value={
+                                            (
+                                                cycle.shrimpData?.totalStocking ||
+                                                cycle.totalStocking
+                                            )?.toLocaleString() || '0'
+                                        }
                                         isSpaceBetween
                                     />
                                     <DetailRow

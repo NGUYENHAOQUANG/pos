@@ -26,11 +26,17 @@ export interface CycleData {
     endDate?: string;
     status: string;
     notes?: string;
-    density: number;
-    totalStocking: number;
-    ageDays: number;
-    season: ICycleSeason;
-    pond: PondData;
+    density?: number;
+    totalStocking?: number;
+    ageDays?: number;
+    shrimpData?: {
+        warehouseItemId?: string;
+        density?: number;
+        totalStocking?: number;
+        ageDays?: number;
+    };
+    season?: ICycleSeason;
+    pond?: PondData;
     id: string;
     no: number;
     creatorId?: string;
