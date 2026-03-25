@@ -23,7 +23,7 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             activeOpacity={0.85}
             disabled={!isOnline}
             onPress={() => onPress(camera)}
-            style={[styles.container, !isOnline && styles.disabledContainer]}
+            style={styles.container}
         >
             {/* Placeholder background with VideoPlayer SVG */}
             <View style={styles.placeholderBg}>
@@ -60,9 +60,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginBottom: spacing.sm,
         alignSelf: 'center',
-    },
-    disabledContainer: {
-        opacity: 0.5,
     },
     placeholderBg: {
         width: '100%',
