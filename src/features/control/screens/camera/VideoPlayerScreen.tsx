@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useMemo } from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
@@ -13,11 +13,28 @@ import { VideoTopBar } from '@/features/control/screens/camera/components/VideoT
 
 type VideoPlayerRouteProp = RouteProp<AppStackParamList, 'CameraPlayer'>;
 
-/**
- * Full-screen landscape camera viewer.
- * Uses WebView to render MJPEG stream via native browser engine.
- * Near-instant playback, no VLC dependency needed.
- */
+/** Parse URL to extract basic auth credentials if embedded */
+interface ParsedAuthUrl {
+    cleanUrl: string;
+    username: string;
+    password: string;
+    hasAuth: boolean;
+}
+
+const parseAuthFromUrl = (url: string): ParsedAuthUrl => {
+    // Match pattern: http(s)://user:pass@host
+    const authMatch = url.match(/^(https?:\/\/)([^:]+):([^@]+)@(.+)$/);
+    if (authMatch) {
+        return {
+            cleanUrl: `${authMatch[1]}${authMatch[4]}`,
+            username: authMatch[2],
+            password: authMatch[3],
+            hasAuth: true,
+        };
+    }
+    return { cleanUrl: url, username: '', password: '', hasAuth: false };
+};
+
 export const VideoPlayerScreen: React.FC = () => {
     const route = useRoute<VideoPlayerRouteProp>();
     const { videoUrl, cameraName, pondName } = route.params;
@@ -27,6 +44,9 @@ export const VideoPlayerScreen: React.FC = () => {
     const { contentAnimatedStyle, handleClose } = useVideoOrientation();
     const { handleSnapshot } = useVideoSnapshot({ cameraName, viewShotRef });
 
+    const parsedUrl = useMemo(() => parseAuthFromUrl(videoUrl), [videoUrl]);
+
+    // iOS: HTML img tag works with embedded auth in URL
     const mjpegHtml = `
 <!DOCTYPE html>
 <html>
@@ -43,6 +63,20 @@ export const VideoPlayerScreen: React.FC = () => {
 </body>
 </html>`;
 
+    /**
+     * Android WebView strips basic auth from <img> sub-resource URLs.
+     * Use source={{ uri }} + basicAuthCredential to handle auth natively.
+     * iOS works fine with HTML img tag approach.
+     */
+    const webViewSource =
+        Platform.OS === 'android'
+            ? { uri: parsedUrl.hasAuth ? parsedUrl.cleanUrl : videoUrl }
+            : { html: mjpegHtml };
+
+    const basicAuth = parsedUrl.hasAuth
+        ? { username: parsedUrl.username, password: parsedUrl.password }
+        : undefined;
+
     return (
         <GestureHandlerRootView style={styles.root}>
             <Animated.View style={[styles.container, contentAnimatedStyle]}>
@@ -52,7 +86,7 @@ export const VideoPlayerScreen: React.FC = () => {
                     style={styles.video}
                 >
                     <WebView
-                        source={{ html: mjpegHtml }}
+                        source={webViewSource}
                         style={styles.video}
                         javaScriptEnabled={false}
                         scrollEnabled={false}
@@ -61,6 +95,7 @@ export const VideoPlayerScreen: React.FC = () => {
                         allowsInlineMediaPlayback={true}
                         mixedContentMode="always"
                         originWhitelist={['*']}
+                        basicAuthCredential={basicAuth}
                     />
                 </ViewShot>
 
