@@ -8,14 +8,11 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { Loading } from '@/shared/components/ui/Loading';
 import { Button } from '@/shared/components/buttons/Button';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
-import { Input } from '@/shared/components/forms/Input';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import type { MeasurementDetectionBox } from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
-import { formatDecimalInput } from '@/shared/utils/formatters';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import Toast from 'react-native-toast-message';
 import type { Measurement } from './MeasureShrimpSizeAIScreen';
@@ -28,7 +25,6 @@ interface Props {
     countTimes: number;
     averageSizeCm: number | null;
     sizePcsPerKg: number | null;
-    measuredWeight: string;
     imageUri: string | null;
     detections: MeasurementDetectionBox[];
     imageDimensions: { width: number; height: number };
@@ -48,7 +44,6 @@ interface Props {
     onCancelReset: () => void;
     onSave: () => void;
     onBack: () => void;
-    onWeightChange: (text: string) => void;
     onShowSheet: () => void;
     onCloseSheet: () => void;
     onImageAreaLayout: (size: { width: number; height: number }) => void;
@@ -61,8 +56,7 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     previousMeasurement,
     countTimes,
     averageSizeCm,
-    sizePcsPerKg,
-    measuredWeight,
+    // sizePcsPerKg,
     imageUri,
     detections: _detections,
     imageDimensions,
@@ -77,7 +71,6 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     onCancelReset,
     onSave,
     onBack,
-    onWeightChange,
     onShowSheet,
     onCloseSheet,
     onImageAreaLayout,
@@ -96,10 +89,10 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
         return (total / previousMeasurement.sizes.length).toFixed(2);
     }, [previousMeasurement]);
 
-    const previousSizePcsPerKg = useMemo(() => {
+    /* const previousSizePcsPerKg = useMemo(() => {
         if (!previousMeasurement || previousMeasurement.weight <= 0) return 0;
         return Math.round((1000 * previousMeasurement.count) / previousMeasurement.weight);
-    }, [previousMeasurement]);
+    }, [previousMeasurement]); */
 
     return (
         <View style={styles.container}>
@@ -119,17 +112,6 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                             onImageAreaLayout={onImageAreaLayout}
                         />
                         {/* Bounding box overlay removed: processed images from AI server already contain annotations */}
-                    </SelectionInfoBox>
-
-                    <SelectionInfoBox title="Thông tin nhập" style={{ marginTop: 0 }}>
-                        <Input
-                            label="Khối lượng tôm được đo (g)"
-                            value={measuredWeight}
-                            onChangeText={text => onWeightChange(formatDecimalInput(text))}
-                            placeholder="Nhập khối lượng tôm được đo"
-                            keyboardType="numeric"
-                            required
-                        />
                     </SelectionInfoBox>
 
                     <SelectionInfoBox title="Kết quả đo từ AI" style={{ marginTop: 0 }}>
@@ -182,12 +164,12 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                                     {averageSizeCm !== null ? averageSizeCm : '-'}
                                 </Text>
                             </View>
-                            <View style={styles.summaryRow}>
+                            {/* <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>Cỡ tôm (con/kg)</Text>
                                 <Text style={styles.summaryValue}>
                                     {sizePcsPerKg !== null ? sizePcsPerKg : '-'}
                                 </Text>
-                            </View>
+                            </View> */}
                             {measurements.length > 1 && (
                                 <>
                                     <View style={styles.summaryRow}>
@@ -198,14 +180,14 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                                             {previousAverageSizeCm}
                                         </Text>
                                     </View>
-                                    <View style={styles.summaryRow}>
+                                    {/* <View style={styles.summaryRow}>
                                         <Text style={styles.summaryLabel}>
                                             CT (con/kg) lần đo trước
                                         </Text>
                                         <Text style={styles.summaryValue}>
                                             {previousSizePcsPerKg}
                                         </Text>
-                                    </View>
+                                    </View> */}
                                 </>
                             )}
 
@@ -219,10 +201,11 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                                     </View>
 
                                     {showAddMore && (
-                                        <OutlineButton
-                                            label="Đo thêm"
+                                        <Button
+                                            title="Đo thêm"
                                             onPress={onAnalyze}
-                                            labelStyle={styles.addMoreText}
+                                            variant="outline"
+                                            textStyle={styles.addMoreText}
                                         />
                                     )}
                                 </>
@@ -275,7 +258,6 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
 
                 {/* Items list */}
                 <ScrollView
-                    style={{ flex: 1 }}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.sheetListContent}
                 >
@@ -346,7 +328,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: 16,
         borderRadius: 8,
-        marginVertical: spacing.md,
+        marginTop: 4,
+        marginBottom: 4,
         flexDirection: 'row',
         alignItems: 'center',
         borderColor: colors.border,
@@ -363,7 +346,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     addMoreText: {
-        color: colors.textSecondary,
+        color: colors.text,
     },
     statusPill: {
         borderRadius: 100,

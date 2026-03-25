@@ -42,7 +42,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     // ── State ────────────────────────────────────
     const [measurements, setMeasurements] = useState<Measurement[]>([]);
-    const [measuredWeight, setMeasuredWeight] = useState('');
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [processedImageUri, setProcessedImageUri] = useState<string | null>(null);
     const [hasAnalyzedCurrent, setHasAnalyzedCurrent] = useState(false);
@@ -117,7 +116,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 { id: Date.now(), count, weight: weightVal, sizes, pcsPerKg },
                             ]);
                             setDetections(newDetections);
-                            setMeasuredWeight('');
                             setHasAnalyzedCurrent(true);
                             Toast.show(TOAST_MESSAGES_CONFIG.AI_MEASURE.SUCCESS);
                         } else if (data.status === 'Failed') {
@@ -207,7 +205,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         setImageUri(null);
         setProcessedImageUri(null);
         setMeasurements([]);
-        setMeasuredWeight('');
         setDetections([]);
         setHasAnalyzedCurrent(false);
         Toast.show(ToastMessages.ShrimpMeasurement.RESET_SUCCESS);
@@ -235,7 +232,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 countTimes={countTimes}
                 averageSizeCm={averageSizeCm}
                 sizePcsPerKg={sizePcsPerKg}
-                measuredWeight={measuredWeight}
                 imageUri={displayImageUri}
                 detections={detections}
                 imageDimensions={imageDimensions}
@@ -250,7 +246,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 onCancelReset={() => setIsResetModalVisible(false)}
                 onSave={handleSave}
                 onBack={navigation.goBack}
-                onWeightChange={setMeasuredWeight}
                 onShowSheet={() => setIsSheetVisible(true)}
                 onCloseSheet={() => setIsSheetVisible(false)}
                 onImageAreaLayout={(size: { width: number; height: number }) =>
