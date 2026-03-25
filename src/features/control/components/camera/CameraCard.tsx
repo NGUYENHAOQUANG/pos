@@ -20,12 +20,9 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
 
     return (
         <TouchableOpacity
-            activeOpacity={isOnline ? 0.85 : 1}
-            onPress={() => {
-                if (isOnline) onPress(camera);
-            }}
+            activeOpacity={0.85}
+            onPress={() => onPress(camera)}
             style={styles.container}
-            disabled={!isOnline}
         >
             {/* Placeholder background with VideoPlayer SVG */}
             <View style={styles.placeholderBg}>

@@ -28,6 +28,10 @@ import { CameraList } from '@/features/control/components/camera/CameraList';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import { cameraApi } from '@/features/control/api/cameraApi';
 import Toast from 'react-native-toast-message';
+import {
+    CAMERA_STREAM_MODE,
+    registerCameraStream,
+} from '@/features/control/constants/cameraServer.constants';
 
 /** Stable key extractor - defined outside component to prevent re-creation */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -349,9 +353,20 @@ export const DeviceControlScreens = () => {
                 <CameraList
                     onCameraPress={async (camera: CameraItem) => {
                         try {
+                            console.log(
+                                '[Camera] Pressed:',
+                                camera.deviceSn,
+                                camera.name,
+                                camera.status
+                            );
+                            console.log('[Camera] Mode:', CAMERA_STREAM_MODE);
+
                             const response = await cameraApi.getStream(camera.deviceSn);
+                            console.log('[Camera] API response:', JSON.stringify(response.data));
+
                             const streamData = response.data?.data;
                             if (!streamData?.url) {
+                                console.log('[Camera] No stream URL found!');
                                 Toast.show({
                                     type: 'error',
                                     text1: 'Lỗi',
@@ -359,12 +374,42 @@ export const DeviceControlScreens = () => {
                                 });
                                 return;
                             }
+                            console.log('[Camera] RTSP URL:', streamData.url);
+
+                            // RTSP mode: use VLC directly (legacy)
+                            if (CAMERA_STREAM_MODE === 'rtsp') {
+                                console.log('[Camera] Navigating with RTSP mode');
+                                navigation.navigate('CameraPlayer', {
+                                    videoUrl: streamData.url,
+                                    cameraName: camera.name,
+                                    pondName: camera.name,
+                                    streamMode: 'rtsp',
+                                });
+                                return;
+                            }
+
+                            // WebRTC/HLS mode: auto-register RTSP with camera server
+                            console.log('[Camera] Registering stream with camera server...');
+                            const registered = await registerCameraStream(
+                                camera.deviceSn,
+                                streamData.url
+                            );
+                            console.log('[Camera] Registered:', JSON.stringify(registered));
+
+                            const videoUrl =
+                                CAMERA_STREAM_MODE === 'webrtc'
+                                    ? registered.webrtcPlayerUrl
+                                    : registered.hlsUrl;
+
+                            console.log('[Camera] Final URL:', videoUrl);
                             navigation.navigate('CameraPlayer', {
-                                videoUrl: streamData.url,
+                                videoUrl,
                                 cameraName: camera.name,
                                 pondName: camera.name,
+                                streamMode: CAMERA_STREAM_MODE,
                             });
-                        } catch {
+                        } catch (err) {
+                            console.error('[Camera] Error:', err);
                             Toast.show({
                                 type: 'error',
                                 text1: 'Lỗi',

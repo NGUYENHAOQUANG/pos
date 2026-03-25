@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import Video from 'react-native-video';
 import { VLCPlayer } from 'react-native-vlc-media-player';
+import { WebView } from 'react-native-webview';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -16,20 +17,27 @@ import { useVideoSnapshot } from '@/features/control/screens/camera/hooks/useVid
 import { VideoTopBar } from '@/features/control/screens/camera/components/VideoTopBar';
 import { VideoCenterControls } from '@/features/control/screens/camera/components/VideoCenterControls';
 import { VideoBottomBar } from '@/features/control/screens/camera/components/VideoBottomBar';
+import { CameraStreamMode } from '@/features/control/constants/cameraServer.constants';
 
 type VideoPlayerRouteProp = RouteProp<AppStackParamList, 'CameraPlayer'>;
 
 /**
  * Full-screen landscape video player.
  * Uses react-native-orientation-locker to natively rotate to landscape.
- * Supports both RTSP live streams (VLC) and regular video files.
+ * Supports 3 modes:
+ * - 'rtsp'   : VLCPlayer (legacy, may lag on iOS real devices)
+ * - 'webrtc' : WebView loading go2rtc web player (< 500ms latency)
+ * - 'hls'    : react-native-video playing HLS m3u8 (~3s latency)
  */
 export const VideoPlayerScreen: React.FC = () => {
     const route = useRoute<VideoPlayerRouteProp>();
-    const { videoUrl, cameraName, pondName } = route.params;
+    const { videoUrl, cameraName, pondName, streamMode = 'rtsp' } = route.params;
 
-    // Detect if the URL is an RTSP live stream
-    const isLiveStream = videoUrl.toLowerCase().startsWith('rtsp://');
+    // Determine stream type
+    const mode: CameraStreamMode = streamMode;
+    const isLiveStream = mode === 'rtsp' && videoUrl.toLowerCase().startsWith('rtsp://');
+    const isWebRTC = mode === 'webrtc';
+    const isHLS = mode === 'hls';
 
     // ViewShot ref for snapshot capture
     const viewShotRef = useRef<ViewShot>(null);
@@ -63,8 +71,9 @@ export const VideoPlayerScreen: React.FC = () => {
 
     const { handleSnapshot } = useVideoSnapshot({ cameraName, viewShotRef });
 
-    // ===== VLC Cleanup =====
+    // ===== VLC Cleanup (only for rtsp mode) =====
     useEffect(() => {
+        if (mode !== 'rtsp') return;
         const vlcPlayer = vlcRef.current;
         return () => {
             if (vlcPlayer) {
@@ -76,7 +85,7 @@ export const VideoPlayerScreen: React.FC = () => {
             }
             if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
         };
-    }, [vlcRef]);
+    }, [vlcRef, mode]);
 
     // Auto-hide buffering indicator after 5s for live streams
     useEffect(() => {
@@ -90,6 +99,123 @@ export const VideoPlayerScreen: React.FC = () => {
         }
     }, [isBuffering, isLiveStream, isMountedRef, setIsBuffering]);
 
+    // ===== WebRTC Mode (WebView with go2rtc player) =====
+    if (isWebRTC) {
+        return (
+            <GestureHandlerRootView style={styles.root}>
+                <Animated.View style={[styles.container, contentAnimatedStyle]}>
+                    <WebView
+                        source={{ uri: videoUrl }}
+                        style={styles.video}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        mediaPlaybackRequiresUserAction={false}
+                        allowsInlineMediaPlayback={true}
+                        allowsFullscreenVideo={false}
+                        scrollEnabled={false}
+                        mixedContentMode="always"
+                        allowFileAccess={true}
+                        originWhitelist={['*']}
+                        onError={e => console.error('[WebView] Error:', e.nativeEvent)}
+                        onHttpError={e => console.error('[WebView] HTTP Error:', e.nativeEvent)}
+                        onLoad={() => console.log('[WebView] Loaded')}
+                    />
+
+                    {/* Close button overlay */}
+                    <View style={styles.webrtcCloseOverlay} pointerEvents="box-none">
+                        <VideoTopBar
+                            pondName={pondName}
+                            cameraName={cameraName}
+                            onSnapshot={handleSnapshot}
+                            onClose={handleClose}
+                        />
+                    </View>
+                </Animated.View>
+            </GestureHandlerRootView>
+        );
+    }
+
+    // ===== HLS Mode (react-native-video) =====
+    if (isHLS) {
+        return (
+            <GestureHandlerRootView style={styles.root}>
+                <Animated.View style={[styles.container, contentAnimatedStyle]}>
+                    <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
+                        <Video
+                            ref={videoRef as never}
+                            source={{ uri: videoUrl }}
+                            style={styles.video}
+                            resizeMode="contain"
+                            paused={paused}
+                            onLoad={onLoad}
+                            onProgress={onProgress}
+                            onBuffer={onBuffer}
+                            playInBackground={false}
+                            playWhenInactive={false}
+                        />
+                    </Animated.View>
+
+                    {/* Buffering indicator */}
+                    {isBuffering && (
+                        <View style={styles.bufferingContainer}>
+                            <ActivityIndicator size="large" color={colors.white} />
+                        </View>
+                    )}
+
+                    {/* Gesture area */}
+                    <GestureDetector gesture={composedGesture}>
+                        <Animated.View
+                            style={[styles.gestureContainer, { backgroundColor: 'transparent' }]}
+                        />
+                    </GestureDetector>
+
+                    {/* Controls overlay */}
+                    {showControls && (
+                        <Animated.View
+                            style={[styles.controlsOverlay, controlsAnimatedStyle]}
+                            pointerEvents="box-none"
+                        >
+                            <VideoTopBar
+                                pondName={pondName}
+                                cameraName={cameraName}
+                                onSnapshot={handleSnapshot}
+                                onClose={handleClose}
+                            />
+
+                            <VideoCenterControls
+                                paused={paused}
+                                isLiveStream={true}
+                                onTogglePause={() => {
+                                    setPaused(!paused);
+                                    showControlsUI();
+                                }}
+                                onSeekBack={() => {
+                                    seekTo(currentTime - SEEK_STEP);
+                                    showControlsUI();
+                                }}
+                                onSeekForward={() => {
+                                    seekTo(currentTime + SEEK_STEP);
+                                    showControlsUI();
+                                }}
+                            />
+
+                            <VideoBottomBar
+                                isLiveStream={true}
+                                currentTime={currentTime}
+                                duration={duration}
+                                progress={progress}
+                                formatTime={formatTime}
+                                seekTo={seekTo}
+                                showControlsUI={showControlsUI}
+                            />
+                        </Animated.View>
+                    )}
+                </Animated.View>
+            </GestureHandlerRootView>
+        );
+    }
+
+    // ===== RTSP Mode (VLCPlayer - legacy) =====
     return (
         <GestureHandlerRootView style={styles.root}>
             <Animated.View style={[styles.container, contentAnimatedStyle]}>
@@ -251,6 +377,13 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         backgroundColor: colors.overlay,
         justifyContent: 'space-between',
+    },
+    webrtcCloseOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
     },
 });
 
