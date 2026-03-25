@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 
 import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -27,8 +27,9 @@ import {
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
 import { useDevices } from '@/features/control/hooks/useDevices';
-// import { deviceApi } from '@/features/control/api/deviceApi';
+import { deviceApi, CreateScheduleRequest } from '@/features/control/api/deviceApi';
 import { DeviceData } from '@/features/control/types/control.types';
+import Toast from 'react-native-toast-message';
 
 type ScreenRouteProp = RouteProp<AppStackParamList, 'FeedingManagement'>;
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -43,8 +44,17 @@ export const FeedingManagementScreens = () => {
     const formRef = useRef<FeedingFormRef>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [formHasChanges, setFormHasChanges] = useState(false);
-    // const [isSubmittingControl, setIsSubmittingControl] = useState(false);
-    const isSubmittingControl = false; // Tạm thời Fix cứng bằng false do đã comment hàm điều khiển thiết bị
+    const [isSubmittingControl, setIsSubmittingControl] = useState(false);
+
+    // Device schedules fetched from API
+    const [deviceSchedules, setDeviceSchedules] = useState<
+        {
+            startTime: Date | null;
+            endTime: Date | null;
+            id: string;
+        }[]
+    >([]);
+    const scheduleFetchedRef = useRef(false);
 
     const { materials, isLoading: isMaterialsLoading } = useFarmMaterials();
     const createMutation = useCreateFeedingRecord();
@@ -78,6 +88,49 @@ export const FeedingManagementScreens = () => {
         }
     }
 
+    // Fetch existing schedules from device API when feeder device is found
+    useEffect(() => {
+        if (!feederDevice?.id || scheduleFetchedRef.current) return;
+        scheduleFetchedRef.current = true;
+
+        const fetchDeviceSchedules = async () => {
+            try {
+                const response = await deviceApi.getSchedules(feederDevice!.id);
+                const items = response.data?.data?.items;
+                if (items && items.length > 0) {
+                    // Sort by 'no' field
+                    items.sort((a, b) => a.no - b.no);
+
+                    const mapped = items.map(item => {
+                        // Parse time strings "HH:mm:ss.fffffff" to Date
+                        const parseTimeStr = (timeStr: string): Date | null => {
+                            if (!timeStr) return null;
+                            const [h, m, s] = timeStr.split(':');
+                            const date = new Date();
+                            if (h) date.setHours(parseInt(h));
+                            if (m) date.setMinutes(parseInt(m));
+                            if (s) date.setSeconds(Math.floor(parseFloat(s)));
+                            else date.setSeconds(0);
+                            date.setMilliseconds(0);
+                            return date;
+                        };
+
+                        return {
+                            id: item.id,
+                            startTime: parseTimeStr(item.startTime),
+                            endTime: parseTimeStr(item.endTime),
+                        };
+                    });
+                    setDeviceSchedules(mapped);
+                }
+            } catch (error) {
+                console.error('Failed to fetch device schedules:', error);
+            }
+        };
+
+        fetchDeviceSchedules();
+    }, [feederDevice]);
+
     const isLoading =
         createMutation.isPending ||
         updateMutation.isPending ||
@@ -86,7 +139,19 @@ export const FeedingManagementScreens = () => {
         (isDetailLoading && isEditMode);
 
     const initialData = useMemo(() => {
-        if (!isEditMode) return undefined;
+        if (!isEditMode) {
+            // For new feeding: if device has existing schedules, pre-fill them
+            if (deviceSchedules.length > 0) {
+                return {
+                    executionDate: new Date(),
+                    materials: [],
+                    mode: 'schedule' as const,
+                    schedules: deviceSchedules,
+                    note: '',
+                };
+            }
+            return undefined;
+        }
         if (detailData?.data) {
             return feedingService.mapDetailToForm(detailData.data, materials);
         }
@@ -94,7 +159,7 @@ export const FeedingManagementScreens = () => {
             return feedingService.mapMetaToForm(itemToEdit, materials);
         }
         return undefined;
-    }, [isEditMode, detailData, itemToEdit, materials]);
+    }, [isEditMode, detailData, itemToEdit, materials, deviceSchedules]);
 
     const handleSubmit = useCallback(
         async (formData: FeedingFormValues) => {
@@ -117,40 +182,74 @@ export const FeedingManagementScreens = () => {
 
                 const payload = feedingService.mapFormToPayload(formData);
 
-                // ================================================================
-                // Ghi chú tạm thời: Code điều khiển thiết bị (Device Control Logic)
-                // Anh có thể mở comment đoạn này ra khi Thiết bị ngoài ao đã kết nối & sẵn sàng!
-                // ================================================================
-                /*
-                setIsSubmittingControl(true);
-                try {
-                    if (feederDevice) {
+                // Device Control Logic - sync schedules with device API
+                if (feederDevice) {
+                    setIsSubmittingControl(true);
+                    try {
                         if (formData.mode === 'manual') {
                             await deviceApi.toggleDevice({ deviceId: feederDevice.id });
-                        } else if (formData.mode === 'schedule') {
-                            const schedulePromises = formData.schedules.map((s) => {
-                                if (!s.startTime || !s.endTime) return Promise.resolve(null);
-                                return deviceApi.createSchedule({
-                                    deviceId: feederDevice.id,
-                                    startTime: s.startTime.toISOString(),
-                                    endtime: s.endTime.toISOString(),
-                                });
-                            });
-                            await Promise.all(schedulePromises);
+                        } else if (formData.mode === 'schedule' && formData.schedules.length > 0) {
+                            // Build ISO datetime using local time
+                            const toLocalISO = (date: Date): string => {
+                                const y = date.getFullYear();
+                                const mo = String(date.getMonth() + 1).padStart(2, '0');
+                                const d = String(date.getDate()).padStart(2, '0');
+                                const h = String(date.getHours()).padStart(2, '0');
+                                const min = String(date.getMinutes()).padStart(2, '0');
+                                const sec = String(date.getSeconds()).padStart(2, '0');
+                                return `${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`;
+                            };
+
+                            const validSchedules = formData.schedules.filter(
+                                s => s.startTime && s.endTime
+                            );
+
+                            if (validSchedules.length > 0) {
+                                const results = await Promise.all(
+                                    validSchedules.map(async s => {
+                                        const schedulePayload: CreateScheduleRequest = {
+                                            ...(s.id &&
+                                            !s.id.startsWith(Date.now().toString().slice(0, 8))
+                                                ? { id: s.id }
+                                                : {}),
+                                            deviceId: feederDevice!.id,
+                                            startTime: toLocalISO(s.startTime!),
+                                            endtime: toLocalISO(s.endTime!),
+                                            runTime: 0,
+                                            pauseTime: 0,
+                                        };
+
+                                        try {
+                                            await deviceApi.createSchedule(schedulePayload);
+                                            return { success: true as const };
+                                        } catch {
+                                            return { success: false as const };
+                                        }
+                                    })
+                                );
+
+                                const failCount = results.filter(r => !r.success).length;
+                                if (failCount > 0) {
+                                    Toast.show({
+                                        type: 'error',
+                                        text1: 'Lỗi lịch trình',
+                                        text2: `${failCount} lịch trình không thể lưu`,
+                                    });
+                                }
+                            }
                         }
+                    } catch (error) {
+                        console.error('Device control error:', error);
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Lỗi điều khiển thiết bị',
+                            text2: 'Không thể cập nhật trạng thái máy cho ăn',
+                            visibilityTime: 4000,
+                        });
+                    } finally {
+                        setIsSubmittingControl(false);
                     }
-                } catch (error) {
-                    console.error('Device control error:', error);
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Lỗi điều khiển thiết bị',
-                        text2: 'Không thể cập nhật trạng thái máy cho ăn',
-                        visibilityTime: 4000,
-                    });
-                } finally {
-                    setIsSubmittingControl(false);
                 }
-                */
 
                 createMutation.mutate(
                     { pondId, payload },
@@ -164,7 +263,7 @@ export const FeedingManagementScreens = () => {
                 );
             }
         },
-        [isEditMode, pondId, jobId, updateMutation, createMutation, navigation /*, feederDevice */]
+        [isEditMode, pondId, jobId, updateMutation, createMutation, navigation, feederDevice]
     );
 
     const handleDelete = useCallback(() => {
