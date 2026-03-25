@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.gray[950],
         fontWeight: '500',
-        lineHeight: 22,
+        lineHeight: 20,
     },
     valueInline: {
         flexShrink: 1,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     unitText: {
         fontSize: 12,
         color: colors.gray[500],
-        lineHeight: 22,
+        lineHeight: 20,
     },
     valueBlock: {
         width: '100%',
