@@ -165,12 +165,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 {
                     <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
-                            <InfoIcon
-                                width={16}
-                                height={16}
-                                style={styles.infoIcon}
-                                color={colors.white}
-                            />
+                            <InfoIcon width={16} height={16} style={styles.infoIcon} />
                             <Text style={styles.infoText}>
                                 Chọn Thủ công để chạy ngay, hoặc Lịch trình để thiết lập nhiều lượt
                                 hoạt động trong ngày
@@ -302,12 +297,13 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginBottom: 16,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         borderColor: colors.border,
         borderWidth: 1,
     },
     infoIcon: {
         marginRight: 8,
+        marginTop: 2,
     },
     infoText: {
         flex: 1,

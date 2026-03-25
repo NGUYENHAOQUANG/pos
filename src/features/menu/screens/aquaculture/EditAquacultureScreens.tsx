@@ -101,11 +101,23 @@ export const EditAquacultureScreens: React.FC = () => {
         (formData: AquacultureFormValues) => {
             if (!aquaculture?.zoneId) return;
 
+            // Check if user changed the start date
+            const initialStartDate = new Date(aquaculture.startDate);
+            const startDateChanged = formData.startDate.getTime() !== initialStartDate.getTime();
+
+            // If startDate not changed, pass original date back so payload stays the same
+            // then strip it from the final payload
+            const payload = aquacultureService.mapFormToPayload(formData);
+            if (!startDateChanged) {
+                delete payload.startDate;
+            }
+
             updateSeasonMutation.mutate(
                 {
                     zoneId: aquaculture.zoneId.toString(),
                     seasonId: aquaculture.id.toString(),
                     formData,
+                    payload,
                 },
                 {
                     onSuccess: () => {

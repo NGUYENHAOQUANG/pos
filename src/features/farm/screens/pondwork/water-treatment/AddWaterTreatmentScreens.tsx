@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import {
     showMaterialQuantityZeroToast,
-    showSelectMaterialToast,
     showInvalidActivityTypeToast,
     showAddJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
@@ -61,13 +60,8 @@ export const AddWaterTreatmentScreens: React.FC = () => {
         navigation.goBack();
     };
     const handleSave = async () => {
-        if (selectedMaterials.length === 0) {
-            showSelectMaterialToast();
-            return;
-        }
-
-        // Validate material quantities must be greater than 0
-        if (selectedMaterials.some(m => m.quantity <= 0)) {
+        // Validate material quantities must be greater than 0 (only when materials selected)
+        if (selectedMaterials.length > 0 && selectedMaterials.some(m => m.quantity <= 0)) {
             showMaterialQuantityZeroToast();
             return;
         }
