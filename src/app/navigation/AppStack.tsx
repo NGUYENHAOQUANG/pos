@@ -223,7 +223,6 @@ export type AppStackParamList = {
         videoUrl: string;
         cameraName: string;
         pondName: string;
-        streamMode?: 'rtsp' | 'webrtc' | 'hls';
     };
 
     // ============== Menu Screens (Tab Bar hidden) ==============

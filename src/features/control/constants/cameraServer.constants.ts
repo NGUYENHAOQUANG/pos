@@ -11,13 +11,13 @@
  */
 
 /** Stream mode type */
-export type CameraStreamMode = 'rtsp' | 'webrtc' | 'hls';
+export type CameraStreamMode = 'rtsp' | 'webrtc' | 'hls' | 'mjpeg';
 
 /**
  * Active camera streaming mode.
- * Switch between 'rtsp', 'webrtc', or 'hls' to change the player.
+ * Switch between 'rtsp', 'webrtc', 'hls', or 'mjpeg' to change the player.
  */
-export const CAMERA_STREAM_MODE: CameraStreamMode = 'hls';
+export const CAMERA_STREAM_MODE: CameraStreamMode = 'mjpeg';
 
 /**
  * go2rtc camera server host.
