@@ -50,7 +50,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const [selectedEntry, setSelectedEntry] = useState<HealthCheckEntry | null>(null);
 
     // ── Unsaved changes guard ────────────────────
-    const { UnsavedChangesModal } = useUnsavedChanges(results.length > 0);
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(results.length > 0);
 
     // ── Derived ──────────────────────────────────
     const isLoading = isPredicting || isFetchingResult || isPolling;
@@ -86,8 +86,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             setTimeout(() => {
                 getResult(requestId, {
                     onSuccess: async data => {
-                        console.log('[AI Health] getResult status:', data.status);
-
                         if (data.status === 'Success' && data.imageProcessedUrl) {
                             setIsPolling(false);
 
@@ -95,7 +93,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                             const localImageUri = await downloadAzureBlobImage(
                                 data.imageProcessedUrl
                             );
-                            console.log('[AI Health] processedImageUri:', localImageUri);
                             if (localImageUri) {
                                 setProcessedImageUri(localImageUri);
                             }
@@ -267,6 +264,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     };
 
     const handleSave = () => {
+        allowNavigation();
         if (results.length > 0) {
             const allItems = results.reduce<HealthCheckItem[]>(
                 (acc, res) => acc.concat(res.items),
@@ -293,7 +291,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             };
 
             navigation.navigate({
-                name: 'ShrimpInspectionScreen',
+                name: 'ShrimpHealthScreen',
                 params,
                 merge: true,
             } as never);

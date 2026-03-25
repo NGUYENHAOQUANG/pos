@@ -42,10 +42,16 @@ export const useFarmMaterials = () => {
     }, [warehouseItemsData, allMaterials, groups]);
 
     const materialMap = useMemo(() => {
-        return materials.reduce((acc, curr) => {
-            acc[curr.id] = curr;
-            return acc;
-        }, {} as Record<string, IMaterial>);
+        const map: Record<string, IMaterial> = {};
+        materials.forEach(curr => {
+            // Primary key: warehouse item id
+            map[curr.id] = curr;
+            // Secondary key: material definition id (for APIs that return materialId instead of warehouseItemId)
+            if (curr.materialDefId && !map[curr.materialDefId]) {
+                map[curr.materialDefId] = curr;
+            }
+        });
+        return map;
     }, [materials]);
 
     return {

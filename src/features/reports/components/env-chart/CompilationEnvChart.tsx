@@ -83,7 +83,13 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
         () => chartData?.metadata || { minY: 0, maxY: 10, xAxis: [] as string[] },
         [chartData?.metadata]
     );
-    const unitMetric = chartData?.unitMetric || '';
+    const unitMetric = useMemo(() => {
+        if (selectedMetricId && metrics.length > 0) {
+            const metric = metrics.find(m => m.id === selectedMetricId);
+            if (metric?.unitDisplay) return metric.unitDisplay;
+        }
+        return chartData?.unitMetric || '';
+    }, [selectedMetricId, metrics, chartData?.unitMetric]);
 
     // Get selected metric name for chart title
     const selectedMetricName = useMemo(() => {
@@ -108,7 +114,9 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
         return series.map(s => ({
             id: s.pondId,
             name: s.pondName,
-            value: unitMetric ? `${s.averageValue} ${unitMetric}` : `${s.averageValue}`,
+            value: unitMetric
+                ? `${String(s.averageValue).replace('.', ',')} ${unitMetric}`
+                : `${String(s.averageValue).replace('.', ',')}`,
             color: pondColors[s.pondId] || '#999',
         }));
     }, [series, pondColors, unitMetric]);

@@ -28,7 +28,10 @@ const formatAxisValue = (value: number) => {
 };
 
 const formatTooltipValue = (value: number) => {
-    return value.toLocaleString('vi-VN') + ' đ';
+    const sign = value < 0 ? '-' : '';
+    const abs = Math.abs(value);
+    const formatted = abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return sign + formatted + ' đ';
 };
 
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {

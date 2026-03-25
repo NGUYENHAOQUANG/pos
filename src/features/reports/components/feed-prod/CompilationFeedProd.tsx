@@ -78,11 +78,11 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
     const getLatestFCR = (): number => summaryData?.fcr || 0;
 
     const formatMetricValue = (value: number): string => {
-        return `${value.toFixed(2)} tấn`;
+        return `${value.toFixed(2).replace('.', ',')} tấn`;
     };
 
     const formatFCR = (fcr: number): string => {
-        return fcr.toFixed(2);
+        return fcr.toFixed(2).replace('.', ',');
     };
 
     return (
