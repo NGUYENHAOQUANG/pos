@@ -171,7 +171,7 @@ export const CreateCycleScreen: React.FC = () => {
             try {
                 await deleteCycleMutation.mutateAsync({ pondId, cycleId });
                 setShowDeleteModal(false);
-                navigation.navigate('MainTabs' as never);
+                setTimeout(() => navigation.navigate('MainTabs' as never), 300);
             } catch (_error) {
                 setShowDeleteModal(false);
             }
