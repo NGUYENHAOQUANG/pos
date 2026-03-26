@@ -198,10 +198,8 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
 
                             <View style={styles.pondListBox}>
                                 {transferDetail.toPonds?.map(tp => (
-                                    <View key={tp.toPondId} style={styles.pondRow}>
-                                        <Text style={styles.pondName}>
-                                            {tp.pond?.name || '---'}
-                                        </Text>
+                                    <View key={tp.pondId || tp.toPondId} style={styles.pondRow}>
+                                        <Text style={styles.pondName}>{tp.pondName || '---'}</Text>
                                         <Text style={styles.pondQuantity}>
                                             {tp.quantity?.toLocaleString()}
                                         </Text>

@@ -55,7 +55,7 @@ export function useIncomingStockTransfer({
                                 );
                                 const detail = detailRes?.data;
                                 if (detail) {
-                                    const fromPondName = detail.pond?.name || transfer.fromPondId;
+                                    const fromPondName = detail.fromPoneName || transfer.fromPondId;
                                     result = {
                                         fromPondId: transfer.fromPondId,
                                         fromPondName,
@@ -93,7 +93,7 @@ export function useIncomingStockTransfer({
                                     // Chưa có incoming → tạo mới với transferDetail
                                     result = {
                                         fromPondId: pondId,
-                                        fromPondName: detail.pond?.name || pondId,
+                                        fromPondName: detail.fromPoneName || pondId,
                                         shrimpSizePcsPerKg: detail.shrimpSizePcsPerKg,
                                         quantity: transfer.totalStocking,
                                         createdAt: transfer.createdAt,
