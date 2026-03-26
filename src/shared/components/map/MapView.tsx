@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import { View, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -180,6 +181,9 @@ export function MapView({
         setIsLoading(false);
     };
 
+    // Unmount WebView when screen loses focus to free ~30-60MB RAM
+    const isFocused = useIsFocused();
+
     if (hasError) {
         return (
             <View style={[styles.container, style]}>
@@ -208,25 +212,35 @@ export function MapView({
                         <Text style={styles.loadingText}>Đang tải bản đồ...</Text>
                     </View>
                 )}
-                <WebView
-                    ref={webViewRef}
-                    source={{ html: mapHtml }}
-                    style={styles.webview}
-                    onMessage={handleMessage}
-                    onLoadStart={handleLoadStart}
-                    onLoadEnd={handleLoadEnd}
-                    onError={handleError}
-                    javaScriptEnabled={true}
-                    domStorageEnabled={true}
-                    startInLoadingState={false}
-                    scalesPageToFit={Platform.OS === 'android'}
-                    originWhitelist={['*']}
-                    mixedContentMode="always"
-                    allowsInlineMediaPlayback={true}
-                    mediaPlaybackRequiresUserAction={false}
-                    cacheEnabled={true}
-                    incognito={false}
-                />
+                {isFocused ? (
+                    <WebView
+                        ref={webViewRef}
+                        source={{ html: mapHtml }}
+                        style={styles.webview}
+                        onMessage={handleMessage}
+                        onLoadStart={handleLoadStart}
+                        onLoadEnd={handleLoadEnd}
+                        onError={handleError}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        startInLoadingState={false}
+                        scalesPageToFit={Platform.OS === 'android'}
+                        originWhitelist={['*']}
+                        mixedContentMode="always"
+                        allowsInlineMediaPlayback={true}
+                        mediaPlaybackRequiresUserAction={false}
+                        cacheEnabled={true}
+                        incognito={false}
+                    />
+                ) : (
+                    <View style={styles.loadingContainer}>
+                        <Ionicons
+                            name="map-outline"
+                            size={sizes.icon['2xl']}
+                            color={colors.textSecondary}
+                        />
+                    </View>
+                )}
                 {editable && (
                     <TouchableOpacity
                         style={styles.editButton}

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { useIsFocused } from '@react-navigation/native';
 
 interface LeafletMapProps {
     /** Latitude of the center */
@@ -121,6 +122,13 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
 </body>
 </html>`;
     }, [latitude, longitude, zoom, mode]);
+
+    // Unmount WebView when screen loses focus to free ~30-60MB RAM
+    const isFocused = useIsFocused();
+
+    if (!isFocused) {
+        return <View style={[styles.webview, style]} />;
+    }
 
     return (
         <WebView
