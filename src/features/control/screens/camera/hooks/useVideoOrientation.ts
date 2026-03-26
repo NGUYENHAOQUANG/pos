@@ -11,14 +11,12 @@ interface UseVideoOrientationReturn {
     handleClose: () => void;
     isMountedRef: React.MutableRefObject<boolean>;
     isClosingRef: React.MutableRefObject<boolean>;
-    vlcRef: React.MutableRefObject<{ stopPlayer?: () => void } | null>;
 }
 
 export const useVideoOrientation = (): UseVideoOrientationReturn => {
     const navigation = useNavigation();
     const isMountedRef = useRef(true);
     const isClosingRef = useRef(false);
-    const vlcRef = useRef<{ stopPlayer?: () => void } | null>(null);
 
     const [isReady, setIsReady] = useState(false);
     const contentOpacity = useSharedValue(0);
@@ -47,11 +45,6 @@ export const useVideoOrientation = (): UseVideoOrientationReturn => {
     const handleClose = useCallback(() => {
         if (isClosingRef.current) return;
         isClosingRef.current = true;
-        if (vlcRef.current) {
-            try {
-                vlcRef.current.stopPlayer?.();
-            } catch (_e) {}
-        }
 
         contentOpacity.value = withTiming(0, { duration: 150 }, finished => {
             if (finished) {
@@ -113,6 +106,5 @@ export const useVideoOrientation = (): UseVideoOrientationReturn => {
         handleClose,
         isMountedRef,
         isClosingRef,
-        vlcRef,
     };
 };
