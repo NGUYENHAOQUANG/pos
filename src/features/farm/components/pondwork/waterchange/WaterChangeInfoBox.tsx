@@ -43,7 +43,8 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         onChangeText={onTargetLevelChange}
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
-                        maxDigits={10}
+                        maxDecimalPlaces={5}
+                        maxDigits={20}
                         required
                         containerStyle={{ marginBottom: 0 }}
                     />
@@ -59,7 +60,8 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         onChangeText={onSupplyLevelChange}
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
-                        maxDigits={10}
+                        maxDecimalPlaces={5}
+                        maxDigits={20}
                         required
                         containerStyle={{ marginBottom: 0 }}
                     />

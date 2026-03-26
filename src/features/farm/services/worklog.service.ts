@@ -121,7 +121,8 @@ function pushMaterialRows(
 export function convertReleaseShrimpRefToActivityData(r: Ref): ActivityData[] {
     const data: ActivityData[] = [];
     if (r.quantity != null) data.push({ label: 'Số lượng (con)', value: `${r.quantity}` });
-    if (r.density != null) data.push({ label: 'Mật độ (con/m²)', value: `${r.density}` });
+    if (r.density != null)
+        data.push({ label: 'Mật độ (con/m²)', value: `${Math.round(Number(r.density))}` });
     if (r.ageDays != null) data.push({ label: 'Ngày tuổi (ngày)', value: `${r.ageDays}` });
     if (r.estimatedCost != null)
         data.push({

@@ -1,5 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    FlatList,
+    ActivityIndicator,
+    TouchableOpacity,
+    RefreshControl,
+} from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
@@ -34,12 +41,19 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
         usePondRecordGroups(pond?.id || '', {
             startDate,
             endDate,
             operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
         });
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const onRefresh = useCallback(async () => {
+        setIsRefreshing(true);
+        await refetch();
+        setIsRefreshing(false);
+    }, [refetch]);
 
     const handleLoadMore = useCallback(() => {
         if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -166,6 +180,13 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                     data={groupedLogs}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.scrollContent}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            onRefresh={onRefresh}
+                            colors={[colors.primary]}
+                        />
+                    }
                     renderItem={({ item, index }) => (
                         <TrackingDayCard
                             group={item}

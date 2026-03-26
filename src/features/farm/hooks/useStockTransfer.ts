@@ -153,6 +153,7 @@ export const useCreateStockTransfer = () => {
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
 
             // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['report', 'stock-transfer-stats'] });
             queryClient.invalidateQueries({ queryKey: ['pond-status-distribution'] });
             queryClient.invalidateQueries({ queryKey: ['cost-donut'] });

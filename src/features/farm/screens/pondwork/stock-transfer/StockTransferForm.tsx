@@ -77,17 +77,44 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
 
     const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
+    const prevTotalRef = useRef(totalShrimpCount);
+    const prevLatestSizeRef = useRef(latestShrimpSize);
+
     useEffect(() => {
-        if (!hasInitialized.current && totalShrimpCount > 0) {
+        if (totalShrimpCount > 0) {
             setReceivingPonds(prev => {
-                if (prev.length === 1 && (prev[0].quantity === '' || prev[0].quantity === '0')) {
-                    hasInitialized.current = true;
-                    return [{ ...prev[0], quantity: totalShrimpCount.toString() }];
+                if (!hasInitialized.current) {
+                    if (
+                        prev.length === 1 &&
+                        (prev[0].quantity === '' || prev[0].quantity === '0')
+                    ) {
+                        hasInitialized.current = true;
+                        return [{ ...prev[0], quantity: totalShrimpCount.toString() }];
+                    }
+                } else if (prevTotalRef.current !== totalShrimpCount) {
+                    // Update if user hasn't manually modified it from the stale cached value
+                    if (prev.length === 1 && prev[0].quantity === prevTotalRef.current.toString()) {
+                        return [{ ...prev[0], quantity: totalShrimpCount.toString() }];
+                    }
                 }
                 return prev;
             });
         }
+        prevTotalRef.current = totalShrimpCount;
     }, [totalShrimpCount]);
+
+    useEffect(() => {
+        if (latestShrimpSize && latestShrimpSize !== prevLatestSizeRef.current) {
+            setShrimpSize(prev => {
+                const prevExpected = prevLatestSizeRef.current || '0';
+                if (prev === prevExpected || prev === '0') {
+                    return latestShrimpSize;
+                }
+                return prev;
+            });
+        }
+        prevLatestSizeRef.current = latestShrimpSize;
+    }, [latestShrimpSize]);
 
     const handleDropdownOpen = useCallback(() => {
         setTimeout(() => {

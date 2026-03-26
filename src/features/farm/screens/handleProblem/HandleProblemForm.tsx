@@ -105,7 +105,7 @@ export const HandleProblemForm = ({
         <Loading isLoading={isSaving}>
             <View style={styles.container}>
                 <HeaderSection
-                    title={isEditMode ? `Chỉnh sửa ${title.toLowerCase()}` : title}
+                    title={title}
                     onBack={onBack}
                     rightComponent={
                         isEditMode ? (

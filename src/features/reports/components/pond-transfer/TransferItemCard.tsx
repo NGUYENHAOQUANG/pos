@@ -68,8 +68,8 @@ export const TransferItemCard = ({ item }: Props) => {
                 {expanded && (
                     <View style={styles.expandedContent}>
                         {renderRow('Ngày thả', item.stockingDate)}
-                        {renderRow('Lượng thả (Pls)', item.stockingAmount)}
-                        {renderRow('Số tôm dự kiến (con)', item.expectedAmount)}
+                        {renderRow('Lượng thả (Pls)', item.stockingAmount, 'con')}
+                        {renderRow('Số tôm dự kiến (con)', item.expectedAmount, 'con')}
                     </View>
                 )}
             </View>

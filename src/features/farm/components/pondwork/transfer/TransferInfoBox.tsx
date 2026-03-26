@@ -8,7 +8,7 @@ import DeleteBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
 import { IconError } from '@/assets/icons';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, RequiredDot } from '@/shared/components/forms/Input';
 
 export interface ReceivingPondItem {
     id: string;
@@ -200,10 +200,10 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                             {/* Receiving Pond */}
                             <View style={styles.column}>
                                 {isFirstRow && (
-                                    <Text style={styles.label}>
-                                        <Text style={styles.required}>* </Text>
-                                        Ao nhận
-                                    </Text>
+                                    <View style={styles.labelWrapper}>
+                                        <Text style={styles.label}>Ao nhận</Text>
+                                        <RequiredDot />
+                                    </View>
                                 )}
                                 <DropdownMaterial
                                     value={pond.receivingPond}
@@ -220,10 +220,10 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                             {/* Quantity */}
                             <View style={styles.column}>
                                 {isFirstRow && (
-                                    <Text style={styles.label}>
-                                        <Text style={styles.required}>* </Text>
-                                        Số lượng
-                                    </Text>
+                                    <View style={styles.labelWrapper}>
+                                        <Text style={styles.label}>Số lượng</Text>
+                                        <RequiredDot />
+                                    </View>
                                 )}
                                 <View style={styles.inputRow}>
                                     <View style={styles.inputContainer}>
@@ -274,6 +274,10 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: colors.text,
         lineHeight: 22,
+    },
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     required: {
         color: colors.error,

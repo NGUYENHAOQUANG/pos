@@ -33,7 +33,6 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
                 placeholder="Lượng thức ăn cho vào nhá (g)"
                 value={foodAmount}
                 onChangeText={onFoodAmountChange}
-                keyboardType="numeric"
                 inputFormat={InputFormat.DECIMAL}
                 maxDigits={15}
                 containerStyle={{ marginBottom: 0 }}
