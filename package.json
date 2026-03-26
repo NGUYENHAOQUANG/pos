@@ -15,7 +15,6 @@
     "dependencies": {
         "@ant-design/icons-react-native": "^2.3.2",
         "@ant-design/react-native": "^5.4.3",
-        "@callstack/liquid-glass": "^0.7.0",
         "@expo/vector-icons": "^15.0.3",
         "@hookform/resolvers": "^3.3.2",
         "@notifee/react-native": "^9.1.8",
@@ -62,7 +61,6 @@
         "react-native-video": "^6.19.0",
         "react-native-view-shot": "^4.0.3",
         "react-native-vision-camera": "^4.7.3",
-        "react-native-vlc-media-player": "^1.0.98",
         "react-native-walkthrough-tooltip": "^1.6.0",
         "react-native-webview": "^13.16.0",
         "react-native-wheel-scrollview-picker": "^2.0.9",
