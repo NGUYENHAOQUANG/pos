@@ -28,8 +28,11 @@ export const NO_SPECIAL_CHARS_REGEX = /^[a-zA-ZÀ-ỹ0-9\s]*$/;
  * These return the filtered string (or null to reject).
  */
 export const InputFilters = {
-    /** Keep only digits */
-    integer: (text: string): string => text.replace(/[^0-9]/g, ''),
+    /** Keep only digits — strips decimals, whitespace, and invisible chars on paste */
+    integer: (text: string): string => {
+        // First trim whitespace (common when pasting), then strip everything except 0-9
+        return text.trim().replace(/[^0-9]/g, '');
+    },
 
     /** Keep digits and at most one decimal point (dot cannot be first), optionally limit decimal places */
     decimal: (text: string, maxDecimalPlaces?: number): string => {
