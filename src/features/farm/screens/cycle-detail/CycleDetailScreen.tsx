@@ -177,10 +177,6 @@ export const CycleDetailScreen: React.FC = () => {
         switch (status) {
             case 'Completed':
                 return 'Hoàn thành';
-            case 'InProgress':
-                return 'Đang nuôi';
-            case 'Preparing':
-                return 'Chuẩn bị';
             default:
                 return 'Chưa hoàn thành';
         }

@@ -12,6 +12,7 @@ export enum StockTransferStatus {
 export interface IStockTransferToPond {
     toPondId: string;
     quantity: number;
+    pondName: string;
     toCycleId: string;
 }
 
@@ -84,13 +85,13 @@ export interface ISeasonInfo {
 }
 
 export interface IStockTransferToPondDetail extends IStockTransferToPond {
-    pond?: IPondInfo | null;
+    pondId?: string;
 }
 
 export interface IStockTransferDetail extends Omit<IStockTransfer, 'toPonds'> {
     toPonds: IStockTransferToPondDetail[];
-    pond?: IPondInfo | null;
-    cycle?: ICycleInfo | null;
+    fromPoneName?: string;
+    fromCycleName?: string;
 }
 
 export interface CreateStockTransferRequest {
