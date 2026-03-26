@@ -9,6 +9,8 @@ import type {
 export interface IncidentDetailMaterial {
     warehouseItemId: string;
     quantity: number;
+    name?: string;
+    unitName?: string;
 }
 
 /** Incident detail body (API) */

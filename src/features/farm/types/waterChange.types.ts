@@ -23,7 +23,7 @@ export interface IWaterSupplyRecord {
             materialId?: string; // Updated
             warehouseItemId?: string; // Added to cover both cases
             quantity: number;
-            warehouseItemName?: string;
+            name?: string;
             unitName?: string;
         }>;
     };

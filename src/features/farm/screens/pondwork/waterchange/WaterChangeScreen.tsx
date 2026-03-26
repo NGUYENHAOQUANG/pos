@@ -153,7 +153,7 @@ export const WaterSupplyScreen = () => {
                     found ||
                     ({
                         id: targetId,
-                        name: m.warehouseItemName || 'Vật tư',
+                        name: m.name || 'Vật tư',
                         unitName: m.unitName || '',
                         materialDefId: m.materialId,
                     } as any),

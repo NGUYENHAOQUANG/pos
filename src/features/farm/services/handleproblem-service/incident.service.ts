@@ -50,11 +50,11 @@ export const incidentService = {
                         return {
                             material: {
                                 id: m.warehouseItemId,
-                                name: mat?.name || 'Vật tư',
-                                unitName: mat?.unitName || '',
+                                name: mat?.name || m.name || 'Vật tư',
+                                unitName: mat?.unitName || m.unitName || '',
                             } as any,
                             quantity: m.quantity,
-                            unit: mat?.unitName || '',
+                            unit: mat?.unitName || m.unitName || '',
                         };
                     }) || [],
                 documentIds: item.documentIds,

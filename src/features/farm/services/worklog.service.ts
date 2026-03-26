@@ -105,14 +105,14 @@ export type RefToActivityDataContext = {
 
 function pushMaterialRows(
     data: ActivityData[],
-    materials: { warehouseItemId: string; quantity: number }[],
+    materials: { warehouseItemId: string; quantity: number; name?: string; unitName?: string }[],
     materialMap: Record<string, { name?: string; unitName?: string }>
 ): void {
     materials.forEach(m => {
         const mat = materialMap[m.warehouseItemId];
-        const label = mat?.unitName
-            ? `${mat?.name || 'Vật tư'} (${mat.unitName})`
-            : mat?.name || 'Vật tư';
+        const matName = mat?.name || m.name || 'Vật tư';
+        const matUnit = mat?.unitName || m.unitName;
+        const label = matUnit ? `${matName} (${matUnit})` : matName;
         data.push({ label, value: m.quantity });
     });
 }

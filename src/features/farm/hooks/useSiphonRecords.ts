@@ -88,7 +88,7 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
                 return {
                     material: {
                         id: m.warehouseItemId,
-                        name: mapItem?.name || m.warehouseItemName || 'Vật tư',
+                        name: mapItem?.name || m.name || 'Vật tư',
                         unitName: mapItem?.unitName || m.unitName || 'Đơn vị',
                     } as any,
                     quantity: m.quantity,

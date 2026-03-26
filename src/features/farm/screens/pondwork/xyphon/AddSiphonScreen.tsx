@@ -173,7 +173,7 @@ export const AddSiphonScreen: React.FC = () => {
                     found ||
                     ({
                         id: targetId,
-                        name: m.warehouseItemName || 'Vật tư',
+                        name: m.name || 'Vật tư',
                         unitName: m.unitName || '',
                         materialDefId: targetId,
                     } as any),
