@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
     StyleSheet,
@@ -89,15 +90,15 @@ const parseTimeToMinutes = (timeStr: string): number => {
     return hours * 60 + minutes;
 };
 
-// Check if a time slot has activity
 const hasActivityForDevice = (time: string, schedules: ScheduleItem[]): boolean => {
     const [hours, minutes] = time.split(':').map(Number);
-    const timeInMinutes = hours * 60 + minutes;
+    const slotStart = hours * 60 + minutes;
+    const slotEnd = slotStart + 15;
     return schedules.some(schedule => {
         if (!schedule.isActive) return false;
-        const startInMinutes = parseTimeToMinutes(schedule.startTime);
-        const endInMinutes = parseTimeToMinutes(schedule.endTime);
-        return timeInMinutes >= startInMinutes && timeInMinutes < endInMinutes;
+        const scheduleStart = parseTimeToMinutes(schedule.startTime);
+        const scheduleEnd = parseTimeToMinutes(schedule.endTime);
+        return scheduleStart < slotEnd && scheduleEnd > slotStart;
     });
 };
 
@@ -161,35 +162,38 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
         return Math.max(calculated, DEVICE_COLUMN_MIN_WIDTH);
     }, [deviceColumns.length]);
 
-    // Fetch schedules for all devices
-    React.useEffect(() => {
-        const fetchAllSchedules = async () => {
-            if (devices.length === 0) {
-                setIsLoadingSchedules(false);
-                return;
-            }
-            setIsLoadingSchedules(true);
-            try {
-                const results = await Promise.all(
-                    devices.map(async device => {
-                        try {
-                            const response = await deviceApi.getSchedules(device.id);
-                            const items = response.data?.data?.items || [];
-                            return { deviceId: device.id, schedules: items };
-                        } catch {
-                            return { deviceId: device.id, schedules: [] };
-                        }
-                    })
-                );
-                setDeviceSchedules(results);
-            } catch {
-                // silently fail
-            } finally {
-                setIsLoadingSchedules(false);
-            }
-        };
-        fetchAllSchedules();
+    // Fetch schedules for all devices — refetch on every screen focus
+    const fetchAllSchedules = React.useCallback(async () => {
+        if (devices.length === 0) {
+            setIsLoadingSchedules(false);
+            return;
+        }
+        setIsLoadingSchedules(true);
+        try {
+            const results = await Promise.all(
+                devices.map(async device => {
+                    try {
+                        const response = await deviceApi.getSchedules(device.id);
+                        const items = response.data?.data?.items || [];
+                        return { deviceId: device.id, schedules: items };
+                    } catch {
+                        return { deviceId: device.id, schedules: [] };
+                    }
+                })
+            );
+            setDeviceSchedules(results);
+        } catch {
+            // silently fail
+        } finally {
+            setIsLoadingSchedules(false);
+        }
     }, [devices]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchAllSchedules();
+        }, [fetchAllSchedules])
+    );
 
     // Update current time every minute
     React.useEffect(() => {

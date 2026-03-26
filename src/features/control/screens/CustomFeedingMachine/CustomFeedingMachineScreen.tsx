@@ -25,6 +25,7 @@ import { Input } from '@/shared/components/forms/Input';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
+import { CustomDeviceSkeleton } from '@/features/control/components/skeleton/CustomDeviceSkeleton';
 
 interface CustomFeedingMachineProps {
     onBack?: () => void;
@@ -147,6 +148,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
     const [isSaving, setIsSaving] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     // Track initial fetch to only auto-set mode/schedules on first load
     const isInitialFetchRef = useRef(true);
 
@@ -223,6 +225,8 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
             }
         } catch (error) {
             console.error('Failed to fetch schedules:', error);
+        } finally {
+            setIsInitialLoading(false);
         }
     }, [deviceId, pondId, updateDeviceMode]);
 
@@ -487,90 +491,98 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 }}
             />
 
-            <SafeInputLayout
-                style={styles.flex1}
-                contentContainerStyle={styles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            >
-                {/* 1. CHẾ ĐỘ HOẠT ĐỘNG */}
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
-                    <Text style={styles.sectionSubtitle}>Chọn loại hoạt động</Text>
-
-                    <RadioButton
-                        options={[
-                            { label: 'Thủ công', value: 'manual' },
-                            { label: 'Lịch trình', value: 'schedule' },
-                        ]}
-                        value={mode}
-                        onValueChange={val => {
-                            setMode(val as 'manual' | 'schedule');
-                            setIsDirty(true);
-                            isDirtyRef.current = true;
-                        }}
-                    />
-                </View>
-
-                {/* 2. CẤU HÌNH MÁY - Only show in schedule mode */}
-                {mode === 'schedule' && (
+            {isInitialLoading ? (
+                <CustomDeviceSkeleton />
+            ) : (
+                <SafeInputLayout
+                    style={styles.flex1}
+                    contentContainerStyle={styles.scrollContent}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
+                >
+                    {/* 1. CHẾ ĐỘ HOẠT ĐỘNG */}
                     <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Cấu hình máy</Text>
+                        <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
+                        <Text style={styles.sectionSubtitle}>Chọn loại hoạt động</Text>
 
-                        <Input
-                            label="Chạy (giây)"
-                            required
-                            placeholder="Nhập số giây"
-                            placeholderTextColor={colors.gray[400]}
-                            keyboardType="numeric"
-                            value={runDuration}
-                            onChangeText={text => {
-                                const numericText = text.replace(/[^0-9]/g, '');
-                                setRunDuration(numericText);
-                                setIsDirty(true);
-                                isDirtyRef.current = true;
-                            }}
-                        />
-
-                        <Input
-                            label="Dừng (phút)"
-                            required
-                            placeholder="Nhập số phút"
-                            placeholderTextColor={colors.gray[400]}
-                            keyboardType="numeric"
-                            value={stopDuration}
-                            onChangeText={text => {
-                                const numericText = text.replace(/[^0-9]/g, '');
-                                setStopDuration(numericText);
+                        <RadioButton
+                            options={[
+                                { label: 'Thủ công', value: 'manual' },
+                                { label: 'Lịch trình', value: 'schedule' },
+                            ]}
+                            value={mode}
+                            onValueChange={val => {
+                                setMode(val as 'manual' | 'schedule');
                                 setIsDirty(true);
                                 isDirtyRef.current = true;
                             }}
                         />
                     </View>
-                )}
 
-                {/* 3. LỊCH HOẠT ĐỘNG - Only show in schedule mode */}
-                {mode === 'schedule' && (
-                    <ActivitySchedule
-                        schedules={schedules}
-                        onUpdateSchedules={newSchedules => {
-                            setSchedules(newSchedules);
-                            setIsDirty(true);
-                            isDirtyRef.current = true;
-                        }}
-                    />
-                )}
-            </SafeInputLayout>
+                    {/* 2. CẤU HÌNH MÁY - Only show in schedule mode */}
+                    {mode === 'schedule' && (
+                        <View style={styles.card}>
+                            <Text style={styles.sectionTitle}>Cấu hình máy</Text>
 
-            <ButtonBar
-                mode="double"
-                primaryTitle={isSaving ? 'Đang lưu...' : 'Lưu thông tin'}
-                secondaryTitle="Hủy"
-                onPrimaryPress={handleSave}
-                onSecondaryPress={handleCancel}
-                primaryButtonDisabled={isSaving}
-                primaryButtonLoading={isSaving}
-                secondaryButtonDisabled={isSaving}
-            />
+                            <Input
+                                label="Chạy (giây)"
+                                required
+                                placeholder="Nhập số giây"
+                                placeholderTextColor={colors.gray[400]}
+                                keyboardType="numeric"
+                                value={runDuration}
+                                onChangeText={text => {
+                                    const numericText = text.replace(/[^0-9]/g, '');
+                                    setRunDuration(numericText);
+                                    setIsDirty(true);
+                                    isDirtyRef.current = true;
+                                }}
+                            />
+
+                            <Input
+                                label="Dừng (phút)"
+                                required
+                                placeholder="Nhập số phút"
+                                placeholderTextColor={colors.gray[400]}
+                                keyboardType="numeric"
+                                value={stopDuration}
+                                onChangeText={text => {
+                                    const numericText = text.replace(/[^0-9]/g, '');
+                                    setStopDuration(numericText);
+                                    setIsDirty(true);
+                                    isDirtyRef.current = true;
+                                }}
+                            />
+                        </View>
+                    )}
+
+                    {/* 3. LỊCH HOẠT ĐỘNG - Only show in schedule mode */}
+                    {mode === 'schedule' && (
+                        <ActivitySchedule
+                            schedules={schedules}
+                            onUpdateSchedules={newSchedules => {
+                                setSchedules(newSchedules);
+                                setIsDirty(true);
+                                isDirtyRef.current = true;
+                            }}
+                        />
+                    )}
+                </SafeInputLayout>
+            )}
+
+            {!isInitialLoading && (
+                <ButtonBar
+                    mode="double"
+                    primaryTitle={isSaving ? 'Đang lưu...' : 'Lưu thông tin'}
+                    secondaryTitle="Hủy"
+                    onPrimaryPress={handleSave}
+                    onSecondaryPress={handleCancel}
+                    primaryButtonDisabled={isSaving}
+                    primaryButtonLoading={isSaving}
+                    secondaryButtonDisabled={isSaving}
+                />
+            )}
         </View>
     );
 }
