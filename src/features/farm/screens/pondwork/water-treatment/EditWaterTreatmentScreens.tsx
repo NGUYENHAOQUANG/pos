@@ -228,8 +228,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 });
                 allowNavigation();
                 setShowDeleteModal(false);
-                navigation.goBack();
                 showDeleteJobSuccessToast('WATER_TREATMENT');
+                setTimeout(() => navigation.goBack(), 300);
             } catch (error: unknown) {
                 handleError(error);
             }

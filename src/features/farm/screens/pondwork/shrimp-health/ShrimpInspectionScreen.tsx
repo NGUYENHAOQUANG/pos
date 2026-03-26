@@ -298,7 +298,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                         type: 'success',
                         text1: TOAST_MESSAGES_CONFIG.JOB.SHRIMP_INSPECTION?.delete || '',
                     });
-                    navigation.goBack();
+                    setTimeout(() => navigation.goBack(), 300);
                 },
             }
         );

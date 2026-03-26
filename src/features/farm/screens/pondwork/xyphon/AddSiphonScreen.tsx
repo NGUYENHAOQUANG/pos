@@ -207,11 +207,11 @@ export const AddSiphonScreen: React.FC = () => {
                 allowNavigation();
                 await deleteMutation.mutateAsync({ pondId: pond.id, id: itemToEdit.id });
                 setDeleteModalVisible(false);
-                navigation.goBack();
                 Toast.show({
                     type: 'success',
                     text1: 'Xóa thành công',
                 });
+                setTimeout(() => navigation.goBack(), 300);
             } catch (error) {
                 console.error('Delete error:', error);
                 Toast.show({

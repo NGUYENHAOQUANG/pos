@@ -278,7 +278,7 @@ export const FeedingManagementScreens = () => {
                 {
                     onSuccess: () => {
                         formRef.current?.allowNavigation();
-                        navigation.goBack();
+                        setTimeout(() => navigation.goBack(), 300);
                     },
                 }
             );

@@ -281,17 +281,17 @@ export const HandleProblemFormScreen = () => {
         try {
             if (currentJobType === 'CLEAN_POND') {
                 await deleteCleanMutation.mutateAsync({ pondId, id: item.id });
-                navigation.goBack();
+                setTimeout(() => navigation.goBack(), 300);
                 return;
             }
             if (currentJobType === 'SUN_DRY_POND') {
                 await deleteDryMutation.mutateAsync({ pondId, id: item.id });
-                navigation.goBack();
+                setTimeout(() => navigation.goBack(), 300);
                 return;
             }
             if (currentJobType === 'TROUBLESHOOTING') {
                 await deleteIncidentMutation.mutateAsync({ pondId, id: item.id });
-                navigation.goBack();
+                setTimeout(() => navigation.goBack(), 300);
                 return;
             }
         } catch (error) {
