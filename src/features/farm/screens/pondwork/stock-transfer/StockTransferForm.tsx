@@ -10,7 +10,7 @@ import {
     TransferInfoBox,
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
-import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import type { DropdownOption } from '@/features/material/components/DropdownMaterial';
@@ -75,7 +75,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
         );
     }, [notes, shrimpSize, transferMethod, receivingPonds, totalShrimpCount, latestShrimpSize]);
 
-    const { UnsavedChangesModal } = useUnsavedChanges(hasChanges);
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     useEffect(() => {
         if (!hasInitialized.current && totalShrimpCount > 0) {
@@ -101,8 +101,17 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
 
     const handleConfirmSave = useCallback(() => {
         setIsConfirmationModalVisible(false);
+        allowNavigation();
         onSubmit({ selectedDate, notes, shrimpSize, transferMethod, receivingPonds });
-    }, [onSubmit, selectedDate, notes, shrimpSize, transferMethod, receivingPonds]);
+    }, [
+        onSubmit,
+        selectedDate,
+        notes,
+        shrimpSize,
+        transferMethod,
+        receivingPonds,
+        allowNavigation,
+    ]);
 
     const handleCancelConfirmation = useCallback(() => {
         setIsConfirmationModalVisible(false);
@@ -163,11 +172,17 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
             </View>
 
             {UnsavedChangesModal}
-            <ConfirmationModal
+            <ConfirmationModalUI
                 visible={isConfirmationModalVisible}
                 onConfirm={handleConfirmSave}
                 onCancel={handleCancelConfirmation}
-                type="transfer"
+                title="Xác nhận sang ao"
+                message={`Việc sang ao sẽ kết thúc chu kỳ hiện tại ở ao vèo và tiếp tục giai đoạn nuôi ở ao nuôi.
+Sau khi thực hiện, bạn sẽ không thể chỉnh sửa lại dữ liệu của giai đoạn vèo.
+Bạn có chắc muốn sang ao không?`}
+                confirmText="Sang ao"
+                cancelText="Không"
+                showSuccessToast={false}
             />
         </View>
     );

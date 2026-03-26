@@ -132,21 +132,31 @@ export const useCreateStockTransfer = () => {
         }) => stockTransferApi.create(pondId, data),
         onSuccess: (_, variables) => {
             showSuccessToast('Đã sang ao thành công');
+
+            // Invalidate stock transfer list for source pond
             queryClient.invalidateQueries({ queryKey: KEYS.list(variables.pondId) });
-            queryClient.invalidateQueries({
-                queryKey: farmKeys.ponds.byZone(variables.zoneId || 'all'),
-            });
+
+            // Invalidate source pond's cycle (the cycle just ended)
+            queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(variables.pondId) });
+
             // Invalidate cycles for receiving ponds
             if (variables.data.toPonds) {
                 variables.data.toPonds.forEach(p => {
                     queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(p.toPondId) });
                 });
-                // Invalidate all pond queries to refresh pond list
-                queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
             }
+
+            // Refresh zone, pond and record data from top to bottom
+            queryClient.invalidateQueries({ queryKey: farmKeys.zones() });
+            queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+
             // Invalidate report charts
             queryClient.invalidateQueries({ queryKey: ['report', 'stock-transfer-stats'] });
             queryClient.invalidateQueries({ queryKey: ['pond-status-distribution'] });
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
         onError: error => handleError(error),
     });

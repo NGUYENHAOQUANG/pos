@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '@/styles';
@@ -75,7 +76,7 @@ export const AddAquacultureScreens: React.FC = () => {
             <View style={styles.container}>
                 <HeaderMenu title="Tạo vụ nuôi" onBack={handleGoBack} />
 
-                <View style={styles.content}>
+                <SafeInputLayout extraScrollHeight={150}>
                     <AquacultureForm
                         ref={formRef}
                         isEditMode={false}
@@ -85,7 +86,7 @@ export const AddAquacultureScreens: React.FC = () => {
                         zoneOptions={zoneOptions}
                         onSubmit={handleSubmit}
                     />
-                </View>
+                </SafeInputLayout>
 
                 <ButtonBarMenu
                     primaryTitle="Tạo vụ nuôi"

@@ -238,6 +238,27 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
     const handleSave = async () => {
         if (isSaving) return;
+
+        // Validate machine config fields when in schedule mode
+        if (mode === 'schedule') {
+            if (!runDuration.trim()) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thiếu thông tin',
+                    text2: 'Vui lòng nhập thời gian chạy (giây)',
+                });
+                return;
+            }
+            if (!stopDuration.trim()) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thiếu thông tin',
+                    text2: 'Vui lòng nhập thời gian dừng (phút)',
+                });
+                return;
+            }
+        }
+
         setIsSaving(true);
         console.log('Dữ liệu:', { deviceId, mode, runDuration, stopDuration, schedules });
 

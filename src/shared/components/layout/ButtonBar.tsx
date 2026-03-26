@@ -31,7 +31,7 @@ export interface ButtonBarProps {
 export const ButtonBar: React.FC<ButtonBarProps> = ({
     mode = 'single',
     primaryTitle = 'Lưu',
-    secondaryTitle = 'Huỷ',
+    secondaryTitle = 'Hủy',
     onPrimaryPress,
     onSecondaryPress,
     totalLabel = 'Tổng tiền:',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import ChevronRight from '@/assets/Icon/ChevronRight.svg';
 import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types';
 import { borderRadius, colors } from '@/styles';
 import { spacing } from '@/styles/spacing';
@@ -21,6 +21,7 @@ import {
     IconEdit,
 } from '@/assets/icons';
 import Warning from '@/assets/Icon/Warning.svg';
+import PlusBlack from '@/assets/Icon/PlusBlack.svg';
 
 export type JobType =
     | 'FEED'
@@ -76,7 +77,7 @@ export const JOB_CONFIG: Record<JobType, JobConfig> = {
     SIPHON: {
         icon: IconXyPhong,
         backgroundColor: colors.blue[50],
-        defaultTitle: 'Xi - phông(Siphon)',
+        defaultTitle: 'Xi - phông (Siphon)',
     },
     TROUBLESHOOTING: {
         icon: IconTroubleshooting,
@@ -162,9 +163,9 @@ export const JobCard: React.FC<JobCardProps> = ({
                 </View>
                 <View style={styles.actions}>
                     <TouchableOpacity style={styles.addButton} onPress={onPressAdd}>
-                        <Text style={styles.addButtonText}>+</Text>
+                        <PlusBlack width={16} height={16} />
                     </TouchableOpacity>
-                    <AntDesign name="right" size={16} color={colors.text} />
+                    <ChevronRight width={18} height={18} />
                 </View>
             </TouchableOpacity>
             <View style={styles.divider} />
@@ -265,11 +266,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 24,
-    },
-    addButtonText: {
-        fontSize: 20,
-        color: colors.text,
-        lineHeight: 22,
     },
     divider: {
         height: 1,
