@@ -44,7 +44,9 @@ export const SiphonLogScreen: React.FC = () => {
             convertSiphonMetaToActivityData(item, meta)
                 .filter(i => i.label !== 'Hình ảnh')
                 .map(i =>
-                    i.label === 'Hao hụt trong ao' ? { ...i, label: 'Số tôm hao (kg)' } : i
+                    i.label === 'Hao hụt trong ao'
+                        ? { ...i, label: 'Số tôm hao (kg)', unit: 'kg' }
+                        : i
                 ),
         editRoute: 'AddSiphonScreen',
         getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
