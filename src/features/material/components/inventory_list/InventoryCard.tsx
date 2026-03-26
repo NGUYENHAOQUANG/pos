@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
-        marginBottom: 8,
+        marginBottom: spacing.md,
     },
     materialName: {
         fontSize: 14,
