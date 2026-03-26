@@ -74,15 +74,17 @@ interface UpdateSeasonParams {
     zoneId: string;
     seasonId: string;
     formData: AquacultureFormValues;
+    /** Pre-built payload — if provided, skip mapFormToPayload */
+    payload?: SeasonPayload;
 }
 
 export const useUpdateSeason = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ zoneId, seasonId, formData }: UpdateSeasonParams) => {
-            const payload: SeasonPayload = aquacultureService.mapFormToPayload(formData);
-            return seasonApi.updateSeason(zoneId, seasonId, payload);
+        mutationFn: async ({ zoneId, seasonId, formData, payload }: UpdateSeasonParams) => {
+            const finalPayload = payload ?? aquacultureService.mapFormToPayload(formData);
+            return seasonApi.updateSeason(zoneId, seasonId, finalPayload);
         },
         onSuccess: (_data, variables) => {
             Toast.show({

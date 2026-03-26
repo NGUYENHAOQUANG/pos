@@ -31,15 +31,25 @@ export const InputFilters = {
     /** Keep only digits */
     integer: (text: string): string => text.replace(/[^0-9]/g, ''),
 
-    /** Keep digits and at most one decimal point (dot cannot be first) */
-    decimal: (text: string): string => {
+    /** Keep digits and at most one decimal point (dot cannot be first), optionally limit decimal places */
+    decimal: (text: string, maxDecimalPlaces?: number): string => {
         const cleaned = text.replace(/[^0-9.]/g, '');
         // Remove leading dots
         const noLeadingDot = cleaned.replace(/^\.+/, '');
         const parts = noLeadingDot.split('.');
-        if (parts.length <= 2) return noLeadingDot;
-        // Keep only first decimal point
-        return parts[0] + '.' + parts.slice(1).join('');
+        let result: string;
+        if (parts.length <= 2) {
+            result = noLeadingDot;
+        } else {
+            // Keep only first decimal point
+            result = parts[0] + '.' + parts.slice(1).join('');
+        }
+        // Limit decimal places if specified
+        if (maxDecimalPlaces !== undefined && result.includes('.')) {
+            const [intPart, decPart] = result.split('.');
+            result = intPart + '.' + decPart.slice(0, maxDecimalPlaces);
+        }
+        return result;
     },
 
     /** Test text against a regex pattern — returns text if valid, null if not */
