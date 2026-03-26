@@ -144,7 +144,9 @@ export const EditAquacultureScreens: React.FC = () => {
             {
                 onSuccess: () => {
                     setDeleteModalVisible(false);
-                    navigation.goBack();
+                    setTimeout(() => {
+                        navigation.goBack();
+                    }, 300);
                 },
                 onSettled: () => {
                     setDeleteModalVisible(false);
@@ -168,7 +170,9 @@ export const EditAquacultureScreens: React.FC = () => {
             {
                 onSuccess: () => {
                     setCloseModalVisible(false);
-                    navigation.goBack();
+                    setTimeout(() => {
+                        navigation.goBack();
+                    }, 300);
                 },
                 onSettled: () => {
                     setCloseModalVisible(false);

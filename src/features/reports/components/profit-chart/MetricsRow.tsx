@@ -16,7 +16,10 @@ interface MetricsRowProps {
 
 const formatFullNumber = (value?: number) => {
     if (value === undefined || value === null) return undefined;
-    return value.toLocaleString('vi-VN') + ' đ';
+    const sign = value < 0 ? '-' : '';
+    const abs = Math.abs(value);
+    const formatted = abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return sign + formatted + ' đ';
 };
 
 export const MetricsRow: React.FC<MetricsRowProps> = ({

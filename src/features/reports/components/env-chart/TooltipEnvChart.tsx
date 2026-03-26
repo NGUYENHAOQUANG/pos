@@ -79,7 +79,7 @@ export const TooltipEnvChart = ({
                         <View style={[styles.dot, { backgroundColor: item.color }]} />
                         <Text style={styles.tooltipLabel}>
                             <Text style={{ fontWeight: 'bold' }}>{item.pond}: </Text>
-                            {item.value.toFixed(2)} {item.unit}
+                            {item.value.toFixed(2).replace('.', ',')} {item.unit}
                         </Text>
                     </View>
                 ))}

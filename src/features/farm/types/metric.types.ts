@@ -5,6 +5,7 @@ export interface Metric {
     code: string;
     name: string;
     unitMetric: string;
+    unitDisplay?: string;
     description: string;
     no: number;
     creatorId: string | null;

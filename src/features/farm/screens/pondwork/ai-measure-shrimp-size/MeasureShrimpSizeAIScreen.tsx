@@ -42,7 +42,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     // ── State ────────────────────────────────────
     const [measurements, setMeasurements] = useState<Measurement[]>([]);
-    const [measuredWeight, setMeasuredWeight] = useState('');
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [processedImageUri, setProcessedImageUri] = useState<string | null>(null);
     const [hasAnalyzedCurrent, setHasAnalyzedCurrent] = useState(false);
@@ -117,7 +116,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 { id: Date.now(), count, weight: weightVal, sizes, pcsPerKg },
                             ]);
                             setDetections(newDetections);
-                            setMeasuredWeight('');
                             setHasAnalyzedCurrent(true);
                             Toast.show(TOAST_MESSAGES_CONFIG.AI_MEASURE.SUCCESS);
                         } else if (data.status === 'Failed') {
@@ -159,12 +157,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     );
 
     const handleAnalyze = useCallback(() => {
-        const weightVal = parseFloat(measuredWeight);
-        if (isNaN(weightVal) || weightVal <= 0) {
-            Toast.show(ToastMessages.ShrimpMeasurement.WEIGHT_REQUIRED);
-            return;
-        }
-
         if (!imageUri) {
             Toast.show(ToastMessages.ShrimpMeasurement.IMAGE_REQUIRED);
             return;
@@ -174,6 +166,8 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
             return;
         }
+
+        const weightVal = 0; // AI handles weight measurement
 
         // Step 1: Upload image via inference predict endpoint
         predict(
@@ -200,7 +194,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 },
             }
         );
-    }, [imageUri, measuredWeight, selectedZoneId, predict, pollForResult]);
+    }, [imageUri, selectedZoneId, predict, pollForResult]);
 
     const handleReset = useCallback(() => {
         setIsResetModalVisible(true);
@@ -211,23 +205,22 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         setImageUri(null);
         setProcessedImageUri(null);
         setMeasurements([]);
-        setMeasuredWeight('');
         setDetections([]);
         setHasAnalyzedCurrent(false);
         Toast.show(ToastMessages.ShrimpMeasurement.RESET_SUCCESS);
     }, []);
 
     const handleSave = useCallback(() => {
-        if (sizePcsPerKg !== null && averageSizeCm !== null) {
+        if (averageSizeCm !== null && measurements.length > 0) {
             navigation.navigate({
                 name: 'MeasureShrimpSizeScreen',
-                params: { aiShrimpSize: sizePcsPerKg.toString() },
+                params: { aiShrimpSize: averageSizeCm.toString() },
                 merge: true,
             } as never);
         } else {
             navigation.goBack();
         }
-    }, [navigation, sizePcsPerKg, averageSizeCm]);
+    }, [navigation, averageSizeCm, measurements]);
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.backgroundPrimary }}>
@@ -239,7 +232,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 countTimes={countTimes}
                 averageSizeCm={averageSizeCm}
                 sizePcsPerKg={sizePcsPerKg}
-                measuredWeight={measuredWeight}
                 imageUri={displayImageUri}
                 detections={detections}
                 imageDimensions={imageDimensions}
@@ -254,7 +246,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 onCancelReset={() => setIsResetModalVisible(false)}
                 onSave={handleSave}
                 onBack={navigation.goBack}
-                onWeightChange={setMeasuredWeight}
                 onShowSheet={() => setIsSheetVisible(true)}
                 onCloseSheet={() => setIsSheetVisible(false)}
                 onImageAreaLayout={(size: { width: number; height: number }) =>

@@ -30,15 +30,17 @@ const truncateToDecimals = (value: number, decimals: number) => {
 };
 
 const formatCurrency = (value: number) => {
-    if (value >= 1e9) {
-        const truncated = truncateToDecimals(value / 1e9, 2);
-        return `${truncated.toFixed(2)} tỉ`;
+    const sign = value < 0 ? '-' : '';
+    const abs = Math.abs(value);
+    if (abs >= 1e9) {
+        const truncated = truncateToDecimals(abs / 1e9, 2);
+        return `${sign}${truncated.toFixed(2).replace('.', ',')} tỉ`;
     }
-    if (value >= 1e6) {
-        const truncated = truncateToDecimals(value / 1e6, 2);
-        return `${truncated.toFixed(2)} tr`;
+    if (abs >= 1e6) {
+        const truncated = truncateToDecimals(abs / 1e6, 2);
+        return `${sign}${truncated.toFixed(2).replace('.', ',')} tr`;
     }
-    return `${value.toLocaleString()} đ`;
+    return `${sign}${abs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ`;
 };
 
 const LEGEND_ITEMS = [
