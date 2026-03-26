@@ -53,15 +53,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
         setIsExpanded(!isExpanded);
     };
 
-    const totalDifference = React.useMemo(() => {
-        if (items.length > 0) {
-            return items.reduce(
-                (sum: number, item: any) => sum + (item.actualQty - item.expectedQty),
-                0
-            );
-        }
-        return data.varianceTotalItems || 0;
-    }, [items, data.varianceTotalItems]);
+    const totalDifference = data.varianceTotalItems || 0;
 
     const getStatusLabel = (status: string): MaterialGroupType => {
         switch (status) {
@@ -119,20 +111,19 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                                 }
                                 style={styles.detailItemContainer}
                             >
-                                <Text style={styles.materialName}>{item.materialName}</Text>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>
-                                        Tồn kho trước khi điều chỉnh:
-                                    </Text>
-                                    <Text style={styles.detailValue}>{item.expectedQty}</Text>
+                                <View style={styles.materialHeader}>
+                                    <Text style={styles.materialName}>{item.materialName}</Text>
                                 </View>
 
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>
-                                        Tồn kho sau khi điều chỉnh:
-                                    </Text>
-                                    <Text style={styles.detailValue}>{item.actualQty}</Text>
+                                <View style={styles.detailView}>
+                                    <DetailRow
+                                        label="Tồn kho trước khi điều chỉnh:"
+                                        value={parseFloat(Number(item.expectedQty).toFixed(5))}
+                                    />
+                                    <DetailRow
+                                        label="Tồn kho sau khi điều chỉnh:"
+                                        value={parseFloat(Number(item.actualQty).toFixed(5))}
+                                    />
                                 </View>
                             </View>
                         ))
@@ -222,6 +213,15 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         width: '100%',
     },
+    materialHeader: {
+        paddingVertical: 12,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.gray[100],
+        borderTopLeftRadius: borderRadius.sm,
+        borderTopRightRadius: borderRadius.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
     noteTextMeasure: {
         position: 'absolute',
         opacity: 0,
@@ -271,25 +271,18 @@ const styles = StyleSheet.create({
     },
     detailItemContainer: {
         borderRadius: borderRadius.sm,
-        marginBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
+        marginBottom: 8,
     },
     materialName: {
         fontSize: 14,
         color: colors.text,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.defaultBorder,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        marginBottom: spacing.sm,
         fontWeight: '600',
     },
-    detailRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        marginBottom: spacing.sm,
+    detailView: {
+        padding: 12,
+        gap: 8,
     },
     detailLabel: {
         fontSize: 14,
