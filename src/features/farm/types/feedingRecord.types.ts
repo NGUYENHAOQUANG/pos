@@ -4,6 +4,10 @@ import type { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/com
 export interface FeedingMaterial {
     warehouseItemId: string;
     quantity: number;
+    /** Material name from BE (available in list response for cross-page display) */
+    name?: string;
+    /** Unit name from BE (available in list response for cross-page display) */
+    unitName?: string;
 }
 
 /** Body detail for feeding record (API) */

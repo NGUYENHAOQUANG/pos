@@ -65,6 +65,8 @@ export interface IAccountCreator {
 export interface IWaterTreatmentMaterialRes {
     warehouseItemId: string;
     quantity: number;
+    name?: string;
+    unitName?: string;
 }
 
 /** Detail object in WaterTreatmentDto response */

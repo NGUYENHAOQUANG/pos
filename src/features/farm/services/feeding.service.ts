@@ -25,6 +25,23 @@ export const feedingService = {
                         rawMaterial: fullMaterial,
                     };
                 }
+                // Fallback: use name/unitName from BE response (for cross-page pagination)
+                if (apiMat.name) {
+                    const fallbackMaterial: IMaterial = {
+                        id: apiMat.warehouseItemId,
+                        name: apiMat.name,
+                        group: '' as any,
+                        unit: apiMat.unitName || '',
+                        unitName: apiMat.unitName || '',
+                    };
+                    return {
+                        materialId: apiMat.warehouseItemId,
+                        materialName: apiMat.name,
+                        quantity: apiMat.quantity,
+                        unit: apiMat.unitName || '',
+                        rawMaterial: fallbackMaterial,
+                    };
+                }
                 return null;
             })
             .filter((m): m is NonNullable<typeof m> => m !== null);
@@ -61,6 +78,24 @@ export const feedingService = {
                         quantity: quantity,
                         unit: fullMaterial.unitName || '',
                         rawMaterial: fullMaterial,
+                    };
+                }
+                // Fallback: use name/unitName from BE response (for cross-page pagination)
+                const apiName = String(apiMat?.name || '');
+                if (apiName) {
+                    const fallbackMaterial: IMaterial = {
+                        id: matId,
+                        name: apiName,
+                        group: '' as any,
+                        unit: String(apiMat?.unitName || ''),
+                        unitName: String(apiMat?.unitName || ''),
+                    };
+                    return {
+                        materialId: matId,
+                        materialName: apiName,
+                        quantity: quantity,
+                        unit: String(apiMat?.unitName || ''),
+                        rawMaterial: fallbackMaterial,
                     };
                 }
                 return null;
@@ -125,11 +160,11 @@ export const feedingService = {
                 return {
                     material: {
                         id: m.warehouseItemId,
-                        name: mat?.name || 'Vật tư',
-                        unitName: mat?.unitName || '',
+                        name: mat?.name || m.name || 'Vật tư',
+                        unitName: mat?.unitName || m.unitName || '',
                     } as any,
                     quantity: m.quantity,
-                    unit: mat?.unitName || '',
+                    unit: mat?.unitName || m.unitName || '',
                 };
             }),
             documentIds: item.documentIds,
