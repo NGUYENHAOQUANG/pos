@@ -27,8 +27,12 @@ export const materialService = {
         };
     },
 
-    mapFormToCreatePayload: (formData: MaterialFormValues): CreateMaterialV2Request => {
+    mapFormToCreatePayload: (
+        formData: MaterialFormValues,
+        warehouseId: string
+    ): CreateMaterialV2Request => {
         return {
+            warehouseId,
             name: formData.name.trim(),
             materialTypeId: formData.type,
             description: formData.usage?.trim() || '',

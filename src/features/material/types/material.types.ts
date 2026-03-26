@@ -94,6 +94,7 @@ export interface MaterialResponseV2 {
 }
 
 export interface CreateMaterialV2Request {
+    warehouseId: string;
     name: string;
     materialTypeId: string;
     description: string;

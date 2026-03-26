@@ -133,7 +133,6 @@ export const useUpdateInventoryCheck = () => {
             });
         },
         onError: error => {
-            console.log('error', error);
             handleError(error);
         },
     });

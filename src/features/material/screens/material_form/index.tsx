@@ -22,11 +22,13 @@ import { materialService } from '@/features/material/services/materialService';
 import { MaterialForm } from '@/features/material/screens/material_form/MaterialForm';
 import { MaterialFormValues } from '@/features/material/schemas/materialFormSchema';
 import { showValidationError } from '@/features/material/utils/validationToast';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 export const MaterialFormScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute<RouteProp<AppStackParamList, 'MaterialForm'>>();
     const queryClient = useQueryClient();
+    const currentWarehouseId = useFarmStore(state => state.currentWarehouseId);
 
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -92,7 +94,10 @@ export const MaterialFormScreen: React.FC = () => {
                     }
                 );
             } else {
-                const payload = materialService.mapFormToCreatePayload(formData);
+                const payload = materialService.mapFormToCreatePayload(
+                    formData,
+                    currentWarehouseId ?? ''
+                );
                 createMaterial(payload, {
                     onSuccess: () => {
                         queryClient.invalidateQueries({ queryKey: ['materials'] });
@@ -101,7 +106,15 @@ export const MaterialFormScreen: React.FC = () => {
                 });
             }
         },
-        [isEditMode, initialMaterial, updateMaterial, createMaterial, queryClient, navigation]
+        [
+            isEditMode,
+            currentWarehouseId,
+            initialMaterial,
+            updateMaterial,
+            createMaterial,
+            queryClient,
+            navigation,
+        ]
     );
 
     const onDelete = useCallback(() => {

@@ -85,7 +85,6 @@ export const useCreateExportReceipt = () => {
             }
         },
         onError: error => {
-            console.log(error);
             handleError(error);
         },
     });

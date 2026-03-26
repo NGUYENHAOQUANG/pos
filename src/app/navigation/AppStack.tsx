@@ -263,10 +263,17 @@ export const AppStack: React.FC = () => {
             initialRouteName="MainTabs"
             screenOptions={{
                 headerShown: false,
+                contentStyle: { backgroundColor: '#FFFFFF' },
             }}
         >
             {/* Main Tabs - Tab Bar visible */}
-            <Stack.Screen name="MainTabs" component={MainNavigator} />
+            <Stack.Screen
+                name="MainTabs"
+                component={MainNavigator}
+                options={{
+                    freezeOnBlur: false,
+                }}
+            />
 
             {/* ============== Farm Screens ============== */}
             <Stack.Screen name="PondDetail" component={PondDetailScreen} />
