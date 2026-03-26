@@ -359,6 +359,7 @@ export const DeviceControlScreens = () => {
                                 });
                                 return;
                             }
+
                             navigation.navigate('CameraPlayer', {
                                 videoUrl: streamData.url,
                                 cameraName: camera.name,

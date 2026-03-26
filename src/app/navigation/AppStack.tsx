@@ -219,7 +219,11 @@ export type AppStackParamList = {
     History: { pondName: string };
     UserManual: undefined;
     GeneralUserManual: undefined;
-    CameraPlayer: { videoUrl: string; cameraName: string; pondName: string };
+    CameraPlayer: {
+        videoUrl: string;
+        cameraName: string;
+        pondName: string;
+    };
 
     // ============== Menu Screens (Tab Bar hidden) ==============
     PersonalInformation: undefined;
