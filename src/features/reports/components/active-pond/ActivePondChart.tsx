@@ -412,11 +412,9 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 const styles = StyleSheet.create({
     badge: {
         backgroundColor: colors.gray[900],
-        paddingLeft: 6,
-        paddingRight: 4,
+        paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 4,
-        marginRight: 8,
         justifyContent: 'center',
         alignItems: 'center',
     },

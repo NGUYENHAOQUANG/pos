@@ -1,42 +1,40 @@
-import { useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useMemo, useCallback } from 'react';
+import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMemo, useCallback, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import { seasonApi } from '@/features/menu/api/seasonApi';
 import { SeasonData, SeasonStatus, getSeasonStatusName } from '@/features/farm/types/farm.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { useZones } from '@/features/farm/hooks/useZones';
 import { NormalizedError } from '@/core/api/errorHandler';
+import { IPaginate } from '@/shared/types/common.types';
+import { APP_CONFIG } from '@/shared/constants';
 
-// Extracted fetch function for reuse
-const fetchSeasonsByZone = async (zoneId: number | string, zoneCode?: string) => {
-    // Ensure zoneId is string for API call
-    const zoneIdStr = String(zoneId);
-    const results = await seasonApi.getSeasons(zoneIdStr);
-    // Map API raw data to Domain SeasonData
-    return results.map((item: SeasonData) => ({
-        ...item,
-        name: item.seasonName || item.name,
-        // Inject farmCode from zone if missing, or use seasonCode as fallback
-        farmCode: zoneCode || item.seasonCode || '',
-        // Store zoneId for filtering
-        zoneId: zoneIdStr,
-        status: item.status as SeasonStatus,
-        statusName: getSeasonStatusName(item.status),
-        id: item.id.toString(), // Ensure string ID
-    }));
-};
+/** Map raw API item to domain SeasonData */
+const mapSeasonItem = (item: SeasonData, zoneCode?: string): SeasonData => ({
+    ...item,
+    name: item.seasonName || item.name,
+    farmCode: zoneCode || item.seasonCode || '',
+    zoneId: String(item.zoneId || ''),
+    status: item.status as SeasonStatus,
+    statusName: getSeasonStatusName(item.status),
+    id: item.id.toString(),
+});
 
 export const useSeasonsByZone = (zoneId: number | string | null | undefined, zoneCode?: string) => {
     const zoneIdStr = zoneId ? String(zoneId) : '';
     return useQuery({
         queryKey: farmKeys.seasons(zoneIdStr),
-        queryFn: () => fetchSeasonsByZone(zoneIdStr, zoneCode),
+        queryFn: async () => {
+            const response = await seasonApi.getSeasons(zoneIdStr);
+            return response.items.map(item => mapSeasonItem(item, zoneCode));
+        },
         enabled: !!zoneIdStr,
     });
 };
 
-export const useSeasons = () => {
-    // 1. Fetch Zones first
+/** Hook to fetch seasons for a single zone with infinite scroll pagination */
+export const useSeasons = (zoneId?: string, zoneCode?: string) => {
+    // 1. Fetch Zones
     const {
         data: zones = [],
         isLoading: isLoadingZones,
@@ -44,37 +42,64 @@ export const useSeasons = () => {
         isError: isErrorZones,
     } = useZones();
 
-    // 2. Parallel fetch seasons for all zones
-    const seasonQueries = useQueries({
-        queries: zones.map(zone => ({
-            queryKey: farmKeys.seasons(zone.id),
-            queryFn: () => fetchSeasonsByZone(zone.id, zone.code),
-            enabled: !!zone.id,
-            staleTime: 1000 * 60 * 5,
-        })),
+    // Determine the active zone
+    const activeZoneId = zoneId || (zones.length > 0 ? String(zones[0].id) : '');
+    const activeZoneCode = zoneCode || zones.find(z => String(z.id) === activeZoneId)?.code;
+
+    // 2. Use infinite query to fetch seasons for the selected zone
+    const infiniteQuery = useInfiniteQuery<IPaginate<SeasonData>>({
+        queryKey: [...farmKeys.seasons(activeZoneId), 'infinite'],
+        queryFn: async ({ pageParam = 1 }) => {
+            const result = await seasonApi.getSeasons(activeZoneId, {
+                Page: pageParam as number,
+                PageSize: APP_CONFIG.DEFAULT_PAGE_SIZE,
+            });
+
+            return {
+                ...result,
+                items: result.items.map((item: SeasonData) => mapSeasonItem(item, activeZoneCode)),
+            };
+        },
+        initialPageParam: 1,
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
+        },
+        enabled: !!activeZoneId,
+        staleTime: 1000 * 60 * 5,
     });
 
-    // 3. Combine data
+    // 3. Flatten all pages into a single array
     const seasons = useMemo(() => {
-        return seasonQueries.reduce((acc, query) => {
-            if (query.data) {
-                return [...acc, ...query.data];
-            }
-            return acc;
-        }, [] as SeasonData[]);
-    }, [seasonQueries]);
+        if (!infiniteQuery.data) return [];
+        return infiniteQuery.data.pages.reduce<SeasonData[]>((acc, page) => {
+            return [...acc, ...page.items];
+        }, []);
+    }, [infiniteQuery.data]);
 
-    // Check loading states
-    // We are loading if zones are loading, OR if any season query is fetching AND we have no data yet
-    const areSeasonsLoading =
-        seasonQueries.some(q => q.isLoading) && seasonQueries.every(q => !q.data);
+    // 4. Auto-fetch all remaining pages so tab counts are always accurate
+    const {
+        hasNextPage: hasMore,
+        isFetchingNextPage: isFetchingMore,
+        isLoading: isQueryLoading,
+        fetchNextPage: fetchMore,
+        data: queryData,
+    } = infiniteQuery;
+    useEffect(() => {
+        if (hasMore && !isFetchingMore && !isQueryLoading) {
+            fetchMore();
+        }
+    }, [hasMore, isFetchingMore, isQueryLoading, fetchMore, queryData]);
 
-    // We are refetching if zones are refetching OR any season query is refetching
-    const areSeasonsRefetching = seasonQueries.some(q => q.isRefetching);
+    // 5. Total count from API (first page has totalCount for the zone)
+    const totalCount = infiniteQuery.data?.pages[0]?.totalCount ?? seasons.length;
 
-    const isLoading = isLoadingZones || (areSeasonsLoading && seasons.length === 0);
-    const isRefetching = isRefetchingZones || areSeasonsRefetching;
-    const isError = isErrorZones || seasonQueries.some(q => q.isError);
+    // Loading states
+    const isLoading = isLoadingZones || (infiniteQuery.isLoading && seasons.length === 0);
+    const isRefetching = isRefetchingZones || infiniteQuery.isRefetching;
+    const isFetchingNextPage = infiniteQuery.isFetchingNextPage;
+    const hasNextPage = infiniteQuery.hasNextPage ?? false;
+    const isError = isErrorZones || infiniteQuery.isError;
 
     const queryClient = useQueryClient();
 
@@ -83,13 +108,23 @@ export const useSeasons = () => {
         await queryClient.invalidateQueries({ queryKey: farmKeys.seasons(), refetchType: 'all' });
     }, [queryClient]);
 
+    const fetchNextPage = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            infiniteQuery.fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, infiniteQuery]);
+
     return {
         seasons,
         zones,
+        totalCount,
         isLoading,
         isRefetching,
+        isFetchingNextPage,
+        hasNextPage,
         isError,
         refresh,
+        fetchNextPage,
     };
 };
 
