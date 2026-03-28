@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { TabType } from '@/features/material/screens/material/MaterialView';
+import { TabType } from '@/features/material/screens/material/MaterialContent';
 import { useMaterialStore } from '@/features/material/store';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useZones } from '@/features/farm/hooks';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { MaterialView } from './MaterialView';
+import { MaterialView } from './MaterialContent';
 
 export const MaterialScreen = () => {
     // 1. Navigation & Route Params

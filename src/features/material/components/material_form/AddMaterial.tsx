@@ -100,11 +100,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                     <Input
                         label="Tên vật tư​"
                         required
-                        // style={styles.input}
                         placeholder="Nhập tên vật tư​"
                         placeholderTextColor={colors.textSecondary}
                         value={name}
                         onChangeText={onNameChange}
+                        maxLength={255}
                     />
 
                     <View style={[styles.row, styles.rowZ30]}>
@@ -201,6 +201,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                             onChangeText={onUsageChange}
                             multiline
                             textAlignVertical="top"
+                            maxLength={2000}
                         />
                     </View>
 
@@ -211,6 +212,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                         value={manufacturer}
                         onChangeText={onManufacturerChange}
                         required
+                        maxLength={255}
                     />
                 </View>
             </View>
@@ -232,8 +234,6 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 12,
-        paddingTop: spacing.md,
-        paddingBottom: 12,
     },
     labelContainer: {
         flexDirection: 'row',
@@ -258,6 +258,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         fontSize: 15,
         color: colors.text,
+        marginBottom: 12,
     },
     textArea: {
         height: 80,
@@ -285,7 +286,7 @@ const styles = StyleSheet.create({
         zIndex: 20,
     },
     rowMarginTop: {
-        marginTop: spacing.md,
+        marginVertical: 12,
     },
     divider: {
         height: 1,

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { WarehouseMaterialList } from '@/features/material/components/warehouse/WarehouseMaterialList';
+import { WarehouseItemListContent } from '@/features/material/screens/warehouse_item_list/WarehouseItemListContent';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -75,7 +75,7 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
     });
 
     return (
-        <WarehouseMaterialList
+        <WarehouseItemListContent
             materials={materials}
             isLoading={showSkeleton}
             refreshing={isRefreshing}

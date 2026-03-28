@@ -7,7 +7,7 @@ import { materialListStyles } from '@/features/material/styles/materialListStyle
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
-interface WarehouseMaterialListProps {
+interface WarehouseItemListContentProps {
     materials: IWarehouseItem[];
     isLoading?: boolean;
     refreshing?: boolean;
@@ -23,7 +23,7 @@ interface WarehouseMaterialListProps {
     showStatus?: boolean;
 }
 
-export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = React.memo(
+export const WarehouseItemListContent: React.FC<WarehouseItemListContentProps> = React.memo(
     ({
         materials,
         isLoading,

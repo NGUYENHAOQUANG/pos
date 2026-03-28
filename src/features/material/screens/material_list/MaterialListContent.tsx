@@ -7,7 +7,7 @@ import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { IMaterial } from '@/features/material/types/material.types';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 
-interface MaterialMasterListProps {
+interface MaterialListContentProps {
     materials: IMaterial[];
     isLoading?: boolean;
     refreshing?: boolean;
@@ -18,7 +18,7 @@ interface MaterialMasterListProps {
     onPressCreate?: () => void;
 }
 
-export const MaterialMasterList: React.FC<MaterialMasterListProps> = React.memo(
+export const MaterialListContent: React.FC<MaterialListContentProps> = React.memo(
     ({
         materials,
         isLoading,

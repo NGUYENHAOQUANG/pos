@@ -7,7 +7,7 @@ import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 
-interface InventoryMaterialListProps {
+interface InventoryListContentProps {
     inventoryList: IInventoryCheck[];
     isLoading?: boolean;
     refreshing?: boolean;
@@ -18,7 +18,7 @@ interface InventoryMaterialListProps {
     onPressCreate?: () => void;
 }
 
-export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = React.memo(
+export const InventoryListContent: React.FC<InventoryListContentProps> = React.memo(
     ({
         inventoryList,
         isLoading,
