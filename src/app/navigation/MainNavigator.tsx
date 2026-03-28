@@ -15,7 +15,7 @@ import { SvgProps } from 'react-native-svg';
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond_list/ShrimpPondListScreens';
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens'; // Import Control Detail
-import { MaterialScreen } from '@/features/material/screens/material';
+import { MaterialScreen } from '@/features/material/screens/material/MaterialScreen';
 // Note: MenuProvider removed - now using Zustand store (useMenuStore)
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
 
