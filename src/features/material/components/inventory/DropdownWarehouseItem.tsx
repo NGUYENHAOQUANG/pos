@@ -2,7 +2,7 @@ import React from 'react';
 import { ViewStyle } from 'react-native';
 import { InfiniteScrollDropdown } from '@/shared/components/forms/InfiniteScrollDropdown';
 import { useInfiniteDropdown } from '@/shared/hooks/useInfiniteDropdown';
-import { useInfiniteWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useInfiniteWarehouseItems } from '@/features/material/hooks';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 /** Mapped type so warehouse items conform to InfiniteDropdownItem */

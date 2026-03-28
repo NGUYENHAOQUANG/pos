@@ -4,27 +4,28 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { Loading } from '@/shared/components/ui/Loading';
 import { colors } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-
-import { exportReceiptService } from '@/features/material/services/exportReceiptService';
-import { ExportWarehouseForm } from '@/features/material/screens/export_warehouse_form/ExportWarehouseForm';
-import { ExportWarehouseFormValues } from '@/features/material/schemas/exportWarehouseFormSchema';
-import { showValidationError } from '@/features/material/utils/validationToast';
-import { DocumentPickerResponse } from '@react-native-documents/picker';
-import { FileUploaderRef } from '@/shared/components/forms/FileUploader';
-import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
-
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useZones } from '@/features/farm/hooks/useZones';
+import { useAllPondsByZone } from '@/features/farm/hooks/usePonds';
+import { Zone } from '@/features/farm/types/farm.types';
 import {
+    useCurrentWarehouse,
     useExportReceipt,
     useCreateExportReceipt,
     useUpdateExportReceipt,
     useDeleteExportReceipt,
-} from '@/features/material/hooks/useExportReceipt';
-import { useExportReceiptItems } from '@/features/material/hooks/useExportReceiptItems';
-import { useCurrentWarehouse } from '@/features/material/hooks/useWarehouses';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+    useExportReceiptItems,
+} from '@/features/material/hooks';
+import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
+import { FileUploaderRef } from '@/shared/components/forms/FileUploader';
+import { DocumentPickerResponse } from '@react-native-documents/picker';
+
+import { exportReceiptService } from '@/features/material/services/exportReceiptService';
+import { ExportWarehouseForm } from '@/features/material/screens/export_warehouse_form/ExportWarehouseFormContent';
+import { ExportWarehouseFormValues } from '@/features/material/schemas/exportWarehouseFormSchema';
+import { showValidationError } from '@/features/material/utils/validationToast';
 
 export const ExportWarehouseFormScreen: React.FC = () => {
     const navigation = useNavigation<any>();
@@ -35,27 +36,31 @@ export const ExportWarehouseFormScreen: React.FC = () => {
 
     const { setTabBarVisible } = useTabBarVisibility();
     const queryClient = useQueryClient();
-
-    // Refs
-    const fileUploaderRef = useRef<FileUploaderRef>(null);
-
-    // Context & Farm Store
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+
+    const fileUploaderRef = useRef<FileUploaderRef>(null);
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    // Query Detail Data
+    // ─── Data Fetching ──────────────────────────────────────
     const { data: detailData, isLoading: isLoadingDetailData } = useExportReceipt(
         exportReceiptId || ''
     );
     const { data: detailItems, isLoading: isLoadingItemsData } = useExportReceiptItems(
         exportReceiptId || ''
     );
+    const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItemsData);
 
+    // ─── Zone / Pond / Warehouse ────────────────────────────
     const [activeZoneId, setActiveZoneId] = useState<string>(selectedZoneId || '');
+
+    const { data: zones = [] } = useZones();
+    const { data: ponds = [] } = useAllPondsByZone(activeZoneId);
+    const { warehouseId: zoneWarehouseId } = useCurrentWarehouse(activeZoneId || undefined);
+    const warehouseId = isEditMode ? detailData?.warehouseId || zoneWarehouseId : zoneWarehouseId;
 
     useEffect(() => {
         if (isEditMode && detailData?.zoneId) {
@@ -63,43 +68,35 @@ export const ExportWarehouseFormScreen: React.FC = () => {
         }
     }, [isEditMode, detailData?.zoneId]);
 
-    // Derive warehouseId from the zone currently selected in the form
-    const { warehouseId: zoneWarehouseId } = useCurrentWarehouse(activeZoneId || undefined);
-    const warehouseId = detailData?.warehouseId || zoneWarehouseId;
+    useEffect(() => {
+        if (!activeZoneId && zones.length > 0) {
+            const defaultZone =
+                zones.find((z: Zone) => z.name.toLowerCase().includes('kiên giang')) || zones[0];
+            setActiveZoneId(defaultZone.id.toString());
+        }
+    }, [zones, activeZoneId]);
 
-    const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItemsData);
+    const handleZoneChange = useCallback((zoneId: string) => {
+        setActiveZoneId(zoneId);
+    }, []);
 
+    // ─── Initial Data ───────────────────────────────────────
     const initialData = useMemo(() => {
         if (isEditMode && detailData && detailItems) {
             return exportReceiptService.mapDetailToForm(detailData, detailItems);
         } else if (!isEditMode) {
-            return {
-                date: new Date(),
-                selectedZone: selectedZoneId || '',
-                selectedPond: '',
-                note: '',
-                files: [],
-                exportItems: [
-                    {
-                        id: Date.now().toString(),
-                        materialId: '',
-                        materialName: '',
-                        quantity: '',
-                        price: '',
-                        unit: '',
-                    },
-                ],
-            };
+            return exportReceiptService.createDefaultFormValues(selectedZoneId || '');
         }
         return undefined;
     }, [isEditMode, detailData, detailItems, selectedZoneId]);
 
-    // Mutations
+    // ─── Mutations ──────────────────────────────────────────
     const { submitWithFiles, isUploading } = useFileSubmit();
     const { mutate: createExport, isPending: isCreating } = useCreateExportReceipt();
     const { mutate: updateExport, isPending: isUpdating } = useUpdateExportReceipt();
     const { mutate: deleteExport, isPending: isDeleting } = useDeleteExportReceipt();
 
+    // ─── Handlers ───────────────────────────────────────────
     const handleSuccess = useCallback(() => {
         queryClient.invalidateQueries({ queryKey: ['export-receipts'] });
         queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
@@ -114,7 +111,6 @@ export const ExportWarehouseFormScreen: React.FC = () => {
                 return;
             }
 
-            // Optional: If files were passed directly in initialData that haven't been mapped cleanly, they are tracked here.
             submitWithFiles((data.files as DocumentPickerResponse[]) || [], async documentIds => {
                 const payload = exportReceiptService.mapFormToPayload(
                     warehouseId!,
@@ -159,25 +155,28 @@ export const ExportWarehouseFormScreen: React.FC = () => {
         navigation.goBack();
     }, [navigation]);
 
+    // ─── Derived State ──────────────────────────────────────
     const isSubmitting = isCreating || isUpdating || isDeleting || isUploading;
-    const isLoading = isSubmitting || isLoadingDetail;
 
+    // ─── Render ─────────────────────────────────────────────
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={isLoading}>
-                <ExportWarehouseForm
-                    isEditMode={isEditMode}
-                    initialData={initialData}
-                    creatorName={detailData?.creator?.fullname}
-                    fileUploaderRef={fileUploaderRef}
-                    onSubmit={onSubmit}
-                    onDelete={onDelete}
-                    onBackPress={handleBackPress}
-                    warehouseId={warehouseId}
-                    onZoneChange={zoneId => setActiveZoneId(zoneId)}
-                />
-            </Loading>
+            <ExportWarehouseForm
+                isEditMode={isEditMode}
+                isLoadingDetail={isLoadingDetail}
+                initialData={initialData}
+                creatorName={detailData?.creator?.fullname}
+                fileUploaderRef={fileUploaderRef}
+                onSubmit={onSubmit}
+                onDelete={onDelete}
+                onBackPress={handleBackPress}
+                zones={zones}
+                ponds={ponds}
+                warehouseId={warehouseId}
+                onZoneChange={handleZoneChange}
+                isSubmitting={isSubmitting}
+            />
         </>
     );
 };

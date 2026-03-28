@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
-import { View, FlatList, ActivityIndicator } from 'react-native';
-import { colors } from '@/styles';
+import { View, FlatList } from 'react-native';
+import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
@@ -64,13 +64,7 @@ export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps>
                     onRefresh={onRefresh}
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                        isFetchingNextPage ? (
-                            <View style={materialListStyles.loaderFooter}>
-                                <ActivityIndicator color={colors.primary} />
-                            </View>
-                        ) : null
-                    }
+                    ListFooterComponent={isFetchingNextPage ? <ListFooterLoader /> : null}
                     ListEmptyComponent={
                         <EmptyStateCard
                             message="Chưa có phiếu nhập kho nào được tạo."

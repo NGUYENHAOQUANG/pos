@@ -15,7 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { DropdownScrollContext } from '@/features/material/hooks/useDropdownScroll';
+import { DropdownScrollContext } from '@/features/material/hooks';
 import { RequiredDot } from '@/shared/components/forms/Input';
 
 export interface DropdownOption {

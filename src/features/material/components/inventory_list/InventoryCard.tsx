@@ -21,9 +21,9 @@ import {
 } from '@/features/material/types/inventoryCheck.types';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
-import { useInventoryItems } from '@/features/material/hooks/useInventory';
-import { DetailRow } from '../DetailRow';
-import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
+import { useInventoryItems } from '@/features/material/hooks';
+import { DetailRow } from '@/features/material/components/DetailRow';
+import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;

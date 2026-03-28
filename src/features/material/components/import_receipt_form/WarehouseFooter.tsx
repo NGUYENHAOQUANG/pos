@@ -1,38 +1,58 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text } from '@/shared/components/typography/Text';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
-import { formatCurrency } from '@/features/material/utils/formatCurrency';
+import { DetailRow } from '@/features/material/components/DetailRow';
+import { CurrencyValue } from '@/features/material/components/CurrencyValue';
 import { Button } from '@/shared/components/buttons/Button';
 
 interface WarehouseFooterProps {
-    safeBottom: number;
     totalAmount: number;
     onSaveDraft: () => void;
     onSubmit: () => void;
     disabled?: boolean;
+    isSavingDraft?: boolean;
+    isSubmitting?: boolean;
 }
 
 export const WarehouseFooter: React.FC<WarehouseFooterProps> = React.memo(
-    ({ safeBottom, totalAmount, onSaveDraft, onSubmit, disabled = false }) => {
+    ({
+        totalAmount,
+        onSaveDraft,
+        onSubmit,
+        disabled = false,
+        isSavingDraft = false,
+        isSubmitting = false,
+    }) => {
+        const insets = useSafeAreaInsets();
+        const safeBottom = Math.max(insets.bottom, 12);
+
         return (
             <View style={[styles.footer, { paddingBottom: safeBottom }]}>
-                <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Tổng tiền:</Text>
-                    <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
-                </View>
+                <DetailRow
+                    label="Tổng tiền:"
+                    value={<CurrencyValue value={totalAmount} valueStyle={{ fontWeight: '700' }} />}
+                    style={styles.totalRow}
+                />
                 <View style={styles.buttonRow}>
                     <View style={styles.buttonWrapper}>
                         <Button
                             title="Lưu Nháp"
                             variant="outline"
                             onPress={onSaveDraft}
-                            disabled={disabled}
+                            disabled={disabled || isSubmitting}
+                            loading={isSavingDraft}
                         />
                     </View>
                     <View style={styles.buttonSpacer} />
                     <View style={styles.buttonWrapper}>
-                        <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                        <Button
+                            title="Gửi Phiếu"
+                            variant="primary"
+                            onPress={onSubmit}
+                            disabled={isSavingDraft}
+                            loading={isSubmitting}
+                        />
                     </View>
                 </View>
             </View>
@@ -43,25 +63,13 @@ export const WarehouseFooter: React.FC<WarehouseFooterProps> = React.memo(
 const styles = StyleSheet.create({
     footer: {
         backgroundColor: colors.white,
-        paddingTop: 16,
+        paddingTop: 12,
         paddingHorizontal: spacing.md,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },
     totalRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: spacing.sm,
-    },
-    totalLabel: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    totalValue: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.error,
     },
     buttonRow: {
         flexDirection: 'row',

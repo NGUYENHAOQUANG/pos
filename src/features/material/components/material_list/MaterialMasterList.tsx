@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, FlatList, ActivityIndicator } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { MaterialMasterItem } from '@/features/material/components/material_list/MaterialMasterItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material_list/MaterialListSkeleton';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
-import { colors } from '@/styles';
+import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { IMaterial } from '@/features/material/types/material.types';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 
@@ -80,13 +80,7 @@ export const MaterialMasterList: React.FC<MaterialMasterListProps> = React.memo(
                     onRefresh={onRefresh}
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                        isFetchingNextPage ? (
-                            <View style={materialListStyles.loaderFooter}>
-                                <ActivityIndicator color={colors.primary} />
-                            </View>
-                        ) : null
-                    }
+                    ListFooterComponent={isFetchingNextPage ? <ListFooterLoader /> : null}
                     ListEmptyComponent={
                         <EmptyStateCard
                             message="Chưa có vật tư nào trong danh mục."

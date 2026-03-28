@@ -2,7 +2,7 @@ import React from 'react';
 import { ViewStyle } from 'react-native';
 import { InfiniteScrollDropdown } from '@/shared/components/forms/InfiniteScrollDropdown';
 import { useInfiniteDropdown } from '@/shared/hooks/useInfiniteDropdown';
-import { useInfiniteMaterials } from '@/features/material/hooks/useMaterials';
+import { useInfiniteMaterials } from '@/features/material/hooks';
 import { IMaterial, GetMaterialsParams } from '@/features/material/types/material.types';
 
 interface DropdownMaterialItemProps {
@@ -60,6 +60,8 @@ const DropdownMaterialItemComponent: React.FC<DropdownMaterialItemProps> = ({
         isFetchingNextPage,
         fetchNextPage,
         hasNextPage,
+        refetch,
+        isRefetching,
     } = useInfiniteMaterials(
         {
             ...filterParams,
@@ -92,6 +94,8 @@ const DropdownMaterialItemComponent: React.FC<DropdownMaterialItemProps> = ({
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
+            refreshing={isRefetching}
+            onRefresh={refetch}
         />
     );
 };

@@ -7,9 +7,8 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
-import { useInfiniteWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useInfiniteWarehouseItems, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 interface WarehouseItemListScreenProps {
     onHistoryPress?: (item: IWarehouseItem) => void;

@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, FlatList, ActivityIndicator } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { InventoryCard } from '@/features/material/components/inventory_list/InventoryCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
-import { colors } from '@/styles';
+import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 
@@ -71,13 +71,7 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = React
                     onRefresh={onRefresh}
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                        isFetchingNextPage ? (
-                            <View style={materialListStyles.loaderFooter}>
-                                <ActivityIndicator color={colors.primary} />
-                            </View>
-                        ) : null
-                    }
+                    ListFooterComponent={isFetchingNextPage ? <ListFooterLoader /> : null}
                 />
             </View>
         );

@@ -7,6 +7,12 @@ import {
     ImportReceipt,
 } from '@/features/material/types/importReceipt.types';
 
+interface NormalizedItem {
+    materialId: string;
+    quantity: string;
+    price: string;
+}
+
 export const importReceiptService = {
     mapDetailToForm: (detail: ImportReceipt | { data: ImportReceipt }) => {
         const formState = {
@@ -66,5 +72,67 @@ export const importReceiptService = {
             documentIds,
             status,
         };
+    },
+
+    // ─── Default Values ─────────────────────────────────────
+
+    createDefaultItem: (): MaterialItem => ({
+        id: Date.now().toString(),
+        materialId: '',
+        materialName: '',
+        quantity: '',
+        price: '',
+        unit: '',
+    }),
+
+    createDefaultFormValues: () => ({
+        date: new Date(),
+        supplier: '',
+        files: [] as any[],
+        warehouseItems: [importReceiptService.createDefaultItem()],
+    }),
+
+    // ─── Change Tracking ────────────────────────────────────
+
+    normalizeItems: (items: MaterialItem[]): NormalizedItem[] =>
+        (items || []).map((item: MaterialItem) => ({
+            materialId: item.materialId || '',
+            quantity: item.quantity || '',
+            price: item.price || '',
+        })),
+
+    createFormSnapshot: (data: {
+        date: Date;
+        supplier: string;
+        warehouseItems: MaterialItem[];
+    }): string =>
+        JSON.stringify({
+            date: new Date(data.date).getTime(),
+            supplier: data.supplier || '',
+            warehouseItems: importReceiptService.normalizeItems(data.warehouseItems),
+        }),
+
+    hasFormChanges: (params: {
+        isEditMode: boolean;
+        initialSnapshot: string | null;
+        date: Date;
+        supplier: string;
+        warehouseItems: MaterialItem[];
+        files: any[];
+    }): boolean => {
+        const { isEditMode, initialSnapshot, date, supplier, warehouseItems, files } = params;
+
+        if (!isEditMode) return true;
+        if (!initialSnapshot) return true;
+
+        const currentSnapshot = JSON.stringify({
+            date: new Date(date).getTime(),
+            supplier: supplier || '',
+            warehouseItems: importReceiptService.normalizeItems(warehouseItems),
+        });
+        if (currentSnapshot !== initialSnapshot) return true;
+        if ((files || []).length > 0) return true;
+
+        return false;
     },
 };

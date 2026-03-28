@@ -1,8 +1,7 @@
 import React from 'react';
 import { MaterialMasterList } from '@/features/material/components/material_list/MaterialMasterList';
-import { useInfiniteMaterials } from '@/features/material/hooks';
+import { useInfiniteMaterials, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';

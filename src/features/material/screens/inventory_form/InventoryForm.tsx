@@ -25,7 +25,7 @@ import {
     InventoryFormValues,
 } from '@/features/material/schemas/inventoryFormSchema';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
-import { useInventoryMaterialActions } from '@/features/material/hooks/logic/useInventoryMaterialActions';
+import { useInventoryMaterialActions } from '@/features/material/hooks';
 
 export type InventoryFormProps = {
     isEditMode: boolean;

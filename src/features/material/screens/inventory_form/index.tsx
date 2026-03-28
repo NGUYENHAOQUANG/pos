@@ -7,21 +7,21 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import {
+    useWarehouses,
     useInventoryDetail,
     useInventoryItems,
     useCreateInventoryCheck,
     useUpdateInventoryCheck,
     useDeleteInventoryTicket,
-} from '@/features/material/hooks/useInventory';
+    materialKeys,
+} from '@/features/material/hooks';
 import {
     CreateInventoryCheckRequest,
     UpdateInventoryCheckRequest,
 } from '@/features/material/types/inventoryCheck.types';
 import { inventoryService } from '@/features/material/services/inventoryService';
 import { InventoryFormValues } from '@/features/material/schemas/inventoryFormSchema';
-import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { InventoryForm } from '@/features/material/screens/inventory_form/InventoryForm';
 
 export const AddInventoryScreen: React.FC = () => {

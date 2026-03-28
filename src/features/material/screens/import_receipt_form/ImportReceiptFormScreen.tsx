@@ -6,48 +6,44 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+
 import {
+    useCurrentWarehouse,
     useCreateImportReceipt,
     useUpdateImportReceipt,
     useImportReceiptDetail,
     useImportReceiptItems,
     useDeleteImportReceipt,
     importReceiptKeys,
-} from '@/features/material/hooks/useImportReceipts';
-import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
-import { showValidationError } from '@/features/material/utils/validationToast';
+} from '@/features/material/hooks';
 import { importReceiptService } from '@/features/material/services/importReceiptService';
 import { WarehouseFormValues } from '@/features/material/schemas/warehouseFormSchema';
-import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
-import { ImportReceiptForm } from '@/features/material/screens/import_receipt_form/ImportReceiptForm';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
+import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
+import { ImportReceiptFormContent } from '@/features/material/screens/import_receipt_form/ImportReceiptFormContent';
+import { showValidationError } from '@/features/material/utils/validationToast';
+
+import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 
 export const ImportReceiptFormScreen: React.FC = () => {
-    // Navigation
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute<RouteProp<AppStackParamList, 'ImportReceiptFormScreen'>>();
 
     const importReceiptId = route.params?.importReceiptId;
     const isEditMode = !!importReceiptId;
 
-    // Stores & Hook Context
     const { setTabBarVisible } = useTabBarVisibility();
     const queryClient = useQueryClient();
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    // Effects
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    // Data Fetching
-    const { data: warehouses = [] } = useWarehouses({
-        ZoneId: selectedZoneId || undefined,
-    });
+    // ─── Data Fetching ──────────────────────────────────────
+    const { warehouseId } = useCurrentWarehouse(selectedZoneId || undefined);
 
-    // Fetch Details for Edit Mode
     const { data: importReceiptDetail, isLoading: isLoadingDetailData } = useImportReceiptDetail(
         importReceiptId || ''
     );
@@ -57,7 +53,7 @@ export const ImportReceiptFormScreen: React.FC = () => {
     );
     const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItems);
 
-    // Initial Data for Edit
+    // ─── Initial Data ───────────────────────────────────────
     const initialData = useMemo(() => {
         if (isEditMode && importReceiptDetail && importReceiptItems) {
             const formState = importReceiptService.mapDetailToForm(importReceiptDetail);
@@ -74,38 +70,30 @@ export const ImportReceiptFormScreen: React.FC = () => {
         return undefined;
     }, [isEditMode, importReceiptDetail, importReceiptItems]);
 
-    // Mutations
+    // ─── Mutations ──────────────────────────────────────────
     const { submitWithFiles, isUploading } = useFileSubmit();
     const { mutate: createImportReceipt, isPending: isCreating } = useCreateImportReceipt();
     const { mutate: updateImportReceipt, isPending: isUpdating } = useUpdateImportReceipt();
     const { mutate: deleteImportReceipt, isPending: isDeleting } = useDeleteImportReceipt();
 
-    const handleSuccess = useCallback(
-        (onSuccessUpload: () => void) => {
-            onSuccessUpload();
-            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+    // ─── Handlers ───────────────────────────────────────────
+    const handleSuccess = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+        queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
 
-            if (isEditMode && importReceiptId) {
-                queryClient.invalidateQueries({
-                    queryKey: ['importReceipts', 'items', importReceiptId],
-                });
-                queryClient.invalidateQueries({
-                    queryKey: importReceiptKeys.detail(importReceiptId),
-                });
-            }
-            navigation.goBack();
-        },
-        [queryClient, isEditMode, importReceiptId, navigation]
-    );
+        if (isEditMode && importReceiptId) {
+            queryClient.invalidateQueries({
+                queryKey: ['importReceipts', 'items', importReceiptId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: importReceiptKeys.detail(importReceiptId),
+            });
+        }
+        navigation.goBack();
+    }, [queryClient, isEditMode, importReceiptId, navigation]);
 
     const onSubmit = useCallback(
-        async (
-            data: WarehouseFormValues,
-            status: ImportReceiptStatus,
-            onSuccessUpload: () => void
-        ) => {
-            // data.supplier is now the supplier ID directly
+        (data: WarehouseFormValues, status: ImportReceiptStatus) => {
             const supplierId = data.supplier;
 
             if (!supplierId) {
@@ -113,10 +101,15 @@ export const ImportReceiptFormScreen: React.FC = () => {
                 return;
             }
 
-            const processSubmit = async (documentIds: string[]) => {
+            if (!warehouseId) {
+                showValidationError('Không tìm thấy thông tin Kho Của Trại để nhập vật tư.');
+                return;
+            }
+
+            submitWithFiles(data.files || [], async documentIds => {
                 const payload = importReceiptService.mapFormToPayload(
                     supplierId,
-                    warehouses[0]?.id || '',
+                    warehouseId,
                     data.warehouseItems as MaterialItem[],
                     status,
                     documentIds
@@ -125,19 +118,15 @@ export const ImportReceiptFormScreen: React.FC = () => {
                 if (isEditMode && importReceiptId) {
                     updateImportReceipt(
                         { id: importReceiptId, data: payload },
-                        { onSuccess: () => handleSuccess(onSuccessUpload) }
+                        { onSuccess: handleSuccess }
                     );
                 } else {
-                    createImportReceipt(payload, {
-                        onSuccess: () => handleSuccess(onSuccessUpload),
-                    });
+                    createImportReceipt(payload, { onSuccess: handleSuccess });
                 }
-            };
-
-            await submitWithFiles(data.files || [], processSubmit);
+            });
         },
         [
-            warehouses,
+            warehouseId,
             isEditMode,
             importReceiptId,
             submitWithFiles,
@@ -149,27 +138,24 @@ export const ImportReceiptFormScreen: React.FC = () => {
 
     const onDelete = useCallback(() => {
         if (!importReceiptId) return;
-
-        deleteImportReceipt(importReceiptId, {
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-                queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
-                navigation.goBack();
-            },
-        });
-    }, [importReceiptId, deleteImportReceipt, queryClient, navigation]);
+        deleteImportReceipt(importReceiptId, { onSuccess: handleSuccess });
+    }, [importReceiptId, deleteImportReceipt, handleSuccess]);
 
     const handleBackPress = useCallback(() => {
         navigation.goBack();
     }, [navigation]);
 
+    // ─── Derived State ──────────────────────────────────────
     const isSubmitting = isCreating || isUpdating || isUploading || isDeleting;
 
+    // ─── Render ─────────────────────────────────────────────
     return (
-        <ImportReceiptForm
+        <ImportReceiptFormContent
             isEditMode={isEditMode}
             isLoadingDetail={isLoadingDetail}
             isSubmitting={isSubmitting}
+            warehouseId={warehouseId}
+            selectedZoneId={selectedZoneId}
             initialData={initialData}
             onBackPress={handleBackPress}
             onSubmit={onSubmit}

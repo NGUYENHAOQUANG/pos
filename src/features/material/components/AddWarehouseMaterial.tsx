@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    UIManager,
-    Platform,
-} from 'react-native';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, UIManager, Platform } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from '@/shared/components/buttons/Button';
-import { DropdownMaterialItem } from './DropdownMaterialItem';
-import { DropdownWarehouseItem } from './inventory/DropdownWarehouseItem';
-import { formatCurrency } from '@/features/material/utils/formatCurrency';
+import { DropdownMaterialItem } from '@/features/material/components/DropdownMaterialItem';
+import { DropdownWarehouseItem } from '@/features/material/components/inventory/DropdownWarehouseItem';
+import { CurrencyValue } from '@/features/material/components/CurrencyValue';
+import { DetailRow } from '@/features/material/components/DetailRow';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
@@ -23,6 +17,11 @@ import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+export enum WarehouseFormType {
+    ImportReceipt = 'ImportReceipt',
+    ExportWarehouse = 'ExportWarehouse',
 }
 
 export interface MaterialItem {
@@ -42,8 +41,8 @@ interface AddWarehouseMaterialProps {
     onRemoveMaterial?: (id: string) => void;
     title?: string;
     isPriceDisabled?: boolean;
-    /** When provided, uses DropdownWarehouseItem (for export flow). Otherwise uses DropdownMaterialItem (for import). */
     warehouseId?: string;
+    formType?: WarehouseFormType;
 }
 
 export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
@@ -54,14 +53,8 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     title = 'Vật tư nhập kho',
     isPriceDisabled = false,
     warehouseId,
+    formType = WarehouseFormType.ImportReceipt,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsExpanded(!isExpanded);
-    };
-
     const handleQuantityChange = React.useCallback(
         (id: string, val: string) => {
             const cleanVal = warehouseFormUtils.sanitizeNumericInput(val, 'quantity');
@@ -82,9 +75,31 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
         [onUpdateMaterial]
     );
 
+    const handleWarehouseItemSelect = React.useCallback(
+        (itemId: string, materialId: string, warehouseItem: IWarehouseItem) => {
+            onUpdateMaterial(itemId, 'materialId', materialId);
+            onUpdateMaterial(itemId, 'materialName', warehouseItem.materialName || '');
+            onUpdateMaterial(itemId, 'unit', warehouseItem.unitName || '');
+            onUpdateMaterial(itemId, 'price', (warehouseItem.averagePrice ?? 0).toString());
+            onUpdateMaterial(itemId, 'availableQuantity', warehouseItem.quantity || 0);
+        },
+        [onUpdateMaterial]
+    );
+
+    const handleMaterialSelect = React.useCallback(
+        (itemId: string, materialId: string, material: IMaterial) => {
+            onUpdateMaterial(itemId, 'materialId', materialId);
+            onUpdateMaterial(itemId, 'materialName', material.name);
+            if (material.unitName) {
+                onUpdateMaterial(itemId, 'unit', material.unitName);
+            }
+        },
+        [onUpdateMaterial]
+    );
+
     return (
         <View style={styles.mainMaterialCard}>
-            <CollapseHead title={title} isExpanded={isExpanded} onToggle={toggleExpand} />
+            <CollapseHead title={title} />
 
             <View style={styles.mainContent}>
                 {materials.map((item, index) => {
@@ -92,14 +107,14 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                         item.quantity,
                         item.price
                     );
-                    const displayTotal =
-                        itemTotal > 0
-                            ? formatCurrency(itemTotal)
-                            : 'Vui lòng nhập số lượng và đơn giá';
-                    const isOverStock = warehouseFormUtils.isQuantityOverStock(
-                        item.quantity,
-                        item.availableQuantity
-                    );
+                    const displayTotal = 'Vui lòng nhập số lượng và đơn giá';
+                    const isExportForm = formType === WarehouseFormType.ExportWarehouse;
+                    const isOverStock = isExportForm
+                        ? warehouseFormUtils.isQuantityOverStock(
+                              item.quantity,
+                              item.availableQuantity
+                          )
+                        : false;
 
                     return (
                         <View key={item.id} style={styles.materialWrapper}>
@@ -130,33 +145,13 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 onChange={(
                                                     materialId: string,
                                                     warehouseItem: IWarehouseItem
-                                                ) => {
-                                                    onUpdateMaterial(
+                                                ) =>
+                                                    handleWarehouseItemSelect(
                                                         item.id,
-                                                        'materialId',
-                                                        materialId
-                                                    );
-                                                    onUpdateMaterial(
-                                                        item.id,
-                                                        'materialName',
-                                                        warehouseItem.materialName || ''
-                                                    );
-                                                    onUpdateMaterial(
-                                                        item.id,
-                                                        'unit',
-                                                        warehouseItem.unitName || ''
-                                                    );
-                                                    onUpdateMaterial(
-                                                        item.id,
-                                                        'price',
-                                                        (warehouseItem.averagePrice ?? 0).toString()
-                                                    );
-                                                    onUpdateMaterial(
-                                                        item.id,
-                                                        'availableQuantity',
-                                                        warehouseItem.quantity || 0
-                                                    );
-                                                }}
+                                                        materialId,
+                                                        warehouseItem
+                                                    )
+                                                }
                                                 placeholder="Chọn vật tư​"
                                             />
                                         ) : (
@@ -168,25 +163,13 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 onChange={(
                                                     materialId: string,
                                                     material: IMaterial
-                                                ) => {
-                                                    onUpdateMaterial(
+                                                ) =>
+                                                    handleMaterialSelect(
                                                         item.id,
-                                                        'materialId',
-                                                        materialId
-                                                    );
-                                                    onUpdateMaterial(
-                                                        item.id,
-                                                        'materialName',
-                                                        material.name
-                                                    );
-                                                    if (material.unitName) {
-                                                        onUpdateMaterial(
-                                                            item.id,
-                                                            'unit',
-                                                            material.unitName
-                                                        );
-                                                    }
-                                                }}
+                                                        materialId,
+                                                        material
+                                                    )
+                                                }
                                                 placeholder="Chọn vật tư​"
                                             />
                                         )}
@@ -199,14 +182,16 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             onChangeText={val => handleQuantityChange(item.id, val)}
                                             keyboardType="numeric"
                                             inputFormat={InputFormat.DECIMAL}
+                                            maxDecimalPlaces={5}
+                                            maxLength={20}
                                             containerStyle={styles.noMarginBottom}
                                             suffix={item.unit}
+                                            hint={
+                                                isOverStock
+                                                    ? `Vượt quá tồn kho (${item.availableQuantity})`
+                                                    : undefined
+                                            }
                                         />
-                                        {isOverStock && (
-                                            <Text style={styles.overStockText}>
-                                                Vượt quá tồn kho ({item.availableQuantity})
-                                            </Text>
-                                        )}
 
                                         <Input
                                             label="Đơn giá"
@@ -215,14 +200,20 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             value={warehouseFormUtils.formatPriceInput(item.price)}
                                             onChangeText={val => handlePriceChange(item.id, val)}
                                             keyboardType="numeric"
-                                            inputFormat={InputFormat.DECIMAL}
+                                            inputFormat={
+                                                isPriceDisabled
+                                                    ? InputFormat.DECIMAL
+                                                    : InputFormat.INTEGER
+                                            }
+                                            maxLength={26}
                                             containerStyle={styles.noMarginBottom}
                                             disabled={isPriceDisabled}
-                                            suffix={<Text style={styles.currencyUnderline}>đ</Text>}
+                                            suffix="đ"
                                         />
 
-                                        {/* Show Available Quantity */}
-                                        {item.materialId &&
+                                        {/* Show Available Quantity — only for Export */}
+                                        {isExportForm &&
+                                            item.materialId &&
                                             item.availableQuantity !== undefined && (
                                                 <View style={styles.stockInfoRow}>
                                                     <Text style={styles.stockInfoText}>
@@ -235,17 +226,18 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             )}
                                     </View>
 
-                                    <View style={styles.footer}>
-                                        <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                        <Text
-                                            style={[
-                                                styles.footerValue,
-                                                !itemTotal && styles.placeholderText,
-                                            ]}
-                                        >
-                                            {displayTotal}
-                                        </Text>
-                                    </View>
+                                    <DetailRow
+                                        label="Thành tiền:"
+                                        value={
+                                            itemTotal ? (
+                                                <CurrencyValue value={itemTotal} />
+                                            ) : (
+                                                <Text style={styles.placeholderText}>
+                                                    {displayTotal}
+                                                </Text>
+                                            )
+                                        }
+                                    />
                                 </View>
                             </View>
                         </View>
@@ -323,67 +315,9 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         gap: spacing.md,
     },
-    row: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginBottom: 12,
-    },
-    halfWidth: {
-        flex: 1,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 44,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    innerInput: {
-        flex: 1,
-        height: '100%',
-        fontSize: 15,
-        color: colors.text,
-        padding: 0,
-        ...Platform.select({
-            android: {
-                textAlignVertical: 'center',
-            },
-            ios: {
-                lineHeight: 24,
-                paddingVertical: (44 - 24) / 2 - 2,
-            },
-        }),
-    },
-    unitText: {
-        fontSize: 15,
-        color: colors.text,
-        marginLeft: spacing.xs,
-        flexShrink: 0,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    footerLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    footerValue: {
-        fontSize: 14,
-        color: '#FF4D4F',
-        fontWeight: '500',
-        textAlign: 'right',
-        flex: 1,
-        marginLeft: spacing.sm,
-    },
     placeholderText: {
         fontSize: 15,
-        color: colors.textSecondary || '#999',
+        color: colors.textSecondary,
         fontWeight: '600',
     },
     addButton: {
@@ -408,16 +342,6 @@ const styles = StyleSheet.create({
     stockQuantity: {
         color: colors.blue[600],
         fontWeight: '500',
-    },
-    // Styles for overstock warning
-    overStockText: {
-        fontSize: 12,
-        color: colors.error,
-        marginTop: 4,
-    },
-    // Currency underline
-    currencyUnderline: {
-        textDecorationLine: 'underline',
     },
     // No margin bottom for inputs
     noMarginBottom: {
