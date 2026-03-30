@@ -117,7 +117,6 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 onChangeText={text => {
                     onRemainingWeightChange(formatDecimalInput(text, 15, 5));
                 }}
-                keyboardType="numeric"
                 inputFormat={InputFormat.DECIMAL}
                 required
                 maxLength={21}
