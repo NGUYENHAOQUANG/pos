@@ -9,6 +9,8 @@ import {
 export interface IDryRenovationMaterial {
     warehouseItemId: string;
     quantity: number;
+    name?: string;
+    unitName?: string;
 }
 
 export interface IDryRenovationDetail {

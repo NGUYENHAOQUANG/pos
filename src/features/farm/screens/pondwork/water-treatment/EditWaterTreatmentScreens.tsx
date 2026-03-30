@@ -119,12 +119,12 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                     found ||
                     ({
                         id: targetId,
-                        name: 'Vật tư',
-                        unitName: '',
+                        name: m.name || 'Vật tư',
+                        unitName: m.unitName || '',
                         materialDefId: targetId,
                     } as any),
                 quantity: m.quantity,
-                unit: found?.unitName || '',
+                unit: found?.unitName || m.unitName || '',
             } as SelectedMaterialItem;
         });
 
@@ -228,8 +228,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 });
                 allowNavigation();
                 setShowDeleteModal(false);
-                navigation.goBack();
                 showDeleteJobSuccessToast('WATER_TREATMENT');
+                setTimeout(() => navigation.goBack(), 300);
             } catch (error: unknown) {
                 handleError(error);
             }

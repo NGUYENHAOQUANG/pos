@@ -153,7 +153,7 @@ export const WaterSupplyScreen = () => {
                     found ||
                     ({
                         id: targetId,
-                        name: m.warehouseItemName || 'Vật tư',
+                        name: m.name || 'Vật tư',
                         unitName: m.unitName || '',
                         materialDefId: m.materialId,
                     } as any),
@@ -362,8 +362,8 @@ export const WaterSupplyScreen = () => {
                 await deleteMutation.mutateAsync({ pondId: pond.id, id: item.id });
                 allowNavigation();
                 setShowDeleteModal(false);
-                navigation.goBack();
                 Toast.show({ type: 'success', text1: 'Xóa thành công' });
+                setTimeout(() => navigation.goBack(), 300);
             } catch (error: any) {
                 console.error('Delete error', error);
                 Toast.show({

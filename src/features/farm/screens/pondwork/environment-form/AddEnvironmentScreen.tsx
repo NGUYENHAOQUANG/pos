@@ -184,7 +184,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                 onSuccess: () => {
                     allowNavigation();
                     setDeleteModalVisible(false);
-                    navigation.goBack();
+                    setTimeout(() => navigation.goBack(), 300);
                 },
             }
         );

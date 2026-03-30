@@ -29,6 +29,22 @@ export const handleProblemService = {
                                 unit: warehouseItem.unitName || '',
                             };
                         }
+                        // Fallback: use BE-provided name/unitName for paginated items
+                        const fallbackName = m.name || m.material?.name || 'Vật tư';
+                        const fallbackUnit = m.unitName || m.material?.unitName || m.unit || '';
+                        if (matId) {
+                            return {
+                                material: {
+                                    id: matId,
+                                    name: fallbackName,
+                                    group: '' as any,
+                                    unit: fallbackUnit,
+                                    unitName: fallbackUnit,
+                                } as IMaterial,
+                                quantity: Number(m.quantity) || 0,
+                                unit: fallbackUnit,
+                            };
+                        }
                         return null;
                     })
                     .filter(

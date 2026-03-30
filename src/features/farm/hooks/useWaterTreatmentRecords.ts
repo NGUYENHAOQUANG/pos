@@ -95,11 +95,11 @@ export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTr
                 return {
                     material: {
                         id: m.warehouseItemId,
-                        name: matDef?.name || 'Vật tư',
-                        unitName: matDef?.unitName || '',
+                        name: matDef?.name || m.name || 'Vật tư',
+                        unitName: matDef?.unitName || m.unitName || '',
                     } as IMaterial,
                     quantity: m.quantity,
-                    unit: matDef?.unitName || '',
+                    unit: matDef?.unitName || m.unitName || '',
                 };
             }),
             images: item.documentIds || [],

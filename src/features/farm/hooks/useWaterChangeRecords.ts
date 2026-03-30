@@ -83,7 +83,7 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
                 return {
                     material: {
                         id: m.warehouseItemId,
-                        name: matDef?.name || m.warehouseItemName || 'Vật tư',
+                        name: matDef?.name || m.name || 'Vật tư',
                         unitName: matDef?.unitName || m.unitName || '',
                     } as any,
                     quantity: m.quantity,

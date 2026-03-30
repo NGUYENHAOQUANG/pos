@@ -81,7 +81,7 @@ export const AddHarvestScreen: React.FC = () => {
             id: itemToEdit.id,
         });
 
-        navigation.goBack();
+        setTimeout(() => navigation.goBack(), 300);
     };
 
     const handleSubmitData = async (data: HarvestFormData) => {

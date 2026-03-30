@@ -65,12 +65,12 @@ export const dryRenovationService = {
                             return {
                                 material: {
                                     id: m.warehouseItemId,
-                                    name: mat?.name || 'Vật tư',
+                                    name: mat?.name || m.name || 'Vật tư',
                                     group: mat?.group || '',
-                                    unit: mat?.unitName || '',
+                                    unit: mat?.unitName || m.unitName || '',
                                 } as any,
                                 quantity: m.quantity,
-                                unit: mat?.unitName || '',
+                                unit: mat?.unitName || m.unitName || '',
                             };
                         }) || [],
                 };

@@ -51,6 +51,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [isSheetVisible, setIsSheetVisible] = useState(false);
     const [isResetModalVisible, setIsResetModalVisible] = useState(false);
     const [isPolling, setIsPolling] = useState(false);
+    const [weight, setWeight] = useState('');
 
     // ── Derived ──────────────────────────────────
     const isLoading = isPredicting || isFetchingResult || isPolling;
@@ -117,6 +118,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             ]);
                             setDetections(newDetections);
                             setHasAnalyzedCurrent(true);
+                            setWeight('');
                             Toast.show(TOAST_MESSAGES_CONFIG.AI_MEASURE.SUCCESS);
                         } else if (data.status === 'Failed') {
                             // Processing failed
@@ -162,12 +164,20 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             return;
         }
 
+        const weightVal = parseFloat(weight) || 0;
+        if (weightVal <= 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập khối lượng tôm được đo (g)',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!selectedZoneId) {
             Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
             return;
         }
-
-        const weightVal = 0; // AI handles weight measurement
 
         // Step 1: Upload image via inference predict endpoint
         predict(
@@ -194,7 +204,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 },
             }
         );
-    }, [imageUri, selectedZoneId, predict, pollForResult]);
+    }, [imageUri, selectedZoneId, predict, pollForResult, weight]);
 
     const handleReset = useCallback(() => {
         setIsResetModalVisible(true);
@@ -207,20 +217,25 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         setMeasurements([]);
         setDetections([]);
         setHasAnalyzedCurrent(false);
+        setWeight('');
         Toast.show(ToastMessages.ShrimpMeasurement.RESET_SUCCESS);
     }, []);
 
     const handleSave = useCallback(() => {
-        if (averageSizeCm !== null && measurements.length > 0) {
+        if (measurements.length > 0) {
+            // 1 measurement → fill current pcsPerKg, 2+ → fill average pcsPerKg
+            const valueToFill =
+                measurements.length === 1 ? currentMeasurement?.pcsPerKg ?? 0 : sizePcsPerKg ?? 0;
+
             navigation.navigate({
                 name: 'MeasureShrimpSizeScreen',
-                params: { aiShrimpSize: averageSizeCm.toString() },
+                params: { aiShrimpSize: Math.round(valueToFill).toString() },
                 merge: true,
             } as never);
         } else {
             navigation.goBack();
         }
-    }, [navigation, averageSizeCm, measurements]);
+    }, [navigation, measurements, currentMeasurement, sizePcsPerKg]);
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.backgroundPrimary }}>
@@ -251,6 +266,8 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 onImageAreaLayout={(size: { width: number; height: number }) =>
                     setDisplayDimensions(size)
                 }
+                weight={weight}
+                onWeightChange={setWeight}
             />
         </View>
     );

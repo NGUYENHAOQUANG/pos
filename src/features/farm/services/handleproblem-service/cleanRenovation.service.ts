@@ -65,12 +65,12 @@ export const cleanRenovationService = {
                             return {
                                 material: {
                                     id: m.warehouseItemId,
-                                    name: mat?.name || 'Vật tư',
+                                    name: mat?.name || m.name || 'Vật tư',
                                     group: mat?.group || '',
-                                    unit: mat?.unitName || '',
+                                    unit: mat?.unitName || m.unitName || '',
                                 } as any, // Cast to any because the interface expects something different but the UI might use it
                                 quantity: m.quantity,
-                                unit: mat?.unitName || '',
+                                unit: mat?.unitName || m.unitName || '',
                             };
                         }) || [],
                 };

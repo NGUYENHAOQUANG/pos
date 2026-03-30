@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -47,6 +48,8 @@ interface Props {
     onShowSheet: () => void;
     onCloseSheet: () => void;
     onImageAreaLayout: (size: { width: number; height: number }) => void;
+    weight: string;
+    onWeightChange: (value: string) => void;
 }
 
 export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
@@ -56,7 +59,7 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     previousMeasurement,
     countTimes,
     averageSizeCm,
-    // sizePcsPerKg,
+    sizePcsPerKg,
     imageUri,
     detections: _detections,
     imageDimensions,
@@ -74,6 +77,8 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     onShowSheet,
     onCloseSheet,
     onImageAreaLayout,
+    weight,
+    onWeightChange,
 }) => {
     const aiCount = currentMeasurement?.count ?? null;
     const sizeShrimp1 =
@@ -82,17 +87,6 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
             : null;
 
     const showAddMore = countTimes >= 2 || (countTimes === 1 && !hasAnalyzedCurrent);
-
-    const previousAverageSizeCm = useMemo(() => {
-        if (!previousMeasurement || previousMeasurement.sizes.length === 0) return 0;
-        const total = previousMeasurement.sizes.reduce((sum, s) => sum + s, 0);
-        return (total / previousMeasurement.sizes.length).toFixed(2);
-    }, [previousMeasurement]);
-
-    /* const previousSizePcsPerKg = useMemo(() => {
-        if (!previousMeasurement || previousMeasurement.weight <= 0) return 0;
-        return Math.round((1000 * previousMeasurement.count) / previousMeasurement.weight);
-    }, [previousMeasurement]); */
 
     return (
         <View style={styles.container}>
@@ -112,6 +106,19 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                             onImageAreaLayout={onImageAreaLayout}
                         />
                         {/* Bounding box overlay removed: processed images from AI server already contain annotations */}
+                    </SelectionInfoBox>
+                    <SelectionInfoBox title="Thông tin nhập" style={{ marginTop: 0 }}>
+                        <Input
+                            label="Khối lượng tôm được đo (g)"
+                            placeholder="Nhập khối lượng tôm được đo"
+                            value={weight}
+                            onChangeText={onWeightChange}
+                            keyboardType="numeric"
+                            inputFormat={InputFormat.DECIMAL}
+                            required
+                            maxLength={10}
+                            containerStyle={{ marginBottom: 0 }}
+                        />
                     </SelectionInfoBox>
 
                     <SelectionInfoBox title="Kết quả đo từ AI" style={{ marginTop: 0 }}>
@@ -164,31 +171,21 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                                     {averageSizeCm !== null ? averageSizeCm : '-'}
                                 </Text>
                             </View>
-                            {/* <View style={styles.summaryRow}>
-                                <Text style={styles.summaryLabel}>Cỡ tôm (con/kg)</Text>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>Cỡ tôm</Text>
                                 <Text style={styles.summaryValue}>
-                                    {sizePcsPerKg !== null ? sizePcsPerKg : '-'}
+                                    {currentMeasurement?.pcsPerKg != null
+                                        ? currentMeasurement.pcsPerKg
+                                        : '-'}
                                 </Text>
-                            </View> */}
+                            </View>
                             {measurements.length > 1 && (
-                                <>
-                                    <View style={styles.summaryRow}>
-                                        <Text style={styles.summaryLabel}>
-                                            TBKTT (cm) lần đo trước
-                                        </Text>
-                                        <Text style={styles.summaryValue}>
-                                            {previousAverageSizeCm}
-                                        </Text>
-                                    </View>
-                                    {/* <View style={styles.summaryRow}>
-                                        <Text style={styles.summaryLabel}>
-                                            CT (con/kg) lần đo trước
-                                        </Text>
-                                        <Text style={styles.summaryValue}>
-                                            {previousSizePcsPerKg}
-                                        </Text>
-                                    </View> */}
-                                </>
+                                <View style={styles.summaryRow}>
+                                    <Text style={styles.summaryLabel}>Trung bình cỡ tôm</Text>
+                                    <Text style={styles.summaryValue}>
+                                        {sizePcsPerKg !== null ? sizePcsPerKg : '-'}
+                                    </Text>
+                                </View>
                             )}
 
                             {countTimes > 0 && (

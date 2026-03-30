@@ -15,7 +15,7 @@ export interface ISiphonRecord {
         materials?: Array<{
             warehouseItemId: string;
             quantity: number;
-            warehouseItemName?: string;
+            name?: string;
             unitName?: string;
         }>;
     };

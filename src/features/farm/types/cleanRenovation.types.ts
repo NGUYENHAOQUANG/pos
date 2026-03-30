@@ -9,6 +9,8 @@ import {
 export interface ICleanRenovationMaterial {
     warehouseItemId: string;
     quantity: number;
+    name?: string;
+    unitName?: string;
 }
 
 export interface ICleanRenovationDetail {

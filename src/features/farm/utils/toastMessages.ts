@@ -115,7 +115,7 @@ export const TOAST_MESSAGES_CONFIG = {
         },
         SICK: {
             type: 'error',
-            text1: 'Phát hiện tôm bệnh !',
+            text1: 'Phát hiện tôm bệnh',
         },
         SUCCESS: {
             type: 'success',
