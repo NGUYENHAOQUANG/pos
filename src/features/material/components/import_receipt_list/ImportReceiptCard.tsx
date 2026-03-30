@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         paddingBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.border,
