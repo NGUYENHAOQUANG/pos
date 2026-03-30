@@ -183,42 +183,40 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.scrollContent}
                     >
-                        <View style={styles.card}>
-                            <SelectionInfoBox title="Hình ảnh xử lý">
-                                <AIImageProcessingSection
-                                    imageUri={processedImageUri || imageUri}
-                                    imageDimensions={imageDimensions}
-                                    displayDimensions={displayDimensions}
-                                    onImageSelect={handleImageSelect}
-                                    onTakePhoto={camera.openCamera}
-                                    onOpenPickerSheet={() => setIsPickerSheetOpen(true)}
-                                    onImageAreaLayout={size => setDisplayDimensions(size)}
-                                />
-                                {/* DotingOverlay removed: processed images from AI server already contain annotations */}
-                            </SelectionInfoBox>
-
-                            <SelectionInfoBox title="Kết quả kiểm tra từ AI">
-                                <CountingResultSection
-                                    result={result}
-                                    currentCheckCount={currentImageCount}
-                                    currentImageCount={previousImageCount}
-                                    countTimes={countTimes}
-                                    showAddMore={showAddMore}
-                                    onAddMore={handleAddMore}
-                                />
-                            </SelectionInfoBox>
-
-                            <ConfirmationModalUI
-                                visible={isConfirmVisible}
-                                onConfirm={handleConfirmReset}
-                                onCancel={() => setIsConfirmVisible(false)}
-                                title="Xác nhận đếm lại"
-                                message="Đếm lại sẽ ghi đè lên TẤT CẢ các lần đếm trước đó, bạn có chắc chắn muốn đếm lại?"
-                                confirmText="Đồng ý"
-                                cancelText="Hủy"
-                                showSuccessToast={false}
+                        <SelectionInfoBox title="Hình ảnh xử lý">
+                            <AIImageProcessingSection
+                                imageUri={processedImageUri || imageUri}
+                                imageDimensions={imageDimensions}
+                                displayDimensions={displayDimensions}
+                                onImageSelect={handleImageSelect}
+                                onTakePhoto={camera.openCamera}
+                                onOpenPickerSheet={() => setIsPickerSheetOpen(true)}
+                                onImageAreaLayout={size => setDisplayDimensions(size)}
                             />
-                        </View>
+                            {/* DotingOverlay removed: processed images from AI server already contain annotations */}
+                        </SelectionInfoBox>
+
+                        <SelectionInfoBox title="Kết quả kiểm tra từ AI">
+                            <CountingResultSection
+                                result={result}
+                                currentCheckCount={currentImageCount}
+                                currentImageCount={previousImageCount}
+                                countTimes={countTimes}
+                                showAddMore={showAddMore}
+                                onAddMore={handleAddMore}
+                            />
+                        </SelectionInfoBox>
+
+                        <ConfirmationModalUI
+                            visible={isConfirmVisible}
+                            onConfirm={handleConfirmReset}
+                            onCancel={() => setIsConfirmVisible(false)}
+                            title="Xác nhận đếm lại"
+                            message="Đếm lại sẽ ghi đè lên TẤT CẢ các lần đếm trước đó, bạn có chắc chắn muốn đếm lại?"
+                            confirmText="Đồng ý"
+                            cancelText="Hủy"
+                            showSuccessToast={false}
+                        />
                     </ScrollView>
                 </View>
 
@@ -275,10 +273,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingBottom: 100,
     },
-    card: {
-        backgroundColor: colors.white,
-        marginTop: 8,
-    },
+
     checkCountRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',

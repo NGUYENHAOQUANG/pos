@@ -179,7 +179,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
+        paddingTop: 12,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
     },
     countLabel: {
         fontSize: 16,

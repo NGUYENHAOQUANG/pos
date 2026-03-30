@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import GearSix from '@/assets/Icon/GearSix.svg';
 import WarningCircle from '@/assets/Icon/WarningCircle.svg';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
@@ -197,10 +197,13 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     })}
 
                 {onSetupPress && (
-                    <OutlineButton
-                        label="Thiết lập chỉ số môi trường"
+                    <Button
+                        title="Thiết lập chỉ số môi trường"
+                        variant="outline"
                         onPress={onSetupPress}
-                        prefix={<GearSix width={16} height={16} color={colors.textSecondary} />}
+                        renderLeftIcon={
+                            <GearSix width={16} height={16} color={colors.textSecondary} />
+                        }
                         style={styles.setupButton}
                     />
                 )}

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import { IconCamera } from '@/assets/icons';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import { colors, typography, borderRadius, spacing } from '@/styles';
@@ -51,12 +51,13 @@ export const AIImageProcessingSection: React.FC<Props> = ({
         <View
             style={[styles.bottomButtonContainer, imageUri ? styles.bottomButtonWithImage : null]}
         >
-            <OutlineButton
-                label="Chụp hoặc chọn ảnh"
+            <Button
+                title="Chụp hoặc chọn ảnh"
+                variant="outline"
                 onPress={onOpenPickerSheet ?? openPicker}
-                prefix={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
+                renderLeftIcon={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
                 style={styles.emptyStateButton}
-                labelStyle={styles.emptyStateButtonText}
+                textStyle={styles.emptyStateButtonText}
             />
         </View>
     );
