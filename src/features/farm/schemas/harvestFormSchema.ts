@@ -22,8 +22,8 @@ export const harvestFormSchema = z.object({
     referencePrice: z
         .string({ required_error: 'Vui lòng nhập giá tôm tham khảo' })
         .min(1, 'Vui lòng nhập giá tôm tham khảo')
-        .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-            message: 'Giá tôm tham khảo phải lớn hơn 0',
+        .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
+            message: 'Giá tôm tham khảo phải lớn hơn hoặc bằng 0',
         }),
     notes: z.string().optional(),
 });

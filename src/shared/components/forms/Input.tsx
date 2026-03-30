@@ -82,6 +82,8 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     hint?: string;
     /** Maximum number of decimal places allowed (only applies to DECIMAL format) */
     maxDecimalPlaces?: number;
+    /** Maximum number of integer digits allowed (only applies to DECIMAL format) */
+    maxIntegerPlaces?: number;
 }
 
 export const RequiredDot = () => <View style={styles.requiredDot} />;
@@ -118,6 +120,7 @@ export function Input({
     reserveErrorSpace = false,
     hint,
     maxDecimalPlaces,
+    maxIntegerPlaces,
     ...restProps
 }: InputProps) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -144,7 +147,7 @@ export function Input({
                     filtered = InputFilters.integer(text);
                     break;
                 case InputFormat.DECIMAL:
-                    filtered = InputFilters.decimal(text, maxDecimalPlaces);
+                    filtered = InputFilters.decimal(text, maxDecimalPlaces, maxIntegerPlaces);
                     break;
                 case InputFormat.REGEX:
                     if (formatPattern) {
@@ -164,7 +167,7 @@ export function Input({
 
             onChangeText?.(filtered);
         },
-        [inputFormat, formatPattern, maxDigits, maxDecimalPlaces, onChangeText]
+        [inputFormat, formatPattern, maxDigits, maxDecimalPlaces, maxIntegerPlaces, onChangeText]
     );
 
     // Get border color based on state

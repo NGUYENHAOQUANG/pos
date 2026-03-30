@@ -118,6 +118,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -129,6 +131,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -140,6 +144,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -151,6 +157,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -162,6 +170,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -173,6 +183,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 {advancedParameters.length > 0 &&
@@ -192,6 +204,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                 hint={getLimitError(paramValue, param.id)}
                                 reserveErrorSpace
                                 containerStyle={styles.inputContainer}
+                                keyboardType="numeric"
+                                maxLength={21}
                             />
                         );
                     })}
