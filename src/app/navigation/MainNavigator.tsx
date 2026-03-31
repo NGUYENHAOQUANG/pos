@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
-import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -279,39 +278,20 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
     return (
         <View style={styles.tabBarWrapper}>
-            {/* iOS 26+: BlurView with gradient mask | others: gradient fade */}
-            {isLiquidGlassSupported ? (
-                <View style={styles.bottomBlur} pointerEvents="none">
-                    <BlurView blurType="light" blurAmount={12} style={StyleSheet.absoluteFill} />
-                    {/* Gradient overlay: opaque white at top → transparent at bottom */}
-                    {/* This "masks" the blur so it appears to fade in from top to bottom */}
-                    <LinearGradient
-                        colors={[
-                            'rgba(255,255,255,1)',
-                            'rgba(255,255,255,0.6)',
-                            'rgba(255,255,255,0.2)',
-                            'rgba(255,255,255,0)',
-                        ]}
-                        locations={[0, 0.3, 0.6, 1]}
-                        style={StyleSheet.absoluteFill}
-                    />
-                </View>
-            ) : (
-                <LinearGradient
-                    colors={[
-                        colors.fade[0],
-                        colors.fade[8],
-                        colors.fade[20],
-                        colors.fade[40],
-                        colors.fade[65],
-                        colors.fade[85],
-                        colors.fade[95],
-                    ]}
-                    locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
-                    style={styles.fadeGradient}
-                    pointerEvents="none"
-                />
-            )}
+            <LinearGradient
+                colors={[
+                    colors.fade[0],
+                    colors.fade[8],
+                    colors.fade[20],
+                    colors.fade[40],
+                    colors.fade[65],
+                    colors.fade[85],
+                    colors.fade[95],
+                ]}
+                locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
+                style={styles.fadeGradient}
+                pointerEvents="none"
+            />
             {tabBarContent}
         </View>
     );
