@@ -25,6 +25,7 @@ export interface PondListStore {
     getPondById: (pondId: string) => PondData | undefined;
     getOperationsForPond: (pondId: string) => PondTypeOperation[];
     updatePondType: (pondId: string, newType: PondType) => void;
+    fetchMasterData: () => Promise<void>;
 }
 
 export const createPondListStore: StateCreator<
@@ -82,18 +83,17 @@ export const createPondListStore: StateCreator<
 
             // Map pondTypeId to type object
             const mappedPonds = ponds.map(pond => {
-                // @ts-ignore
-                const typeId = (pond as unknown as { pondCategoryId: string }).pondCategoryId;
-                const matchedType = currentTypes.find(t => t.id === typeId);
+                const typeId = pond.pondCategoryId;
+                const matchedType = typeId ? currentTypes.find(t => t.id === typeId) : undefined;
 
-                // If matched, assign it. If not, keeping undefined/partial is better than crashing.
                 if (matchedType) {
                     pond.type = matchedType;
-                } else {
-                    if (typeId) {
-                        // @ts-ignore
-                        pond.type = typeId;
-                    }
+                } else if (typeId) {
+                    // Fallback: use pondCategoryName from list API if master data not matched
+                    pond.type = {
+                        id: typeId,
+                        name: pond.pondCategoryName || typeId,
+                    };
                 }
                 return pond;
             });
