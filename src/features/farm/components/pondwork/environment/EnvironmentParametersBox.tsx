@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import GearSix from '@/assets/Icon/GearSix.svg';
 import WarningCircle from '@/assets/Icon/WarningCircle.svg';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
@@ -118,6 +118,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -129,6 +131,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -140,6 +144,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -151,6 +157,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -162,6 +170,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 <Input
@@ -173,6 +183,8 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     hint={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
                     reserveErrorSpace
                     containerStyle={styles.inputContainer}
+                    keyboardType="numeric"
+                    maxLength={21}
                 />
 
                 {advancedParameters.length > 0 &&
@@ -192,15 +204,20 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                 hint={getLimitError(paramValue, param.id)}
                                 reserveErrorSpace
                                 containerStyle={styles.inputContainer}
+                                keyboardType="numeric"
+                                maxLength={21}
                             />
                         );
                     })}
 
                 {onSetupPress && (
-                    <OutlineButton
-                        label="Thiết lập chỉ số môi trường"
+                    <Button
+                        title="Thiết lập chỉ số môi trường"
+                        variant="outline"
                         onPress={onSetupPress}
-                        prefix={<GearSix width={16} height={16} color={colors.textSecondary} />}
+                        renderLeftIcon={
+                            <GearSix width={16} height={16} color={colors.textSecondary} />
+                        }
                         style={styles.setupButton}
                     />
                 )}

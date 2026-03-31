@@ -26,16 +26,22 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
     leftoverFood,
     onLeftoverFoodChange,
 }) => {
+    const handleFoodAmountChange = (val: string) => {
+        if (onFoodAmountChange) onFoodAmountChange(val);
+    };
+
     return (
         <SelectionInfoBox title="Kiểm tra thức ăn">
             <Input
                 label="Lượng thức ăn cho vào nhá (g)"
                 placeholder="Lượng thức ăn cho vào nhá (g)"
                 value={foodAmount}
-                onChangeText={onFoodAmountChange}
+                onChangeText={handleFoodAmountChange}
                 inputFormat={InputFormat.DECIMAL}
-                maxDigits={15}
+                maxDecimalPlaces={5}
+                maxDigits={21}
                 containerStyle={{ marginBottom: 0 }}
+                keyboardType="numeric"
                 required
             />
 

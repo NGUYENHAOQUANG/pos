@@ -16,6 +16,7 @@ import { antdTheme } from '../core/config/antd-theme';
 import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
 import { NetworkStatusModal } from '@/shared/components/lostNetwork/NetworkStatusModal';
+import { ErrorBoundary } from '@/shared/components/error/ErrorBoundary';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
 
@@ -60,11 +61,13 @@ export function AppProviders() {
             <GestureHandlerRootView style={styles.gestureHandler}>
                 <AntdProvider theme={antdTheme}>
                     <QueryClientProvider client={queryClient}>
-                        <TabBarVisibilityProvider>
-                            <NavigationContainer>
-                                <AppNavigator />
-                            </NavigationContainer>
-                        </TabBarVisibilityProvider>
+                        <ErrorBoundary>
+                            <TabBarVisibilityProvider>
+                                <NavigationContainer>
+                                    <AppNavigator />
+                                </NavigationContainer>
+                            </TabBarVisibilityProvider>
+                        </ErrorBoundary>
                     </QueryClientProvider>
                 </AntdProvider>
             </GestureHandlerRootView>

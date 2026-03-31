@@ -1,6 +1,23 @@
 import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
 import { OperationType, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
 
+/** Stocking record embedded in cyclePond from pond list API */
+export interface CyclePondRecord {
+    warehouseItemId: string;
+    density: number;
+    quantity: number;
+    ageDays: number;
+    estimatedCost: number;
+}
+
+/** Active cycle data embedded directly in each pond from the list API */
+export interface CyclePond {
+    cycleId: string;
+    cycleName: string;
+    createAt: string;
+    record: CyclePondRecord | null;
+}
+
 export enum PondShape {
     Rectangle = 'Rectangle',
     Circle = 'Circle',
@@ -42,6 +59,8 @@ export interface PondData {
     editedAt?: string;
     creator?: ICreatorEditor | null;
     editor?: ICreatorEditor | null;
+    pondCategoryName?: string;
+    cyclePond?: CyclePond | null;
 }
 
 export enum PondStatus {

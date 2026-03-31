@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -6,6 +6,7 @@ import {
     FlatList,
     RefreshControl,
     ScrollView,
+    ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,18 +28,38 @@ export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { setTabBarVisible } = useTabBarVisibility();
 
-    // Use new React Query hook
-    const { seasons, zones, isLoading, refresh } = useSeasons();
-
+    // Use React Query hook with infinite scroll
     const [selectedTab, setSelectedTab] = useState('all');
-    const [selectedZoneId, setSelectedZoneId] = useState<string>('all');
-    const [isPulling, setIsPulling] = useState(false);
+    const [selectedZoneId, setSelectedZoneId] = useState<string>('');
+
+    const {
+        seasons,
+        zones,
+        totalCount,
+        isLoading,
+        isRefetching,
+        isFetchingNextPage,
+        hasNextPage,
+        refresh,
+        fetchNextPage,
+    } = useSeasons(selectedZoneId);
+
+    // Auto-select first zone when zones are loaded
+    useEffect(() => {
+        if (zones.length > 0 && !selectedZoneId) {
+            setSelectedZoneId(String(zones[0].id));
+        }
+    }, [zones, selectedZoneId]);
 
     const onRefresh = useCallback(async () => {
-        setIsPulling(true);
         await refresh();
-        setIsPulling(false);
     }, [refresh]);
+
+    const handleLoadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -53,51 +74,47 @@ export const AquacultureManagementScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    // Prepare zone options
+    // Prepare zone options (no 'all' option)
     const zoneOptions = useMemo(() => {
-        const options = [{ id: 'all', label: 'Tất cả trại' }];
-        if (!zones) return options;
-
-        const mappedZones = zones.map(z => ({
+        if (!zones) return [];
+        return zones.map(z => ({
             id: z.id.toString(),
             label: z.name,
         }));
-        return [...options, ...mappedZones];
     }, [zones]);
 
     const activeData = useMemo(() => {
         let filtered = seasons || [];
 
-        // Filter by zone
-        if (selectedZoneId !== 'all') {
-            filtered = filtered.filter(s => s.zoneId?.toString() === selectedZoneId);
-        }
-
-        // Filter by status tab
+        // Filter by status tab (zone filter is handled by API via selectedZoneId)
         if (selectedTab === 'active') {
-            filtered = filtered.filter(i => i.status === SeasonStatus.Active);
+            filtered = filtered.filter((i: SeasonData) => i.status === SeasonStatus.Active);
         } else if (selectedTab === 'preparing') {
-            filtered = filtered.filter(i => i.status === SeasonStatus.Preparation);
+            filtered = filtered.filter((i: SeasonData) => i.status === SeasonStatus.Preparation);
         } else if (selectedTab === 'ended') {
-            filtered = filtered.filter(i => i.status === SeasonStatus.Closed);
+            filtered = filtered.filter((i: SeasonData) => i.status === SeasonStatus.Closed);
         }
 
         // Sort by NO descending (newest created first)
-        return [...filtered].sort((a, b) => {
+        return [...filtered].sort((a: SeasonData, b: SeasonData) => {
             const noA = a.no || 0;
             const noB = b.no || 0;
             return noB - noA;
         });
-    }, [seasons, selectedTab, selectedZoneId]);
+    }, [seasons, selectedTab]);
 
+    // Use totalCount from API for 'all' tab; other counts from loaded data of selected zone
     const counts = useMemo(
         () => ({
-            all: seasons?.length || 0,
-            preparing: seasons?.filter(i => i.status === SeasonStatus.Preparation).length || 0,
-            active: seasons?.filter(i => i.status === SeasonStatus.Active).length || 0,
-            ended: seasons?.filter(i => i.status === SeasonStatus.Closed).length || 0,
+            all: totalCount,
+            preparing:
+                seasons?.filter((i: SeasonData) => i.status === SeasonStatus.Preparation).length ||
+                0,
+            active:
+                seasons?.filter((i: SeasonData) => i.status === SeasonStatus.Active).length || 0,
+            ended: seasons?.filter((i: SeasonData) => i.status === SeasonStatus.Closed).length || 0,
         }),
-        [seasons]
+        [seasons, totalCount]
     );
 
     const tabs = useMemo(
@@ -110,7 +127,8 @@ export const AquacultureManagementScreens: React.FC = () => {
         [counts]
     );
 
-    const showSkeleton = isLoading || isPulling;
+    const showSkeleton = isLoading;
+    const isRefreshing = isRefetching && !isFetchingNextPage;
 
     // Memoized callbacks for navigation
     const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
@@ -179,7 +197,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                     <ScrollView
                         contentContainerStyle={styles.emptyScrollContent}
                         refreshControl={
-                            <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
+                            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
                         }
                     >
                         <View>
@@ -195,10 +213,19 @@ export const AquacultureManagementScreens: React.FC = () => {
                         data={activeData}
                         keyExtractor={item => item.id.toString()}
                         refreshControl={
-                            <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
+                            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
                         }
                         renderItem={renderItem}
                         contentContainerStyle={styles.listContent}
+                        onEndReached={handleLoadMore}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={
+                            isFetchingNextPage ? (
+                                <View style={styles.loaderFooter}>
+                                    <ActivityIndicator color={colors.primary} />
+                                </View>
+                            ) : null
+                        }
                         ListEmptyComponent={
                             <View>
                                 <EmptyStateCard
@@ -248,6 +275,10 @@ const styles = StyleSheet.create({
     },
     listContent: {
         paddingBottom: spacing.xl,
+    },
+    loaderFooter: {
+        paddingVertical: spacing.md,
+        alignItems: 'center' as const,
     },
     emptyScrollContent: {
         flexGrow: 1,

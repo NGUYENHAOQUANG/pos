@@ -34,9 +34,14 @@ export const InputFilters = {
         return text.trim().replace(/[^0-9]/g, '');
     },
 
-    /** Keep digits and at most one decimal point (dot cannot be first), optionally limit decimal places */
-    decimal: (text: string, maxDecimalPlaces?: number): string => {
-        const cleaned = text.replace(/[^0-9.]/g, '');
+    /** Keep digits and at most one decimal point (dot cannot be first), optionally limit integer and decimal places */
+    decimal: (
+        text: string,
+        maxDecimalPlaces: number = 5,
+        maxIntegerPlaces: number = 15
+    ): string => {
+        const textWithDot = text.replace(/,/g, '.');
+        const cleaned = textWithDot.replace(/[^0-9.]/g, '');
         // Remove leading dots
         const noLeadingDot = cleaned.replace(/^\.+/, '');
         const parts = noLeadingDot.split('.');
@@ -47,12 +52,22 @@ export const InputFilters = {
             // Keep only first decimal point
             result = parts[0] + '.' + parts.slice(1).join('');
         }
-        // Limit decimal places if specified
-        if (maxDecimalPlaces !== undefined && result.includes('.')) {
-            const [intPart, decPart] = result.split('.');
-            result = intPart + '.' + decPart.slice(0, maxDecimalPlaces);
+
+        const finalParts = result.split('.');
+        let intPart = finalParts[0];
+
+        // Limit integer places
+        if (intPart.length > maxIntegerPlaces) {
+            intPart = intPart.slice(0, maxIntegerPlaces);
         }
-        return result;
+
+        // Limit decimal places if specified
+        if (finalParts.length > 1) {
+            const decPart = finalParts[1].slice(0, maxDecimalPlaces);
+            return intPart + '.' + decPart;
+        }
+
+        return intPart;
     },
 
     /** Test text against a regex pattern — returns text if valid, null if not */

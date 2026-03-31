@@ -28,10 +28,6 @@ export interface Measurement {
     pcsPerKg: number;
 }
 
-// Polling config for inference result
-const POLLING_INTERVAL_MS = 2000;
-const MAX_POLLING_ATTEMPTS = 30;
-
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
 
@@ -50,11 +46,10 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
     const [isSheetVisible, setIsSheetVisible] = useState(false);
     const [isResetModalVisible, setIsResetModalVisible] = useState(false);
-    const [isPolling, setIsPolling] = useState(false);
     const [weight, setWeight] = useState('');
 
     // ── Derived ──────────────────────────────────
-    const isLoading = isPredicting || isFetchingResult || isPolling;
+    const isLoading = isPredicting || isFetchingResult;
     const currentMeasurement =
         measurements.length > 0 ? measurements[measurements.length - 1] : null;
     const previousMeasurement =
@@ -67,76 +62,58 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     // Display the processed image (with bounding boxes) if available, otherwise original
     const displayImageUri = processedImageUri || imageUri;
 
-    // ── Polling for inference result ──────────────
-    const pollForResult = useCallback(
-        (requestId: string, weightVal: number, attempt: number = 0) => {
-            if (attempt >= MAX_POLLING_ATTEMPTS) {
-                setIsPolling(false);
+    /** Process inference result data */
+    const processInferenceResult = useCallback(
+        async (
+            data: {
+                status?: string;
+                imageProcessedUrl?: string | null;
+                annotationJson?: string | null;
+            },
+            weightVal: number
+        ) => {
+            // Check if result is valid — Pending/Failed or null fields = failure
+            if (data.status !== 'Success' || !data.imageProcessedUrl || !data.annotationJson) {
+                console.log('[AI Measure] Invalid result — status:', data.status);
                 Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
                 return;
             }
 
-            setTimeout(() => {
-                getResult(requestId, {
-                    onSuccess: async data => {
-                        // Check if processing is complete
-                        if (data.status === 'Success' && data.imageProcessedUrl) {
-                            setIsPolling(false);
+            // Download processed image to local cache
+            const localImageUri = await downloadAzureBlobImage(data.imageProcessedUrl);
+            if (localImageUri) {
+                setProcessedImageUri(localImageUri);
+            }
 
-                            // Download processed image to local cache
-                            const localImageUri = await downloadAzureBlobImage(
-                                data.imageProcessedUrl
-                            );
+            // Parse annotations from JSON string
+            let annotations: ShrimpAnnotation[] = [];
+            try {
+                annotations = JSON.parse(data.annotationJson);
+            } catch {
+                annotations = [];
+            }
 
-                            if (localImageUri) {
-                                setProcessedImageUri(localImageUri);
-                            }
+            const count = annotations.length;
+            const sizes = annotations.map(a => a.length_cm);
+            const newDetections: MeasurementDetectionBox[] = annotations.map(a => ({
+                id: a.id,
+                bbox: a.bbox,
+                label: `${a.length_cm.toFixed(2)} cm`,
+                confidence: a.confidence,
+            }));
 
-                            // Parse annotations from JSON string
-                            let annotations: ShrimpAnnotation[] = [];
-                            try {
-                                annotations = JSON.parse(data.annotationJson || '[]');
-                            } catch {
-                                annotations = [];
-                            }
+            const pcsPerKg = weightVal > 0 ? Math.round((1000 * count) / weightVal) : 0;
 
-                            const count = annotations.length;
-                            const sizes = annotations.map(a => a.length_cm);
-                            const newDetections: MeasurementDetectionBox[] = annotations.map(a => ({
-                                id: a.id,
-                                bbox: a.bbox,
-                                label: `${a.length_cm.toFixed(2)} cm`,
-                                confidence: a.confidence,
-                            }));
-
-                            const pcsPerKg =
-                                weightVal > 0 ? Math.round((1000 * count) / weightVal) : 0;
-
-                            setMeasurements(prev => [
-                                ...prev,
-                                { id: Date.now(), count, weight: weightVal, sizes, pcsPerKg },
-                            ]);
-                            setDetections(newDetections);
-                            setHasAnalyzedCurrent(true);
-                            setWeight('');
-                            Toast.show(TOAST_MESSAGES_CONFIG.AI_MEASURE.SUCCESS);
-                        } else if (data.status === 'Failed') {
-                            // Processing failed
-                            setIsPolling(false);
-                            Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
-                        } else {
-                            // Still processing, continue polling
-                            pollForResult(requestId, weightVal, attempt + 1);
-                        }
-                    },
-                    onError: () => {
-                        // Retry on error
-                        pollForResult(requestId, weightVal, attempt + 1);
-                    },
-                });
-            }, POLLING_INTERVAL_MS);
+            setMeasurements(prev => [
+                ...prev,
+                { id: Date.now(), count, weight: weightVal, sizes, pcsPerKg },
+            ]);
+            setDetections(newDetections);
+            setHasAnalyzedCurrent(true);
+            setWeight('');
+            Toast.show(TOAST_MESSAGES_CONFIG.AI_MEASURE.SUCCESS);
         },
-        [getResult]
+        []
     );
 
     // ── Handlers ─────────────────────────────────
@@ -179,7 +156,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             return;
         }
 
-        // Step 1: Upload image via inference predict endpoint
+        // Step 1: Upload image via predict endpoint
         predict(
             {
                 Image: {
@@ -193,18 +170,36 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             },
             {
                 onSuccess: predictResult => {
+                    console.log(
+                        '[AI Measure] predict response:',
+                        JSON.stringify(predictResult, null, 2)
+                    );
                     if (!predictResult.requestId) {
                         Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
                         return;
                     }
 
-                    // Step 2: Poll for inference result
-                    setIsPolling(true);
-                    pollForResult(predictResult.requestId, weightVal);
+                    // Step 2: Get inference result directly (wait for response)
+                    getResult(predictResult.requestId, {
+                        onSuccess: async data => {
+                            console.log(
+                                '[AI Measure] getResult response:',
+                                JSON.stringify(data, null, 2)
+                            );
+                            await processInferenceResult(data, weightVal);
+                        },
+                        onError: error => {
+                            console.log('[AI Measure] getResult error:', error);
+                            Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
+                        },
+                    });
+                },
+                onError: error => {
+                    console.log('[AI Measure] predict error:', error);
                 },
             }
         );
-    }, [imageUri, selectedZoneId, predict, pollForResult, weight]);
+    }, [imageUri, selectedZoneId, predict, getResult, processInferenceResult, weight]);
 
     const handleReset = useCallback(() => {
         setIsResetModalVisible(true);
