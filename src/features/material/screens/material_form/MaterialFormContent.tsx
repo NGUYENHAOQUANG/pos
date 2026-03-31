@@ -3,7 +3,6 @@ import { View, StyleSheet, ScrollView, Platform, UIManager } from 'react-native'
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { colors, spacing } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
@@ -12,13 +11,13 @@ import {
     materialFormSchema,
 } from '@/features/material/schemas/materialFormSchema';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
-import { ButtonBar } from '@/shared/components/layout/ButtonBar';
-import { IconTrashOutlined } from '@/assets/icons';
-
-import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterial } from '@/features/material/components/material_form/AddMaterial';
+import { DropdownOption } from '@/features/material/components/DropdownMaterial';
+import { IconTrashOutlined } from '@/assets/icons';
+import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
+import { ButtonBar } from '@/shared/components/layout/ButtonBar';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -54,10 +53,12 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
         onBackPress,
         onGroupChangeTrigger,
     }) => {
+        // ─── State & Refs ──────────────────────────────────
         const [deleteModalVisible, setDeleteModalVisible] = useState(false);
         const initializedRef = useRef(false);
         const scrollViewRef = useRef<ScrollView>(null);
 
+        // ─── Form ──────────────────────────────────────────
         const { control, handleSubmit, reset, setValue } = useForm<MaterialFormValues>({
             resolver: zodResolver(materialFormSchema),
             defaultValues: {
@@ -73,6 +74,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
 
         const watchedForm = useWatch({ control });
 
+        // ─── Effects ───────────────────────────────────────
         useEffect(() => {
             if (watchedForm.group) {
                 onGroupChangeTrigger(watchedForm.group);
@@ -86,6 +88,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
             }
         }, [initialData, reset]);
 
+        // ─── Handlers ──────────────────────────────────────
         const onError = useCallback((formErrors: unknown) => {
             const errors = formErrors as Record<string, { message?: string }>;
             const firstErrorKey = Object.keys(errors)[0];
@@ -128,6 +131,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
                 scrollViewRef.current?.scrollToEnd({ animated: true });
             }, 100);
         }, []);
+
         const handleDeletePress = useCallback(() => setDeleteModalVisible(true), []);
         const handleConfirmDelete = useCallback(() => {
             setDeleteModalVisible(false);
@@ -135,6 +139,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
         }, [onDelete]);
         const handleCancelDelete = useCallback(() => setDeleteModalVisible(false), []);
 
+        // ─── Render ────────────────────────────────────────
         return (
             <View style={styles.container}>
                 <HeaderMeterial
@@ -183,13 +188,12 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
                     mode="double"
                     primaryTitle="Lưu thông tin"
                     secondaryTitle="Huỷ"
-                    containerStyle={{
-                        borderTopWidth: 1,
-                        borderTopColor: colors.border,
-                    }}
+                    containerStyle={styles.buttonBarBorder}
                     onPrimaryPress={handleSubmit(onSubmit, onError)}
                     onSecondaryPress={onBackPress}
                     primaryButtonDisabled={isSubmitting}
+                    primaryButtonLoading={isSubmitting}
+                    secondaryButtonDisabled={isSubmitting}
                 />
 
                 <ConfirmationModalUI
@@ -216,5 +220,9 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 100,
         gap: spacing.sm,
+    },
+    buttonBarBorder: {
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
     },
 });

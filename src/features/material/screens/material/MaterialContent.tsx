@@ -9,8 +9,8 @@ import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
 import { ImportReceiptListScreen } from '@/features/material/screens/import_receipt_list/ImportReceiptListScreen';
 import { ExportWarehouseListScreen } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListScreen';
-import { WarehouseItemListScreen } from '@/features/material/screens/warehouse_item/WarehouseItemListScreen';
-import { MaterialMasterListTab } from '@/features/material/screens/material_list/MaterialMasterListTab';
+import { WarehouseItemListScreen } from '@/features/material/screens/warehouse_item_list/WarehouseItemListScreen';
+import { MaterialListScreen } from '@/features/material/screens/material_list/MaterialListScreen';
 import { InventoryListScreen } from '@/features/material/screens/inventory_list/InventoryListScreen';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
@@ -105,7 +105,7 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
             />
 
             <View style={styles.content}>
-                {selectedTab === TabType.Material && <MaterialMasterListTab />}
+                {selectedTab === TabType.Material && <MaterialListScreen />}
                 {selectedTab === TabType.Warehouse && (
                     <WarehouseItemListScreen
                         onHistoryPress={handleHistoryPress}

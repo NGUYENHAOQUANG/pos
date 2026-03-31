@@ -1,8 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
-import { ImportReceiptMaterialList } from '@/features/material/components/import_receipt_list/ImportReceiptMaterialList';
-import { useInfiniteImportReceipts } from '@/features/material/hooks';
+import { ImportReceiptMaterialList } from '@/features/material/screens/import_receipt_list/ImportReceiptListContent';
+import { useInfiniteImportReceipts, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';

@@ -1,13 +1,12 @@
 import React from 'react';
-import { MaterialMasterList } from '@/features/material/components/material_list/MaterialMasterList';
-import { useInfiniteMaterials } from '@/features/material/hooks';
+import { MaterialListContent } from '@/features/material/screens/material_list/MaterialListContent';
+import { useInfiniteMaterials, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const MaterialMasterListTab: React.FC = () => {
+export const MaterialListScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
@@ -46,7 +45,7 @@ export const MaterialMasterListTab: React.FC = () => {
     }, [navigation]);
 
     return (
-        <MaterialMasterList
+        <MaterialListContent
             materials={masterMaterials}
             isLoading={showSkeleton}
             refreshing={isRefreshing}

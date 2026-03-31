@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { DocumentPickerResponse } from '@react-native-documents/picker';
+
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
+import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
+
 import { borderRadius, colors, spacing } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { DropdownSupplierItem } from '@/features/material/components/import_receipt_form/DropdownSupplierItem';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface WarehouseInformationProps {
     date: Date;
@@ -15,18 +15,24 @@ interface WarehouseInformationProps {
     supplier: string;
     onSupplierChange: (supplierId: string) => void;
     supplierDisplayValue?: string;
-    children?: React.ReactNode;
+    selectedZoneId?: string | null;
+    files: DocumentPickerResponse[];
+    onFilesSelected: (files: DocumentPickerResponse[]) => void;
+    fileUploaderRef: React.RefObject<FileUploaderRef | null>;
 }
 
 export const WarehouseInformation: React.FC<WarehouseInformationProps> = React.memo(
-    ({ date, onDateChange, supplier, onSupplierChange, supplierDisplayValue, children }) => {
-        const [isExpanded, setIsExpanded] = useState(true);
-
-        const toggleExpand = React.useCallback(() => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setIsExpanded(prev => !prev);
-        }, []);
-
+    ({
+        date,
+        onDateChange,
+        supplier,
+        onSupplierChange,
+        supplierDisplayValue,
+        selectedZoneId,
+        files,
+        onFilesSelected,
+        fileUploaderRef,
+    }) => {
         const handleSupplierChange = React.useCallback(
             (supplierId: string) => onSupplierChange(supplierId),
             [onSupplierChange]
@@ -34,38 +40,36 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = React.m
 
         return (
             <View style={styles.cardContainer}>
-                <CollapseHead
-                    title="Thông tin nhập kho"
-                    isExpanded={isExpanded}
-                    onToggle={toggleExpand}
-                />
+                <CollapseHead title="Thông tin nhập kho" />
 
-                {isExpanded && (
-                    <View style={styles.content}>
-                        {/* Date Input */}
-                        <DateInputButton
-                            label="Ngày nhập"
-                            required
-                            date={date}
-                            onDateChange={onDateChange}
-                            dateOnly
-                            formatOptions={{ showCurrentLabel: false }}
-                        />
+                <View style={styles.content}>
+                    <DateInputButton
+                        label="Ngày nhập"
+                        required
+                        date={date}
+                        onDateChange={onDateChange}
+                        dateOnly
+                        formatOptions={{ showCurrentLabel: false }}
+                    />
 
-                        {/* Supplier Dropdown */}
-                        <DropdownSupplierItem
-                            label="Nhà cung cấp"
-                            required
-                            value={supplier}
-                            onChange={handleSupplierChange}
-                            placeholder="Nhập nhà cung cấp"
-                            displayValue={supplierDisplayValue}
-                            useAutoScroll={true}
-                        />
+                    <DropdownSupplierItem
+                        label="Nhà cung cấp"
+                        required
+                        value={supplier}
+                        onChange={handleSupplierChange}
+                        placeholder="Nhập nhà cung cấp"
+                        displayValue={supplierDisplayValue}
+                        useAutoScroll={true}
+                        zoneId={selectedZoneId || undefined}
+                    />
 
-                        {children}
-                    </View>
-                )}
+                    <FileUploader
+                        ref={fileUploaderRef}
+                        files={files}
+                        onFilesSelected={onFilesSelected}
+                        maxFiles={5}
+                    />
+                </View>
             </View>
         );
     }
@@ -80,7 +84,6 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         zIndex: 10,
     },
-
     content: {
         gap: spacing.md,
         paddingHorizontal: 12,

@@ -140,7 +140,13 @@ export function Button({
             {loading ? (
                 <ActivityIndicator
                     size="small"
-                    color={variant === 'primary' ? colors.white : colors.primary}
+                    color={
+                        variant === 'primary'
+                            ? colors.white
+                            : variant === 'outline'
+                            ? colors.text
+                            : colors.primary
+                    }
                 />
             ) : (
                 <View style={styles.content}>

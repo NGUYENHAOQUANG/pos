@@ -6,7 +6,6 @@ import {
     GetExportReceiptItemsParams,
     GetExportWarehouseParams,
 } from '@/features/material/types/exportReceipt.types';
-import { GetWarehouseParams } from '@/features/material/types/warehouse.types';
 import { GetMaterialsParams } from '@/features/material/types/material.types';
 
 // Query Keys
@@ -29,6 +28,5 @@ export const materialKeys = {
     inventoryDetail: (id: string) => [...materialKeys.all, 'inventory', 'detail', id] as const,
     inventoryItems: (id: string, params?: GetInventoryCheckItemsParams) =>
         [...materialKeys.all, 'inventory', 'items', id, params] as const,
-    warehouse: (params?: GetWarehouseParams) => [...materialKeys.all, 'warehouse', params] as const,
     warehouses: (params?: any) => [...materialKeys.all, 'warehouses', params] as const,
 };

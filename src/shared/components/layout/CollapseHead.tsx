@@ -6,7 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CollapseHeadProps {
     title: string | React.ReactNode;
-    isExpanded: boolean;
+    isExpanded?: boolean;
     onToggle?: () => void;
     style?: ViewStyle;
     titleStyle?: TextStyle;

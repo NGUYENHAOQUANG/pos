@@ -5,7 +5,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import { DropdownWarehouseItem } from './DropdownWarehouseItem';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
-import { numericStringSchema } from '@/shared/utils/validation';
+import { DetailRow } from '@/features/material/components/DetailRow';
 import { InventoryItem } from './InventoryMaterialList';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
@@ -22,7 +22,11 @@ interface InventoryMaterialItemProps {
 
 export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React.memo(
     ({ item, index, warehouseId, usedMaterialIds, onUpdateItem, onRemoveItem }) => {
-        const diff = item.newStock ? Number(item.newStock) - item.oldStock : -item.oldStock;
+        const roundTo5 = (n: number) => parseFloat(n.toFixed(5));
+        const oldStock = roundTo5(item.oldStock);
+        const diff = roundTo5(
+            item.newStock ? Number(item.newStock) - item.oldStock : -item.oldStock
+        );
 
         const handleMaterialChange = React.useCallback(
             (materialId: string, warehouseItem: IWarehouseItem) => {
@@ -64,44 +68,33 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
 
                         {/* Stock Info */}
                         <View>
-                            <View style={styles.stockRow}>
-                                <Text style={styles.label}>Tồn kho cũ:</Text>
-                                <Text style={styles.oldStockValue}>
-                                    {item.oldStock} {item.unit || ''}
-                                </Text>
-                            </View>
+                            <DetailRow
+                                label="Tồn kho cũ:"
+                                value={`${oldStock} ${item.unit || ''}`}
+                                style={styles.stockRow}
+                            />
 
                             <Input
                                 label="Tồn kho mới"
                                 required
                                 value={item.newStock}
-                                onChangeText={val => {
-                                    const normalizedText = val.replace(/,/g, '.');
-                                    if (numericStringSchema.safeParse(normalizedText).success) {
-                                        onUpdateItem(item.id, 'newStock', normalizedText);
-                                    }
-                                }}
+                                onChangeText={val => onUpdateItem(item.id, 'newStock', val)}
                                 keyboardType="numeric"
                                 inputFormat={InputFormat.DECIMAL}
+                                maxDecimalPlaces={5}
                                 containerStyle={styles.noMarginBottom}
                                 suffix={item.unit}
+                                maxLength={20}
                             />
                         </View>
 
                         {/* Difference Footer */}
-                        <View style={styles.footer}>
-                            <Text style={styles.footerLabel}>Tổng chênh lệch:</Text>
-                            <Text
-                                style={[
-                                    styles.footerValue,
-                                    diff < 0
-                                        ? styles.footerValueNegative
-                                        : styles.footerValuePositive,
-                                ]}
-                            >
-                                {diff > 0 ? `+${diff}` : diff} {item.unit || ''}
-                            </Text>
-                        </View>
+                        <DetailRow
+                            label="Tổng chênh lệch:"
+                            value={`${diff > 0 ? `+${diff}` : diff} ${item.unit || ''}`}
+                            valueStyle={diff < 0 ? styles.diffNegative : styles.diffPositive}
+                            style={styles.footer}
+                        />
                     </View>
                 </View>
             </View>
@@ -122,6 +115,7 @@ const styles = StyleSheet.create({
     materialHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         borderBottomWidth: 1,
@@ -152,42 +146,18 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     stockRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: 12,
     },
-    label: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    oldStockValue: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
     footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         marginTop: 12,
     },
-    footerLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    footerValue: {
-        fontSize: 15,
-        fontWeight: '600',
-        textAlign: 'right',
-    },
-    footerValueNegative: {
+    diffNegative: {
         color: colors.red[900],
+        fontWeight: '600',
     },
-    footerValuePositive: {
+    diffPositive: {
         color: colors.success,
+        fontWeight: '600',
     },
     noMarginBottom: {
         marginBottom: 0,

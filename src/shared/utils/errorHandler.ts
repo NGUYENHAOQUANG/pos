@@ -4,7 +4,6 @@
  * @author Kindy
  * @created 2025-11-16
  */
-import axios from 'axios';
 import { NormalizedError } from '@/core/api/errorHandler';
 import Toast from 'react-native-toast-message';
 
@@ -13,15 +12,6 @@ export class ApiError extends Error {
         super(message);
         this.name = 'ApiError';
     }
-}
-
-export function handleApiError(error: any): ApiError {
-    if (axios.isAxiosError(error)) {
-        const statusCode = error.response?.status || 500;
-        const message = error.response?.data?.message || 'Something went wrong';
-        return new ApiError(statusCode, message, error.response?.data);
-    }
-    return new ApiError(500, error.message || 'An unexpected error occurred');
 }
 
 export const handleError = (err: unknown) => {

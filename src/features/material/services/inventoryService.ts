@@ -1,12 +1,46 @@
-import { InventoryFormValues } from '../schemas/inventoryFormSchema';
+import { InventoryFormValues } from '@/features/material/schemas/inventoryFormSchema';
 import {
     IInventoryCheckDetail,
     InventoryCheckItem,
     CreateInventoryCheckRequest,
     UpdateInventoryCheckRequest,
-} from '../types/inventoryCheck.types';
+} from '@/features/material/types/inventoryCheck.types';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 export const inventoryService = {
+    createDefaultItem: () => ({
+        id: Date.now().toString(),
+        materialId: '',
+        materialName: '',
+        oldStock: 0,
+        newStock: '',
+        difference: 0,
+        unit: '',
+    }),
+
+    createDefaultFormValues: (): InventoryFormValues => ({
+        date: new Date(),
+        note: '',
+        inventoryItems: [inventoryService.createDefaultItem()],
+    }),
+
+    createFormFromWarehouseItem: (item: IWarehouseItem): InventoryFormValues => ({
+        date: new Date(),
+        note: '',
+        inventoryItems: [
+            {
+                id: Date.now().toString(),
+                materialId: item.materialId,
+                materialName: item.materialName ?? '',
+                oldStock: item.quantity ?? 0,
+                newStock: '',
+                difference: 0,
+                unit: item.unitName ?? '',
+                materialCode: item.materialCode ?? '',
+            },
+        ],
+    }),
+
     mapDetailToForm: (
         detail: IInventoryCheckDetail,
         items: InventoryCheckItem[]
@@ -26,6 +60,22 @@ export const inventoryService = {
             })),
         };
     },
+
+    normalizeFormValues: (data: InventoryFormValues): InventoryFormValues => ({
+        date: data.date || new Date(),
+        note: data.note || '',
+        inventoryItems: data.inventoryItems,
+    }),
+
+    createSnapshot: (data: InventoryFormValues): string =>
+        JSON.stringify({
+            date: new Date(data.date || new Date()).getTime(),
+            note: data.note || '',
+            inventoryItems: (data.inventoryItems || []).map(item => ({
+                materialId: item.materialId || '',
+                newStock: item.newStock || '',
+            })),
+        }),
 
     mapFormToPayload: (
         id: string | undefined,
