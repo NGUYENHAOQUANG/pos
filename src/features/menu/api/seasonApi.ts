@@ -2,29 +2,49 @@ import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { SeasonPayload } from '@/features/menu/services/aquacultureService';
+import { IPaginate } from '@/shared/types/common.types';
+
+/** Params for paginated season list */
+interface GetSeasonsParams {
+    Page?: number;
+    PageSize?: number;
+}
 
 export const seasonApi = {
-    getSeasons: async (zoneId: string): Promise<SeasonData[]> => {
+    getSeasons: async (
+        zoneId: string,
+        params?: GetSeasonsParams
+    ): Promise<IPaginate<SeasonData>> => {
         const url = API_ENDPOINTS.ZONE.SEASONS.LIST(zoneId);
-        const response = await apiClient.get(url);
+        const response = await apiClient.get(url, { params });
         const responseData = response.data;
+
+        // Handle paginated response: { data: { items, pageNumber, hasNextPage, ... } }
         if (responseData?.data?.items && Array.isArray(responseData.data.items)) {
-            return responseData.data.items;
-        }
-        if (Array.isArray(responseData)) {
-            return responseData;
-        }
-        if (responseData?.data && Array.isArray(responseData.data)) {
             return responseData.data;
         }
-        if (responseData?.result && Array.isArray(responseData.result)) {
-            return responseData.result;
-        }
-        if (responseData?.items && Array.isArray(responseData.items)) {
-            return responseData.items;
+
+        // Fallback: wrap raw array into paginated shape (API without pagination support)
+        let items: SeasonData[] = [];
+        if (Array.isArray(responseData)) {
+            items = responseData;
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+            items = responseData.data;
+        } else if (responseData?.result && Array.isArray(responseData.result)) {
+            items = responseData.result;
+        } else if (responseData?.items && Array.isArray(responseData.items)) {
+            items = responseData.items;
         }
 
-        return [];
+        return {
+            items,
+            pageNumber: 1,
+            totalPages: 1,
+            totalCount: items.length,
+            pageSize: items.length,
+            hasPreviousPage: false,
+            hasNextPage: false,
+        };
     },
     getSeasonDetail: async (zoneId: string, id: string): Promise<SeasonData> => {
         const response = await apiClient.get(API_ENDPOINTS.ZONE.SEASONS.DETAIL(zoneId, id));

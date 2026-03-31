@@ -16,6 +16,9 @@
 import React from 'react';
 import { Text as RNText, TextProps, StyleSheet } from 'react-native';
 import { fontFamily, fontWeightToFamily } from '@/styles/typography';
+interface AppTextProps extends TextProps {
+    trailingSpace?: string;
+}
 
 const resolveFontFamily = (style?: TextProps['style']): string => {
     if (!style) return fontFamily.regular;
@@ -36,7 +39,12 @@ const resolveFontFamily = (style?: TextProps['style']): string => {
     return fontFamily.regular;
 };
 
-export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
+export const Text: React.FC<AppTextProps> = ({
+    style,
+    children,
+    // trailingSpace = '\u200A',
+    ...props
+}) => {
     const resolvedFamily = resolveFontFamily(style);
 
     return (
@@ -47,14 +55,14 @@ export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
                     fontFamily: resolvedFamily,
                     includeFontPadding: false,
                     textAlignVertical: 'center',
-                    letterSpacing: 0.2,
+                    paddingRight: 0.01,
                 },
                 style,
                 { fontFamily: resolvedFamily },
             ]}
         >
             {typeof children === 'string' || typeof children === 'number'
-                ? `${children} `
+                ? `${children}`
                 : children}
         </RNText>
     );
