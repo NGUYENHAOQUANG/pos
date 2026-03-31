@@ -22,7 +22,7 @@ type SettingsStore = SettingsState & SettingsActions;
 export const useSettingsStore = create<SettingsStore>()(
     persist(
         immer(set => ({
-            soundEnabled: true,
+            soundEnabled: false,
             hapticEnabled: true,
             alertSoundEnabled: false,
 
