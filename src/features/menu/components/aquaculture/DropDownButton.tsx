@@ -86,7 +86,6 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
                 >
                     {item.label}
                 </Text>
-                {isSelected && <AntDesign name="check" size={18} color={colors.primary} />}
             </TouchableOpacity>
         );
     };
@@ -193,14 +192,14 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     dropdownItemSelected: {
-        backgroundColor: colors.blue[50], // Light blue bg for selected
+        backgroundColor: colors.gray[200],
     },
     dropdownItemText: {
         fontSize: typography.fontSize.sm,
         color: colors.text,
     },
     dropdownItemTextSelected: {
-        fontWeight: typography.fontWeight.regular,
-        color: colors.primary,
+        fontWeight: typography.fontWeight.medium,
+        color: colors.text,
     },
 });
