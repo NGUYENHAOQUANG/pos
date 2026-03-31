@@ -8,15 +8,13 @@ import RNFS from 'react-native-fs';
 import { colors, spacing, typography } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import { IconCamera } from '@/assets/icons';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import { AIImagePickerSheet } from '@/features/farm/components/ai-common/AIImagePickerSheet';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export interface CountingImagePickerSectionProps {
-    /** Mở camera VisionCamera tùy chỉnh có crop frame */
     onOpenCamera: () => void;
-    /** Trả về ảnh đã chọn từ thư viện (đã compress + base64) */
     onImagePicked: (
         uri: string,
         base64: string,
@@ -91,7 +89,6 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
 
     return (
         <View style={styles.container}>
-            {/* Empty state illustration */}
             <View style={styles.emptyState}>
                 <EmptyStateIcon width={160} height={160} />
                 <Text style={styles.emptyTitle}>Chưa có hình ảnh</Text>
@@ -100,17 +97,16 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
                 </Text>
             </View>
 
-            {/* CTA button */}
-            <OutlineButton
-                label={isProcessing ? 'Đang xử lý...' : 'Chụp hoặc chọn ảnh'}
+            <Button
+                title={isProcessing ? 'Đang xử lý...' : 'Chụp hoặc chọn ảnh'}
+                variant="outline"
                 onPress={() => setSheetVisible(true)}
                 disabled={isProcessing}
-                prefix={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
+                renderLeftIcon={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
                 style={styles.ctaButton}
-                labelStyle={styles.ctaLabel}
+                textStyle={styles.ctaLabel}
             />
 
-            {/* Custom bottom sheet */}
             <AIImagePickerSheet
                 visible={sheetVisible}
                 onClose={() => setSheetVisible(false)}
