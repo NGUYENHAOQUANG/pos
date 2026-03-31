@@ -10,6 +10,7 @@ export interface ISupplier {
 }
 
 export interface GetSuppliersParams {
+    ZoneId?: string;
     SearchText?: string;
     Id?: string;
     CreatedAt?: string;

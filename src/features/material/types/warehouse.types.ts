@@ -21,40 +21,6 @@ export interface GetWarehouseItemsQueryParams {
     OrderBy?: string;
 }
 
-export interface IExportWarehouseMaterialItem {
-    id: string;
-    materialName: string;
-    quantity: string;
-    price: string;
-    unit?: string;
-    total?: number;
-}
-
-export interface IExportWarehouseReceipt {
-    id: string;
-    date: Date | string;
-    farm?: string;
-    materials: IExportWarehouseMaterialItem[];
-    totalAmount: number;
-    totalItems?: number;
-    status?: string;
-}
-
-export interface GetWarehouseParams {
-    Search?: string;
-    MaterialName?: string;
-    Page?: number;
-    PageSize?: number;
-    ZoneId?: string;
-    Name?: string;
-    Location?: string;
-    Id?: string;
-    CreatedAt?: string;
-    CreateAtFrom?: string;
-    CreateAtTo?: string;
-    OrderBy?: string;
-}
-
 export interface IWarehouse {
     id: string;
     name: string;

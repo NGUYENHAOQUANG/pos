@@ -32,19 +32,6 @@ export const warehouseFormUtils = {
         }, 0);
     },
 
-    getAvailableDropdownOptions: (
-        materials: MaterialItem[],
-        materialOptions: any[],
-        currentIndex: number
-    ) => {
-        const otherSelectedIds = materials
-            .filter((_, idx) => idx !== currentIndex)
-            .map(m => String(m.materialId || ''))
-            .filter(id => id !== '');
-
-        return materialOptions.filter(opt => !otherSelectedIds.includes(String(opt.value)));
-    },
-
     isQuantityOverStock: (quantity: string, availableQuantity?: number) => {
         if (availableQuantity === undefined) return false;
         const quantityNum = parseFloat(quantity) || 0;

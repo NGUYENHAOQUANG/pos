@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
     Dimensions,
     Keyboard,
+    RefreshControl,
 } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
@@ -84,6 +85,11 @@ export interface InfiniteScrollDropdownProps<T extends InfiniteDropdownItem> {
 
     /** Custom render for each item row (optional) */
     renderItemContent?: (item: T, isSelected: boolean) => React.ReactElement;
+
+    /** Whether the list is currently refreshing */
+    refreshing?: boolean;
+    /** Callback when pull-to-refresh is triggered */
+    onRefresh?: () => void;
 }
 
 // ────────────────────────────── Component ──────────────────────────────
@@ -116,6 +122,8 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
         hasNextPage = false,
         fetchNextPage,
         renderItemContent,
+        refreshing = false,
+        onRefresh,
     } = props;
 
     // Derive display label
@@ -317,6 +325,14 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                                     style={styles.list}
                                     contentContainerStyle={
                                         items.length === 0 ? styles.listContentEmpty : undefined
+                                    }
+                                    refreshControl={
+                                        onRefresh ? (
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                            />
+                                        ) : undefined
                                     }
                                 />
                             </View>

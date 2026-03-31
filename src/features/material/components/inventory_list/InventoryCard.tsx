@@ -21,9 +21,9 @@ import {
 } from '@/features/material/types/inventoryCheck.types';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
-import { useInventoryItems } from '@/features/material/hooks/useInventory';
-import { DetailRow } from '../DetailRow';
-import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
+import { useInventoryItems } from '@/features/material/hooks';
+import { DetailRow } from '@/features/material/components/DetailRow';
+import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         padding: spacing.md,
         marginHorizontal: spacing.md,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.border,
     },
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
-        marginBottom: 8,
+        marginBottom: spacing.md,
     },
     materialName: {
         fontSize: 14,

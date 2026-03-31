@@ -2,8 +2,8 @@ import React from 'react';
 import { ViewStyle } from 'react-native';
 import { InfiniteScrollDropdown } from '@/shared/components/forms/InfiniteScrollDropdown';
 import { useInfiniteDropdown } from '@/shared/hooks/useInfiniteDropdown';
-import { useInfiniteSuppliers } from '@/features/material/hooks/useSuppliers';
-import { ISupplier, GetSuppliersParams } from '@/features/material/types/supplier.types';
+import { useInfiniteSuppliers } from '@/features/material/hooks';
+import { ISupplier } from '@/features/material/types/supplier.types';
 
 interface DropdownSupplierItemProps {
     /** Currently selected supplier ID */
@@ -16,8 +16,8 @@ interface DropdownSupplierItemProps {
     required?: boolean;
     /** Placeholder text when no value is selected */
     placeholder?: string;
-    /** Extra filters to pass to the API */
-    filterParams?: Omit<GetSuppliersParams, 'Page' | 'PageSize' | 'SearchText'>;
+    /** Zone ID to filter suppliers */
+    zoneId?: string;
     /** Whether dropdown is disabled */
     disabled?: boolean;
     /** Display value override (e.g. from parent) */
@@ -38,7 +38,7 @@ const DropdownSupplierItemComponent: React.FC<DropdownSupplierItemProps> = ({
     label,
     required,
     placeholder = 'Chọn nhà cung cấp',
-    filterParams,
+    zoneId,
     disabled = false,
     displayValue,
     buttonStyle,
@@ -62,7 +62,7 @@ const DropdownSupplierItemComponent: React.FC<DropdownSupplierItemProps> = ({
         hasNextPage,
     } = useInfiniteSuppliers(
         {
-            ...filterParams,
+            ZoneId: zoneId,
             SearchText: debouncedSearch || undefined,
         },
         { enabled: isOpen }

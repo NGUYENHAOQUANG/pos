@@ -69,6 +69,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                     status={computedStatus}
                     style={styles.item}
                     pondId={item.id || ''}
+                    cyclePond={item.cyclePond}
                     onInfoPress={() => onInfoPress?.(item)}
                     onCyclePress={() =>
                         navigation.navigate('PondCycleListScreen', {

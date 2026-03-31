@@ -3,20 +3,20 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 import { formatDate } from '@/features/farm/utils/dateUtils';
-import { CycleData } from '@/features/farm/types/cycle.types';
+import { CyclePond } from '@/features/farm/types/pond.types';
 
 interface ShrimpPondCycleInfoProps {
-    cycleData: CycleData;
+    cyclePond: CyclePond;
     doc: number;
     breedLabel?: string;
 }
 
 export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
-    cycleData,
+    cyclePond,
     doc,
     breedLabel,
 }) => {
-    if (!cycleData || cycleData.status === 'Hoàn thành') {
+    if (!cyclePond) {
         return null;
     }
 
@@ -24,11 +24,11 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
         <View style={styles.cycleSection}>
             <View style={styles.cycleHeader}>
                 <View style={styles.cycleNameWrapper}>
-                    <Text style={styles.cycleName}>{cycleData.name || '---'}</Text>
+                    <Text style={styles.cycleName}>{cyclePond.cycleName || '---'}</Text>
                 </View>
                 <Text style={styles.cycleDate} numberOfLines={1}>
-                    {cycleData.createdAt
-                        ? `${formatDate(new Date(cycleData.createdAt))} - nay`
+                    {cyclePond.createAt
+                        ? `${formatDate(new Date(cyclePond.createAt))} - nay`
                         : '-- nay'}
                 </Text>
             </View>
@@ -40,7 +40,7 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
                 <View style={styles.cycleInfoRow}>
                     <Text style={styles.cycleLabel}>Số lượng thả (Pls):</Text>
                     <Text style={styles.cycleValue}>
-                        {cycleData.totalStocking?.toLocaleString('vi-VN')}
+                        {cyclePond.record?.quantity?.toLocaleString('vi-VN')}
                     </Text>
                 </View>
                 <View style={styles.cycleInfoRow}>

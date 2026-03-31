@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     // Yellow - Ao xử lý
     yellow: {
         backgroundColor: colors.yellow[50],
-        borderColor: colors.yellow[600],
+        borderColor: colors.yellow[200],
     },
     textYellow: {
         color: colors.yellow[700],

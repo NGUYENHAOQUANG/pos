@@ -1,8 +1,7 @@
 import React from 'react';
-import { ExportWarehouseMaterialList } from '@/features/material/components/export_warehouse_list/ExportWarehouseMaterialList';
-import { useInfiniteExportWarehouse } from '@/features/material/hooks';
+import { ExportWarehouseListContent } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListContent';
+import { useInfiniteExportWarehouse, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -62,7 +61,7 @@ export const ExportWarehouseListScreen: React.FC = () => {
     }, [navigation]);
 
     return (
-        <ExportWarehouseMaterialList
+        <ExportWarehouseListContent
             receipts={receipts}
             isLoading={showSkeleton}
             refreshing={isRefreshing}

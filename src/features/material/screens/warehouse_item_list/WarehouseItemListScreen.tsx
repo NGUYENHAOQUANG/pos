@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { WarehouseMaterialList } from '@/features/material/components/warehouse/WarehouseMaterialList';
+import { WarehouseItemListContent } from '@/features/material/screens/warehouse_item_list/WarehouseItemListContent';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,9 +7,8 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
-import { useInfiniteWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useInfiniteWarehouseItems, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 interface WarehouseItemListScreenProps {
     onHistoryPress?: (item: IWarehouseItem) => void;
@@ -76,7 +75,7 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
     });
 
     return (
-        <WarehouseMaterialList
+        <WarehouseItemListContent
             materials={materials}
             isLoading={showSkeleton}
             refreshing={isRefreshing}

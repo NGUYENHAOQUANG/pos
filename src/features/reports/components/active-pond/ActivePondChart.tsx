@@ -8,6 +8,7 @@ import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.sv
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
 import { usePondStatusDistribution } from '@/features/reports/hooks/usePondStatusDistribution';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 // --- CẤU HÌNH ---
 const ITEM_WIDTH = 40;
@@ -237,6 +238,8 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                         <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
+                    ) : processedData.length === 0 ? (
+                        <EmptyStateCard message="Không có dữ liệu ao hoạt động" />
                     ) : (
                         containerWidth > 0 &&
                         yScale && (

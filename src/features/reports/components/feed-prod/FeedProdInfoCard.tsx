@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, borderRadius, spacing } from '@/styles';
+import InfoIcon from '@/assets/Icon/IconReport/I.svg';
 
 interface FeedProdInfoCardProps {
     message?: string;
@@ -14,9 +15,7 @@ export const FeedProdInfoCard: React.FC<FeedProdInfoCardProps> = ({
 }) => {
     return (
         <View style={styles.card}>
-            <View style={styles.iconWrap}>
-                <Text style={styles.iconText}>i</Text>
-            </View>
+            <InfoIcon width={20} height={20} style={styles.icon} />
             <Text style={styles.message}>{message}</Text>
         </View>
     );
@@ -34,19 +33,8 @@ const styles = StyleSheet.create({
         marginHorizontal: spacing.md,
         marginBottom: spacing.md,
     },
-    iconWrap: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
+    icon: {
         marginRight: spacing.sm,
-    },
-    iconText: {
-        color: colors.white,
-        fontSize: 14,
-        fontWeight: '600',
     },
     message: {
         flex: 1,

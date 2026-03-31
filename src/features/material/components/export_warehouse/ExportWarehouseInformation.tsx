@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
+import { DocumentPickerResponse } from '@react-native-documents/picker';
+
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { borderRadius, colors, spacing } from '@/styles';
 import { InfiniteScrollDropdown } from '@/shared/components/forms/InfiniteScrollDropdown';
+import { Input } from '@/shared/components/forms/Input';
+import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
+
+import { borderRadius, colors, spacing } from '@/styles';
 import { useInfiniteDropdown } from '@/shared/hooks/useInfiniteDropdown';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';
-import { useZones } from '@/features/farm/hooks/useZones';
-import { useAllPondsByZone } from '@/features/farm/hooks/usePonds';
 import { Zone } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/pond.types';
 
@@ -18,60 +21,54 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface ExportWarehouseInformationProps {
     date: Date;
     onDateChange: (date: Date) => void;
+    zones: Zone[];
     selectedZone: string;
-    onZoneChange: (value: string) => void;
+    onZoneChange: (zoneId: string) => void;
+    ponds: PondData[];
     selectedPond: string;
-    onPondChange: (value: string) => void;
-    /** Display name for zone in edit mode */
-    zoneDisplayValue?: string;
-    /** Display name for pond in edit mode */
-    pondDisplayValue?: string;
-    children?: React.ReactNode;
+    onPondChange: (pondId: string) => void;
+    isEditMode: boolean;
+    creatorName?: string;
+    note: string;
+    onNoteChange: (val: string) => void;
+    files: DocumentPickerResponse[];
+    onFilesSelected: (files: DocumentPickerResponse[]) => void;
+    fileUploaderRef: React.RefObject<FileUploaderRef | null>;
 }
 
 export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProps> = ({
     date,
     onDateChange,
+    zones,
     selectedZone,
     onZoneChange,
+    ponds,
     selectedPond,
     onPondChange,
-    zoneDisplayValue,
-    pondDisplayValue,
-    children,
+    isEditMode,
+    creatorName,
+    note,
+    onNoteChange,
+    files,
+    onFilesSelected,
+    fileUploaderRef,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
-    // Zone dropdown state
     const zoneDropdown = useInfiniteDropdown();
-    const { data: zones = [] } = useZones();
-
-    // Pond dropdown state
     const pondDropdown = useInfiniteDropdown();
-    const { data: ponds = [] } = useAllPondsByZone(selectedZone);
 
-    // Filter zones by search
     const filteredZones = React.useMemo(() => {
         if (!zoneDropdown.debouncedSearch) return zones;
         const search = zoneDropdown.debouncedSearch.toLowerCase();
         return zones.filter((z: Zone) => z.name.toLowerCase().includes(search));
     }, [zones, zoneDropdown.debouncedSearch]);
 
-    // Filter ponds by search
     const filteredPonds = React.useMemo(() => {
         if (!pondDropdown.debouncedSearch) return ponds;
         const search = pondDropdown.debouncedSearch.toLowerCase();
         return ponds.filter((p: PondData) => p.name.toLowerCase().includes(search));
     }, [ponds, pondDropdown.debouncedSearch]);
-
-    // Auto-select first zone if none selected
-    useEffect(() => {
-        if (!selectedZone && zones.length > 0) {
-            const defaultZone =
-                zones.find((z: Zone) => z.name.toLowerCase().includes('kiên giang')) || zones[0];
-            onZoneChange(defaultZone.id.toString());
-        }
-    }, [zones, selectedZone, onZoneChange]);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -87,7 +84,6 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
             />
 
             <View style={styles.content}>
-                {/* Date Input */}
                 <DateInputButton
                     label="Ngày xuất"
                     date={date}
@@ -96,16 +92,11 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                     required
                 />
 
-                {/* Zone Dropdown */}
                 <InfiniteScrollDropdown<Zone>
                     label="Trại nuôi"
                     required
                     value={selectedZone}
-                    displayValue={zoneDisplayValue}
-                    onSelect={zoneId => {
-                        onZoneChange(zoneId);
-                        onPondChange('');
-                    }}
+                    onSelect={onZoneChange}
                     placeholder="Chọn trại nuôi"
                     searchPlaceholder="Tìm trại nuôi"
                     emptyText="Không tìm thấy trại nuôi"
@@ -119,12 +110,10 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                     isLoading={false}
                 />
 
-                {/* Pond Dropdown */}
                 <InfiniteScrollDropdown<PondData>
                     label="Ao nuôi"
                     required
                     value={selectedPond}
-                    displayValue={pondDisplayValue}
                     onSelect={onPondChange}
                     placeholder={!selectedZone ? 'Chọn trại nuôi trước' : 'Chọn ao nuôi'}
                     searchPlaceholder="Tìm ao nuôi"
@@ -140,7 +129,28 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                     isLoading={false}
                 />
 
-                {children}
+                {isEditMode && creatorName ? (
+                    <Input label="Người tạo phiếu" value={creatorName} editable={false} />
+                ) : null}
+
+                <Input
+                    label="Ghi chú"
+                    placeholder="Nhập ghi chú xuất kho"
+                    value={note}
+                    onChangeText={onNoteChange}
+                    multiline={true}
+                    numberOfLines={3}
+                    maxLength={2000}
+                    inputContainerStyle={styles.noteInputContainer}
+                    inputStyle={styles.noteInput}
+                />
+
+                <FileUploader
+                    ref={fileUploaderRef}
+                    files={files}
+                    onFilesSelected={onFilesSelected}
+                    maxFiles={5}
+                />
             </View>
         </View>
     );
@@ -157,8 +167,15 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 12,
-        // paddingTop: spacing.md,
         paddingBottom: 12,
         gap: 12,
+    },
+    noteInputContainer: {
+        height: 100,
+        alignItems: 'flex-start' as const,
+    },
+    noteInput: {
+        textAlignVertical: 'top' as const,
+        paddingTop: 8,
     },
 });

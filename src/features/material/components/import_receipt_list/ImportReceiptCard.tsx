@@ -16,13 +16,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ImportReceipt, ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { MaterialGroupType } from '@/features/material/types/material.types';
-import { useImportReceiptItems } from '@/features/material/hooks/useImportReceipts';
-import { useSuppliers } from '@/features/material/hooks/useSuppliers';
+import { useImportReceiptItems, useSuppliers } from '@/features/material/hooks';
 import { ImportReceiptItems } from '@/features/material/components/import_receipt_list/ImportReceiptItems';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
+import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
 
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         paddingBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.border,

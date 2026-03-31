@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { InventoryMaterialList } from '@/features/material/components/inventory_list/InventoryMaterialList';
-import { useInfiniteInventoryTickets } from '@/features/material/hooks/useInventory';
+import { InventoryListContent } from '@/features/material/screens/inventory_list/InventoryListContent';
+import { useInfiniteInventoryTickets, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -57,7 +56,7 @@ export const InventoryListScreen: React.FC = () => {
     }, [navigation]);
 
     return (
-        <InventoryMaterialList
+        <InventoryListContent
             inventoryList={inventoryList}
             isLoading={showSkeleton}
             refreshing={isRefreshing}

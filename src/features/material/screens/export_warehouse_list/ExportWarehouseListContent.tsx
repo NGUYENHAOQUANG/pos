@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-    View,
-    FlatList,
-    Platform,
-    UIManager,
-    RefreshControl,
-    ActivityIndicator,
-} from 'react-native';
+import { View, FlatList, Platform, UIManager, RefreshControl } from 'react-native';
 import { ExportReceipt } from '@/features/material/types/exportReceipt.types';
-import { ExportWarehouseReceiptCard } from './ExportWarehouseReceiptCard';
+import { ExportWarehouseReceiptCard } from '../../components/export_warehouse_list/ExportWarehouseReceiptCard';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
-import { colors } from '@/styles';
+import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 
 if (Platform.OS === 'android') {
@@ -31,7 +24,7 @@ interface ExportWarehouseMaterialListProps {
     hasNextPage?: boolean;
 }
 
-export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListProps> = React.memo(
+export const ExportWarehouseListContent: React.FC<ExportWarehouseMaterialListProps> = React.memo(
     ({
         receipts,
         isLoading,
@@ -80,13 +73,7 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                     }
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                        isFetchingNextPage ? (
-                            <View style={materialListStyles.loaderFooter}>
-                                <ActivityIndicator color={colors.primary} />
-                            </View>
-                        ) : null
-                    }
+                    ListFooterComponent={isFetchingNextPage ? <ListFooterLoader /> : null}
                     ListEmptyComponent={
                         <EmptyStateCard
                             message="Chưa có phiếu xuất kho nào được tạo."
