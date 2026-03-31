@@ -38,10 +38,7 @@ export const StockTransferFormScreen: React.FC = () => {
     const { data: pondsByZoneData } = useAllPondsByZone(zoneId!);
     const { data: categoriesResponse } = usePondCategories();
     const { data: sizeMeasurementsData, isLoading: isSizeMeasurementsLoading } =
-        useSizeMeasurements(pondId, {
-            PageSize: 1,
-            OrderBy: 'CreatedAt desc',
-        });
+        useSizeMeasurements(pondId);
     const { breedName, cycleData } = useCurrentShrimpBreed(pondId, cycleId, warehouseId);
 
     const pondOptions = useMemo(
@@ -56,7 +53,16 @@ export const StockTransferFormScreen: React.FC = () => {
 
     const actualStockingQuantity = cycleData?.totalStocking ?? 0;
 
-    const sizeMeasurementDetail = sizeMeasurementsData?.data?.items?.[0];
+    const sizeMeasurementDetail = useMemo(() => {
+        const items = sizeMeasurementsData?.data?.items || [];
+        if (items.length === 0) return undefined;
+        return [...items].sort((a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeB - timeA;
+        })[0];
+    }, [sizeMeasurementsData]);
+
     const sizeDetail =
         sizeMeasurementDetail?.sizeMeasurementDetail || sizeMeasurementDetail?.sizeMeasurement;
     const latestShrimpSize = sizeDetail

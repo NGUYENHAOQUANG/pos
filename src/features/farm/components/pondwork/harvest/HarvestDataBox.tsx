@@ -22,8 +22,12 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
     onReferencePriceChange,
     containerStyle,
 }) => {
-    // Calculate revenue: yieldAmount * referencePrice
+    const handleYieldAmountChange = (val: string) => {
+        if (onYieldAmountChange) onYieldAmountChange(val);
+    };
+
     const revenue = useMemo(() => {
+        if (yieldAmount === '' || referencePrice === '') return null;
         const yieldValue = parseFloat(String(yieldAmount).replace(/[^\d.]/g, '')) || 0;
         const price = parseFloat(String(referencePrice).replace(/[^\d.]/g, '')) || 0;
         if (yieldValue > 0 && price > 0) {
@@ -46,9 +50,10 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 label="Sản lượng (kg)"
                 placeholder="Sản lượng (kg)"
                 value={String(yieldAmount)}
-                onChangeText={onYieldAmountChange}
+                onChangeText={handleYieldAmountChange}
                 inputFormat={InputFormat.DECIMAL}
-                maxDigits={20}
+                maxDecimalPlaces={5}
+                maxDigits={21}
                 keyboardType="numeric"
                 required
                 containerStyle={styles.inputGap}
@@ -59,7 +64,7 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 placeholder="Cỡ tôm (con/kg)"
                 value={String(shrimpSize)}
                 onChangeText={onShrimpSizeChange}
-                inputFormat={InputFormat.DECIMAL}
+                inputFormat={InputFormat.INTEGER}
                 maxDigits={20}
                 keyboardType="numeric"
                 required
@@ -71,7 +76,7 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 placeholder="Giá tôm tham khảo (VNĐ/kg)"
                 value={String(referencePrice)}
                 onChangeText={onReferencePriceChange}
-                inputFormat={InputFormat.DECIMAL}
+                inputFormat={InputFormat.INTEGER}
                 maxDigits={20}
                 keyboardType="numeric"
                 required
