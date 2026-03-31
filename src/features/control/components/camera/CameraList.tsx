@@ -1,11 +1,12 @@
 import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, View, RefreshControl } from 'react-native';
-import { Text } from '@/shared/components/typography/Text';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { CameraCard } from '@/features/control/components/camera/CameraCard';
 import { CameraSkeleton } from '@/features/control/components/skeleton/CameraSkeleton';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { useCameras } from '@/features/control/hooks/useCameras';
 import { CameraItem } from '@/features/control/api/cameraApi';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
 
 interface CameraListProps {
     onCameraPress: (camera: CameraItem) => void;
@@ -26,23 +27,19 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
         return <CameraSkeleton />;
     }
 
-    if (cameras.length === 0) {
-        return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>Chưa có camera nào được kết nối</Text>
-            </View>
-        );
-    }
-
     return (
         <FlatList
             data={cameras}
             keyExtractor={item => item.deviceSn}
             renderItem={({ item }) => <CameraCard camera={item} onPress={onCameraPress} />}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[
+                styles.listContent,
+                cameras.length === 0 && styles.emptyContent,
+            ]}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />}
+            ListEmptyComponent={<EmptyStateCard message="Chưa có camera nào được kết nối" />}
         />
     );
 };
@@ -56,14 +53,9 @@ const styles = StyleSheet.create({
     separator: {
         height: 4,
     },
-    emptyContainer: {
-        flex: 1,
+    emptyContent: {
+        flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: spacing.xl,
-    },
-    emptyText: {
-        fontSize: 14,
-        color: colors.gray[500],
     },
 });

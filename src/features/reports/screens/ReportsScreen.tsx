@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
 
@@ -176,11 +177,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: bottomBarHeight, gap: 6 }}
                     refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={handleRefresh}
-                            colors={[colors.primary]}
-                        />
+                        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
                     }
                 >
                     {selectedPondType.label === 'Ao vèo'

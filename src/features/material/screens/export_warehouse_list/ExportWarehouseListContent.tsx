@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, FlatList, Platform, UIManager, RefreshControl } from 'react-native';
+import { View, FlatList, Platform, UIManager } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { ExportReceipt } from '@/features/material/types/exportReceipt.types';
 import { ExportWarehouseReceiptCard } from '../../components/export_warehouse_list/ExportWarehouseReceiptCard';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';

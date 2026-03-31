@@ -8,6 +8,7 @@
  * @see https://rn.mobile.ant.design/components/button
  */
 import { borderRadius, colors, sizes, spacing, typography } from '@/styles';
+import { haptics } from '@/shared/utils/haptics';
 import React from 'react';
 import {
     ActivityIndicator,
@@ -133,7 +134,10 @@ export function Button({
     return (
         <TouchableOpacity
             style={buttonStyles}
-            onPress={onPress}
+            onPress={() => {
+                haptics.light();
+                onPress();
+            }}
             disabled={isDisabled}
             activeOpacity={0.7}
         >

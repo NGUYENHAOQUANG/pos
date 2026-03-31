@@ -10,6 +10,7 @@ import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 
 import UserIcon from '@/assets/Icon/IconMenu/User.svg';
 import UsersIcon from '@/assets/Icon/IconMenu/Users.svg';
+import GearSixIcon from '@/assets/Icon/GearSix.svg';
 
 interface RecordManagementItemProps {
     Icon: React.FC<SvgProps>;
@@ -45,6 +46,12 @@ export const RecordManagement: React.FC = () => {
             title: 'Quản lý thành viên',
             Icon: UsersIcon,
             onPress: () => navigation.navigate('MemberManagement'),
+        },
+        {
+            id: 'settings',
+            title: 'Cài đặt',
+            Icon: GearSixIcon,
+            onPress: () => navigation.navigate('Settings'),
         },
     ];
 

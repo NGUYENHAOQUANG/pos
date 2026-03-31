@@ -74,6 +74,7 @@ import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/Equ
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
 import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebViewScreen';
+import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
@@ -257,6 +258,7 @@ export type AppStackParamList = {
     };
     DeleteAccount: undefined;
     PolicyWebView: { url: string; title: string };
+    Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -371,6 +373,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="DeleteAccount" component={DeleteAccountFormScreen} />
             <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
             <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>
     );
 };
