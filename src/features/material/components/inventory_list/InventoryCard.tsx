@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         padding: spacing.md,
         marginHorizontal: spacing.md,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.border,
     },

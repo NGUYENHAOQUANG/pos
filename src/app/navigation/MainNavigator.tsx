@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
+import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -124,8 +125,8 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
 
     const IconComponent = isFocused ? item.IconActive : item.Icon;
 
-    const iconFill = isFocused ? colors.white : undefined;
-    const iconColor = isFocused ? colors.white : undefined;
+    const iconFill = isFocused ? colors.white : colors.gray[600];
+    const iconColor = isFocused ? colors.white : colors.gray[600];
 
     return (
         <TouchableOpacity
@@ -152,8 +153,8 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
 };
 
 /**
- * Custom Tab Bar with spring animations
- * Animation triggers when navigating back from detail screens
+ * Custom Tab Bar with Liquid Glass effect
+ * Uses BlurView for frosted glass translucency with spring animations
  */
 const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
@@ -233,14 +234,39 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
         </>
     );
 
-    const tabBarContent = (
+    // ── iOS 26+: LiquidGlassView ─────────────────────────────────────
+    // ── Android / iOS < 26: BlurView fallback ────────────────────────
+    const tabBarContent = isLiquidGlassSupported ? (
         <View
             onLayout={e => {
                 handleLayout(e);
                 onBarLayout(e);
             }}
             style={[
-                styles.bottomContainer,
+                styles.glassOuter,
+                {
+                    marginBottom: insets.bottom + 4,
+                },
+            ]}
+        >
+            <LiquidGlassView
+                effect="regular"
+                colorScheme="light"
+                tintColor="rgba(255, 255, 255, 0.15)"
+                style={styles.glassContainer}
+            >
+                <View style={styles.glassContent}>{tabBarItems}</View>
+            </LiquidGlassView>
+            <View style={styles.glassBorderOverlay} pointerEvents="none" />
+        </View>
+    ) : (
+        <View
+            onLayout={e => {
+                handleLayout(e);
+                onBarLayout(e);
+            }}
+            style={[
+                styles.fallbackContainer,
                 {
                     marginBottom: insets.bottom + 4,
                 },
@@ -252,22 +278,25 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
     return (
         <View style={styles.tabBarWrapper}>
-            {/* Fade gradient below tab bar - always visible */}
-            <LinearGradient
-                colors={[
-                    colors.fade[0],
-                    colors.fade[8],
-                    colors.fade[20],
-                    colors.fade[40],
-                    colors.fade[65],
-                    colors.fade[85],
-                    colors.fade[95],
-                ]}
-                locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
-                style={styles.blurContainer}
-                pointerEvents="none"
-            />
-            {/* Tab bar sits on top */}
+            {/* iOS 26+: bottom blur | others: gradient fade */}
+            {isLiquidGlassSupported ? (
+                <View style={styles.bottomBlur} />
+            ) : (
+                <LinearGradient
+                    colors={[
+                        colors.fade[0],
+                        colors.fade[8],
+                        colors.fade[20],
+                        colors.fade[40],
+                        colors.fade[65],
+                        colors.fade[85],
+                        colors.fade[95],
+                    ]}
+                    locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
+                    style={styles.fadeGradient}
+                    pointerEvents="none"
+                />
+            )}
             {tabBarContent}
         </View>
     );
@@ -299,9 +328,34 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    bottomContainer: {
+    bottomBlur: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 70,
+    },
+
+    // ── Liquid Glass Tab Bar ──────────────────────────────────────────
+    glassOuter: {
+        marginHorizontal: 16,
+        borderRadius: borderRadius.full,
+        overflow: 'hidden',
+    },
+    glassContainer: {
+        borderRadius: borderRadius.full,
+        overflow: 'hidden',
+    },
+    glassBorderOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: colors.white,
+    },
+    // ── Fallback (Android / iOS < 26) ─────────────────────────────────
+    fallbackContainer: {
         flexDirection: 'row',
-        backgroundColor: 'white',
+        backgroundColor: colors.white,
         borderRadius: borderRadius.full,
         borderColor: colors.border,
         borderWidth: 1,
@@ -315,13 +369,7 @@ const styles = StyleSheet.create({
         elevation: 1,
         zIndex: 1,
     },
-    tabBarWrapper: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    blurContainer: {
+    fadeGradient: {
         position: 'absolute',
         bottom: 0,
         left: 0,
@@ -330,6 +378,20 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         overflow: 'hidden',
     },
+    glassContent: {
+        flexDirection: 'row',
+        padding: 4,
+    },
+
+    // ── Wrapper ─────────────────────────────────────────────────────
+    tabBarWrapper: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+
+    // ── Tab Items ──────────────────────────────────────────────────
     tabItem: {
         flex: 1,
         height: 50,
@@ -342,6 +404,8 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
+
+    // ── Sliding Indicator ──────────────────────────────────────────
     slidingIndicator: {
         position: 'absolute',
         top: 4,
@@ -353,8 +417,14 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.orange[800],
         borderRadius: borderRadius.full,
+        // Subtle inner glow for glass consistency
+        shadowColor: colors.orange[800],
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
     },
 
+    // ── Icons & Labels ─────────────────────────────────────────────
     iconContainer: {
         marginBottom: 2,
     },
@@ -364,7 +434,7 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontSize: 12,
-        color: colors.text,
+        color: colors.gray[600],
         fontWeight: '400',
     },
     tabLabelActive: {
