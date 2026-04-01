@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, BackHandler, RefreshControl } from 'react-native';
+import { View, StyleSheet, BackHandler } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';

@@ -3,12 +3,12 @@ import {
     View,
     StyleSheet,
     ScrollView,
-    RefreshControl,
     LayoutChangeEvent,
     NativeSyntheticEvent,
     NativeScrollEvent,
     Image,
 } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
@@ -332,14 +332,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
             <ScrollView
                 ref={scrollViewRef}
                 contentContainerStyle={[styles.content, { paddingBottom: bottomBarHeight + 40 }]}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        colors={[colors.text]}
-                        tintColor={colors.text}
-                    />
-                }
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
             >

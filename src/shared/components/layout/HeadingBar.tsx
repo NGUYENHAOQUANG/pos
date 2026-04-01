@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors, spacing } from '@/styles';
+import { haptics } from '@/shared/utils/haptics';
 
 export interface HeadingBarItem {
     key: string;
@@ -60,7 +61,10 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
                     spreadTabs && tabMinWidth > 0 && { minWidth: tabMinWidth },
                     isSelected && styles.activeTab,
                 ]}
-                onPress={() => onTabSelect(tab.key)}
+                onPress={() => {
+                    haptics.light();
+                    onTabSelect(tab.key);
+                }}
                 activeOpacity={0.7}
             >
                 <Text style={[styles.tabText, isSelected && styles.activeTabText]}>

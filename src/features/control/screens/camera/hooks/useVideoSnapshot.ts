@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Platform, PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 import Toast from 'react-native-toast-message';
+import { haptics } from '@/shared/utils/haptics';
 import ViewShot from 'react-native-view-shot';
 
 interface UseVideoSnapshotParams {
@@ -18,6 +19,7 @@ export const useVideoSnapshot = ({
     viewShotRef,
 }: UseVideoSnapshotParams): UseVideoSnapshotReturn => {
     const handleSnapshot = useCallback(async () => {
+        haptics.light();
         try {
             if (Platform.OS === 'android') {
                 const granted = await PermissionsAndroid.request(

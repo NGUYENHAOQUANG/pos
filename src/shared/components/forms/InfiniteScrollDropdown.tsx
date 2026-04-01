@@ -10,8 +10,8 @@ import {
     ActivityIndicator,
     Dimensions,
     Keyboard,
-    RefreshControl,
 } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';

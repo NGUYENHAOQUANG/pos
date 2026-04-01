@@ -9,6 +9,7 @@ import {
     Easing,
 } from 'react-native';
 import { colors } from '@/styles';
+import { haptics } from '@/shared/utils/haptics';
 
 interface ButtonDevicesProps {
     value: boolean;
@@ -48,7 +49,10 @@ export const ButtonDevices: React.FC<ButtonDevicesProps> = React.memo(
         return (
             <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => onValueChange(!value)}
+                onPress={() => {
+                    haptics.medium();
+                    onValueChange(!value);
+                }}
                 disabled={disabled}
                 style={[style]}
             >

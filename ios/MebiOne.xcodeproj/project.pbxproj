@@ -7,21 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0652B5A60AE148EBB4DC1F69 /* GoogleSansFlex120pt-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E7482C004F424BC1BD3729E6 /* GoogleSansFlex120pt-ExtraBold.ttf */; };
-		081092403F7548B39004FACC /* GoogleSansFlex120pt-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 735CA3B2EED542749AE70A4C /* GoogleSansFlex120pt-Black.ttf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		553B6698FD5C4559B427EF88 /* GoogleSansFlex120pt-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 90D457BFE704485D8DA6C7AB /* GoogleSansFlex120pt-SemiBold.ttf */; };
 		5A773223237725FA17A26DB7 /* libPods-MebiOne.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B7A3055B70D3B9A52FBC502 /* libPods-MebiOne.a */; };
-		75FB2985C93442C491D8C31B /* GoogleSansFlex120pt-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2E6E7A6A17F44740BA4228CF /* GoogleSansFlex120pt-ExtraLight.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		C36517C030CD4295B3D1B6DA /* GoogleSansFlex120pt-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAFE93F1464C42948971EAEA /* GoogleSansFlex120pt-Regular.ttf */; };
-		C40BF0F4210B42B0975D390B /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = E778926902E1436F9E18EE18 /* OFL.txt */; };
-		C643F8F0BCFB41BE834A986B /* GoogleSansFlex120pt-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2A72FB6E280F45D7AF33C514 /* GoogleSansFlex120pt-Light.ttf */; };
 		D5EF9C88B97FEF593E722BDD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		D8E2540CF7BC44A7B80582C1 /* GoogleSansFlex120pt-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB36A92B49954D76BB3CD0AF /* GoogleSansFlex120pt-Thin.ttf */; };
-		E0707CE44C9D496A98CB12B9 /* GoogleSansFlex120pt-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 730AEF5A5A0C4F7BAE447FDE /* GoogleSansFlex120pt-Medium.ttf */; };
-		E5BA1B9B246845FE8A166E14 /* GoogleSansFlex120pt-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3C42EF6023EF4FEAA43BC93F /* GoogleSansFlex120pt-Bold.ttf */; };
+		8746DE2B87504C2EAEB9095A /* GoogleSansFlex120pt-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FE2F30CEF80E44EDB147237C /* GoogleSansFlex120pt-Black.ttf */; };
+		564F3E4C5A064251875E4C39 /* GoogleSansFlex120pt-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 04F62297A28249289539A77F /* GoogleSansFlex120pt-Bold.ttf */; };
+		F916C43E178843478B871DE0 /* GoogleSansFlex120pt-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 939722F229A54B6584F41CE6 /* GoogleSansFlex120pt-ExtraBold.ttf */; };
+		F60026BBE26149459C2502FC /* GoogleSansFlex120pt-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 44E87BABAE4D4E11A45D2D2D /* GoogleSansFlex120pt-ExtraLight.ttf */; };
+		646400F4C7DE4821AB73C9FE /* GoogleSansFlex120pt-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C84DBD9F415647F0A99C0F38 /* GoogleSansFlex120pt-Light.ttf */; };
+		72BF3BDD2C904781969C6710 /* GoogleSansFlex120pt-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24E82A48C0014AE6AF3E7126 /* GoogleSansFlex120pt-Medium.ttf */; };
+		FD8B39691FC844E79F5C6A05 /* GoogleSansFlex120pt-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F6B00B55925A491DB551081A /* GoogleSansFlex120pt-Regular.ttf */; };
+		26B9FECA8CD04FED833EB39F /* GoogleSansFlex120pt-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A6B50C3CC85A44EA9129BF72 /* GoogleSansFlex120pt-SemiBold.ttf */; };
+		698B2F36BAC74A9FAD2C2C37 /* GoogleSansFlex120pt-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 00ECDC4833BC4200946822CA /* GoogleSansFlex120pt-Thin.ttf */; };
+		C3CDE812614E4811A2D1F43D /* error.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 088E1B51F76C40F68AD4CDEA /* error.mp3 */; };
+		B2F7E2AF36B14E10AF9D9E93 /* success.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 70B70D8F6CDC4ABF9BBB2390 /* success.mp3 */; };
+		348A2C7F4CEA43CE8B45A440 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = FCDE75BA58A74A4CB4D57846 /* OFL.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,21 +32,23 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = MebiOne/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = MebiOne/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1F0470F3CA4745E84508D7AB /* Pods-MebiOne.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MebiOne.release.xcconfig"; path = "Target Support Files/Pods-MebiOne/Pods-MebiOne.release.xcconfig"; sourceTree = "<group>"; };
-		2A72FB6E280F45D7AF33C514 /* GoogleSansFlex120pt-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Light.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Light.ttf"; sourceTree = "<group>"; };
-		2E6E7A6A17F44740BA4228CF /* GoogleSansFlex120pt-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-ExtraLight.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-ExtraLight.ttf"; sourceTree = "<group>"; };
-		3C42EF6023EF4FEAA43BC93F /* GoogleSansFlex120pt-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Bold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Bold.ttf"; sourceTree = "<group>"; };
 		3DBEB21044DA6303B10B5AA3 /* Pods-MebiOne.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MebiOne.debug.xcconfig"; path = "Target Support Files/Pods-MebiOne/Pods-MebiOne.debug.xcconfig"; sourceTree = "<group>"; };
 		4B7A3055B70D3B9A52FBC502 /* libPods-MebiOne.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MebiOne.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		730AEF5A5A0C4F7BAE447FDE /* GoogleSansFlex120pt-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Medium.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Medium.ttf"; sourceTree = "<group>"; };
-		735CA3B2EED542749AE70A4C /* GoogleSansFlex120pt-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Black.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Black.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = MebiOne/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = MebiOne/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		90D457BFE704485D8DA6C7AB /* GoogleSansFlex120pt-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-SemiBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-SemiBold.ttf"; sourceTree = "<group>"; };
-		CB36A92B49954D76BB3CD0AF /* GoogleSansFlex120pt-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Thin.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Thin.ttf"; sourceTree = "<group>"; };
-		E7482C004F424BC1BD3729E6 /* GoogleSansFlex120pt-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-ExtraBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-ExtraBold.ttf"; sourceTree = "<group>"; };
-		E778926902E1436F9E18EE18 /* OFL.txt */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = OFL.txt; path = ../src/assets/fonts/OFL.txt; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		FAFE93F1464C42948971EAEA /* GoogleSansFlex120pt-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Regular.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Regular.ttf"; sourceTree = "<group>"; };
+		FE2F30CEF80E44EDB147237C /* GoogleSansFlex120pt-Black.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-Black.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Black.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		04F62297A28249289539A77F /* GoogleSansFlex120pt-Bold.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-Bold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		939722F229A54B6584F41CE6 /* GoogleSansFlex120pt-ExtraBold.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-ExtraBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-ExtraBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		44E87BABAE4D4E11A45D2D2D /* GoogleSansFlex120pt-ExtraLight.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-ExtraLight.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-ExtraLight.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C84DBD9F415647F0A99C0F38 /* GoogleSansFlex120pt-Light.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-Light.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		24E82A48C0014AE6AF3E7126 /* GoogleSansFlex120pt-Medium.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-Medium.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F6B00B55925A491DB551081A /* GoogleSansFlex120pt-Regular.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-Regular.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A6B50C3CC85A44EA9129BF72 /* GoogleSansFlex120pt-SemiBold.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-SemiBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		00ECDC4833BC4200946822CA /* GoogleSansFlex120pt-Thin.ttf */ = {isa = PBXFileReference; name = "GoogleSansFlex120pt-Thin.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Thin.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		088E1B51F76C40F68AD4CDEA /* error.mp3 */ = {isa = PBXFileReference; name = "error.mp3"; path = "../src/assets/sounds/error.mp3"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		70B70D8F6CDC4ABF9BBB2390 /* success.mp3 */ = {isa = PBXFileReference; name = "success.mp3"; path = "../src/assets/sounds/success.mp3"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		FCDE75BA58A74A4CB4D57846 /* OFL.txt */ = {isa = PBXFileReference; name = "OFL.txt"; path = "../src/assets/fonts/OFL.txt"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,16 +87,18 @@
 		3AA64A4C658D4160AA6BA6D3 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				E778926902E1436F9E18EE18 /* OFL.txt */,
-				90D457BFE704485D8DA6C7AB /* GoogleSansFlex120pt-SemiBold.ttf */,
-				730AEF5A5A0C4F7BAE447FDE /* GoogleSansFlex120pt-Medium.ttf */,
-				2A72FB6E280F45D7AF33C514 /* GoogleSansFlex120pt-Light.ttf */,
-				E7482C004F424BC1BD3729E6 /* GoogleSansFlex120pt-ExtraBold.ttf */,
-				2E6E7A6A17F44740BA4228CF /* GoogleSansFlex120pt-ExtraLight.ttf */,
-				FAFE93F1464C42948971EAEA /* GoogleSansFlex120pt-Regular.ttf */,
-				CB36A92B49954D76BB3CD0AF /* GoogleSansFlex120pt-Thin.ttf */,
-				3C42EF6023EF4FEAA43BC93F /* GoogleSansFlex120pt-Bold.ttf */,
-				735CA3B2EED542749AE70A4C /* GoogleSansFlex120pt-Black.ttf */,
+				FE2F30CEF80E44EDB147237C /* GoogleSansFlex120pt-Black.ttf */,
+				04F62297A28249289539A77F /* GoogleSansFlex120pt-Bold.ttf */,
+				939722F229A54B6584F41CE6 /* GoogleSansFlex120pt-ExtraBold.ttf */,
+				44E87BABAE4D4E11A45D2D2D /* GoogleSansFlex120pt-ExtraLight.ttf */,
+				C84DBD9F415647F0A99C0F38 /* GoogleSansFlex120pt-Light.ttf */,
+				24E82A48C0014AE6AF3E7126 /* GoogleSansFlex120pt-Medium.ttf */,
+				F6B00B55925A491DB551081A /* GoogleSansFlex120pt-Regular.ttf */,
+				A6B50C3CC85A44EA9129BF72 /* GoogleSansFlex120pt-SemiBold.ttf */,
+				00ECDC4833BC4200946822CA /* GoogleSansFlex120pt-Thin.ttf */,
+				088E1B51F76C40F68AD4CDEA /* error.mp3 */,
+				70B70D8F6CDC4ABF9BBB2390 /* success.mp3 */,
+				FCDE75BA58A74A4CB4D57846 /* OFL.txt */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -201,16 +207,18 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				D5EF9C88B97FEF593E722BDD /* PrivacyInfo.xcprivacy in Resources */,
-				C40BF0F4210B42B0975D390B /* OFL.txt in Resources */,
-				553B6698FD5C4559B427EF88 /* GoogleSansFlex120pt-SemiBold.ttf in Resources */,
-				E0707CE44C9D496A98CB12B9 /* GoogleSansFlex120pt-Medium.ttf in Resources */,
-				C643F8F0BCFB41BE834A986B /* GoogleSansFlex120pt-Light.ttf in Resources */,
-				0652B5A60AE148EBB4DC1F69 /* GoogleSansFlex120pt-ExtraBold.ttf in Resources */,
-				75FB2985C93442C491D8C31B /* GoogleSansFlex120pt-ExtraLight.ttf in Resources */,
-				C36517C030CD4295B3D1B6DA /* GoogleSansFlex120pt-Regular.ttf in Resources */,
-				D8E2540CF7BC44A7B80582C1 /* GoogleSansFlex120pt-Thin.ttf in Resources */,
-				E5BA1B9B246845FE8A166E14 /* GoogleSansFlex120pt-Bold.ttf in Resources */,
-				081092403F7548B39004FACC /* GoogleSansFlex120pt-Black.ttf in Resources */,
+				8746DE2B87504C2EAEB9095A /* GoogleSansFlex120pt-Black.ttf in Resources */,
+				564F3E4C5A064251875E4C39 /* GoogleSansFlex120pt-Bold.ttf in Resources */,
+				F916C43E178843478B871DE0 /* GoogleSansFlex120pt-ExtraBold.ttf in Resources */,
+				F60026BBE26149459C2502FC /* GoogleSansFlex120pt-ExtraLight.ttf in Resources */,
+				646400F4C7DE4821AB73C9FE /* GoogleSansFlex120pt-Light.ttf in Resources */,
+				72BF3BDD2C904781969C6710 /* GoogleSansFlex120pt-Medium.ttf in Resources */,
+				FD8B39691FC844E79F5C6A05 /* GoogleSansFlex120pt-Regular.ttf in Resources */,
+				26B9FECA8CD04FED833EB39F /* GoogleSansFlex120pt-SemiBold.ttf in Resources */,
+				698B2F36BAC74A9FAD2C2C37 /* GoogleSansFlex120pt-Thin.ttf in Resources */,
+				C3CDE812614E4811A2D1F43D /* error.mp3 in Resources */,
+				B2F7E2AF36B14E10AF9D9E93 /* success.mp3 in Resources */,
+				348A2C7F4CEA43CE8B45A440 /* OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,12 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import {
-    View,
-    StyleSheet,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-    RefreshControl,
-} from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
@@ -181,11 +175,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.scrollContent}
                     refreshControl={
-                        <RefreshControl
-                            refreshing={isRefreshing}
-                            onRefresh={onRefresh}
-                            colors={[colors.primary]}
-                        />
+                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
                     }
                     renderItem={({ item, index }) => (
                         <TrackingDayCard

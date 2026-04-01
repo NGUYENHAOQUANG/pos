@@ -5,6 +5,8 @@ import { ToastConfig } from 'react-native-toast-message';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, colors, spacing } from '@/styles';
+import { haptics } from '@/shared/utils/haptics';
+import { playSound } from '@/shared/utils/sounds';
 import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 
@@ -43,9 +45,38 @@ const CustomToast = ({
     );
 };
 
+/** Debounce timestamp to prevent double-firing from re-renders */
+let lastFeedbackTime = 0;
+const DEBOUNCE_MS = 500;
+
+/** Fire haptic + sound feedback with debounce */
+const triggerFeedback = (type: 'success' | 'error') => {
+    const now = Date.now();
+    if (now - lastFeedbackTime < DEBOUNCE_MS) return;
+    lastFeedbackTime = now;
+
+    if (type === 'success') {
+        haptics.success();
+        playSound('success');
+    } else {
+        haptics.error();
+        playSound('error');
+    }
+};
+
 export const toastConfig: ToastConfig = {
-    success: ({ text1, text2 }) => <CustomToast text1={text1} text2={text2} type="success" />,
-    error: ({ text1, text2 }) => <CustomToast text1={text1} text2={text2} type="error" />,
+    success: ({ text1, text2, isVisible }) => {
+        if (isVisible) {
+            triggerFeedback('success');
+        }
+        return <CustomToast text1={text1} text2={text2} type="success" />;
+    },
+    error: ({ text1, text2, isVisible }) => {
+        if (isVisible) {
+            triggerFeedback('error');
+        }
+        return <CustomToast text1={text1} text2={text2} type="error" />;
+    },
 };
 
 const styles = StyleSheet.create({

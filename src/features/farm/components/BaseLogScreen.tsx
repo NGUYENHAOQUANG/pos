@@ -1,5 +1,6 @@
 import React, { useEffect, ReactNode } from 'react';
-import { View, StyleSheet, ScrollView, ViewStyle, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, ViewStyle } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

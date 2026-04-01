@@ -4,10 +4,10 @@ import {
     StyleSheet,
     TouchableOpacity,
     FlatList,
-    RefreshControl,
     ScrollView,
     ActivityIndicator,
 } from 'react-native';
+import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
