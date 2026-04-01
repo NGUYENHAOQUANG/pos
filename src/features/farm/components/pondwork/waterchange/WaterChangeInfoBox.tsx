@@ -41,10 +41,7 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         placeholder="Mực nước mục tiêu (cm)"
                         value={targetLevel}
                         onChangeText={onTargetLevelChange}
-                        keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
-                        maxDecimalPlaces={5}
-                        maxDigits={20}
                         required
                         containerStyle={{ marginBottom: 0 }}
                     />
@@ -58,10 +55,7 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         placeholder="Số cm cấp"
                         value={supplyLevel}
                         onChangeText={onSupplyLevelChange}
-                        keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
-                        maxDecimalPlaces={5}
-                        maxDigits={20}
                         required
                         containerStyle={{ marginBottom: 0 }}
                     />
