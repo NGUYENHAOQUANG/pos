@@ -7,6 +7,10 @@ import { TimelineActivity } from '@/features/farm/components/TrackingList';
 import { EnvMetricType } from '@/features/farm/types/environment.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { HarvestType } from '@/features/farm/types/harvestRecord.types';
+import {
+    TREATMENT_TYPE_LABELS,
+    TreatmentTypeEnum,
+} from '@/features/farm/types/waterTreatment.types';
 import type {
     IPondRecordItem,
     IPondRecordReferenceData,
@@ -300,6 +304,11 @@ export function convertWaterTreatmentRefToActivityData(
     ctx: RefToActivityDataContext
 ): ActivityData[] {
     const data: ActivityData[] = [];
+    const treatmentType = (r as Record<string, unknown>).treatmentType as string | undefined;
+    if (treatmentType) {
+        const label = TREATMENT_TYPE_LABELS[treatmentType as TreatmentTypeEnum] || treatmentType;
+        data.push({ label: 'Loại hoạt động', value: label });
+    }
     if (r.materials?.length) pushMaterialRows(data, r.materials, ctx.materialMap);
     return data;
 }

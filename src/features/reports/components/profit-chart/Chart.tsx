@@ -323,16 +323,21 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                 const TOOLTIP_MARGIN = 30;
                                 const isOverflowRight =
                                     tooltipX + 8 + TOOLTIP_WIDTH + TOOLTIP_MARGIN > svgWidth;
+                                // Check if placing tooltip to the left would be clipped by the Y-axis overlay
+                                const isOverflowLeft =
+                                    tooltipX - 8 - TOOLTIP_WIDTH < PADDING_LEFT + SCROLL_PADDING;
+                                // If overflows right but also overflows left, prefer showing on the right
+                                const showOnRight = !isOverflowRight || isOverflowLeft;
                                 return (
                                     <View
                                         style={[
                                             styles.barTooltip,
-                                            isOverflowRight
-                                                ? {
+                                            showOnRight
+                                                ? { left: tooltipX + 8, top: PADDING_TOP + 4 }
+                                                : {
                                                       right: svgWidth - tooltipX + 8,
                                                       top: PADDING_TOP + 4,
-                                                  }
-                                                : { left: tooltipX + 8, top: PADDING_TOP + 4 },
+                                                  },
                                         ]}
                                     >
                                         <Text style={styles.barTooltipTitle}>

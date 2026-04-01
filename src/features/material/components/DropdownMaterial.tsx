@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     itemDisabled: {
         opacity: 0.5,
     },
-    itemSelected: { backgroundColor: '#F3F4F6' },
+    itemSelected: { backgroundColor: colors.gray[200] },
     itemText: { fontSize: 14, color: colors.text },
     itemTextSelected: { fontWeight: '500', color: colors.text },
     itemTextDisabled: { color: colors.textSecondary },
