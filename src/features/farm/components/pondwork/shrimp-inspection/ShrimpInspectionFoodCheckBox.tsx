@@ -38,10 +38,7 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
                 value={foodAmount}
                 onChangeText={handleFoodAmountChange}
                 inputFormat={InputFormat.DECIMAL}
-                maxDecimalPlaces={5}
-                maxDigits={21}
                 containerStyle={{ marginBottom: 0 }}
-                keyboardType="numeric"
                 required
             />
 

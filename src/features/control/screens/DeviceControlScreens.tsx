@@ -14,7 +14,10 @@ import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { DevicesStatus } from '@/features/control/components/DevicesStatus';
 import { PondCard } from '@/features/control/components/devices/PondCard';
-import { HelpOptionsModal } from '@/features/control/components/HelpOptionsModal';
+import {
+    HelpOptionsModal,
+    HelpOptionsModalRef,
+} from '@/features/control/components/HelpOptionsModal';
 import { colors, spacing } from '@/styles';
 import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -56,13 +59,7 @@ export const DeviceControlScreens = () => {
     }, [zones, selectedZoneId]);
 
     // Help Modal State
-    const [showHelpModal, setShowHelpModal] = useState(false);
-    const [helpButtonPosition, setHelpButtonPosition] = useState<{
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    } | null>(null);
+    const helpModalRef = useRef<HelpOptionsModalRef>(null);
 
     const [selectedAppTab, setSelectedAppTab] = useState('thiet-bi');
     const moreButtonRef = useRef<View>(null);
@@ -110,7 +107,7 @@ export const DeviceControlScreens = () => {
     useFocusEffect(
         useCallback(() => {
             return () => {
-                setShowHelpModal(false);
+                helpModalRef.current?.close();
             };
         }, [])
     );
@@ -131,8 +128,7 @@ export const DeviceControlScreens = () => {
     };
 
     const handleHelpPress = (position: { x: number; y: number; width: number; height: number }) => {
-        setHelpButtonPosition(position);
-        setShowHelpModal(true);
+        helpModalRef.current?.open(position);
     };
 
     const filteredPonds = useMemo(() => {
@@ -378,15 +374,13 @@ export const DeviceControlScreens = () => {
             )}
 
             <HelpOptionsModal
-                isOpen={showHelpModal}
-                buttonPosition={helpButtonPosition}
-                onClose={() => setShowHelpModal(false)}
+                ref={helpModalRef}
                 onPressUserManual={() => {
-                    setShowHelpModal(false);
+                    helpModalRef.current?.close();
                     navigation.navigate('GeneralUserManual');
                 }}
                 onPressDeviceExplanation={() => {
-                    setShowHelpModal(false);
+                    helpModalRef.current?.close();
                     navigation.navigate('UserManual');
                 }}
             />
@@ -406,7 +400,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: '700',
+        fontWeight: '600',
         color: colors.text,
     },
     headingBarContainer: {

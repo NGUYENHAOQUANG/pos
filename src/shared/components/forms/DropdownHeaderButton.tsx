@@ -196,7 +196,6 @@ export const DropdownHeaderButton: React.FC<DropdownHeaderButtonProps> = ({
                         {item.label}
                     </Text>
                 </View>
-                {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
             </TouchableOpacity>
         );
     };
@@ -358,7 +357,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     dropdownItemSelected: {
-        backgroundColor: colors.blue[50],
+        backgroundColor: colors.gray[200],
     },
     dropdownItemTextContainer: {
         marginRight: spacing.xs,

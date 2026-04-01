@@ -9,7 +9,6 @@ import {
     ViewStyle,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import ChevronDownIcon from '@/assets/Icon/ChevronDown.svg';
 import ChevronUpIcon from '@/assets/Icon/ChevronUp.svg';
 
@@ -104,7 +103,6 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                         speed={25}
                     />
                 </View>
-                {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
             </TouchableOpacity>
         );
     };
@@ -246,7 +244,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     dropdownItemSelected: {
-        backgroundColor: colors.blue[50],
+        backgroundColor: colors.gray[200],
     },
     dropdownItemTextContainer: {
         flex: 1,

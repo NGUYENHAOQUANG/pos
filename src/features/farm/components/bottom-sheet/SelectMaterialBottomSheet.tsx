@@ -185,9 +185,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     placeholder="Nhập số lượng"
                     value={quantity}
                     onChangeText={setQuantity}
-                    keyboardType="decimal-pad"
                     inputFormat={InputFormat.DECIMAL}
-                    maxDigits={6}
                     required
                     containerStyle={{ marginBottom: 0 }}
                 />

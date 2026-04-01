@@ -15,13 +15,9 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
                 placeholder="Số tôm hao (kg)"
                 value={lossAmount}
                 onChangeText={onLossAmountChange}
-                keyboardType="numeric"
                 inputFormat={InputFormat.DECIMAL}
-                maxDigits={20}
-                maxDecimalPlaces={5}
                 required
                 containerStyle={{ marginBottom: 0 }}
-                maxLength={20}
             />
         </SelectionInfoBox>
     );
