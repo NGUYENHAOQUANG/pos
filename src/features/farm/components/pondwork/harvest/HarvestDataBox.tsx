@@ -52,9 +52,6 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 value={String(yieldAmount)}
                 onChangeText={handleYieldAmountChange}
                 inputFormat={InputFormat.DECIMAL}
-                maxDecimalPlaces={5}
-                maxDigits={21}
-                keyboardType="numeric"
                 required
                 containerStyle={styles.inputGap}
             />
