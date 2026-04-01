@@ -15,6 +15,7 @@
     "dependencies": {
         "@ant-design/icons-react-native": "^2.3.2",
         "@ant-design/react-native": "^5.4.3",
+        "@bottom-tabs/react-navigation": "^1.1.0",
         "@callstack/liquid-glass": "^0.7.1",
         "@expo/vector-icons": "^15.0.3",
         "@hookform/resolvers": "^3.3.2",
@@ -41,6 +42,7 @@
         "react": "19.1.1",
         "react-hook-form": "^7.49.2",
         "react-native": "0.82.1",
+        "react-native-bottom-tabs": "^1.1.0",
         "react-native-check-version": "^1.4.0",
         "react-native-compressor": "^1.16.0",
         "react-native-curved-bottom-bar": "^3.5.1",
