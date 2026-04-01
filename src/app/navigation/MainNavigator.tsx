@@ -1,34 +1,31 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
 
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { colors, borderRadius } from '@/styles';
+import { fontFamily } from '@/styles/typography';
 import { SvgProps } from 'react-native-svg';
 
 // Main screens only (no nested stacks)
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond_list/ShrimpPondListScreens';
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
-import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens'; // Import Control Detail
+import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens';
 import { MaterialScreen } from '@/features/material/screens/material/MaterialScreen';
-// Note: MenuProvider removed - now using Zustand store (useMenuStore)
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
-
-// Providers
-// Note: ControlProvider removed - now using Zustand store (useControlStore)
 
 // Native Stack for Control Tab
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const ControlStack = createNativeStackNavigator();
 
-// Control Stack Screen - no provider needed, using Zustand directly
 const ControlStackScreen = () => (
     <ControlStack.Navigator screenOptions={{ headerShown: false }}>
         <ControlStack.Screen name="ControlList" component={DeviceControlScreens} />
@@ -38,7 +35,7 @@ const ControlStackScreen = () => (
 
 const MenuScreenWithProvider = MenuScreens;
 
-// Import Icons
+// Import SVG Icons (for Android / iOS < 26 fallback)
 import {
     IconReport,
     IconReportActive,
@@ -52,6 +49,9 @@ import {
     IconSettingActive,
 } from '@/assets/icons';
 
+// ════════════════════════════════════════════════════════════════════
+// Navigation Item config (shared metadata)
+// ════════════════════════════════════════════════════════════════════
 interface NavigationItem {
     key: string;
     label: string;
@@ -73,7 +73,7 @@ const navigationItems: NavigationItem[] = [
         label: 'Thiết bị',
         Icon: IconDevices,
         IconActive: IconDevicesActive,
-        component: ControlStackScreen, // Use Stack instead of single screen
+        component: ControlStackScreen,
     },
     {
         key: 'Farm',
@@ -98,6 +98,93 @@ const navigationItems: NavigationItem[] = [
     },
 ];
 
+// ════════════════════════════════════════════════════════════════════
+// iOS 26+ : Native Bottom Tabs (uses OS-level UITabBarController)
+// ════════════════════════════════════════════════════════════════════
+const NativeTab = createNativeBottomTabNavigator();
+
+const NativeTabNavigator = () => (
+    <View style={styles.container}>
+        <NativeTab.Navigator
+            initialRouteName="Farm"
+            screenOptions={() => ({
+                tabBarActiveTintColor: colors.orange[800],
+                tabBarInactiveTintColor: colors.gray[600],
+                tabBarBlurEffect: 'regular',
+                tabBarActiveIndicatorColor: colors.orange[800],
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                    fontWeight: '400',
+                    fontFamily: fontFamily.regular,
+                },
+                tabBarStyle: {
+                    backgroundColor: 'transparent',
+                },
+            })}
+        >
+            <NativeTab.Screen
+                name="Reports"
+                component={ReportsScreen}
+                options={{
+                    title: 'Báo cáo',
+                    tabBarIcon: ({ focused }: { focused: boolean }) =>
+                        focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Active.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Report.png'),
+                }}
+            />
+            <NativeTab.Screen
+                name="Devices"
+                component={ControlStackScreen}
+                options={{
+                    title: 'Thiết bị',
+                    tabBarIcon: ({ focused }: { focused: boolean }) =>
+                        focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Active.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Devices.png'),
+                }}
+            />
+            <NativeTab.Screen
+                name="Farm"
+                component={ShrimpPondListScreens}
+                options={{
+                    title: 'Trại nuôi',
+                    tabBarIcon: ({ focused }: { focused: boolean }) =>
+                        focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Active.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Farm.png'),
+                }}
+            />
+            <NativeTab.Screen
+                name="Material"
+                component={MaterialScreen}
+                options={{
+                    title: 'Vật tư',
+                    tabBarIcon: ({ focused }: { focused: boolean }) =>
+                        focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Active.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Material.png'),
+                }}
+            />
+            <NativeTab.Screen
+                name="Menu"
+                component={MenuScreenWithProvider}
+                options={{
+                    title: 'Tài khoản',
+                    tabBarIcon: ({ focused }: { focused: boolean }) =>
+                        focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Active.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Setting.png'),
+                }}
+            />
+        </NativeTab.Navigator>
+    </View>
+);
+
+// ════════════════════════════════════════════════════════════════════
+// Android / iOS < 26 : Custom Tab Bar (SVG icons, floating pill,
+//                      sliding indicator, white glass fallback)
+// ════════════════════════════════════════════════════════════════════
 const Tab = createBottomTabNavigator();
 
 interface AnimatedTabItemProps {
@@ -110,10 +197,9 @@ interface AnimatedTabItemProps {
 const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocused, onPress }) => {
     const indicatorScale = useRef(new Animated.Value(0)).current;
 
-    // Animate active indicator when tab becomes focused
     useEffect(() => {
         if (isFocused) {
-            indicatorScale.setValue(0.8); // Start slightly smaller for pop effect
+            indicatorScale.setValue(0.8);
             Animated.spring(indicatorScale, {
                 toValue: 1,
                 friction: 8,
@@ -124,7 +210,6 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
     }, [isFocused, indicatorScale]);
 
     const IconComponent = isFocused ? item.IconActive : item.Icon;
-
     const iconFill = isFocused ? colors.white : colors.gray[600];
     const iconColor = isFocused ? colors.white : colors.gray[600];
 
@@ -152,10 +237,6 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
     );
 };
 
-/**
- * Custom Tab Bar with Liquid Glass effect
- * Uses BlurView for frosted glass translucency with spring animations
- */
 const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
     const [barWidth, setBarWidth] = useState(0);
@@ -179,7 +260,6 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const innerWidth = Math.max(0, barWidth - 10);
     const tabWidth = innerWidth > 0 ? innerWidth / state.routes.length : 0;
 
-    // Tab bar items shared between glass and fallback
     const tabBarItems = (
         <>
             {barWidth > 0 && (
@@ -234,48 +314,6 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
         </>
     );
 
-    // ── iOS 26+: LiquidGlassView ─────────────────────────────────────
-    // ── Android / iOS < 26: BlurView fallback ────────────────────────
-    const tabBarContent = isLiquidGlassSupported ? (
-        <View
-            onLayout={e => {
-                handleLayout(e);
-                onBarLayout(e);
-            }}
-            style={[
-                styles.glassOuter,
-                {
-                    marginBottom: insets.bottom + 4,
-                },
-            ]}
-        >
-            <LiquidGlassView
-                effect="regular"
-                colorScheme="light"
-                tintColor="rgba(255, 255, 255, 0.15)"
-                style={styles.glassContainer}
-            >
-                <View style={styles.glassContent}>{tabBarItems}</View>
-            </LiquidGlassView>
-            <View style={styles.glassBorderOverlay} pointerEvents="none" />
-        </View>
-    ) : (
-        <View
-            onLayout={e => {
-                handleLayout(e);
-                onBarLayout(e);
-            }}
-            style={[
-                styles.fallbackContainer,
-                {
-                    marginBottom: insets.bottom + 4,
-                },
-            ]}
-        >
-            {tabBarItems}
-        </View>
-    );
-
     return (
         <View style={styles.tabBarWrapper}>
             <LinearGradient
@@ -292,61 +330,61 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                 style={styles.fadeGradient}
                 pointerEvents="none"
             />
-            {tabBarContent}
+            <View
+                onLayout={e => {
+                    handleLayout(e);
+                    onBarLayout(e);
+                }}
+                style={[
+                    styles.fallbackContainer,
+                    {
+                        marginBottom: insets.bottom + 4,
+                    },
+                ]}
+            >
+                {tabBarItems}
+            </View>
         </View>
     );
 };
 
 const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
 
+const ClassicTabNavigator = () => (
+    <View style={styles.container}>
+        <Tab.Navigator
+            initialRouteName="Farm"
+            screenOptions={{
+                headerShown: false,
+            }}
+            tabBar={renderTabBar}
+        >
+            {navigationItems.map(item => (
+                <Tab.Screen key={item.key} name={item.key} component={item.component} />
+            ))}
+        </Tab.Navigator>
+    </View>
+);
+
+// ════════════════════════════════════════════════════════════════════
+// Main Navigator — picks the right implementation at runtime
+// ════════════════════════════════════════════════════════════════════
 export function MainNavigator() {
     return (
         <BottomBarProvider>
-            <View style={styles.container}>
-                <Tab.Navigator
-                    initialRouteName="Farm"
-                    screenOptions={{
-                        headerShown: false,
-                    }}
-                    tabBar={renderTabBar}
-                >
-                    {navigationItems.map(item => (
-                        <Tab.Screen key={item.key} name={item.key} component={item.component} />
-                    ))}
-                </Tab.Navigator>
-            </View>
+            {isLiquidGlassSupported ? <NativeTabNavigator /> : <ClassicTabNavigator />}
         </BottomBarProvider>
     );
 }
 
+// ════════════════════════════════════════════════════════════════════
+// Styles (used by fallback / classic tab bar)
+// ════════════════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    bottomBlur: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 70,
-    },
 
-    // ── Liquid Glass Tab Bar ──────────────────────────────────────────
-    glassOuter: {
-        marginHorizontal: 16,
-        borderRadius: borderRadius.full,
-        overflow: 'hidden',
-    },
-    glassContainer: {
-        borderRadius: borderRadius.full,
-        overflow: 'hidden',
-    },
-    glassBorderOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.white,
-    },
     // ── Fallback (Android / iOS < 26) ─────────────────────────────────
     fallbackContainer: {
         flexDirection: 'row',
@@ -371,10 +409,6 @@ const styles = StyleSheet.create({
         right: 0,
         height: 80,
         overflow: 'hidden',
-    },
-    glassContent: {
-        flexDirection: 'row',
-        padding: 4,
     },
 
     // ── Wrapper ─────────────────────────────────────────────────────
@@ -411,7 +445,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.orange[800],
         borderRadius: borderRadius.full,
-        // Subtle inner glow for glass consistency
         shadowColor: colors.orange[800],
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
@@ -423,7 +456,6 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     iconActiveContainer: {
-        // Add subtle bounce for icon when selected
         transform: [{ scale: 1.1 }],
     },
     tabLabel: {
