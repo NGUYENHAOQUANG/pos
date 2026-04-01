@@ -62,7 +62,6 @@ interface ActivePondChartProps {
 
 export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
     const [expanded, setExpanded] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [containerWidth, setContainerWidth] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState<PondFilterType>('active');
     const scrollViewRef = useRef<ScrollView>(null);
@@ -73,16 +72,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 
     const { data: response, isLoading: isApiLoading } = usePondStatusDistribution({ zoneId });
 
-    const handleToggle = () => {
-        const nextExpanded = !expanded;
-        setExpanded(nextExpanded);
-        if (nextExpanded) {
-            setIsLoading(true);
-            setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-        }
-    };
+    const handleToggle = () => setExpanded(prev => !prev);
 
     // --- 1. XỬ LÝ DỮ LIỆU ---
     const processedData = useMemo(() => {
@@ -116,12 +106,12 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 
     // --- 2. TỰ ĐỘNG CUỘN ---
     useEffect(() => {
-        if (expanded && containerWidth > 0 && !isLoading) {
+        if (expanded && containerWidth > 0 && !isApiLoading) {
             setTimeout(() => {
                 scrollViewRef.current?.scrollToEnd({ animated: true });
             }, 100);
         }
-    }, [expanded, containerWidth, isLoading]);
+    }, [expanded, containerWidth, isApiLoading]);
 
     // --- 3. TÍNH TOÁN D3 ---
     const { yTicks, xTicks, yScale, chartContentWidth } = useMemo(() => {
@@ -234,7 +224,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 
             {expanded && (
                 <>
-                    {isLoading || isApiLoading ? (
+                    {isApiLoading ? (
                         <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
@@ -243,12 +233,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                     ) : (
                         containerWidth > 0 &&
                         yScale && (
-                            <View
-                                style={[
-                                    styles.contentContainer,
-                                    isLoading ? styles.loadingContainer : undefined,
-                                ]}
-                            >
+                            <View style={styles.contentContainer}>
                                 {/* --- VÙNG THỐNG KÊ POND INDEX --- */}
                                 <View style={styles.pondIndexWrapper}>
                                     <PondIndex

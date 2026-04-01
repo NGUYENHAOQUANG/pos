@@ -20,7 +20,7 @@ export const ExportWarehouseListScreen: React.FC = () => {
         const params: Record<string, string | number> = {};
 
         if (searchText?.trim()) {
-            params.Search = searchText.trim();
+            params.SearchText = searchText.trim();
         }
 
         if (filterMaterialName) {

@@ -272,11 +272,6 @@ export const Chart: React.FC<ChartProps> = ({
         return createLinePath(forecastData);
     };
 
-    // X-axis label: DD/MM (already formatted in DAY_LABELS)
-    const formatXLabel = (dateStr: string) => {
-        return dateStr;
-    };
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Khối lượng (Tấn)</Text>
@@ -423,7 +418,7 @@ export const Chart: React.FC<ChartProps> = ({
                                     fontSize={12}
                                     textAnchor={align}
                                 >
-                                    {formatXLabel(DAY_LABELS[index])}
+                                    {DAY_LABELS[index]}
                                 </SvgText>
                             );
                         })}

@@ -104,14 +104,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    emptyContainer: {
-        paddingVertical: 40,
-        alignItems: 'center',
-    },
-    emptyText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
     footerLoader: {
         paddingVertical: 16,
         alignItems: 'center',

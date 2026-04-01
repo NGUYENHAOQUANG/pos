@@ -67,15 +67,11 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
             {isExpanded && (
                 <View style={styles.content}>
                     {isLoading ? (
-                        <View style={{ height: 300 }}>
+                        <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
                     ) : isError ? (
-                        <View
-                            style={{ height: 300, justifyContent: 'center', alignItems: 'center' }}
-                        >
-                            <Text>Có lỗi xảy ra khi tải dữ liệu lượng nước.</Text>
-                        </View>
+                        <EmptyStateCard message="Có lỗi xảy ra khi tải dữ liệu lượng nước" />
                     ) : bars.length === 0 ? (
                         <EmptyStateCard message="Không có dữ liệu lượng nước" />
                     ) : (
@@ -250,6 +246,11 @@ const styles = StyleSheet.create({
     chartRow: {
         flexDirection: 'row',
         height: CHART_HEIGHT,
+    },
+    loadingContainer: {
+        height: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
