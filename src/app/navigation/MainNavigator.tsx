@@ -278,25 +278,20 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
     return (
         <View style={styles.tabBarWrapper}>
-            {/* iOS 26+: bottom blur | others: gradient fade */}
-            {isLiquidGlassSupported ? (
-                <View style={styles.bottomBlur} />
-            ) : (
-                <LinearGradient
-                    colors={[
-                        colors.fade[0],
-                        colors.fade[8],
-                        colors.fade[20],
-                        colors.fade[40],
-                        colors.fade[65],
-                        colors.fade[85],
-                        colors.fade[95],
-                    ]}
-                    locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
-                    style={styles.fadeGradient}
-                    pointerEvents="none"
-                />
-            )}
+            <LinearGradient
+                colors={[
+                    colors.fade[0],
+                    colors.fade[8],
+                    colors.fade[20],
+                    colors.fade[40],
+                    colors.fade[65],
+                    colors.fade[85],
+                    colors.fade[95],
+                ]}
+                locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
+                style={styles.fadeGradient}
+                pointerEvents="none"
+            />
             {tabBarContent}
         </View>
     );
@@ -375,7 +370,6 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 80,
-        marginHorizontal: 16,
         overflow: 'hidden',
     },
     glassContent: {
