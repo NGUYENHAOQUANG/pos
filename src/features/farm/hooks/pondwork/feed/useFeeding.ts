@@ -12,8 +12,7 @@ import type {
     FeedingRecordListParams,
     CreateFeedingRecordPayload,
 } from '@/features/farm/types/feedingRecord.types';
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { feedingService } from '@/features/farm/services/feeding.service';
+import { feedingLogService } from '@/features/farm/services/work-log';
 import { handleError } from '@/shared/utils';
 
 export const useFeedingRecords = (pondId: string, params?: FeedingRecordListParams) => {
@@ -26,11 +25,10 @@ export const useFeedingRecords = (pondId: string, params?: FeedingRecordListPara
 
 export const useFeedingRecordsAsJobs = (pondId: string, params?: FeedingRecordListParams) => {
     const { data, isLoading, error, refetch } = useFeedingRecords(pondId, params);
-    const { materialMap } = useFarmMaterials();
 
     const rawItems: FeedingRecordItem[] = data?.data?.items ?? [];
 
-    const jobs: JobExecution[] = feedingService.mapRecordsToJobs(rawItems, materialMap);
+    const jobs: JobExecution[] = feedingLogService.mapRecordsToJobs(rawItems);
 
     return { jobs, isLoading, error, refetch };
 };

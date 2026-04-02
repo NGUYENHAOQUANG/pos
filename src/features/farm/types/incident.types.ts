@@ -3,19 +3,12 @@ import type {
     IPaginate,
     PaginationParams,
     ICreatorEditor,
+    PondLogMaterialType,
 } from '@/shared/types/common.types';
-
-/** Material line in incident detail (API) */
-export interface IncidentDetailMaterial {
-    warehouseItemId: string;
-    quantity: number;
-    name?: string;
-    unitName?: string;
-}
 
 /** Incident detail body (API) */
 export interface IncidentDetail {
-    materials: IncidentDetailMaterial[];
+    materials: PondLogMaterialType[];
     notes: string;
 }
 
@@ -65,7 +58,7 @@ export interface IncidentListItem {
     value?: number;
     detail?: {
         notes?: string;
-        materials?: IncidentDetailMaterial[];
+        materials?: PondLogMaterialType[];
     };
     documentIds?: string[];
 }
