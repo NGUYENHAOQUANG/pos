@@ -293,6 +293,15 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
             // Call schedule API for each schedule entry when mode is schedule
             if (mode === 'schedule' && schedules.length > 0) {
                 try {
+                    const toLocalISO = (date: Date): string => {
+                        const y = date.getFullYear();
+                        const mo = String(date.getMonth() + 1).padStart(2, '0');
+                        const d = String(date.getDate()).padStart(2, '0');
+                        const h = String(date.getHours()).padStart(2, '0');
+                        const min = String(date.getMinutes()).padStart(2, '0');
+                        const sec = String(date.getSeconds()).padStart(2, '0');
+                        return `${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`;
+                    };
                     // Send all schedules that have valid start/end time
                     const validSchedules = schedules.filter(s => s.startTime && s.endTime);
 
@@ -309,8 +318,8 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                     // Include id for existing schedules (already saved on server)
                                     ...(!s.isNew ? { id: s.id } : {}),
                                     deviceId: deviceId!,
-                                    startTime: s.startTime!.toISOString(),
-                                    endtime: s.endTime!.toISOString(),
+                                    startTime: toLocalISO(s.startTime!),
+                                    endtime: toLocalISO(s.endTime!),
                                     runTime: parseInt(runDuration) || 0,
                                     pauseTime: parseInt(stopDuration) || 0,
                                 };
