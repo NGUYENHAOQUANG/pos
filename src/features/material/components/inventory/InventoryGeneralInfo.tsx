@@ -4,7 +4,6 @@ import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
-import { RequiredDot } from '@/shared/components/forms/Input';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -62,7 +61,6 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                 <View style={styles.inputContainer}>
                     <View style={styles.labelContainer}>
                         <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
-                        <RequiredDot />
                     </View>
 
                     <TextInput

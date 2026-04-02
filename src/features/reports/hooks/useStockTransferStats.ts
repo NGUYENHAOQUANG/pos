@@ -1,9 +1,9 @@
 /**
  * @file useStockTransferStats.ts
- * @description Hooks for stock transfer stats (normal query + infinite scroll)
+ * @description Hook for stock transfer stats with infinite scroll
  */
 import React from 'react';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { reportApi } from '../api/reportApi';
 import {
     StockTransferStatsParams,
@@ -19,18 +19,6 @@ const formatDateDDMMYYYY = (dateStr: string): string => {
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
-};
-
-// Standard query hook (kept for backward compatibility)
-export const useStockTransferStats = (params: StockTransferStatsParams) => {
-    return useQuery({
-        queryKey: ['report', 'stock-transfer-stats', params],
-        queryFn: () => {
-            if (!params.ZoneId) throw new Error('ZoneId is required');
-            return reportApi.getStockTransferStats(params);
-        },
-        enabled: !!params.ZoneId,
-    });
 };
 
 // Infinite scroll hook

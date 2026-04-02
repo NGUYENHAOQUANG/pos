@@ -29,6 +29,8 @@ export interface IPondRecordReferenceData {
     materials?: {
         warehouseItemId: string;
         quantity: number;
+        name?: string;
+        unitName?: string;
     }[];
 
     // ReleaseShrimp (operationType: "ReleaseShrimp")
