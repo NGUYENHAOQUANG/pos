@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { colors, spacing, borderRadius } from '@/styles';
+import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import {
     IInventoryCheck,
     IInventoryCheckItem,
@@ -78,10 +79,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                     value={<MaterialGroup group={getStatusLabel(data.status)} />}
                 />
                 <DetailRow label="Người kiểm" value={data.creator?.fullname || '---'} />
-                <DetailRow
-                    label="Ngày Kiểm"
-                    value={new Date(data.createdAt).toLocaleDateString('vi-VN')}
-                />
+                <DetailRow label="Ngày Kiểm" value={formatMaterialDateTime(data.createdAt)} />
                 <DetailRow label="Ghi chú:" value={data.note} />
                 <DetailRow label="Tổng chênh lệch:" value={totalDifference} />
             </View>

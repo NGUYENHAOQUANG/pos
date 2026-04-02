@@ -11,9 +11,6 @@ import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { APP_CONFIG } from '@/shared/constants';
 import { handleError } from '@/shared/utils';
 
-// Constants for staleTime
-const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
-
 /**
  * Hook to fetch export warehouse receipts
  */
@@ -27,7 +24,6 @@ export const useExportWarehouse = (params?: GetExportWarehouseParams) => {
             }
             return response.data || { items: [], totalCount: 0 };
         },
-        staleTime: STALE_TIME_SHORT,
     });
 };
 
@@ -59,7 +55,6 @@ export const useInfiniteExportWarehouse = (
             return lastPage.pageNumber + 1;
         },
         enabled: options?.enabled,
-        staleTime: STALE_TIME_SHORT,
     });
 
     const items = React.useMemo(() => {
