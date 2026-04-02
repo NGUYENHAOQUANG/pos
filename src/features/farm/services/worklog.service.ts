@@ -109,12 +109,19 @@ export type RefToActivityDataContext = {
 
 function pushMaterialRows(
     data: ActivityData[],
-    materials: { warehouseItemId: string; quantity: number; name?: string; unitName?: string }[],
+    materials: {
+        warehouseItemId: string;
+        quantity: number;
+        name?: string;
+        materialName?: string;
+        unitName?: string;
+    }[],
     materialMap: Record<string, { name?: string; unitName?: string }>
 ): void {
     materials.forEach(m => {
         const mat = materialMap[m.warehouseItemId];
-        const matName = mat?.name || m.name || 'Vật tư';
+        // Fallback: materialMap.name → m.materialName (record API) → m.name (detail API) → 'Vật tư'
+        const matName = mat?.name || m.materialName || m.name || 'Vật tư';
         const matUnit = mat?.unitName || m.unitName;
         const label = matUnit ? `${matName} (${matUnit})` : matName;
         data.push({ label, value: m.quantity });

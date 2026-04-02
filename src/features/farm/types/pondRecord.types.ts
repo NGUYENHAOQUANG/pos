@@ -29,7 +29,8 @@ export interface IPondRecordReferenceData {
     materials?: {
         warehouseItemId: string;
         quantity: number;
-        name?: string;
+        name?: string; // from detail APIs (waterTreatmentDetail, siphonDetail...)
+        materialName?: string; // from /record API (referenceData.materials)
         unitName?: string;
     }[];
 
