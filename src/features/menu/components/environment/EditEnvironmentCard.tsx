@@ -27,14 +27,10 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     onUpperLimitChange,
     onAlertToggle,
 }) => {
-    /** Non-negative decimal with dot separator, max 10 digits (not counting dot), max 5 decimal places */
     const handleLimitChange = useCallback(
         (callback: (text: string) => void) => (text: string) => {
-            // Only allow digits and dot
             let cleaned = text.replace(/[^0-9.]/g, '');
-            // Remove leading dots
             cleaned = cleaned.replace(/^\.+/, '');
-            // Keep only first dot
             const parts = cleaned.split('.');
             if (parts.length > 2) {
                 cleaned = parts[0] + '.' + parts.slice(1).join('');
@@ -73,7 +69,6 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 required
                 value={lowerLimit}
                 onChangeText={handleLimitChange(onLowerLimitChange)}
-                keyboardType="numeric"
                 placeholder="Nhập giới hạn dưới"
                 containerStyle={styles.inputGroup}
             />
@@ -84,7 +79,6 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 required
                 value={upperLimit}
                 onChangeText={handleLimitChange(onUpperLimitChange)}
-                keyboardType="numeric"
                 placeholder="Nhập giới hạn trên"
                 containerStyle={styles.inputGroup}
             />
