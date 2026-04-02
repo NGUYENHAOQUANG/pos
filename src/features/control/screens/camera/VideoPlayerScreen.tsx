@@ -90,7 +90,6 @@ export const VideoPlayerScreen: React.FC = () => {
                         style={styles.video}
                         javaScriptEnabled={true}
                         domStorageEnabled={true}
-                        startInLoadingState={true}
                         scrollEnabled={false}
                         bounces={false}
                         mediaPlaybackRequiresUserAction={false}
