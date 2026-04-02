@@ -6,7 +6,7 @@ import LinearGradient from 'react-native-linear-gradient';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
 
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
@@ -104,81 +104,94 @@ const navigationItems: NavigationItem[] = [
 const NativeTab = createNativeBottomTabNavigator();
 
 const NativeTabNavigator = () => (
-    <View style={styles.container}>
-        <NativeTab.Navigator
-            initialRouteName="Farm"
-            screenOptions={() => ({
-                tabBarActiveTintColor: colors.orange[800],
-                tabBarInactiveTintColor: colors.gray[600],
-                tabBarBlurEffect: 'regular',
-                tabBarActiveIndicatorColor: colors.orange[800],
-                tabBarLabelStyle: {
-                    fontSize: 12,
-                    fontWeight: '400',
-                    fontFamily: fontFamily.regular,
-                },
-                tabBarStyle: {
-                    backgroundColor: 'transparent',
-                },
-            })}
-        >
-            <NativeTab.Screen
-                name="Reports"
-                component={ReportsScreen}
-                options={{
-                    title: 'Báo cáo',
-                    tabBarIcon: ({ focused }: { focused: boolean }) =>
-                        focused
-                            ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Active.png')
-                            : require('@/assets/Icon/IconMainNavigator/Icon-Report.png'),
-                }}
-            />
-            <NativeTab.Screen
-                name="Devices"
-                component={ControlStackScreen}
-                options={{
-                    title: 'Thiết bị',
-                    tabBarIcon: ({ focused }: { focused: boolean }) =>
-                        focused
-                            ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Active.png')
-                            : require('@/assets/Icon/IconMainNavigator/Icon-Devices.png'),
-                }}
-            />
-            <NativeTab.Screen
-                name="Farm"
-                component={ShrimpPondListScreens}
-                options={{
-                    title: 'Trại nuôi',
-                    tabBarIcon: ({ focused }: { focused: boolean }) =>
-                        focused
-                            ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Active.png')
-                            : require('@/assets/Icon/IconMainNavigator/Icon-Farm.png'),
-                }}
-            />
-            <NativeTab.Screen
-                name="Material"
-                component={MaterialScreen}
-                options={{
-                    title: 'Vật tư',
-                    tabBarIcon: ({ focused }: { focused: boolean }) =>
-                        focused
-                            ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Active.png')
-                            : require('@/assets/Icon/IconMainNavigator/Icon-Material.png'),
-                }}
-            />
-            <NativeTab.Screen
-                name="Menu"
-                component={MenuScreenWithProvider}
-                options={{
-                    title: 'Tài khoản',
-                    tabBarIcon: ({ focused }: { focused: boolean }) =>
-                        focused
-                            ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Active.png')
-                            : require('@/assets/Icon/IconMainNavigator/Icon-Setting.png'),
-                }}
-            />
-        </NativeTab.Navigator>
-    </View>
+    <NativeTab.Navigator
+        initialRouteName="Farm"
+        screenOptions={{
+            headerShown: false,
+            tabBarBlurEffect: 'regular',
+            tabBarActiveTintColor: colors.primaryOrange,
+            tabBarLabelStyle: {
+                fontSize: 12,
+                fontWeight: '400',
+                fontFamily: fontFamily.regular,
+            },
+            tabBarStyle: {
+                backgroundColor: colors.white,
+            },
+            lazy: false,
+        }}
+    >
+        <NativeTab.Screen
+            name="Reports"
+            component={ReportsScreen}
+            options={{
+                title: 'Báo cáo',
+                tabBarIcon: ({ focused }) => ({
+                    type: 'image' as const,
+                    source: focused
+                        ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Active.png')
+                        : require('@/assets/Icon/IconMainNavigator/Icon-Report.png'),
+                    tinted: true,
+                }),
+            }}
+        />
+        <NativeTab.Screen
+            name="Devices"
+            component={ControlStackScreen}
+            options={{
+                title: 'Thiết bị',
+                tabBarIcon: ({ focused }) => ({
+                    type: 'image' as const,
+                    source: focused
+                        ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Active.png')
+                        : require('@/assets/Icon/IconMainNavigator/Icon-Devices.png'),
+                    tinted: true,
+                }),
+            }}
+        />
+        <NativeTab.Screen
+            name="Farm"
+            component={ShrimpPondListScreens}
+            options={{
+                title: 'Trại nuôi',
+                tabBarIcon: ({ focused }) => ({
+                    type: 'image' as const,
+                    source: focused
+                        ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Active.png')
+                        : require('@/assets/Icon/IconMainNavigator/Icon-Farm.png'),
+                    tinted: true,
+                }),
+            }}
+        />
+        <NativeTab.Screen
+            name="Material"
+            component={MaterialScreen}
+            options={{
+                title: 'Vật tư',
+                tabBarIcon: ({ focused }) => ({
+                    type: 'image' as const,
+                    source: focused
+                        ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Active.png')
+                        : require('@/assets/Icon/IconMainNavigator/Icon-Material.png'),
+                    tinted: true,
+                }),
+            }}
+        />
+        <NativeTab.Screen
+            name="Menu"
+            component={MenuScreenWithProvider}
+            options={{
+                title: 'Tài khoản',
+                tabBarIcon: ({ focused }) => ({
+                    type: 'image' as const,
+                    source: focused
+                        ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Active.png')
+                        : require('@/assets/Icon/IconMainNavigator/Icon-Setting.png'),
+                    tinted: true,
+                }),
+            }}
+        />
+    </NativeTab.Navigator>
 );
 
 // ════════════════════════════════════════════════════════════════════
@@ -383,9 +396,9 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.white,
     },
 
-    // ── Fallback (Android / iOS < 26) ─────────────────────────────────
     fallbackContainer: {
         flexDirection: 'row',
         backgroundColor: colors.white,

@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
@@ -44,6 +44,14 @@ onlineManager.setEventListener(setOnline => {
     });
 });
 
+const AppTheme = {
+    ...DefaultTheme,
+    colors: {
+        ...DefaultTheme.colors,
+        background: '#FFFFFF',
+    },
+};
+
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
 
@@ -63,7 +71,7 @@ export function AppProviders() {
                     <QueryClientProvider client={queryClient}>
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
-                                <NavigationContainer>
+                                <NavigationContainer theme={AppTheme}>
                                     <AppNavigator />
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>
