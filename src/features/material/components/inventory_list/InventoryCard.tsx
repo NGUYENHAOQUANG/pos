@@ -77,6 +77,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                     label="Trạng thái:"
                     value={<MaterialGroup group={getStatusLabel(data.status)} />}
                 />
+                <DetailRow label="Người kiểm" value={data.creator?.fullname || '---'} />
                 <DetailRow
                     label="Ngày Kiểm"
                     value={new Date(data.createdAt).toLocaleDateString('vi-VN')}
