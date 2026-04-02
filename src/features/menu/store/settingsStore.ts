@@ -16,6 +16,7 @@ interface SettingsState {
     tabSlideEnabled: boolean;
     tabSwipeEnabled: boolean;
     logoLoadingEnabled: boolean;
+    liquidGlassEnabled: boolean;
     lockMethod: LockMethod;
     autoLockTimeout: AutoLockTimeout;
     pinHash: string | null;
@@ -28,6 +29,7 @@ interface SettingsActions {
     toggleTabSlide: () => void;
     toggleTabSwipe: () => void;
     toggleLogoLoading: () => void;
+    toggleLiquidGlass: () => void;
     setLockMethod: (method: LockMethod) => void;
     setAutoLockTimeout: (timeout: AutoLockTimeout) => void;
     setPinHash: (hash: string | null) => void;
@@ -46,6 +48,7 @@ export const useSettingsStore = create<SettingsStore>()(
             tabSlideEnabled: true,
             tabSwipeEnabled: true,
             logoLoadingEnabled: true,
+            liquidGlassEnabled: true,
             lockMethod: 'none' as LockMethod,
             autoLockTimeout: 0 as AutoLockTimeout,
             pinHash: null,
@@ -78,6 +81,11 @@ export const useSettingsStore = create<SettingsStore>()(
             toggleLogoLoading: () =>
                 set(state => {
                     state.logoLoadingEnabled = !state.logoLoadingEnabled;
+                }),
+
+            toggleLiquidGlass: () =>
+                set(state => {
+                    state.liquidGlassEnabled = !state.liquidGlassEnabled;
                 }),
 
             setLockMethod: (method: LockMethod) =>

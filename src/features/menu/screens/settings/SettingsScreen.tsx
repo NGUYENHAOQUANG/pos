@@ -135,6 +135,7 @@ export const SettingsScreen: React.FC = () => {
     const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
     const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
     const logoLoadingEnabled = useSettingsStore(s => s.logoLoadingEnabled);
+    const liquidGlassEnabled = useSettingsStore(s => s.liquidGlassEnabled);
     const lockMethod = useSettingsStore(s => s.lockMethod);
     const autoLockTimeout = useSettingsStore(s => s.autoLockTimeout);
     const pinHash = useSettingsStore(s => s.pinHash);
@@ -144,6 +145,7 @@ export const SettingsScreen: React.FC = () => {
     const toggleTabSlide = useSettingsStore(s => s.toggleTabSlide);
     const toggleTabSwipe = useSettingsStore(s => s.toggleTabSwipe);
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
+    const toggleLiquidGlass = useSettingsStore(s => s.toggleLiquidGlass);
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
 
@@ -217,7 +219,7 @@ export const SettingsScreen: React.FC = () => {
 
                     {/* Animation Section */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Hiệu ứng chuyển động</Text>
+                        <Text style={styles.sectionTitle}>Giao diện & hiệu ứng</Text>
                         <View style={styles.card}>
                             <SettingRow
                                 title="Trượt chuyển tab"
@@ -241,6 +243,14 @@ export const SettingsScreen: React.FC = () => {
                                 subtitle="Dùng logo MebiEco làm hiệu ứng tải thay cho Loading mặc định"
                                 value={logoLoadingEnabled}
                                 onValueChange={handleToggleLogoLoading}
+                            />
+                        </View>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Liquid Glass"
+                                subtitle="Thanh điều hướng kiểu Liquid Glass trên iOS 26+"
+                                value={liquidGlassEnabled}
+                                onValueChange={toggleLiquidGlass}
                             />
                         </View>
                     </View>
