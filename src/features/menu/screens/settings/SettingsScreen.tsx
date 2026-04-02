@@ -14,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 interface SettingRowProps {
     title: string;
@@ -245,14 +246,16 @@ export const SettingsScreen: React.FC = () => {
                                 onValueChange={handleToggleLogoLoading}
                             />
                         </View>
-                        <View style={styles.card}>
-                            <SettingRow
-                                title="Liquid Glass"
-                                subtitle="Thanh điều hướng kiểu Liquid Glass trên iOS 26+"
-                                value={liquidGlassEnabled}
-                                onValueChange={toggleLiquidGlass}
-                            />
-                        </View>
+                        {isLiquidGlassSupported && (
+                            <View style={styles.card}>
+                                <SettingRow
+                                    title="Liquid Glass"
+                                    subtitle="Thanh điều hướng kiểu Liquid Glass trên iOS 26+ (cần khởi động lại)"
+                                    value={liquidGlassEnabled}
+                                    onValueChange={toggleLiquidGlass}
+                                />
+                            </View>
+                        )}
                     </View>
 
                     {/* Security Section */}

@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
+import {
+    StyleSheet,
+    TouchableOpacity,
+    View,
+    Animated,
+    LayoutChangeEvent,
+    Platform,
+} from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import LinearGradient from 'react-native-linear-gradient';
@@ -387,7 +394,7 @@ export function MainNavigator() {
     const liquidGlassEnabled = useSettingsStore(s => s.liquidGlassEnabled);
 
     // iOS 26+ with Liquid Glass — use native OS tab bar (only if user has it enabled)
-    if (isLiquidGlassSupported && liquidGlassEnabled) {
+    if (Platform.OS === 'ios' && isLiquidGlassSupported && liquidGlassEnabled) {
         return (
             <BottomBarProvider>
                 <NativeTabNavigator />
