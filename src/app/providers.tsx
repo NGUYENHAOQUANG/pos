@@ -17,27 +17,27 @@ import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
 import { NetworkStatusModal } from '@/shared/components/lostNetwork/NetworkStatusModal';
 import { ErrorBoundary } from '@/shared/components/error/ErrorBoundary';
+import {
+    BiometricLockScreen,
+    useBiometricLock,
+} from '@/shared/components/security/BiometricLockScreen';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 5 * 60 * 1000,
             retry: 3,
             refetchOnReconnect: true,
         },
     },
 });
 
-// Update React Query online status using NetInfo
 onlineManager.setEventListener(setOnline => {
     return NetInfo.addEventListener(state => {
         const isConnected = !!state.isConnected;
         setOnline(isConnected);
-
-        // Force refetch all active queries when connection is restored
-        // This ensures the app tries to download data immediately when network returns
         if (isConnected) {
             queryClient.invalidateQueries();
         }
@@ -46,12 +46,12 @@ onlineManager.setEventListener(setOnline => {
 
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
+    const { isLocked, handleUnlock } = useBiometricLock();
 
     useEffect(() => {
-        // Auto-hide splash screen after 2.5 seconds
         const timer = setTimeout(() => {
             setShowSplash(false);
-        }, 2500);
+        }, 3200);
 
         return () => clearTimeout(timer);
     }, []);
@@ -72,10 +72,8 @@ export function AppProviders() {
                 </AntdProvider>
             </GestureHandlerRootView>
 
-            {/* Splash Screen overlay - outside navigation stack, prevents back navigation */}
             <SplashScreen visible={showSplash} />
-
-            {/* Network Status Modal - monitors connection globally */}
+            {!showSplash && <BiometricLockScreen visible={isLocked} onUnlock={handleUnlock} />}
             <NetworkStatusModal />
         </SafeAreaProvider>
     );

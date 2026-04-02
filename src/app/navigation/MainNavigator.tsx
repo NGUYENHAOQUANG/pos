@@ -5,8 +5,11 @@ import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass
 import LinearGradient from 'react-native-linear-gradient';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Route } from '@react-navigation/native';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { colors, borderRadius } from '@/styles';
@@ -98,7 +101,8 @@ const navigationItems: NavigationItem[] = [
     },
 ];
 
-const Tab = createBottomTabNavigator();
+const SlideTab = createMaterialTopTabNavigator();
+const StandardTab = createBottomTabNavigator();
 
 interface AnimatedTabItemProps {
     route: { key: string; name: string };
@@ -154,9 +158,12 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
 
 /**
  * Custom Tab Bar with Liquid Glass effect
- * Uses BlurView for frosted glass translucency with spring animations
+ * Works with both BottomTab and MaterialTopTab navigators
+ * Using 'any' cast since both navigator types share identical tabBar shape
+ * but TypeScript can't cleanly union their emit() signatures
  */
-const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomTabBar = ({ state, navigation }: { state: any; navigation: any }) => {
     const insets = useSafeAreaInsets();
     const [barWidth, setBarWidth] = useState(0);
     const slideAnim = useRef(new Animated.Value(state.index)).current;
@@ -203,7 +210,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                 </Animated.View>
             )}
 
-            {state.routes.map(route => {
+            {state.routes.map((route: Route<string, object | undefined>) => {
                 const item = navigationItems.find(i => i.key === route.name);
                 const isFocused = route.name === currentRoute.name;
 
@@ -215,6 +222,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                     });
 
                     if (!event.defaultPrevented) {
+                        // For material top tabs navigating to the current route does essentially nothing (or closes top-level modals)
                         navigation.navigate(route.name);
                     }
                 };
@@ -277,7 +285,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     );
 
     return (
-        <View style={styles.tabBarWrapper}>
+        <View style={styles.tabBarWrapper} pointerEvents="box-none">
             <LinearGradient
                 colors={[
                     colors.fade[0],
@@ -297,23 +305,51 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     );
 };
 
-const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const renderTabBar = (props: any) => <CustomTabBar {...props} />;
 
 export function MainNavigator() {
+    const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
+    const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
+
     return (
         <BottomBarProvider>
             <View style={styles.container}>
-                <Tab.Navigator
-                    initialRouteName="Farm"
-                    screenOptions={{
-                        headerShown: false,
-                    }}
-                    tabBar={renderTabBar}
-                >
-                    {navigationItems.map(item => (
-                        <Tab.Screen key={item.key} name={item.key} component={item.component} />
-                    ))}
-                </Tab.Navigator>
+                {tabSlideEnabled ? (
+                    <SlideTab.Navigator
+                        initialRouteName="Farm"
+                        tabBarPosition="bottom"
+                        screenOptions={{
+                            swipeEnabled: tabSwipeEnabled,
+                            animationEnabled: true,
+                        }}
+                        tabBar={renderTabBar}
+                    >
+                        {navigationItems.map(item => (
+                            <SlideTab.Screen
+                                key={item.key}
+                                name={item.key}
+                                component={item.component}
+                            />
+                        ))}
+                    </SlideTab.Navigator>
+                ) : (
+                    <StandardTab.Navigator
+                        initialRouteName="Farm"
+                        screenOptions={{
+                            headerShown: false,
+                        }}
+                        tabBar={renderTabBar}
+                    >
+                        {navigationItems.map(item => (
+                            <StandardTab.Screen
+                                key={item.key}
+                                name={item.key}
+                                component={item.component}
+                            />
+                        ))}
+                    </StandardTab.Navigator>
+                )}
             </View>
         </BottomBarProvider>
     );
