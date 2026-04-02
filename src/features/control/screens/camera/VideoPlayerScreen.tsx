@@ -88,7 +88,9 @@ export const VideoPlayerScreen: React.FC = () => {
                     <WebView
                         source={webViewSource}
                         style={styles.video}
-                        javaScriptEnabled={false}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        startInLoadingState={true}
                         scrollEnabled={false}
                         bounces={false}
                         mediaPlaybackRequiresUserAction={false}

@@ -6,6 +6,9 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 
+/** Default padding for native tab bar (iOS UITabBarController ≈ 49px + safe area) */
+const NATIVE_TAB_BAR_FALLBACK = 100;
+
 interface BottomBarContextValue {
     /** Total height of the bottom bar including margins and safe area */
     bottomBarHeight: number;
@@ -18,8 +21,19 @@ const BottomBarContext = createContext<BottomBarContextValue>({
     onBarLayout: () => {},
 });
 
-export const BottomBarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [bottomBarHeight, setBottomBarHeight] = useState(0);
+interface BottomBarProviderProps {
+    children: React.ReactNode;
+    /** When true, sets a default fallback height for native tab bars (onBarLayout won't fire) */
+    isNativeTab?: boolean;
+}
+
+export const BottomBarProvider: React.FC<BottomBarProviderProps> = ({
+    children,
+    isNativeTab = false,
+}) => {
+    const [bottomBarHeight, setBottomBarHeight] = useState(
+        isNativeTab ? NATIVE_TAB_BAR_FALLBACK : 0
+    );
 
     const onBarLayout = useCallback((event: LayoutChangeEvent) => {
         const { height } = event.nativeEvent.layout;

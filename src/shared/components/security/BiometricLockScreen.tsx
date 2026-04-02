@@ -5,8 +5,8 @@ import {
     StatusBar,
     AppState,
     AppStateStatus,
-    Platform,
     TouchableOpacity,
+    Platform,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Animated, {
@@ -26,6 +26,8 @@ import { Button } from '@/shared/components/buttons/Button';
 import { PinEntryPad } from '@/shared/components/security/PinEntryPad';
 import { verifyPin } from '@/shared/utils/hashPin';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FaceIDIcon from '@/assets/Icon/FaceID.svg';
+import FingerprintIcon from '@/assets/Icon/Fingerprint.svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
@@ -63,6 +65,19 @@ interface LockScreenProps {
  * Full-screen lock overlay supporting biometric + PIN
  * Adapts UI based on lockMethod setting
  */
+/** Get the appropriate biometric SVG icon based on biometry type */
+function getBiometricSvgIcon(
+    biometryType: string | undefined
+): React.FC<{ width: number; height: number }> {
+    if (Platform.OS === 'ios') {
+        // Only show Fingerprint for iPhone SE (TouchID) — all others get FaceID
+        if (biometryType === BiometryTypes.TouchID) return FingerprintIcon;
+        return FaceIDIcon;
+    }
+    // Android: always Fingerprint
+    return FingerprintIcon;
+}
+
 export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlock }) => {
     const insets = useSafeAreaInsets();
     const lockMethod = useSettingsStore(s => s.lockMethod);
@@ -73,16 +88,31 @@ export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlo
     const [pinError, setPinError] = React.useState(false);
     const [failedAttempts, setFailedAttempts] = React.useState(0);
     const [forgotModalVisible, setForgotModalVisible] = React.useState(false);
+    const hasAutoTriggeredRef = useRef(false);
+    const [biometryType, setBiometryType] = React.useState<string | undefined>(undefined);
+
+    // Detect biometry type (FaceID / TouchID / Biometrics)
+    useEffect(() => {
+        rnBiometrics
+            .isSensorAvailable()
+            .then(({ biometryType: type }) => {
+                setBiometryType(type);
+            })
+            .catch(() => {});
+    }, []);
+
+    const BiometricSvgIcon = getBiometricSvgIcon(biometryType);
 
     const useBiometric = lockMethod === 'biometric' || lockMethod === 'both';
     const usePin = lockMethod === 'pin' || lockMethod === 'both';
     const showForgotPin = failedAttempts >= MAX_PIN_ATTEMPTS;
     const remainingAttempts = Math.max(0, MAX_PIN_ATTEMPTS - failedAttempts);
 
-    // Reset attempts when lock screen appears
+    // Reset attempts & auto-trigger flag when lock screen appears/disappears
     React.useEffect(() => {
         if (visible) {
             setFailedAttempts(0);
+            hasAutoTriggeredRef.current = false;
         }
     }, [visible]);
 
@@ -166,9 +196,11 @@ export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlo
         logout();
     }, [setPinHash, setLockMethod, onUnlock, logout]);
 
-    // Auto-trigger biometric when lock screen appears
+    // Auto-trigger biometric ONCE when lock screen appears
+    // Uses ref to prevent re-triggering when handleBiometricAuth reference changes
     useEffect(() => {
-        if (visible && useBiometric) {
+        if (visible && useBiometric && !hasAutoTriggeredRef.current) {
+            hasAutoTriggeredRef.current = true;
             const timer = setTimeout(() => {
                 handleBiometricAuth();
             }, 400);
@@ -245,11 +277,7 @@ export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlo
                 <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
                 <View style={styles.content}>
                     <Animated.View style={[styles.iconContainer, pulseStyle]}>
-                        <Ionicons
-                            name={Platform.OS === 'ios' ? 'finger-print' : 'finger-print-outline'}
-                            size={64}
-                            color={colors.primaryOrange}
-                        />
+                        <BiometricSvgIcon width={64} height={64} />
                     </Animated.View>
                     <Text style={styles.title}>Ứng dụng đang khóa</Text>
                     <Text style={styles.subtitle}>Xác thực để tiếp tục sử dụng Mebieco</Text>
@@ -302,6 +330,7 @@ export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlo
                     onComplete={handlePinComplete}
                     showBiometric
                     onBiometricPress={handleBiometricAuth}
+                    biometricIcon={<BiometricSvgIcon width={40} height={40} />}
                     error={pinError}
                     errorMessage={`Mã PIN không đúng, còn ${remainingAttempts} lần thử`}
                     onErrorReset={handlePinErrorReset}
@@ -335,18 +364,27 @@ export function useBiometricLock() {
     const isLockEnabled = lockMethod !== 'none';
 
     // Lock on first mount if lock is enabled
+    // Use a ref to capture the initial value — prevents locking when user
+    // just enabled PIN setup during this session (isLockEnabled transitions false→true)
+    const wasLockEnabledOnMountRef = useRef(isLockEnabled);
+
     useEffect(() => {
-        if (isLockEnabled && !hasInitiallyAuthRef.current) {
+        if (wasLockEnabledOnMountRef.current && !hasInitiallyAuthRef.current) {
             setIsLocked(true);
         }
-    }, [isLockEnabled]);
+        // Only run once on mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Monitor app state changes for auto-lock
+    // Only track 'background' (not 'inactive') — on iOS, system dialogs like
+    // FaceID/TouchID send 'inactive' → 'active', which would immediately re-lock
+    // the app if autoLockTimeout === 0, causing an infinite FaceID loop.
     useEffect(() => {
         if (!isLockEnabled) return;
 
         const handleAppStateChange = (nextAppState: AppStateStatus) => {
-            if (nextAppState === 'background' || nextAppState === 'inactive') {
+            if (nextAppState === 'background') {
                 backgroundTimestampRef.current = Date.now();
             } else if (nextAppState === 'active') {
                 if (backgroundTimestampRef.current !== null) {
@@ -367,6 +405,7 @@ export function useBiometricLock() {
 
     const handleUnlock = useCallback(() => {
         hasInitiallyAuthRef.current = true;
+        backgroundTimestampRef.current = null; // Xóa timestamp tránh re-lock khi active
         setIsLocked(false);
     }, []);
 
