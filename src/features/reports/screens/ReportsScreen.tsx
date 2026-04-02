@@ -16,20 +16,19 @@ import { HarvestChart } from '@/features/reports/components/harvest-chart/Harves
 import { FoodChart } from '@/features/reports/components/food-chart/FoodChart';
 import { HarvestStat } from '@/features/reports/components/harvest-stat/HarvestStat';
 import { PondTransfer } from '@/features/reports/components/pond-transfer/PondTransfer';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ReportStackParamList } from '@/features/reports/navigation/ReportNavigator';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { PondInfor } from '@/features/reports/components/PondInfor';
 import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
-import { useScrollToTop } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { spacing } from '@/styles/spacing';
 import { FarmData } from '@/features/farm/types/farm.types';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 import { useQueryClient } from '@tanstack/react-query';
 
-type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
-
-export const ReportsScreen = ({ navigation }: Props) => {
+export const ReportsScreen = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const bottomBarHeight = useBottomTabBarHeight();
     const queryClient = useQueryClient();
     // Ref for scroll to top
@@ -69,7 +68,6 @@ export const ReportsScreen = ({ navigation }: Props) => {
             area: '',
             address: '',
         };
-        // @ts-ignore
         navigation.navigate('FarmInfo', { farm: farmData });
     };
 
