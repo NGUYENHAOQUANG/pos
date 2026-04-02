@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { TextInput } from '@/shared/components/typography/AppTextInput';
-import { Text } from '@/shared/components/typography/Text';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -189,21 +187,16 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                 />
 
                 <View style={styles.content}>
-                    <View>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.label}>Công dụng</Text>
-                        </View>
-                        <TextInput
-                            style={[styles.input, styles.textArea]}
-                            placeholder="Nhập công dụng"
-                            placeholderTextColor={colors.textSecondary}
-                            value={usage}
-                            onChangeText={onUsageChange}
-                            multiline
-                            textAlignVertical="top"
-                            maxLength={2000}
-                        />
-                    </View>
+                    <Input
+                        label="Chú thích"
+                        placeholder="Nhập chú thích"
+                        value={usage}
+                        onChangeText={onUsageChange}
+                        multiline
+                        numberOfLines={3}
+                        maxLength={2000}
+                        inputContainerStyle={styles.textArea}
+                    />
 
                     <Input
                         label="Nhãn hiệu"
