@@ -1,17 +1,10 @@
-import React from 'react';
-
 import { formatCurrencyValue } from '@/shared/utils/formatters';
-import { View } from 'react-native';
 
-import { Text } from '@/shared/components/typography/Text';
-export const formatCurrency = (value: number) => {
-    return (
-        <View style={{ flexDirection: 'row' }}>
-            <Text style={{ fontSize: 14, fontWeight: '500' }}>{formatCurrencyValue(value)}</Text>
-            <Text style={{ textDecorationLine: 'underline', fontSize: 14, fontWeight: '500' }}>
-                {' '}
-                đ
-            </Text>
-        </View>
-    );
+/**
+ * Format currency value as plain text string with "đ" suffix
+ * @param value - Numeric value to format
+ * @returns Formatted string like "1,000 đ"
+ */
+export const formatCurrency = (value: number): string => {
+    return `${formatCurrencyValue(value)} ₫`;
 };
