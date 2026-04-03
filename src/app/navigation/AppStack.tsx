@@ -76,6 +76,9 @@ import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/De
 import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebViewScreen';
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
 
+// Weather screens
+import WeatherScreen from '@/features/weather/screens/WeatherScreen';
+
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -259,6 +262,9 @@ export type AppStackParamList = {
     DeleteAccount: undefined;
     PolicyWebView: { url: string; title: string };
     Settings: undefined;
+
+    // ============== Weather Screens ==============
+    WeatherScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -374,6 +380,9 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
             <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+
+            {/* ============== Weather Screens ============== */}
+            <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
         </Stack.Navigator>
     );
 };

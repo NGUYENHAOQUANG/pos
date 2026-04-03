@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import SwimmingPoolIcon from '@/assets/Icon/IconMenu/SwimmingPool.svg';
 import ToolboxIcon from '@/assets/Icon/IconMenu/Toolbox.svg';
 import ChartBarIcon from '@/assets/Icon/IconMenu/ChartBar.svg';
+import WeatherForecastIcon from '@/assets/Icon/IconMenu/WeatherForecast.svg';
 
 interface FarmOperationItemProps {
     Icon: React.FC<SvgProps>;
@@ -50,6 +51,12 @@ export const FarmOperation: React.FC = () => {
             title: 'Thiết lập thông số môi trường',
             Icon: ChartBarIcon,
             screen: 'SettingEnvironment',
+        },
+        {
+            id: 'weather',
+            title: 'Dự báo thời tiết',
+            Icon: WeatherForecastIcon,
+            screen: 'WeatherScreen',
         },
     ];
 
