@@ -1,11 +1,6 @@
-/**
- * @file useWeatherForecast.ts
- * @description React Query hook for weather forecast data
- * @author AI Assistant
- * @created 2026-04-03
- */
-
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { WeatherNotificationService } from '@/features/weather/services/weatherNotification.service';
 import { weatherApi } from '@/features/weather/api/weatherApi';
 import { IWeatherData, IWeatherLocation } from '@/features/weather/types/weather.types';
 
@@ -25,7 +20,7 @@ export const weatherKeys = {
  * Auto-refreshes every 15 minutes for near real-time data
  */
 export const useWeatherForecast = (location: IWeatherLocation | null) => {
-    return useQuery<IWeatherData>({
+    const query = useQuery<IWeatherData>({
         queryKey: weatherKeys.forecast(location?.latitude ?? 0, location?.longitude ?? 0),
         queryFn: () => weatherApi.getWeatherForecast(location!.latitude, location!.longitude),
         enabled: !!location,
@@ -33,4 +28,21 @@ export const useWeatherForecast = (location: IWeatherLocation | null) => {
         staleTime: STALE_TIME,
         retry: 2,
     });
+
+    useEffect(() => {
+        WeatherNotificationService.initialize().catch(() => {
+            // Ignore permission silently if user denies it
+            console.log('Push notification permission denied / ignored.');
+        });
+    }, []);
+
+    useEffect(() => {
+        if (query.data) {
+            WeatherNotificationService.checkAndNotify(query.data.current, query.data.daily).catch(
+                console.error
+            );
+        }
+    }, [query.data, query.data?.current.time]);
+
+    return query;
 };

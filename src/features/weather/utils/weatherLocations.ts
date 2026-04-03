@@ -1,10 +1,3 @@
-/**
- * @file weatherLocations.ts
- * @description Predefined shrimp farming provinces in Vietnam with coordinates
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import { IWeatherLocation } from '@/features/weather/types/weather.types';
 
 /**

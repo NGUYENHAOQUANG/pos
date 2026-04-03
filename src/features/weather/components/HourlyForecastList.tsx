@@ -1,16 +1,10 @@
-/**
- * @file HourlyForecastList.tsx
- * @description Horizontal scrollable hourly forecast - iOS Weather style
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React, { useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IHourlyForecast } from '@/features/weather/types/weather.types';
 import { getWeatherInfo } from '@/features/weather/utils/weatherCodes';
+import WeatherIcon from '@/features/weather/components/WeatherIcon';
 
 interface HourlyForecastListProps {
     readonly hourlyData: readonly IHourlyForecast[];
@@ -44,7 +38,11 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
                         return (
                             <View key={`hourly-${index}`} style={styles.hourItem}>
                                 <Text style={styles.hourText}>{formatHour(item.time)}</Text>
-                                <Text style={styles.hourIcon}>{weatherInfo.icon}</Text>
+                                <WeatherIcon
+                                    name={weatherInfo.icon}
+                                    size={22}
+                                    color="rgba(255, 255, 255, 0.9)"
+                                />
                                 <Text style={styles.hourTemp}>
                                     {Math.round(item.temperature2m)}°
                                 </Text>
@@ -100,8 +98,7 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.medium,
     },
 
-    hourIcon: {
-        fontSize: typography.fontSize.xl,
+    hourIconWrapper: {
         marginVertical: spacing.xs,
     },
 

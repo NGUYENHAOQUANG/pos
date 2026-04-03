@@ -1,10 +1,3 @@
-/**
- * @file WeatherScreen.tsx
- * @description Main weather forecast screen - iOS Weather app style
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React, { useMemo, useState } from 'react';
 import {
     View,
@@ -22,7 +15,8 @@ import { colors, spacing, typography, borderRadius } from '@/styles';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useWeatherForecast } from '@/features/weather/hooks/useWeatherForecast';
-import { getWeatherInfo, getWeatherIcon } from '@/features/weather/utils/weatherCodes';
+import { getWeatherInfo, getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
+import WeatherIcon from '@/features/weather/components/WeatherIcon';
 import { useWeatherStore } from '@/features/weather/store/weatherStore';
 import LocationPickerModal from '@/features/weather/components/LocationPickerModal';
 import HourlyForecastList from '@/features/weather/components/HourlyForecastList';
@@ -141,7 +135,7 @@ const WeatherScreen: React.FC = () => {
     }
 
     const weatherInfo = getWeatherInfo(weatherData.current.weatherCode);
-    const weatherIcon = getWeatherIcon(
+    const weatherIconKey = getWeatherIconKey(
         weatherData.current.weatherCode,
         weatherData.current.isDay === 1
     );
@@ -188,9 +182,10 @@ const WeatherScreen: React.FC = () => {
                     </Text>
 
                     {/* Weather condition */}
-                    <Text style={styles.heroCondition}>
-                        {weatherIcon} {weatherInfo.label}
-                    </Text>
+                    <View style={styles.heroConditionRow}>
+                        <WeatherIcon name={weatherIconKey} size={28} color={colors.white} />
+                        <Text style={styles.heroCondition}>{weatherInfo.label}</Text>
+                    </View>
 
                     {/* High / Low */}
                     {todayForecast && (
@@ -204,24 +199,28 @@ const WeatherScreen: React.FC = () => {
                 {/* ===== Detail Metrics Row ===== */}
                 <View style={styles.metricsCard}>
                     <MetricItem
-                        icon="🌡️"
+                        iconName="Thermometer"
                         label="Cảm giác"
                         value={`${Math.round(weatherData.current.apparentTemperature)}°`}
                     />
                     <View style={styles.metricDivider} />
                     <MetricItem
-                        icon="💧"
+                        iconName="Humidity"
                         label="Độ ẩm"
                         value={`${weatherData.current.relativeHumidity2m}%`}
                     />
                     <View style={styles.metricDivider} />
                     <MetricItem
-                        icon="💨"
+                        iconName="Wind"
                         label="Gió"
                         value={`${Math.round(weatherData.current.windSpeed10m)} km/h`}
                     />
                     <View style={styles.metricDivider} />
-                    <MetricItem icon="🌧️" label="Mưa" value={`${weatherData.current.rain} mm`} />
+                    <MetricItem
+                        iconName="Raindrop"
+                        label="Mưa"
+                        value={`${weatherData.current.rain} mm`}
+                    />
                 </View>
 
                 {/* ===== Farming Alerts ===== */}
@@ -254,14 +253,14 @@ const WeatherScreen: React.FC = () => {
 
 /* ===== Metric Item Sub-component ===== */
 interface MetricItemProps {
-    readonly icon: string;
+    readonly iconName: string;
     readonly label: string;
     readonly value: string;
 }
 
-const MetricItem: React.FC<MetricItemProps> = ({ icon, label, value }) => (
+const MetricItem: React.FC<MetricItemProps> = ({ iconName, label, value }) => (
     <View style={styles.metricItem}>
-        <Text style={styles.metricIcon}>{icon}</Text>
+        <WeatherIcon name={iconName} size={20} color={colors.white} />
         <Text style={styles.metricValue}>{value}</Text>
         <Text style={styles.metricLabel}>{label}</Text>
     </View>
@@ -369,6 +368,12 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.light,
         color: colors.white,
         marginVertical: spacing.xs,
+    },
+
+    heroConditionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
     },
 
     heroCondition: {

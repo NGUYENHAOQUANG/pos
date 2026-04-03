@@ -1,16 +1,10 @@
-/**
- * @file DailyForecastList.tsx
- * @description 7-day weather forecast list - iOS Weather style
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IDailyForecast } from '@/features/weather/types/weather.types';
 import { getWeatherInfo } from '@/features/weather/utils/weatherCodes';
+import WeatherIcon from '@/features/weather/components/WeatherIcon';
 
 interface DailyForecastListProps {
     readonly dailyData: readonly IDailyForecast[];
@@ -56,7 +50,11 @@ const DailyForecastList: React.FC<DailyForecastListProps> = ({ dailyData }) => {
 
                             {/* Weather icon + rain */}
                             <View style={styles.weatherSection}>
-                                <Text style={styles.dayIcon}>{weatherInfo.icon}</Text>
+                                <WeatherIcon
+                                    name={weatherInfo.icon}
+                                    size={22}
+                                    color="rgba(255, 255, 255, 0.9)"
+                                />
                                 {item.rainSum > 0 && (
                                     <Text style={styles.rainText}>{item.rainSum.toFixed(1)}mm</Text>
                                 )}
@@ -135,8 +133,9 @@ const styles = StyleSheet.create({
         gap: spacing.xs,
     },
 
-    dayIcon: {
-        fontSize: typography.fontSize.xl,
+    dayIconWrapper: {
+        width: 22,
+        height: 22,
     },
 
     rainText: {

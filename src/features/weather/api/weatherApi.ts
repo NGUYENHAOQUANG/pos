@@ -1,10 +1,3 @@
-/**
- * @file weatherApi.ts
- * @description Open-Meteo API client - no API key required
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import axios from 'axios';
 import {
     IOpenMeteoFullResponse,

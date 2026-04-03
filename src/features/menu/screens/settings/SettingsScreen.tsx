@@ -147,6 +147,8 @@ export const SettingsScreen: React.FC = () => {
     const toggleTabSwipe = useSettingsStore(s => s.toggleTabSwipe);
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
     const toggleLiquidGlass = useSettingsStore(s => s.toggleLiquidGlass);
+    const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
+    const toggleWeather = useSettingsStore(s => s.toggleWeather);
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
 
@@ -256,6 +258,19 @@ export const SettingsScreen: React.FC = () => {
                                 />
                             </View>
                         )}
+                    </View>
+
+                    {/* Feature Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Dự báo thời tiết</Text>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Dự báo thời tiết"
+                                subtitle="Hiển thị tính năng dự báo thời tiết trong mục Vận hành trại nuôi"
+                                value={weatherEnabled}
+                                onValueChange={toggleWeather}
+                            />
+                        </View>
                     </View>
 
                     {/* Security Section */}

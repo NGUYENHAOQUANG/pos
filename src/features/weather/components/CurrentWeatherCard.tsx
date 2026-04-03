@@ -1,17 +1,11 @@
-/**
- * @file CurrentWeatherCard.tsx
- * @description Card displaying current weather conditions
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { shadows } from '@/styles/shadows';
 import { ICurrentWeather } from '@/features/weather/types/weather.types';
-import { getWeatherInfo, getWeatherIcon } from '@/features/weather/utils/weatherCodes';
+import { getWeatherInfo, getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
+import WeatherIcon from '@/features/weather/components/WeatherIcon';
 
 interface CurrentWeatherCardProps {
     readonly current: ICurrentWeather;
@@ -20,13 +14,13 @@ interface CurrentWeatherCardProps {
 
 const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({ current, locationName }) => {
     const weatherInfo = getWeatherInfo(current.weatherCode);
-    const icon = getWeatherIcon(current.weatherCode, current.isDay === 1);
+    const iconKey = getWeatherIconKey(current.weatherCode, current.isDay === 1);
 
     return (
         <View style={styles.container}>
             {/* Main temperature area */}
             <View style={styles.mainSection}>
-                <Text style={styles.weatherIcon}>{icon}</Text>
+                <WeatherIcon name={iconKey} size={48} color={colors.blue[600]} />
                 <Text style={styles.temperature}>{Math.round(current.temperature2m)}°C</Text>
                 <Text style={styles.weatherLabel}>{weatherInfo.label}</Text>
                 {locationName && <Text style={styles.location}>📍 {locationName}</Text>}
@@ -35,21 +29,26 @@ const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({ current, locati
             {/* Detail metrics */}
             <View style={styles.metricsRow}>
                 <MetricItem
-                    icon="🌡️"
+                    iconName="Thermometer"
                     label="Cảm giác"
                     value={`${Math.round(current.apparentTemperature)}°C`}
                 />
-                <MetricItem icon="💧" label="Độ ẩm" value={`${current.relativeHumidity2m}%`} />
                 <MetricItem
-                    icon="💨"
+                    iconName="Humidity"
+                    label="Độ ẩm"
+                    value={`${current.relativeHumidity2m}%`}
+                />
+                <MetricItem
+                    iconName="Wind"
                     label="Gió"
                     value={`${Math.round(current.windSpeed10m)} km/h`}
                 />
-                <MetricItem icon="🌧️" label="Mưa" value={`${current.rain} mm`} />
+                <MetricItem iconName="Raindrop" label="Mưa" value={`${current.rain} mm`} />
             </View>
 
             {/* Pressure row */}
             <View style={styles.pressureRow}>
+                <WeatherIcon name="Pressure" size={14} color={colors.textTertiary} />
                 <Text style={styles.pressureLabel}>Áp suất:</Text>
                 <Text style={styles.pressureValue}>{Math.round(current.pressure)} hPa</Text>
             </View>
@@ -60,14 +59,14 @@ const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({ current, locati
 /* ===== Metric Item Sub-component ===== */
 
 interface MetricItemProps {
-    readonly icon: string;
+    readonly iconName: string;
     readonly label: string;
     readonly value: string;
 }
 
-const MetricItem: React.FC<MetricItemProps> = ({ icon, label, value }) => (
+const MetricItem: React.FC<MetricItemProps> = ({ iconName, label, value }) => (
     <View style={styles.metricItem}>
-        <Text style={styles.metricIcon}>{icon}</Text>
+        <WeatherIcon name={iconName} size={18} color={colors.blue[600]} />
         <Text style={styles.metricValue}>{value}</Text>
         <Text style={styles.metricLabel}>{label}</Text>
     </View>
@@ -87,10 +86,6 @@ const styles = StyleSheet.create({
     mainSection: {
         alignItems: 'center',
         paddingVertical: spacing.sm,
-    },
-
-    weatherIcon: {
-        fontSize: typography.fontSize['5xl'],
     },
 
     temperature: {
@@ -125,10 +120,6 @@ const styles = StyleSheet.create({
     metricItem: {
         alignItems: 'center',
         gap: 2,
-    },
-
-    metricIcon: {
-        fontSize: typography.fontSize.lg,
     },
 
     metricValue: {

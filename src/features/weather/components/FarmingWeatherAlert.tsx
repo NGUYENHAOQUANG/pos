@@ -1,15 +1,9 @@
-/**
- * @file FarmingWeatherAlert.tsx
- * @description Alert card for weather conditions affecting shrimp farming - iOS style
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { spacing, typography, borderRadius } from '@/styles';
 import { ICurrentWeather, IDailyForecast } from '@/features/weather/types/weather.types';
+import WeatherIcon from '@/features/weather/components/WeatherIcon';
 
 interface FarmingWeatherAlertProps {
     readonly current: ICurrentWeather;
@@ -38,7 +32,7 @@ const analyzeAlerts = (
             message: `Nhiệt độ cao ${Math.round(
                 current.temperature2m
             )}°C — Nguy cơ tôm bị sốc nhiệt. Cần tăng quạt nước và bổ sung nước.`,
-            icon: '🔥',
+            icon: 'Fire',
         });
     } else if (current.temperature2m < 22) {
         alerts.push({
@@ -46,7 +40,7 @@ const analyzeAlerts = (
             message: `Nhiệt độ thấp ${Math.round(
                 current.temperature2m
             )}°C — Tôm dễ bị stress, giảm ăn. Cần giảm lượng thức ăn.`,
-            icon: '🥶',
+            icon: 'Cold',
         });
     }
 
@@ -58,13 +52,13 @@ const analyzeAlerts = (
             message: `Dự báo mưa lớn ${todayForecast.rainSum.toFixed(
                 1
             )}mm — Chuẩn bị vôi, kiểm tra pH sau mưa.`,
-            icon: '⛈️',
+            icon: 'Thunderstorm',
         });
     } else if (current.rain > 5) {
         alerts.push({
             type: 'warning',
             message: `Đang mưa ${current.rain}mm/h — Theo dõi DO và pH, giảm cho ăn.`,
-            icon: '🌧️',
+            icon: 'Rain',
         });
     }
 
@@ -75,7 +69,7 @@ const analyzeAlerts = (
             message: `Gió mạnh ${Math.round(
                 current.windSpeed10m
             )} km/h — Kiểm tra bạt phủ ao, dây neo.`,
-            icon: '🌪️',
+            icon: 'Tornado',
         });
     }
 
@@ -84,7 +78,7 @@ const analyzeAlerts = (
         alerts.push({
             type: 'info',
             message: 'Độ ẩm rất cao — Tăng sục khí để bổ sung oxy cho ao.',
-            icon: '💧',
+            icon: 'Humidity',
         });
     }
 
@@ -93,7 +87,7 @@ const analyzeAlerts = (
         alerts.push({
             type: 'danger',
             message: 'Cảnh báo giông bão — Tắt thiết bị điện, gia cố ao nuôi.',
-            icon: '⚡',
+            icon: 'Lightning',
         });
     }
 
@@ -102,7 +96,7 @@ const analyzeAlerts = (
         alerts.push({
             type: 'info',
             message: 'Thời tiết thuận lợi cho nuôi tôm. Tiếp tục chế độ chăm sóc bình thường.',
-            icon: '✅',
+            icon: 'CheckCircle',
         });
     }
 
@@ -133,7 +127,11 @@ const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, dail
                         key={`alert-${index}`}
                         style={[styles.alertItem, { backgroundColor: ALERT_COLORS[alert.type] }]}
                     >
-                        <Text style={styles.alertIcon}>{alert.icon}</Text>
+                        <WeatherIcon
+                            name={alert.icon}
+                            size={20}
+                            color={ALERT_TEXT_COLORS[alert.type]}
+                        />
                         <Text
                             style={[styles.alertMessage, { color: ALERT_TEXT_COLORS[alert.type] }]}
                         >

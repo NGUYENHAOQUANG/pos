@@ -5,6 +5,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
 import { SvgProps } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 import SwimmingPoolIcon from '@/assets/Icon/IconMenu/SwimmingPool.svg';
 import ToolboxIcon from '@/assets/Icon/IconMenu/Toolbox.svg';
@@ -32,6 +33,7 @@ const FarmOperationItem: React.FC<FarmOperationItemProps> = ({ Icon, title, onPr
 
 export const FarmOperation: React.FC = () => {
     const navigation = useNavigation<any>();
+    const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
 
     const operations = [
         {
@@ -52,12 +54,16 @@ export const FarmOperation: React.FC = () => {
             Icon: ChartBarIcon,
             screen: 'SettingEnvironment',
         },
-        {
-            id: 'weather',
-            title: 'Dự báo thời tiết',
-            Icon: WeatherForecastIcon,
-            screen: 'WeatherScreen',
-        },
+        ...(weatherEnabled
+            ? [
+                  {
+                      id: 'weather',
+                      title: 'Dự báo thời tiết',
+                      Icon: WeatherForecastIcon,
+                      screen: 'WeatherScreen',
+                  },
+              ]
+            : []),
     ];
 
     return (

@@ -1,10 +1,3 @@
-/**
- * @file weather.types.ts
- * @description Weather forecast type definitions for Open-Meteo API
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 /** Weather code mapping from WMO standard */
 export interface IWeatherCodeInfo {
     readonly label: string;

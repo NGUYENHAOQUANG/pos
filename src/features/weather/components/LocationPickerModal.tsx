@@ -1,10 +1,3 @@
-/**
- * @file LocationPickerModal.tsx
- * @description Bottom sheet modal to pick weather location - iOS style
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React, { useState, useMemo } from 'react';
 import {
     View,

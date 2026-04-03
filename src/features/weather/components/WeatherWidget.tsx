@@ -1,16 +1,10 @@
-/**
- * @file WeatherWidget.tsx
- * @description Compact weather widget for embedding in Farm dashboard/header
- * @author AI Assistant
- * @created 2026-04-03
- */
-
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { ICurrentWeather } from '@/features/weather/types/weather.types';
-import { getWeatherIcon } from '@/features/weather/utils/weatherCodes';
+import { getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
+import WeatherIcon from '@/features/weather/components/WeatherIcon';
 
 interface WeatherWidgetProps {
     readonly current: ICurrentWeather;
@@ -22,18 +16,24 @@ interface WeatherWidgetProps {
  * Shows: icon + temperature + humidity + rain
  */
 const WeatherWidget: React.FC<WeatherWidgetProps> = ({ current, onPress }) => {
-    const icon = getWeatherIcon(current.weatherCode, current.isDay === 1);
+    const iconKey = getWeatherIconKey(current.weatherCode, current.isDay === 1);
 
     const content = (
         <View style={styles.container}>
-            <Text style={styles.icon}>{icon}</Text>
+            <WeatherIcon name={iconKey} size={18} color={colors.blue[600]} />
             <Text style={styles.temp}>{Math.round(current.temperature2m)}°C</Text>
             <View style={styles.separator} />
-            <Text style={styles.detail}>💧{current.relativeHumidity2m}%</Text>
+            <View style={styles.detailRow}>
+                <WeatherIcon name="Humidity" size={12} color={colors.textSecondary} />
+                <Text style={styles.detail}>{current.relativeHumidity2m}%</Text>
+            </View>
             {current.rain > 0 && (
                 <>
                     <View style={styles.separator} />
-                    <Text style={styles.detail}>🌧️{current.rain}mm</Text>
+                    <View style={styles.detailRow}>
+                        <WeatherIcon name="Raindrop" size={12} color={colors.textSecondary} />
+                        <Text style={styles.detail}>{current.rain}mm</Text>
+                    </View>
                 </>
             )}
         </View>
@@ -64,10 +64,6 @@ const styles = StyleSheet.create({
         gap: spacing.xs,
     },
 
-    icon: {
-        fontSize: typography.fontSize.base,
-    },
-
     temp: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.semibold,
@@ -78,6 +74,12 @@ const styles = StyleSheet.create({
         width: 1,
         height: 14,
         backgroundColor: colors.borderMedium,
+    },
+
+    detailRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
     },
 
     detail: {
