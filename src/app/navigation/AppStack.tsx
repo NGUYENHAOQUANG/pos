@@ -75,6 +75,7 @@ import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/
 import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebViewScreen';
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
+import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen';
 
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
@@ -265,6 +266,7 @@ export type AppStackParamList = {
 
     // ============== Weather Screens ==============
     WeatherScreen: undefined;
+    PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -383,6 +385,7 @@ export const AppStack: React.FC = () => {
 
             {/* ============== Weather Screens ============== */}
             <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
+            <Stack.Screen name="PinSetup" component={PinSetupScreen} />
         </Stack.Navigator>
     );
 };

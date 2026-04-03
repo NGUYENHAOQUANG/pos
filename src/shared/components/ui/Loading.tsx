@@ -12,6 +12,8 @@ import Animated, {
     SharedValue,
 } from 'react-native-reanimated';
 import { colors } from '@/styles';
+import { AnimatedLogoLoading } from '@/shared/components/brand/AnimatedLogoLoading';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 const DOT_COUNT = 6;
 const CYCLE_DURATION = 2400;
@@ -111,11 +113,14 @@ export const Loading: React.FC<LoadingProps> = ({
 }) => {
     const sizeNum = getNumericSize(size);
     const mainColor = color as string;
+    const logoLoadingEnabled = useSettingsStore(s => s.logoLoadingEnabled);
 
     const rotation = useSharedValue(0);
     const progress = useSharedValue(0);
 
     useEffect(() => {
+        if (logoLoadingEnabled) return;
+
         // Continuous rotation
         rotation.value = withRepeat(
             withTiming(360, {
@@ -133,37 +138,41 @@ export const Loading: React.FC<LoadingProps> = ({
             }),
             -1
         );
-    }, [rotation, progress]);
+    }, [rotation, progress, logoLoadingEnabled]);
 
     const containerStyle = useAnimatedStyle(() => ({
         transform: [{ rotate: `${rotation.value}deg` }],
     }));
 
+    // Determine which spinner to show based on user setting
     const Spinner = React.useMemo(
-        () => (
-            <Animated.View
-                style={[
-                    {
-                        width: sizeNum,
-                        height: sizeNum,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    },
-                    containerStyle,
-                ]}
-            >
-                {Array.from({ length: DOT_COUNT }).map((_, i) => (
-                    <Dot
-                        key={i}
-                        index={i}
-                        sizeNum={sizeNum}
-                        color={mainColor}
-                        progress={progress}
-                    />
-                ))}
-            </Animated.View>
-        ),
-        [sizeNum, mainColor, containerStyle, progress]
+        () =>
+            logoLoadingEnabled ? (
+                <AnimatedLogoLoading size={sizeNum * 1.5} />
+            ) : (
+                <Animated.View
+                    style={[
+                        {
+                            width: sizeNum,
+                            height: sizeNum,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        },
+                        containerStyle,
+                    ]}
+                >
+                    {Array.from({ length: DOT_COUNT }).map((_, i) => (
+                        <Dot
+                            key={i}
+                            index={i}
+                            sizeNum={sizeNum}
+                            color={mainColor}
+                            progress={progress}
+                        />
+                    ))}
+                </Animated.View>
+            ),
+        [sizeNum, mainColor, containerStyle, progress, logoLoadingEnabled]
     );
 
     // --- Wrapper Mode Logic ---
