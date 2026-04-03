@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { JobExecution, JobMeta } from '@/features/farm/types/farm.types';
-import { PondData } from '@/features/farm/types/farm.types';
+import { JobExecution, JobMeta, PondData } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { TrackingGroup, TimelineActivity } from '@/features/farm/components/TrackingList';
+import { TrackingGroup } from '@/features/farm/components/TrackingList';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
-import { parseDate, compareTime, formatDate } from '@/features/farm/utils/dateUtils';
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
+import { buildTrackingGroups } from '@/features/farm/utils/work-log.utils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
@@ -57,8 +56,7 @@ export interface UseLogScreenDataResult {
 /**
  * Hook to handle common log screen logic:
  * - Date range state management
- * - Data fetching and grouping by date
- * - Meta to ActivityData conversion
+ * - Data grouping by date (delegated to utils)
  * - Navigation for edit
  *
  * @example
@@ -101,91 +99,23 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
     const groupedData: TrackingGroup[] = useMemo(() => {
         if (!pondId || !config.externalData) return [];
 
-        // Data is already filtered by API via date params — just group by date
-        const itemsByDate = new Map<string, JobExecution[]>();
-        config.externalData.forEach(item => {
-            const dateStr = item.date;
-            const date = dateStr
-                ? dateStr.includes('/')
-                    ? parseDate(dateStr)
-                    : new Date(dateStr)
-                : new Date();
-            const dateKey = formatDate(date);
-            if (!itemsByDate.has(dateKey)) itemsByDate.set(dateKey, []);
-            itemsByDate.get(dateKey)!.push(item);
-        });
+        const handleEdit = (item: JobExecution) => {
+            if (config.pond) {
+                const params = config.getEditParams(config.pond, item);
+                navigation.navigate(config.editRoute as any, params);
+            } else if (config.pondId) {
+                const pondData = { id: config.pondId } as PondData;
+                const params = config.getEditParams(pondData, item);
+                navigation.navigate(config.editRoute as any, params);
+            }
+        };
 
-        itemsByDate.forEach(items =>
-            items.sort((a, b) => compareTime(b.time ?? '00:00', a.time ?? '00:00'))
+        return buildTrackingGroups<T>(
+            config.externalData,
+            config.metaConverter,
+            handleEdit,
+            config.itemFilter
         );
-
-        if (itemsByDate.size === 0) return [];
-
-        const groups: TrackingGroup[] = [];
-
-        itemsByDate.forEach((dateItems, dateKey) => {
-            // Apply filter if provided
-            const filteredItems = config.itemFilter
-                ? dateItems.filter(item => {
-                      const meta = (item.meta as T) || ({} as T);
-                      return config.itemFilter!(item, meta);
-                  })
-                : dateItems;
-
-            if (filteredItems.length === 0) return;
-
-            const activities: TimelineActivity[] = filteredItems.map(item => {
-                const meta = (item.meta as T) || ({} as T);
-                return {
-                    id: item.id,
-                    time: item.time,
-                    title: item.label,
-                    data: config.metaConverter(item, meta),
-                    note: item.note,
-                    onEdit: () => {
-                        if (config.pond) {
-                            const params = config.getEditParams(config.pond, item);
-                            navigation.navigate(config.editRoute as any, params);
-                        } else if (config.pondId) {
-                            const pondData = { id: config.pondId } as PondData;
-                            const params = config.getEditParams(pondData, item);
-                            navigation.navigate(config.editRoute as any, params);
-                        }
-                    },
-                };
-            });
-
-            groups.push({
-                id: dateKey,
-                date: dateKey,
-                activities: activities.sort((a, b) => {
-                    const timeCompare = compareTime(b.time, a.time);
-                    if (timeCompare !== 0) return timeCompare;
-
-                    // If times are equal, sort by "Lần X" in title (descending - newest first)
-                    const getInstanceNumber = (title: string): number | null => {
-                        const match = title.match(/Lần\s+(\d+)/i);
-                        return match ? parseInt(match[1], 10) : null;
-                    };
-
-                    const instanceA = getInstanceNumber(a.title);
-                    const instanceB = getInstanceNumber(b.title);
-
-                    if (instanceA !== null && instanceB !== null) {
-                        return instanceB - instanceA;
-                    }
-
-                    return 0;
-                }),
-            });
-        });
-
-        // Sort groups by date (newest first)
-        return groups.sort((a, b) => {
-            const dateA = parseDate(a.date);
-            const dateB = parseDate(b.date);
-            return dateB.getTime() - dateA.getTime();
-        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pondId, config, navigation, config.externalData]);
 

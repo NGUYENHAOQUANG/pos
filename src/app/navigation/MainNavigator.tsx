@@ -391,12 +391,11 @@ const renderTabBar = (props: any) => <CustomTabBar {...props} />;
 export function MainNavigator() {
     const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
     const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
-    const liquidGlassEnabled = useSettingsStore(s => s.liquidGlassEnabled);
 
-    // iOS 26+ with Liquid Glass — use native OS tab bar (only if user has it enabled)
-    if (Platform.OS === 'ios' && isLiquidGlassSupported && liquidGlassEnabled) {
+    // iOS 26+ with Liquid Glass — automatically use native OS tab bar
+    if (Platform.OS === 'ios' && isLiquidGlassSupported) {
         return (
-            <BottomBarProvider>
+            <BottomBarProvider isNativeTab>
                 <NativeTabNavigator />
             </BottomBarProvider>
         );

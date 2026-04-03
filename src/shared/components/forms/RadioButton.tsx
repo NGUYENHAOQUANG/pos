@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
 import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
 
@@ -50,6 +52,9 @@ export function RadioButton<T = string | number | boolean>({
         onValueChange?.(optionValue);
     };
 
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={[styles.container, containerStyle]}>
             {options.map((option, index) => {
@@ -72,9 +77,13 @@ export function RadioButton<T = string | number | boolean>({
                             style={[styles.radioIconWrap, isDisabled && styles.radioOuterDisabled]}
                         >
                             {isSelected ? (
-                                <CheckboxActiveIcon width={24} height={24} />
+                                <CheckboxActiveIcon
+                                    width={24}
+                                    height={24}
+                                    color={theme.primaryOrange}
+                                />
                             ) : (
-                                <CheckboxIcon width={24} height={24} />
+                                <CheckboxIcon width={24} height={24} color={theme.defaultBorder} />
                             )}
                         </View>
                         <Text
@@ -93,35 +102,36 @@ export function RadioButton<T = string | number | boolean>({
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        rowGap: spacing.sm,
-    },
-    radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    radioIconWrap: {
-        width: 20,
-        height: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.sm,
-    },
-    radioOuterDisabled: {
-        opacity: 0.5,
-    },
-    radioLabel: {
-        fontSize: 16,
-        color: colors.text,
-        fontWeight: '400',
-        lineHeight: 22,
-    },
-    radioLabelDisabled: {
-        color: colors.textSecondary,
-        opacity: 0.5,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            rowGap: spacing.sm,
+        },
+        radioItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        radioIconWrap: {
+            width: 20,
+            height: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.sm,
+        },
+        radioOuterDisabled: {
+            opacity: 0.5,
+        },
+        radioLabel: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: '400',
+            lineHeight: 22,
+        },
+        radioLabelDisabled: {
+            color: theme.textSecondary,
+            opacity: 0.5,
+        },
+    });

@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { spacing, borderRadius, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { CyclePond } from '@/features/farm/types/pond.types';
 
@@ -16,6 +18,9 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
     doc,
     breedLabel,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     if (!cyclePond) {
         return null;
     }
@@ -52,54 +57,55 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    cycleSection: {
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        borderRadius: borderRadius.md,
-        marginHorizontal: spacing.md,
-        marginBottom: 12,
-        overflow: 'hidden',
-    },
-    cycleHeader: {
-        backgroundColor: colors.gray[50],
-        padding: spacing.sm,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    cycleNameWrapper: {
-        flex: 1,
-        marginRight: spacing.sm,
-    },
-    cycleName: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
-    cycleDate: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        flexShrink: 0,
-    },
-    cycleInfo: {
-        gap: spacing.xs,
-        padding: spacing.sm,
-    },
-    cycleInfoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    cycleLabel: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        flex: 1,
-        lineHeight: 22,
-    },
-    cycleValue: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        cycleSection: {
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.md,
+            marginHorizontal: spacing.md,
+            marginBottom: 12,
+            overflow: 'hidden',
+        },
+        cycleHeader: {
+            backgroundColor: theme.backgroundTertiary, // Use backgroundTertiary instead of gray 50
+            padding: spacing.sm,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        cycleNameWrapper: {
+            flex: 1,
+            marginRight: spacing.sm,
+        },
+        cycleName: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+        },
+        cycleDate: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+            flexShrink: 0,
+        },
+        cycleInfo: {
+            gap: spacing.xs,
+            padding: spacing.sm,
+        },
+        cycleInfoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        cycleLabel: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            flex: 1,
+            lineHeight: 22,
+        },
+        cycleValue: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+            fontWeight: typography.fontWeight.bold,
+        },
+    });

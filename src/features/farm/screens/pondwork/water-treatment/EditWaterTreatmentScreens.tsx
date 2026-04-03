@@ -8,7 +8,8 @@ import {
     showInvalidActivityTypeToast,
 } from '@/features/farm/utils/toastMessages';
 import { handleError } from '@/shared/utils/errorHandler';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -39,6 +40,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<ScreenRouteProp>();
     const { pondId, jobId, item, pond } = route.params || {};
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // Mutations
     const updateMutation = useUpdateWaterTreatment();
@@ -275,7 +278,11 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleBack}
                 primaryDisabled={!hasChanges}
-                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                style={{
+                    borderTopWidth: 1,
+                    borderTopColor: theme.defaultBorder,
+                    backgroundColor: theme.background,
+                }}
             />
 
             {UnsavedChangesModal}
@@ -289,12 +296,13 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+        },
+    });

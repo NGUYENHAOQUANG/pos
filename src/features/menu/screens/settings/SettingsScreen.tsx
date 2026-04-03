@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -14,7 +14,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 interface SettingRowProps {
     title: string;
@@ -136,19 +135,24 @@ export const SettingsScreen: React.FC = () => {
     const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
     const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
     const logoLoadingEnabled = useSettingsStore(s => s.logoLoadingEnabled);
-    const liquidGlassEnabled = useSettingsStore(s => s.liquidGlassEnabled);
+
     const lockMethod = useSettingsStore(s => s.lockMethod);
     const autoLockTimeout = useSettingsStore(s => s.autoLockTimeout);
     const pinHash = useSettingsStore(s => s.pinHash);
+    const themeMode = useSettingsStore(s => s.themeMode);
     const toggleSound = useSettingsStore(s => s.toggleSound);
     const toggleHaptic = useSettingsStore(s => s.toggleHaptic);
     const toggleAlertSound = useSettingsStore(s => s.toggleAlertSound);
     const toggleTabSlide = useSettingsStore(s => s.toggleTabSlide);
     const toggleTabSwipe = useSettingsStore(s => s.toggleTabSwipe);
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
-    const toggleLiquidGlass = useSettingsStore(s => s.toggleLiquidGlass);
+
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
+    const setThemeMode = useSettingsStore(s => s.setThemeMode);
+
+    const systemScheme = useColorScheme();
+    const isDarkMode = (themeMode === 'system' ? systemScheme : themeMode) === 'dark';
 
     const [biometricAvailable, setBiometricAvailable] = useState(false);
     const [biometricLabel, setBiometricLabel] = useState('');
@@ -218,9 +222,17 @@ export const SettingsScreen: React.FC = () => {
                         </View>
                     </View>
 
-                    {/* Animation Section */}
+                    {/* Animation & Theme Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Giao diện & hiệu ứng</Text>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Chế độ tối (Dark Mode)"
+                                subtitle="Sử dụng giao diện màu tối cho ứng dụng"
+                                value={isDarkMode}
+                                onValueChange={val => setThemeMode(val ? 'dark' : 'light')}
+                            />
+                        </View>
                         <View style={styles.card}>
                             <SettingRow
                                 title="Trượt chuyển tab"
@@ -246,16 +258,6 @@ export const SettingsScreen: React.FC = () => {
                                 onValueChange={handleToggleLogoLoading}
                             />
                         </View>
-                        {isLiquidGlassSupported && (
-                            <View style={styles.card}>
-                                <SettingRow
-                                    title="Liquid Glass"
-                                    subtitle="Thanh điều hướng kiểu Liquid Glass trên iOS 26+ (cần khởi động lại)"
-                                    value={liquidGlassEnabled}
-                                    onValueChange={toggleLiquidGlass}
-                                />
-                            </View>
-                        )}
                     </View>
 
                     {/* Security Section */}

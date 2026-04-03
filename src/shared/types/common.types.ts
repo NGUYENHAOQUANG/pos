@@ -87,6 +87,13 @@ export interface ICreatorEditor {
     email?: string | null;
     phoneNumber?: string | null;
     avatar?: string | null;
-    createdAt: string;
     editedAt: string;
+}
+
+export interface PondLogMaterialType {
+    warehouseItemId: string;
+    quantity: number;
+    name?: string | null;
+    materialName?: string | null;
+    unitName?: string | null;
 }

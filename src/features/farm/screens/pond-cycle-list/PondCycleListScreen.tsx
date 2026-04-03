@@ -20,7 +20,6 @@ export const PondCycleListScreen = () => {
     const { pondId, zoneId, warehouseId } = route.params;
 
     const [selectedSeason, setSelectedSeason] = useState('');
-    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const { data: _pond } = usePondDetail(zoneId, pondId);
 
@@ -46,10 +45,11 @@ export const PondCycleListScreen = () => {
     const seasonOptions = useMemo(() => {
         const seasonsList = seasons?.data?.items || [];
         const options = seasonsList.map(s => ({
+            id: s.id as string,
             label: s.name || 'Unknown',
             value: s.id as string,
         }));
-        return [{ label: 'Tất cả vụ nuôi', value: '' }, ...options];
+        return [{ id: '', label: 'Tất cả vụ nuôi', value: '' }, ...options];
     }, [seasons]);
 
     const displayedCycles = cycles;
@@ -72,8 +72,6 @@ export const PondCycleListScreen = () => {
             seasonOptions={seasonOptions}
             selectedSeason={selectedSeason}
             setSelectedSeason={setSelectedSeason}
-            dropdownOpen={dropdownOpen}
-            setDropdownOpen={setDropdownOpen}
             onBack={() => navigation.goBack()}
             onPressCycle={cycleId =>
                 navigation.navigate('CycleDetailScreen', { pondId, zoneId, cycleId, warehouseId })

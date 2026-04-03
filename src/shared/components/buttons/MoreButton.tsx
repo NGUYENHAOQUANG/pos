@@ -6,7 +6,9 @@ import {
     ViewStyle,
     StyleProp,
 } from 'react-native';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import DotsThree from '@/assets/Icon/DotsThree.svg';
 
 export interface MoreButtonProps {
@@ -16,23 +18,28 @@ export interface MoreButtonProps {
     size?: number;
 }
 
-export const MoreButton: React.FC<MoreButtonProps> = ({ onPress, style, color = colors.text }) => {
+export const MoreButton: React.FC<MoreButtonProps> = ({ onPress, style, color }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    const finalColor = color || theme.text;
+
     return (
         <TouchableOpacity style={[styles.button, style]} onPress={onPress} activeOpacity={0.7}>
-            <DotsThree width={20} height={20} color={color} />
+            <DotsThree width={20} height={20} color={finalColor} />
         </TouchableOpacity>
     );
 };
 
-const styles = StyleSheet.create({
-    button: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        button: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
+        },
+    });

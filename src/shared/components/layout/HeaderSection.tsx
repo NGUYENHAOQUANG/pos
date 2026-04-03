@@ -3,7 +3,9 @@ import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle, TextStyle } f
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useNavigation } from '@react-navigation/native';
 import PlusIcon from '@/assets/Icon/PlusBlack.svg';
 
@@ -50,6 +52,9 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     rightButtonStyle,
     titleNumberOfLines = 1,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
 
@@ -67,7 +72,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
             return (
                 <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
                     {/* Use ArrowLeft SVG icon for back navigation */}
-                    <ArrowLeftIcon width={20} height={20} />
+                    <ArrowLeftIcon width={20} height={20} color={theme.text} />
                 </TouchableOpacity>
             );
         }
@@ -106,7 +111,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
                     style={[styles.iconButton, rightButtonStyle]}
                     onPress={onRightPress}
                 >
-                    {rightIcon ? rightIcon : <PlusIcon width={20} height={20} />}
+                    {rightIcon ? rightIcon : <PlusIcon width={20} height={20} color={theme.text} />}
                 </TouchableOpacity>
             );
         }
@@ -144,60 +149,61 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingTop: 12,
-        paddingHorizontal: 16,
-        backgroundColor: colors.backgroundPrimary,
-        zIndex: 1000,
-        overflow: 'visible',
-    },
-    leftContainer: {
-        minWidth: 40,
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        // margin right handled by padding/centering
-    },
-    centerContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginHorizontal: 8,
-    },
-    rightContainer: {
-        minWidth: 40,
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        overflow: 'visible',
-        zIndex: 1000,
-    },
-    iconButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    placeholderButton: {
-        width: 40,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    titleCenter: {
-        textAlign: 'center',
-    },
-    titleLeft: {
-        textAlign: 'left',
-        alignSelf: 'flex-start',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingBottom: 12,
+            paddingTop: 12,
+            paddingHorizontal: 16,
+            backgroundColor: theme.backgroundPrimary,
+            zIndex: 1000,
+            overflow: 'visible',
+        },
+        leftContainer: {
+            minWidth: 40,
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            // margin right handled by padding/centering
+        },
+        centerContainer: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginHorizontal: 8,
+        },
+        rightContainer: {
+            minWidth: 40,
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            overflow: 'visible',
+            zIndex: 1000,
+        },
+        iconButton: {
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.backgroundButton,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        placeholderButton: {
+            width: 40,
+        },
+        title: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        titleCenter: {
+            textAlign: 'center',
+        },
+        titleLeft: {
+            textAlign: 'left',
+            alignSelf: 'flex-start',
+        },
+    });

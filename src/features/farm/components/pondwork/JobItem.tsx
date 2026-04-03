@@ -3,8 +3,9 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import ChevronRight from '@/assets/Icon/ChevronRight.svg';
 import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types';
-import { borderRadius, colors } from '@/styles';
-import { spacing } from '@/styles/spacing';
+import { borderRadius, spacing, colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import {
     IconFeed,
     IconShrimpInspection,
@@ -148,6 +149,9 @@ export const JobCard: React.FC<JobCardProps> = ({
         );
     };
 
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <TouchableOpacity
@@ -163,9 +167,9 @@ export const JobCard: React.FC<JobCardProps> = ({
                 </View>
                 <View style={styles.actions}>
                     <TouchableOpacity style={styles.addButton} onPress={onPressAdd}>
-                        <PlusBlack width={16} height={16} />
+                        <PlusBlack width={16} height={16} color={theme.text} />
                     </TouchableOpacity>
-                    <ChevronRight width={18} height={18} />
+                    <ChevronRight width={18} height={18} color={theme.textSecondary} />
                 </View>
             </TouchableOpacity>
             <View style={styles.divider} />
@@ -200,7 +204,7 @@ export const JobCard: React.FC<JobCardProps> = ({
                                     </View>
                                     {type !== 'TRANSFER_POND' && (
                                         <TouchableOpacity onPress={() => onEditItem?.(item)}>
-                                            <IconEdit />
+                                            <IconEdit color={theme.textSecondary} />
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -218,96 +222,97 @@ export const JobCard: React.FC<JobCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 16,
-        marginBottom: 8,
-        overflow: 'hidden',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-    },
-    leftContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 16,
+            marginBottom: 8,
+            overflow: 'hidden',
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+        },
+        leftContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: 1,
+        },
+        iconContainer: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+        },
 
-    title: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-        flex: 1,
-    },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    addButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 24,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
-    body: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-    },
-    dataText: {
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'center', // Center only for empty state text if desired, or remove to align left
-    },
-    listContent: {
-        width: '100%',
-    },
-    countText: {
-        fontSize: 14,
-        color: colors.textMuted,
-        marginBottom: 4,
-    },
-    itemRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    itemText: {
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 20,
-        fontWeight: '500',
-    },
-    itemDivider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginVertical: spacing.xs,
-    },
-    headerCountText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        marginTop: 4,
-    },
-});
+        title: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+            flex: 1,
+        },
+        actions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        addButton: {
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 24,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: -spacing.md,
+        },
+        body: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: 12,
+        },
+        dataText: {
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'center', // Center only for empty state text if desired, or remove to align left
+        },
+        listContent: {
+            width: '100%',
+        },
+        countText: {
+            fontSize: 14,
+            color: theme.textMuted,
+            marginBottom: 4,
+        },
+        itemRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        itemText: {
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 20,
+            fontWeight: '500',
+        },
+        itemDivider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginVertical: spacing.xs,
+        },
+        headerCountText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            marginTop: 4,
+        },
+    });

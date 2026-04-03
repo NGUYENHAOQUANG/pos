@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import PlusIcon from '@/assets/Icon/Plus.svg';
 
@@ -44,6 +46,9 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     buttonStyle,
     style,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={[styles.container, style]}>
             {/* Empty state illustration */}
@@ -70,34 +75,35 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: spacing.md,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: spacing.md,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.textSecondary,
-        textAlign: 'center',
-        marginBottom: spacing.md,
-    },
-    description: {
-        fontSize: 14,
-        color: colors.textSecondary || colors.text,
-        textAlign: 'center',
-        marginBottom: spacing.lg,
-        fontFamily: typography.fontFamily.regular,
-        lineHeight: 22,
-    },
-    button: {
-        width: '100%',
-        height: 40,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingHorizontal: spacing.md,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: spacing.md,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: typography.fontWeight.semibold,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            marginBottom: spacing.md,
+        },
+        description: {
+            fontSize: 14,
+            color: theme.textSecondary || theme.text,
+            textAlign: 'center',
+            marginBottom: spacing.lg,
+            fontFamily: typography.fontFamily.regular,
+            lineHeight: 22,
+        },
+        button: {
+            width: '100%',
+            height: 40,
+        },
+    });

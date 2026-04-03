@@ -9,6 +9,8 @@ export type AutoLockTimeout = 0 | 1 | 5 | 15 | 30 | 60;
 /** Lock method for app security */
 export type LockMethod = 'none' | 'biometric' | 'pin' | 'both';
 
+export type ThemeMode = 'system' | 'light' | 'dark';
+
 interface SettingsState {
     soundEnabled: boolean;
     hapticEnabled: boolean;
@@ -20,6 +22,7 @@ interface SettingsState {
     lockMethod: LockMethod;
     autoLockTimeout: AutoLockTimeout;
     pinHash: string | null;
+    themeMode: ThemeMode;
 }
 
 interface SettingsActions {
@@ -28,6 +31,8 @@ interface SettingsActions {
     toggleAlertSound: () => void;
     toggleTabSlide: () => void;
     toggleTabSwipe: () => void;
+    setTabSlide: (enabled: boolean) => void;
+    setTabSwipe: (enabled: boolean) => void;
     toggleLogoLoading: () => void;
     toggleLiquidGlass: () => void;
     setLockMethod: (method: LockMethod) => void;
@@ -35,6 +40,7 @@ interface SettingsActions {
     setPinHash: (hash: string | null) => void;
     setSoundEnabled: (enabled: boolean) => void;
     setHapticEnabled: (enabled: boolean) => void;
+    setThemeMode: (mode: ThemeMode) => void;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -52,6 +58,7 @@ export const useSettingsStore = create<SettingsStore>()(
             lockMethod: 'none' as LockMethod,
             autoLockTimeout: 0 as AutoLockTimeout,
             pinHash: null,
+            themeMode: 'system',
 
             toggleSound: () =>
                 set(state => {
@@ -76,6 +83,16 @@ export const useSettingsStore = create<SettingsStore>()(
             toggleTabSwipe: () =>
                 set(state => {
                     state.tabSwipeEnabled = !state.tabSwipeEnabled;
+                }),
+
+            setTabSlide: (enabled: boolean) =>
+                set(state => {
+                    state.tabSlideEnabled = enabled;
+                }),
+
+            setTabSwipe: (enabled: boolean) =>
+                set(state => {
+                    state.tabSwipeEnabled = enabled;
                 }),
 
             toggleLogoLoading: () =>
@@ -111,6 +128,11 @@ export const useSettingsStore = create<SettingsStore>()(
             setHapticEnabled: (enabled: boolean) =>
                 set(state => {
                     state.hapticEnabled = enabled;
+                }),
+
+            setThemeMode: (mode: ThemeMode) =>
+                set(state => {
+                    state.themeMode = mode;
                 }),
         })),
         {

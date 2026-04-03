@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useScrollToTop } from '@react-navigation/native';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ShrimpPondList } from '@/features/farm/components/pond-list/ShrimpPondList';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
@@ -50,12 +51,14 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
 }) => {
     const flatListRef = useRef<FlatList<PondData>>(null);
     useScrollToTop(flatListRef as any);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const renderFooter = () => {
         if (!isFetchingNextPage) return null;
         return (
             <View style={styles.loaderFooter}>
-                <ActivityIndicator color={colors.primary} />
+                <ActivityIndicator color={theme.primary} />
             </View>
         );
     };
@@ -96,14 +99,15 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    loaderFooter: {
-        paddingVertical: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        loaderFooter: {
+            paddingVertical: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+    });

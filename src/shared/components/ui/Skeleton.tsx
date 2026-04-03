@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, StyleProp, ViewStyle, DimensionValue } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface SkeletonProps {
     /** Width of the skeleton line (number or string like '100%') */
@@ -27,6 +29,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     borderRadius: customBorderRadius,
     backgroundColor: customBackgroundColor,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -74,7 +78,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
                 ]}
             >
                 <LinearGradient
-                    colors={['transparent', 'rgba(255, 255, 255, 0.5)', 'transparent']}
+                    colors={['transparent', 'rgba(255, 255, 255, 0.2)', 'transparent']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={StyleSheet.absoluteFill}
@@ -84,15 +88,16 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    skeletonBase: {
-        backgroundColor: colors.borderLight,
-        borderRadius: borderRadius.sm,
-        overflow: 'hidden',
-    },
-    shimmer: {
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        skeletonBase: {
+            backgroundColor: theme.borderLight,
+            borderRadius: borderRadius.sm,
+            overflow: 'hidden',
+        },
+        shimmer: {
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+        },
+    });

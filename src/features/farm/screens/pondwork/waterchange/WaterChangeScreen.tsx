@@ -10,8 +10,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
-import { colors } from '@/styles';
-// import { HeaderFarm } from '@/features/farm/components/HeaderFarm'; // Replaced with custom header like Siphon
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import {
@@ -54,6 +54,8 @@ export const WaterSupplyScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { setTabBarVisible } = useTabBarVisibility();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const { pond, item } = route.params || {};
 
@@ -439,7 +441,11 @@ export const WaterSupplyScreen = () => {
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
                 primaryDisabled={!!item && !hasChanges}
-                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                style={{
+                    borderTopWidth: 1,
+                    borderTopColor: theme.defaultBorder,
+                    backgroundColor: theme.background,
+                }}
             />
 
             {UnsavedChangesModal}
@@ -453,18 +459,19 @@ export const WaterSupplyScreen = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    contentContainer: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-    },
-    spacer: {
-        height: 80,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        contentContainer: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+        },
+        spacer: {
+            height: 80,
+        },
+    });

@@ -21,7 +21,7 @@ import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environme
 import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment-setting/EnvironmentSettingScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment-log/EnvironmentLogScreen';
 import { CreateCycleScreen } from '@/features/farm/screens/create-cycle/CreateCycleScreen';
-import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
+import { AddSiphonScreen } from '@/features/farm/screens/pondwork/siphon-form/SiphonFormScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
 import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeLogScreen';
@@ -155,7 +155,7 @@ export type AppStackParamList = {
         isEditMode?: boolean;
         aiCount?: number;
     };
-    AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
+    AddSiphonScreen: { pond: PondData; siphonId?: string };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
     EditWaterTreatmentScreens: {

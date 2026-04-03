@@ -4,7 +4,9 @@ import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
@@ -102,6 +104,8 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
     onRightPress,
     titleNumberOfLines,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const navigation = useNavigation<NavigationProp>();
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
@@ -121,8 +125,7 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
         ? {
               borderRadius: 0,
               borderWidth: 0,
-              // borderBottomWidth: 1,
-              borderBottomColor: colors.border,
+              borderBottomColor: theme.border,
               marginBottom: 8,
               shadowColor: 'transparent',
               shadowOpacity: 0,
@@ -141,7 +144,7 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
                     rightIcon={rightIcon}
                     onRightPress={onRightPress}
                     showBackButton={true}
-                    containerStyle={{ backgroundColor: colors.backgroundPrimary }}
+                    containerStyle={{ backgroundColor: theme.backgroundPrimary }}
                     titleNumberOfLines={titleNumberOfLines}
                 />
 
@@ -192,24 +195,25 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    headerSection: {
-        backgroundColor: colors.backgroundPrimary,
-    },
-    dateRangeWrapper: {
-        marginHorizontal: spacing.md,
-        marginTop: spacing.sm,
-        marginBottom: spacing.sm,
-    },
-    cardStyle: {
-        marginBottom: spacing.sm,
-    },
-    emptyContainer: {
-        marginHorizontal: spacing.md,
-        marginTop: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        headerSection: {
+            backgroundColor: theme.backgroundPrimary,
+        },
+        dateRangeWrapper: {
+            marginHorizontal: spacing.md,
+            marginTop: spacing.sm,
+            marginBottom: spacing.sm,
+        },
+        cardStyle: {
+            marginBottom: spacing.sm,
+        },
+        emptyContainer: {
+            marginHorizontal: spacing.md,
+            marginTop: spacing.sm,
+        },
+    });
