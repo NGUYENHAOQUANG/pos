@@ -95,23 +95,25 @@ export const Chart: React.FC<ChartProps> = ({
         const DAY_MARKS = generateDayMarks(TOTAL_DAYS);
         const DAY_LABELS = DAY_MARKS.map(day => getDateForDay(day));
 
+        const kgToTon = (kg: number) => kg / 1000;
+
         // Orange = Food
         const ORANGE_DATA_HISTORICAL = historicalData
             .filter(item => item.actualFood !== null)
-            .map(item => ({ day: item.day, value: item.actualFood as number }));
+            .map(item => ({ day: item.day, value: kgToTon(item.actualFood as number) }));
 
         const ORANGE_DATA_FORECAST = forecastData
             .filter(item => item.forecastFood !== null)
-            .map(item => ({ day: item.day, value: item.forecastFood as number }));
+            .map(item => ({ day: item.day, value: kgToTon(item.forecastFood as number) }));
 
         // Blue/Green = Biomass
         const BLUE_DATA_HISTORICAL = historicalData
             .filter(item => item.actualBiomass !== null)
-            .map(item => ({ day: item.day, value: item.actualBiomass as number }));
+            .map(item => ({ day: item.day, value: kgToTon(item.actualBiomass as number) }));
 
         const BLUE_DATA_FORECAST = forecastData
             .filter(item => item.forecastBiomass !== null)
-            .map(item => ({ day: item.day, value: item.forecastBiomass as number }));
+            .map(item => ({ day: item.day, value: kgToTon(item.forecastBiomass as number) }));
 
         // Y-axis max
         const calculateYMax = (): number => {
