@@ -75,6 +75,7 @@ import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/
 import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebViewScreen';
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
+import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
@@ -259,6 +260,7 @@ export type AppStackParamList = {
     DeleteAccount: undefined;
     PolicyWebView: { url: string; title: string };
     Settings: undefined;
+    PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -374,6 +376,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
             <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="PinSetup" component={PinSetupScreen} />
         </Stack.Navigator>
     );
 };

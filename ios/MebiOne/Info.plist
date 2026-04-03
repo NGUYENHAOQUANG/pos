@@ -30,6 +30,8 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
@@ -43,6 +45,8 @@
 	<string>Ứng dụng cần quyền lưu ảnh vào thư viện.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Ứng dụng cần quyền truy cập Thư viện ảnh để chọn ảnh đại diện hoặc tải lên hình ảnh.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Sử dụng Face ID để mở khóa ứng dụng nhanh chóng và bảo mật.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

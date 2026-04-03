@@ -1,13 +1,23 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
+import {
+    StyleSheet,
+    TouchableOpacity,
+    View,
+    Animated,
+    LayoutChangeEvent,
+    Platform,
+} from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
+import { Route } from '@react-navigation/native';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { colors, borderRadius } from '@/styles';
@@ -126,7 +136,7 @@ const NativeTabNavigator = () => (
             component={ReportsScreen}
             options={{
                 title: 'Báo cáo',
-                tabBarIcon: ({ focused }) => ({
+                tabBarIcon: ({ focused }: { focused: boolean }) => ({
                     type: 'image' as const,
                     source: focused
                         ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Active.png')
@@ -140,7 +150,7 @@ const NativeTabNavigator = () => (
             component={ControlStackScreen}
             options={{
                 title: 'Thiết bị',
-                tabBarIcon: ({ focused }) => ({
+                tabBarIcon: ({ focused }: { focused: boolean }) => ({
                     type: 'image' as const,
                     source: focused
                         ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Active.png')
@@ -154,7 +164,7 @@ const NativeTabNavigator = () => (
             component={ShrimpPondListScreens}
             options={{
                 title: 'Trại nuôi',
-                tabBarIcon: ({ focused }) => ({
+                tabBarIcon: ({ focused }: { focused: boolean }) => ({
                     type: 'image' as const,
                     source: focused
                         ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Active.png')
@@ -168,7 +178,7 @@ const NativeTabNavigator = () => (
             component={MaterialScreen}
             options={{
                 title: 'Vật tư',
-                tabBarIcon: ({ focused }) => ({
+                tabBarIcon: ({ focused }: { focused: boolean }) => ({
                     type: 'image' as const,
                     source: focused
                         ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Active.png')
@@ -182,7 +192,7 @@ const NativeTabNavigator = () => (
             component={MenuScreenWithProvider}
             options={{
                 title: 'Tài khoản',
-                tabBarIcon: ({ focused }) => ({
+                tabBarIcon: ({ focused }: { focused: boolean }) => ({
                     type: 'image' as const,
                     source: focused
                         ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Active.png')
@@ -198,7 +208,8 @@ const NativeTabNavigator = () => (
 // Android / iOS < 26 : Custom Tab Bar (SVG icons, floating pill,
 //                      sliding indicator, white glass fallback)
 // ════════════════════════════════════════════════════════════════════
-const Tab = createBottomTabNavigator();
+const SlideTab = createMaterialTopTabNavigator();
+const StandardTab = createBottomTabNavigator();
 
 interface AnimatedTabItemProps {
     route: { key: string; name: string };
@@ -250,7 +261,14 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
     );
 };
 
-const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
+/**
+ * Custom Tab Bar with sliding indicator
+ * Works with both BottomTab and MaterialTopTab navigators
+ * Using 'any' cast since both navigator types share identical tabBar shape
+ * but TypeScript can't cleanly union their emit() signatures
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomTabBar = ({ state, navigation }: { state: any; navigation: any }) => {
     const insets = useSafeAreaInsets();
     const [barWidth, setBarWidth] = useState(0);
     const slideAnim = useRef(new Animated.Value(state.index)).current;
@@ -296,7 +314,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                 </Animated.View>
             )}
 
-            {state.routes.map(route => {
+            {state.routes.map((route: Route<string, object | undefined>) => {
                 const item = navigationItems.find(i => i.key === route.name);
                 const isFocused = route.name === currentRoute.name;
 
@@ -328,7 +346,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     );
 
     return (
-        <View style={styles.tabBarWrapper}>
+        <View style={styles.tabBarWrapper} pointerEvents="box-none">
             <LinearGradient
                 colors={[
                     colors.fade[0],
@@ -361,31 +379,68 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     );
 };
 
-const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
-
-const ClassicTabNavigator = () => (
-    <View style={styles.container}>
-        <Tab.Navigator
-            initialRouteName="Farm"
-            screenOptions={{
-                headerShown: false,
-            }}
-            tabBar={renderTabBar}
-        >
-            {navigationItems.map(item => (
-                <Tab.Screen key={item.key} name={item.key} component={item.component} />
-            ))}
-        </Tab.Navigator>
-    </View>
-);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const renderTabBar = (props: any) => <CustomTabBar {...props} />;
 
 // ════════════════════════════════════════════════════════════════════
 // Main Navigator — picks the right implementation at runtime
+// Liquid Glass (iOS 26+) → NativeTabNavigator
+// Slide + Swipe enabled  → MaterialTopTab (SlideTab)
+// Default fallback       → StandardTab (BottomTab)
 // ════════════════════════════════════════════════════════════════════
 export function MainNavigator() {
+    const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
+    const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
+
+    // iOS 26+ with Liquid Glass — automatically use native OS tab bar
+    if (Platform.OS === 'ios' && isLiquidGlassSupported) {
+        return (
+            <BottomBarProvider isNativeTab>
+                <NativeTabNavigator />
+            </BottomBarProvider>
+        );
+    }
+
+    // Android / iOS < 26 — custom tab bar with swipe/slide options
     return (
         <BottomBarProvider>
-            {isLiquidGlassSupported ? <NativeTabNavigator /> : <ClassicTabNavigator />}
+            <View style={styles.container}>
+                {tabSlideEnabled ? (
+                    <SlideTab.Navigator
+                        initialRouteName="Farm"
+                        tabBarPosition="bottom"
+                        screenOptions={{
+                            swipeEnabled: tabSwipeEnabled,
+                            animationEnabled: true,
+                        }}
+                        tabBar={renderTabBar}
+                    >
+                        {navigationItems.map(item => (
+                            <SlideTab.Screen
+                                key={item.key}
+                                name={item.key}
+                                component={item.component}
+                            />
+                        ))}
+                    </SlideTab.Navigator>
+                ) : (
+                    <StandardTab.Navigator
+                        initialRouteName="Farm"
+                        screenOptions={{
+                            headerShown: false,
+                        }}
+                        tabBar={renderTabBar}
+                    >
+                        {navigationItems.map(item => (
+                            <StandardTab.Screen
+                                key={item.key}
+                                name={item.key}
+                                component={item.component}
+                            />
+                        ))}
+                    </StandardTab.Navigator>
+                )}
+            </View>
         </BottomBarProvider>
     );
 }
