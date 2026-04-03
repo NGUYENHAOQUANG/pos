@@ -14,7 +14,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 
 interface SettingRowProps {
     title: string;
@@ -136,7 +135,7 @@ export const SettingsScreen: React.FC = () => {
     const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
     const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
     const logoLoadingEnabled = useSettingsStore(s => s.logoLoadingEnabled);
-    const liquidGlassEnabled = useSettingsStore(s => s.liquidGlassEnabled);
+
     const lockMethod = useSettingsStore(s => s.lockMethod);
     const autoLockTimeout = useSettingsStore(s => s.autoLockTimeout);
     const pinHash = useSettingsStore(s => s.pinHash);
@@ -146,7 +145,7 @@ export const SettingsScreen: React.FC = () => {
     const toggleTabSlide = useSettingsStore(s => s.toggleTabSlide);
     const toggleTabSwipe = useSettingsStore(s => s.toggleTabSwipe);
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
-    const toggleLiquidGlass = useSettingsStore(s => s.toggleLiquidGlass);
+
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
 
@@ -246,16 +245,6 @@ export const SettingsScreen: React.FC = () => {
                                 onValueChange={handleToggleLogoLoading}
                             />
                         </View>
-                        {isLiquidGlassSupported && (
-                            <View style={styles.card}>
-                                <SettingRow
-                                    title="Liquid Glass"
-                                    subtitle="Thanh điều hướng kiểu Liquid Glass trên iOS 26+ (cần khởi động lại)"
-                                    value={liquidGlassEnabled}
-                                    onValueChange={toggleLiquidGlass}
-                                />
-                            </View>
-                        )}
                     </View>
 
                     {/* Security Section */}

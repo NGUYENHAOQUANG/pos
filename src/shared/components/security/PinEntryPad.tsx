@@ -24,6 +24,8 @@ interface PinEntryPadProps {
     showBiometric?: boolean;
     /** Called when biometric button is pressed */
     onBiometricPress?: () => void;
+    /** Biometric icon element (SVG component) */
+    biometricIcon?: React.ReactNode;
     /** Show error shake animation */
     error?: boolean;
     /** Reset error state after animation */
@@ -42,6 +44,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
     onComplete,
     showBiometric = false,
     onBiometricPress,
+    biometricIcon,
     error = false,
     onErrorReset,
     errorMessage = 'Mã PIN không đúng',
@@ -148,7 +151,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
                             onPress={onBiometricPress}
                             activeOpacity={0.6}
                         >
-                            <Ionicons name="finger-print" size={28} color={colors.primaryOrange} />
+                            {biometricIcon}
                         </TouchableOpacity>
                     ) : (
                         <View style={styles.keyEmpty} />

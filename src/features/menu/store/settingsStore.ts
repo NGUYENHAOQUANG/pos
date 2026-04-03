@@ -28,6 +28,8 @@ interface SettingsActions {
     toggleAlertSound: () => void;
     toggleTabSlide: () => void;
     toggleTabSwipe: () => void;
+    setTabSlide: (enabled: boolean) => void;
+    setTabSwipe: (enabled: boolean) => void;
     toggleLogoLoading: () => void;
     toggleLiquidGlass: () => void;
     setLockMethod: (method: LockMethod) => void;
@@ -76,6 +78,16 @@ export const useSettingsStore = create<SettingsStore>()(
             toggleTabSwipe: () =>
                 set(state => {
                     state.tabSwipeEnabled = !state.tabSwipeEnabled;
+                }),
+
+            setTabSlide: (enabled: boolean) =>
+                set(state => {
+                    state.tabSlideEnabled = enabled;
+                }),
+
+            setTabSwipe: (enabled: boolean) =>
+                set(state => {
+                    state.tabSwipeEnabled = enabled;
                 }),
 
             toggleLogoLoading: () =>
