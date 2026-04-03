@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react';
 import { View, FlatList } from 'react-native';
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
-import { materialListStyles } from '@/features/material/styles/materialListStyles';
+import { getMaterialListStyles } from '@/features/material/styles/materialListStyles';
+import { useAppTheme } from '@/styles/themeContext';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
@@ -34,6 +35,9 @@ export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps>
                 onLoadMore();
             }
         }, [hasNextPage, isFetchingNextPage, onLoadMore]);
+
+        const theme = useAppTheme();
+        const materialListStyles = getMaterialListStyles(theme);
 
         const renderItem = useCallback(({ item }: { item: ImportReceipt }) => {
             return <ImportReceiptCard item={item} />;

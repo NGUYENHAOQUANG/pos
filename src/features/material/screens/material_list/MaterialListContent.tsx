@@ -5,7 +5,9 @@ import { MaterialItemSkeleton } from '@/features/material/components/material_li
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { IMaterial } from '@/features/material/types/material.types';
-import { materialListStyles } from '@/features/material/styles/materialListStyles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles';
+import { StyleSheet } from 'react-native';
 
 interface MaterialListContentProps {
     materials: IMaterial[];
@@ -29,6 +31,9 @@ export const MaterialListContent: React.FC<MaterialListContentProps> = React.mem
         hasNextPage,
         onPressCreate,
     }) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         const handleLoadMore = React.useCallback(() => {
             if (hasNextPage && !isFetchingNextPage && onLoadMore) {
                 onLoadMore();
@@ -53,12 +58,12 @@ export const MaterialListContent: React.FC<MaterialListContentProps> = React.mem
 
         if (isLoading) {
             return (
-                <View style={materialListStyles.container}>
+                <View style={styles.container}>
                     <FlatList
                         data={[1, 2, 3, 4, 5]}
                         renderItem={renderSkeleton}
                         keyExtractor={skeletonKeyExtractor}
-                        contentContainerStyle={materialListStyles.listContent}
+                        contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
                     />
                 </View>
@@ -66,14 +71,14 @@ export const MaterialListContent: React.FC<MaterialListContentProps> = React.mem
         }
 
         return (
-            <View style={materialListStyles.container}>
+            <View style={styles.container}>
                 <FlatList
                     data={materials}
                     keyExtractor={keyExtractor}
                     renderItem={renderItem}
                     contentContainerStyle={[
-                        materialListStyles.listContent,
-                        materials.length === 0 && materialListStyles.emptyContent,
+                        styles.listContent,
+                        materials.length === 0 && styles.emptyContent,
                     ]}
                     showsVerticalScrollIndicator={false}
                     refreshing={refreshing}
@@ -93,3 +98,22 @@ export const MaterialListContent: React.FC<MaterialListContentProps> = React.mem
         );
     }
 );
+
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        listContent: {
+            paddingBottom: 100,
+            flexGrow: 1,
+        },
+        emptyContent: {
+            flex: 1,
+        },
+        loaderFooter: {
+            paddingVertical: 16,
+            alignItems: 'center',
+        },
+    });

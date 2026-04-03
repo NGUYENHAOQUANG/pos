@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 
 interface MaterialGroupProps {
@@ -9,6 +10,8 @@ interface MaterialGroupProps {
 }
 
 export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
+    const theme = useAppTheme();
+
     const getStyle = (type: MaterialGroupType) => {
         switch (type) {
             case MaterialGroupType.FARMING:
@@ -56,9 +59,9 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
             // --- STATUS TAGS ---
             case MaterialGroupType.DRAFT:
                 return {
-                    backgroundColor: colors.neutral,
-                    color: colors.text,
-                    borderColor: colors.defaultBorder,
+                    backgroundColor: theme.isDark ? '#2a2a2a' : colors.neutral,
+                    color: theme.text,
+                    borderColor: theme.defaultBorder,
                 };
             case MaterialGroupType.PENDING:
                 return {
@@ -80,9 +83,9 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
                 };
             default:
                 return {
-                    backgroundColor: colors.gray[100],
-                    color: colors.text,
-                    borderColor: colors.border,
+                    backgroundColor: theme.isDark ? '#2a2a2a' : colors.gray[100],
+                    color: theme.text,
+                    borderColor: theme.defaultBorder,
                 };
         }
     };

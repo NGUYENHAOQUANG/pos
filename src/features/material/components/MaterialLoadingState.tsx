@@ -1,9 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { useAppTheme } from '@/styles/themeContext';
 
 const ImportReceiptSkeleton = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.card}>
             <View style={styles.cardContent}>
@@ -33,6 +37,9 @@ const ImportReceiptSkeleton = () => {
 };
 
 export const MaterialLoadingState = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <FlatList
@@ -46,40 +53,41 @@ export const MaterialLoadingState = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    listContainer: {
-        paddingBottom: 100,
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        marginBottom: spacing.sm,
-        paddingBottom: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    cardContent: {
-        padding: spacing.md,
-        paddingBottom: 0,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: spacing.xs,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#F3F4F6',
-        marginVertical: spacing.sm,
-    },
-    expandButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: spacing.sm,
-        gap: 4,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+        },
+        listContainer: {
+            paddingBottom: 100,
+        },
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            marginBottom: spacing.sm,
+            paddingBottom: spacing.sm,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        cardContent: {
+            padding: spacing.md,
+            paddingBottom: 0,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: spacing.xs,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginVertical: spacing.sm,
+        },
+        expandButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: spacing.sm,
+            gap: 4,
+        },
+    });

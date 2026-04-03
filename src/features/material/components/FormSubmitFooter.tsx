@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 
 interface FormSubmitFooterProps {
@@ -29,6 +30,8 @@ export const FormSubmitFooter: React.FC<FormSubmitFooterProps> = React.memo(
     }) => {
         const insets = useSafeAreaInsets();
         const safeBottom = Math.max(insets.bottom, 12);
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
 
         return (
             <View style={[styles.footer, { paddingBottom: safeBottom }]}>
@@ -59,25 +62,26 @@ export const FormSubmitFooter: React.FC<FormSubmitFooterProps> = React.memo(
     }
 );
 
-const styles = StyleSheet.create({
-    footer: {
-        backgroundColor: colors.white,
-        paddingTop: 12,
-        paddingHorizontal: spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    headerRow: {
-        marginBottom: spacing.sm,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    buttonWrapper: {
-        flex: 1,
-    },
-    buttonSpacer: {
-        width: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        footer: {
+            backgroundColor: theme.background,
+            paddingTop: 12,
+            paddingHorizontal: spacing.md,
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+        },
+        headerRow: {
+            marginBottom: spacing.sm,
+        },
+        buttonRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        buttonWrapper: {
+            flex: 1,
+        },
+        buttonSpacer: {
+            width: spacing.md,
+        },
+    });

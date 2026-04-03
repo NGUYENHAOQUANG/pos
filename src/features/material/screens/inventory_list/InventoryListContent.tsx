@@ -4,7 +4,8 @@ import { InventoryCard } from '@/features/material/components/inventory_list/Inv
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
-import { materialListStyles } from '@/features/material/styles/materialListStyles';
+import { getMaterialListStyles } from '@/features/material/styles/materialListStyles';
+import { useAppTheme } from '@/styles/themeContext';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 
 interface InventoryListContentProps {
@@ -29,6 +30,9 @@ export const InventoryListContent: React.FC<InventoryListContentProps> = React.m
         hasNextPage,
         onPressCreate,
     }) => {
+        const theme = useAppTheme();
+        const materialListStyles = getMaterialListStyles(theme);
+
         const handleLoadMore = React.useCallback(() => {
             if (hasNextPage && !isFetchingNextPage && onLoadMore) {
                 onLoadMore();

@@ -5,7 +5,8 @@ import { DocumentPickerResponse } from '@react-native-documents/picker';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 
-import { borderRadius, colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, borderRadius, spacing } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { DropdownSupplierItem } from '@/features/material/components/import_receipt_form/DropdownSupplierItem';
 
@@ -33,6 +34,9 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = React.m
         onFilesSelected,
         fileUploaderRef,
     }) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         const handleSupplierChange = React.useCallback(
             (supplierId: string) => onSupplierChange(supplierId),
             [onSupplierChange]
@@ -75,18 +79,19 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = React.m
     }
 );
 
-const styles = StyleSheet.create({
-    cardContainer: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        zIndex: 10,
-    },
-    content: {
-        gap: spacing.md,
-        paddingHorizontal: 12,
-        paddingBottom: 12,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        cardContainer: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            zIndex: 10,
+        },
+        content: {
+            gap: spacing.md,
+            paddingHorizontal: 12,
+            paddingBottom: 12,
+        },
+    });

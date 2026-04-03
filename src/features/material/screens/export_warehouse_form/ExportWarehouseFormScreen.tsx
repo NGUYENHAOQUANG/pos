@@ -4,7 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useZones } from '@/features/farm/hooks/useZones';
@@ -37,6 +37,7 @@ export const ExportWarehouseFormScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const queryClient = useQueryClient();
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const theme = useAppTheme();
 
     const fileUploaderRef = useRef<FileUploaderRef>(null);
 
@@ -161,7 +162,7 @@ export const ExportWarehouseFormScreen: React.FC = () => {
     // ─── Render ─────────────────────────────────────────────
     return (
         <>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+            <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
             <ExportWarehouseForm
                 isEditMode={isEditMode}
                 isLoadingDetail={isLoadingDetail}

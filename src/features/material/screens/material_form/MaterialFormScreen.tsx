@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
     useCreateMaterial,
@@ -27,6 +27,7 @@ export const MaterialFormScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute<RouteProp<AppStackParamList, 'MaterialForm'>>();
     const queryClient = useQueryClient();
+    const theme = useAppTheme();
 
     const params = route.params as { materialId?: string };
     const materialId = params?.materialId || null;
@@ -123,7 +124,7 @@ export const MaterialFormScreen: React.FC = () => {
     // ─── Render ────────────────────────────────────────────
     return (
         <>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+            <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
             <MaterialForm
                 isEditMode={isEditMode}
                 isSubmitting={isSubmitting}

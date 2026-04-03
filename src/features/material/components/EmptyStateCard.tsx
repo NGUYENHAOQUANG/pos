@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius, typography } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 interface EmptyStateCardProps {
@@ -18,6 +19,9 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     onPress,
     buttonStyle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <EmptyStateIcon width={100} height={100} style={styles.image} />
@@ -34,31 +38,32 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        padding: spacing.xl,
-        marginHorizontal: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-    },
-    image: {
-        marginBottom: spacing.md,
-    },
-    text: {
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'center',
-        marginBottom: spacing.lg,
-        fontFamily: typography.fontFamily.regular,
-    },
-    button: {
-        minWidth: 160,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            padding: spacing.xl,
+            marginHorizontal: spacing.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        image: {
+            marginBottom: spacing.md,
+        },
+        text: {
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'center',
+            marginBottom: spacing.lg,
+            fontFamily: typography.fontFamily.regular,
+        },
+        button: {
+            minWidth: 160,
+        },
+    });
 
 export enum MaterialTabType {
     List = 'list',

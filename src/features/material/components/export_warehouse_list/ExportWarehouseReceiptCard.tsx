@@ -9,7 +9,8 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -36,6 +37,9 @@ interface ExportWarehouseReceiptCardProps {
 export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProps> = ({ item }) => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const shouldFetch = isExpanded && (!item.materials || item.materials.length === 0);
     const { data: fetchedItems, isLoading: isFetchingItems } = useExportReceiptItems(
@@ -149,7 +153,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                     {isFetchingItems ? (
                         <ActivityIndicator
                             size="small"
-                            color={colors.primary}
+                            color={theme.primary}
                             style={{ margin: spacing.md }}
                         />
                     ) : (
@@ -164,77 +168,78 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                 <Ionicons
                     name={isExpanded ? 'chevron-up' : 'chevron-down'}
                     size={16}
-                    color={colors.primary}
+                    color={theme.primary}
                 />
             </TouchableOpacity>
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        marginBottom: spacing.sm,
-        overflow: 'hidden',
-        paddingBottom: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    cardContent: {
-        padding: spacing.md,
-        paddingBottom: 0,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    label: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.gray[500],
-        lineHeight: 20,
-        flex: 1,
-    },
-    value: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-        maxWidth: '60%',
-        textAlign: 'right',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#F3F4F6',
-        marginVertical: spacing.sm,
-    },
-    expandButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: spacing.sm,
-        gap: 4,
-    },
-    expandText: {
-        fontSize: 14,
-        color: colors.primary,
-        fontWeight: '500',
-    },
-    detailsContainer: {
-        backgroundColor: colors.white,
-        marginTop: spacing.md,
-    },
-    editButton: {
-        marginTop: spacing.sm,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        alignSelf: 'stretch',
-    },
-    detailRow: {
-        gap: 12,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            marginBottom: spacing.sm,
+            overflow: 'hidden',
+            paddingBottom: spacing.sm,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        cardContent: {
+            padding: spacing.md,
+            paddingBottom: 0,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+        },
+        label: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.textSecondary,
+            lineHeight: 20,
+            flex: 1,
+        },
+        value: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+            maxWidth: '60%',
+            textAlign: 'right',
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginVertical: spacing.sm,
+        },
+        expandButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: spacing.sm,
+            gap: 4,
+        },
+        expandText: {
+            fontSize: 14,
+            color: theme.primary,
+            fontWeight: '500',
+        },
+        detailsContainer: {
+            backgroundColor: theme.background,
+            marginTop: spacing.md,
+        },
+        editButton: {
+            marginTop: spacing.sm,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: spacing.lg,
+            alignSelf: 'stretch',
+        },
+        detailRow: {
+            gap: 12,
+        },
+    });

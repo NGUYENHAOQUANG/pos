@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { DropdownScrollContext } from '@/features/material/hooks';
@@ -64,6 +65,9 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     disabled = false,
     displayValue,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     // Helper to get normalized options
     const getNormalizedOptions = (): DropdownOption[] => {
         return options.map(opt => {
@@ -298,7 +302,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 <Ionicons
                     name={isOpen ? 'chevron-up' : 'chevron-down'}
                     size={20}
-                    color={colors.textSecondary || '#999'}
+                    color={theme.textSecondary}
                 />
             </TouchableOpacity>
 
@@ -322,77 +326,78 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: { zIndex: 10 },
-    labelContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 40,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    text: {
-        flex: 1,
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 40,
-        textAlignVertical: 'center',
-    },
-    placeholderText: { color: colors.textSecondary || '#999' },
-    modalOverlay: {
-        flex: 1,
-    },
-    dropdown: {
-        position: 'absolute',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        maxHeight: 250,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 12,
-            },
-            android: { elevation: 8 },
-        }),
-    },
-    scrollContent: { paddingVertical: spacing.xs },
-    item: {
-        paddingVertical: spacing.sm + 2,
-        paddingHorizontal: spacing.md,
-        marginHorizontal: spacing.xs,
-        borderRadius: borderRadius.sm,
-    },
-    itemDisabled: {
-        opacity: 0.5,
-    },
-    itemSelected: { backgroundColor: colors.gray[200] },
-    itemText: { fontSize: 14, color: colors.text },
-    itemTextSelected: { fontWeight: '500', color: colors.text },
-    itemTextDisabled: { color: colors.textSecondary },
-    autoScrollContainer: {
-        width: '100%',
-        minHeight: 20,
-    },
-    dropdownInline: {
-        position: 'relative',
-        width: '100%',
-        marginTop: spacing.xs,
-        elevation: 0,
-        shadowOpacity: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: { zIndex: 10 },
+        labelContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+        label: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+            lineHeight: 20,
+        },
+        button: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: 40,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: borderRadius.sm,
+        },
+        text: {
+            flex: 1,
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 40,
+            textAlignVertical: 'center',
+        },
+        placeholderText: { color: theme.textSecondary },
+        modalOverlay: {
+            flex: 1,
+        },
+        dropdown: {
+            position: 'absolute',
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            maxHeight: 250,
+            ...Platform.select({
+                ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 12,
+                },
+                android: { elevation: 8 },
+            }),
+        },
+        scrollContent: { paddingVertical: spacing.xs },
+        item: {
+            paddingVertical: spacing.sm + 2,
+            paddingHorizontal: spacing.md,
+            marginHorizontal: spacing.xs,
+            borderRadius: borderRadius.sm,
+        },
+        itemDisabled: {
+            opacity: 0.5,
+        },
+        itemSelected: { backgroundColor: theme.backgroundTertiary },
+        itemText: { fontSize: 14, color: theme.text },
+        itemTextSelected: { fontWeight: '500', color: theme.text },
+        itemTextDisabled: { color: theme.textSecondary },
+        autoScrollContainer: {
+            width: '100%',
+            minHeight: 20,
+        },
+        dropdownInline: {
+            position: 'relative',
+            width: '100%',
+            marginTop: spacing.xs,
+            elevation: 0,
+            shadowOpacity: 0,
+        },
+    });

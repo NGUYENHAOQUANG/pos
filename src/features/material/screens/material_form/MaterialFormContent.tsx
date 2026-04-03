@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Platform, UIManager } from 'react-native'
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import {
@@ -57,6 +58,8 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
         const [deleteModalVisible, setDeleteModalVisible] = useState(false);
         const initializedRef = useRef(false);
         const scrollViewRef = useRef<ScrollView>(null);
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
 
         // ─── Form ──────────────────────────────────────────
         const { control, handleSubmit, reset, setValue } = useForm<MaterialFormValues>({
@@ -147,7 +150,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
                     onBackPress={onBackPress}
                     rightIcon={
                         isEditMode && onDelete ? (
-                            <IconTrashOutlined width={20} height={20} color={colors.text} />
+                            <IconTrashOutlined width={20} height={20} color={theme.text} />
                         ) : undefined
                     }
                     onRightPress={isEditMode && onDelete ? handleDeletePress : undefined}
@@ -209,20 +212,21 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
     }
 );
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    contentScroll: {
-        flex: 1,
-    },
-    contentContainer: {
-        paddingBottom: 100,
-        gap: spacing.sm,
-    },
-    buttonBarBorder: {
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        contentScroll: {
+            flex: 1,
+        },
+        contentContainer: {
+            paddingBottom: 100,
+            gap: spacing.sm,
+        },
+        buttonBarBorder: {
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+        },
+    });

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { ImportReceiptDetailItem } from '@/features/material/types/importReceipt.types';
 import { formatCurrencyValue } from '@/shared/utils';
@@ -12,6 +13,9 @@ interface ImportReceiptItemsProps {
 }
 
 export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ materials }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <View>
@@ -42,120 +46,121 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: spacing.md,
-    },
-    materialCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: spacing.md,
-    },
-    materialHeader: {
-        paddingVertical: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.gray[100],
-        borderTopLeftRadius: borderRadius.sm,
-        borderTopRightRadius: borderRadius.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    materialHeaderTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    content: {
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        gap: spacing.sm,
-    },
-    nameRow: {
-        paddingVertical: 4,
-    },
-    materialName: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-    },
-    detailsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-    },
-    detailItem: {
-        flex: 1,
-    },
-    detailContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    value: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-    },
-    footerLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    footerValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    priceLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    priceValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    detailContentEnd: {
-        justifyContent: 'flex-end',
-    },
-    separatorFull: {
-        height: 1,
-        backgroundColor: colors.border,
-        width: '100%',
-    },
-    separatorInset: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: spacing.md,
-    },
-    detailRow: {
-        flexDirection: 'row',
-        marginBottom: 12,
-        flexWrap: 'wrap',
-        marginTop: spacing.sm,
-    },
-    detailLabel: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-    },
-    detailValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            paddingHorizontal: spacing.md,
+        },
+        materialCard: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.border,
+            marginBottom: spacing.md,
+        },
+        materialHeader: {
+            paddingVertical: 12,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.backgroundSecondary,
+            borderTopLeftRadius: borderRadius.sm,
+            borderTopRightRadius: borderRadius.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        materialHeaderTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        content: {
+            paddingHorizontal: 12,
+            paddingVertical: 12,
+            gap: spacing.sm,
+        },
+        nameRow: {
+            paddingVertical: 4,
+        },
+        materialName: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+        },
+        detailsRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.md,
+        },
+        detailItem: {
+            flex: 1,
+        },
+        detailContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '600',
+        },
+        value: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        footer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+        },
+        footerLabel: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '600',
+        },
+        footerValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        priceLabel: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '600',
+        },
+        priceValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        detailContentEnd: {
+            justifyContent: 'flex-end',
+        },
+        separatorFull: {
+            height: 1,
+            backgroundColor: theme.border,
+            width: '100%',
+        },
+        separatorInset: {
+            height: 1,
+            backgroundColor: theme.border,
+            marginHorizontal: spacing.md,
+        },
+        detailRow: {
+            flexDirection: 'row',
+            marginBottom: 12,
+            flexWrap: 'wrap',
+            marginTop: spacing.sm,
+        },
+        detailLabel: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.text,
+            flex: 1,
+        },
+        detailValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+        },
+    });
