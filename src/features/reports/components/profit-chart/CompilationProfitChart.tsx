@@ -88,22 +88,6 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                         <EmptyStateCard message="Không có dữ liệu lợi nhuận" />
                     ) : (
                         <>
-                            {console.log('[PROFIT CHART] Raw data:', {
-                                totalActualRevenue: statsData?.kpis?.totalActualRevenue,
-                                totalEstimatedRevenue: statsData?.kpis?.totalEstimatedRevenue,
-                                totalMaterialCost: statsData?.kpis?.totalMaterialCost,
-                                totalEstimatedProfit: statsData?.kpis?.totalEstimatedProfit,
-                            })}
-                            {console.log('[PROFIT CHART] Formatted:', {
-                                revenue: formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0),
-                                estimatedRevenue: formatCurrency(
-                                    statsData?.kpis?.totalEstimatedRevenue ?? 0
-                                ),
-                                totalCost: formatCurrency(statsData?.kpis?.totalMaterialCost ?? 0),
-                                estimatedProfit: formatCurrency(
-                                    statsData?.kpis?.totalEstimatedProfit ?? 0
-                                ),
-                            })}
                             <MetricsRow
                                 revenue={formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0)}
                                 estimatedRevenue={formatCurrency(

@@ -67,16 +67,7 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
     // Format total display
     const totalDisplay = useMemo(() => {
         if (!summary) return '0';
-        console.log('[COST CHART] Raw data:', {
-            totalCost: summary.totalCost,
-            currencyUnit: summary.currencyUnit,
-            totalFoodUsage: summary.totalFoodUsage,
-            weightUnit: summary.weightUnit,
-            fcr: summary.fcr,
-        });
-        const formatted = formatCurrency(summary.totalCost, summary.currencyUnit);
-        console.log('[COST CHART] Formatted totalCost:', formatted);
-        return formatted;
+        return formatCurrency(summary.totalCost, summary.currencyUnit);
     }, [summary]);
 
     const showLoading = isLoading || isRefetching;
@@ -192,11 +183,6 @@ const styles = StyleSheet.create({
     chartContainer: {
         alignItems: 'center',
         marginVertical: 16,
-    },
-    excludeContainer: {
-        paddingHorizontal: 8,
-        borderBottomLeftRadius: borderRadius.sm,
-        borderBottomRightRadius: borderRadius.sm,
     },
     divider: {
         height: 1,

@@ -134,7 +134,6 @@ const styles = StyleSheet.create({
     },
     headingBar: {
         marginTop: 12,
-        marginBottom: 16,
     },
     card: {
         backgroundColor: colors.white,

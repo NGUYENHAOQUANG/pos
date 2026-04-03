@@ -14,19 +14,4 @@ export const CATEGORY_COLORS: Record<string, string> = {
     'Chất xử lý nước đầu vào': '#94A3B8',
 };
 
-/** Short display labels for legend */
-export const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
-    'Thức ăn cho tôm': 'Thức ăn',
-    'Dinh dưỡng bổ sung': 'Dinh dưỡng',
-};
-
-/** Preferred display order for legend */
-export const CATEGORY_ORDER = [
-    'Thức ăn cho tôm',
-    'Tôm giống',
-    'Dinh dưỡng bổ sung',
-    'Trị bệnh',
-    'Chất xử lý nước đầu vào',
-];
-
 export const DEFAULT_CATEGORY_COLOR = '#94A3B8';

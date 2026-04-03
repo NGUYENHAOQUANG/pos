@@ -68,7 +68,8 @@ export const AddInventoryScreen: React.FC = () => {
 
     // ─── Derived ───────────────────────────────────────────
     const warehouseId = inventoryDetail?.warehouseId ?? warehouses?.[0]?.id;
-    const warehouseName = inventoryDetail?.warehouseName ?? warehouses?.[0]?.name ?? '---';
+    const selectedWarehouse = warehouses?.find(w => w.id === warehouseId);
+    const warehouseName = selectedWarehouse?.zoneName ?? '---';
     const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItemsData);
 
     const initialData = useMemo(() => {

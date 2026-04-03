@@ -293,7 +293,6 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
             // Call schedule API for each schedule entry when mode is schedule
             if (mode === 'schedule' && schedules.length > 0) {
                 try {
-                    // Build ISO datetime using local time (not UTC)
                     const toLocalISO = (date: Date): string => {
                         const y = date.getFullYear();
                         const mo = String(date.getMonth() + 1).padStart(2, '0');
@@ -303,7 +302,6 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         const sec = String(date.getSeconds()).padStart(2, '0');
                         return `${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`;
                     };
-
                     // Send all schedules that have valid start/end time
                     const validSchedules = schedules.filter(s => s.startTime && s.endTime);
 

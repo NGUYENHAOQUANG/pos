@@ -19,7 +19,7 @@ export const ImportReceiptListScreen: React.FC = () => {
         const params: Record<string, string | number> = {};
 
         if (searchText?.trim()) {
-            params.ReceiptCode = searchText.trim();
+            params.SearchText = searchText.trim();
         }
 
         if (warehouseId) {
