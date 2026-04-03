@@ -101,7 +101,27 @@ export const MenuScreens: React.FC = () => {
                     <RecordManagement />
                     <SecurityManagement />
 
-                    {/* Bottom Actions Group */}
+                    {/* Chatbot (Beta) */}
+                    <View style={styles.chatbotSection}>
+                        <Text style={styles.chatbotSectionTitle}>Trợ lý AI</Text>
+                        <TouchableOpacity
+                            style={styles.chatbotCard}
+                            onPress={() => navigation.navigate('Chatbot')}
+                            activeOpacity={0.8}
+                        >
+                            <View style={styles.chatbotIconWrapper}>
+                                <AntDesign name="message1" size={18} color="#FFFFFF" />
+                            </View>
+                            <View style={styles.chatbotInfo}>
+                                <Text style={styles.chatbotTitle}>MeBiEco AI Chatbot</Text>
+                                <Text style={styles.chatbotDesc}>Trợ lý ảo hỗ trợ quản lý</Text>
+                            </View>
+                            <View style={styles.chatbotBetaBadge}>
+                                <Text style={styles.chatbotBetaText}>BETA</Text>
+                            </View>
+                            <AntDesign name="right" size={16} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.actionsContainer}>
                         {/* Delete Account */}
                         <View style={styles.actionCard}>
@@ -260,5 +280,60 @@ const styles = StyleSheet.create({
     versionText: {
         fontSize: 13,
         color: colors.textSecondary,
+    },
+    chatbotSection: {
+        gap: 12,
+    },
+    chatbotSectionTitle: {
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    chatbotCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 56,
+        paddingHorizontal: 12,
+        gap: 12,
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.primaryOrange,
+        borderStyle: 'solid' as const,
+    },
+    chatbotIconWrapper: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: colors.primaryOrange,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    chatbotInfo: {
+        flex: 1,
+    },
+    chatbotTitle: {
+        fontSize: 15,
+        lineHeight: 20,
+        fontWeight: '500',
+        color: colors.gray[950],
+    },
+    chatbotDesc: {
+        fontSize: 12,
+        lineHeight: 16,
+        color: colors.textSecondary,
+    },
+    chatbotBetaBadge: {
+        backgroundColor: colors.primaryOrange,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    chatbotBetaText: {
+        color: colors.white,
+        fontSize: 9,
+        fontWeight: '700',
+        letterSpacing: 0.5,
     },
 });

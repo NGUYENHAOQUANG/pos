@@ -76,6 +76,7 @@ import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/De
 import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebViewScreen';
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
 import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen';
+import { ChatbotScreen } from '@/features/menu/screens/chatbot/ChatbotScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
@@ -261,6 +262,7 @@ export type AppStackParamList = {
     PolicyWebView: { url: string; title: string };
     Settings: undefined;
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
+    Chatbot: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -377,6 +379,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="PinSetup" component={PinSetupScreen} />
+            <Stack.Screen name="Chatbot" component={ChatbotScreen} />
         </Stack.Navigator>
     );
 };
