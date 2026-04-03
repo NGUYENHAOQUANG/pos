@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 
 import { Text } from '@/shared/components/typography/Text';
-import { colors, typography } from '@/styles';
+import { typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { FarmData } from '@/features/farm/types/farm.types';
 import { LeafletMap } from '@/shared/components/map/LeafletMap';
 import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
@@ -22,6 +24,8 @@ interface InfoFieldProps {
 }
 
 const InfoField: React.FC<InfoFieldProps> = ({ label, value }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>{label}</Text>
@@ -35,6 +39,8 @@ interface FarmInfoCardProps {
 }
 
 export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [activeTab, setActiveTab] = React.useState('map');
     const [mapMode, setMapMode] = React.useState<'map' | 'satellite'>('satellite');
     const { width: screenWidth } = useWindowDimensions();
@@ -128,86 +134,87 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    wrapper: {
-        flex: 1,
-    },
-    headingBar: {
-        marginTop: 12,
-    },
-    card: {
-        backgroundColor: colors.white,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        marginTop: 16,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginHorizontal: 16,
-    },
-    fieldContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-    },
-    fieldLabel: {
-        fontSize: 14,
-        lineHeight: 22,
-        color: colors.textSecondary,
-    },
-    imageContainer: {
-        height: 250,
-        borderRadius: 16,
-        overflow: 'hidden',
-        marginTop: 12,
-        backgroundColor: colors.gray[100],
-        marginHorizontal: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    farm3dImage: {
-        width: '100%',
-        height: '100%',
-    },
-    fieldValue: {
-        fontSize: 14,
-        fontWeight: typography.fontWeight.medium,
-        lineHeight: 22,
-        color: colors.text,
-        flex: 1,
-        marginLeft: 80,
-        textAlign: 'right',
-    },
-    mapControls: {
-        position: 'absolute',
-        top: 12,
-        left: 12,
-        flexDirection: 'row',
-        backgroundColor: colors.gray[100],
-        borderRadius: 100,
-        padding: 2,
-    },
-    controlButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    controlButtonActive: {
-        backgroundColor: colors.white,
-        padding: 4,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    controlButtonText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.textSecondary,
-    },
-    controlButtonTextActive: {
-        color: colors.black,
-        fontWeight: '700',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        wrapper: {
+            flex: 1,
+        },
+        headingBar: {
+            marginTop: 12,
+        },
+        card: {
+            backgroundColor: theme.background,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            marginTop: 16,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            marginHorizontal: 16,
+        },
+        fieldContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 8,
+        },
+        fieldLabel: {
+            fontSize: 14,
+            lineHeight: 22,
+            color: theme.textSecondary,
+        },
+        imageContainer: {
+            height: 250,
+            borderRadius: 16,
+            overflow: 'hidden',
+            marginTop: 12,
+            backgroundColor: theme.gray[100],
+            marginHorizontal: 16,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        farm3dImage: {
+            width: '100%',
+            height: '100%',
+        },
+        fieldValue: {
+            fontSize: 14,
+            fontWeight: typography.fontWeight.medium,
+            lineHeight: 22,
+            color: theme.text,
+            flex: 1,
+            marginLeft: 80,
+            textAlign: 'right',
+        },
+        mapControls: {
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            flexDirection: 'row',
+            backgroundColor: theme.gray[100],
+            borderRadius: 100,
+            padding: 2,
+        },
+        controlButton: {
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 100,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        controlButtonActive: {
+            backgroundColor: theme.background,
+            padding: 4,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        controlButtonText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.textSecondary,
+        },
+        controlButtonTextActive: {
+            color: theme.text,
+            fontWeight: '700',
+        },
+    });

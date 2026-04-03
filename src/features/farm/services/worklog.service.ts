@@ -1,21 +1,29 @@
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
-import { mapFromApiResponse as mapShrimpHealthAndEnv } from '@/features/farm/utils/shrimpHealthCheckMapper';
 import { JOB_CONFIG, JobType } from '@/features/farm/components/pondwork/JobItem';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 import { TimelineActivity } from '@/features/farm/components/TrackingList';
 import { EnvMetricType } from '@/features/farm/types/environment.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
-import { HarvestType } from '@/features/farm/types/harvestRecord.types';
-import {
-    TREATMENT_TYPE_LABELS,
-    TreatmentTypeEnum,
-} from '@/features/farm/types/waterTreatment.types';
 import type {
     IPondRecordItem,
     IPondRecordReferenceData,
     RawPondRecordItem,
 } from '@/features/farm/types/pondRecord.types';
+import {
+    feedingLogService,
+    siphonLogService,
+    waterChangeLogService,
+    sizeMeasurementLogService,
+    shrimpHealthLogService,
+    stockTransferLogService,
+    harvestLogService,
+    envMeasurementLogService,
+    cleanRenovationLogService,
+    dryRenovationLogService,
+    incidentLogService,
+    waterTreatmentLogService,
+} from './work-log';
 
 type Ref = IPondRecordReferenceData & Record<string, unknown>;
 
@@ -107,20 +115,6 @@ export type RefToActivityDataContext = {
     pondNameMap: Record<string, string>;
 };
 
-function pushMaterialRows(
-    data: ActivityData[],
-    materials: { warehouseItemId: string; quantity: number; name?: string; unitName?: string }[],
-    materialMap: Record<string, { name?: string; unitName?: string }>
-): void {
-    materials.forEach(m => {
-        const mat = materialMap[m.warehouseItemId];
-        const matName = mat?.name || m.name || 'Vật tư';
-        const matUnit = mat?.unitName || m.unitName;
-        const label = matUnit ? `${matName} (${matUnit})` : matName;
-        data.push({ label, value: m.quantity });
-    });
-}
-
 /** Convert ReleaseShrimp referenceData to ActivityData[] (giống metaConverters: 1 converter / 1 type). */
 export function convertReleaseShrimpRefToActivityData(r: Ref): ActivityData[] {
     const data: ActivityData[] = [];
@@ -133,243 +127,6 @@ export function convertReleaseShrimpRefToActivityData(r: Ref): ActivityData[] {
             label: 'Chi phí ước tính (VNĐ)',
             value: `${Number(r.estimatedCost).toLocaleString()}`,
         });
-    return data;
-}
-
-export function convertFeedingRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    if (r.materials?.length) pushMaterialRows(data, r.materials, ctx.materialMap);
-    return data;
-}
-
-export function convertEnvMeasurementRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    const { metricTypes } = ctx;
-    const detailsList =
-        r.envMeasurements ||
-        (r as any).EnvMeasurements ||
-        (r as any).envMeasurementDetails ||
-        (r as any).envMeasurementDetail?.envMeasurementDetails;
-    if (detailsList && Array.isArray(detailsList) && detailsList.length > 0) {
-        detailsList.forEach((detail: any) => {
-            const metricId = detail.metricId || detail.MetricId;
-            const value = detail.value ?? detail.Value;
-            if (metricId != null && value != null) {
-                const strMetricId = String(metricId).toLowerCase();
-                const metric = metricTypes.find(m => String(m.id).toLowerCase() === strMetricId);
-                const isAlerted = detail.isAlerted === true || detail.IsAlerted === true;
-                let finalLabel = metric ? metric.name : `Thông số (${strMetricId.substring(0, 4)})`;
-                let finalUnit: string | undefined;
-                const nameMatch = finalLabel.match(/^(.*?)\s*\((.*?)\)$/);
-                if (nameMatch) {
-                    finalLabel = nameMatch[1].trim();
-                    finalUnit = nameMatch[2].trim();
-                }
-                data.push({
-                    label: finalUnit ? `${finalLabel} (${finalUnit})` : finalLabel,
-                    value: `${value}`,
-                    isWarning: isAlerted,
-                });
-            }
-        });
-    } else {
-        const objToScan =
-            detailsList && typeof detailsList === 'object' && !Array.isArray(detailsList)
-                ? detailsList
-                : r;
-        const commonNames: Record<string, string> = {
-            ph: 'pH',
-            dissolvedoxygen: 'DO (mg/L)',
-            do: 'DO (mg/L)',
-            temperature: 'Nhiệt độ (°C)',
-            temp: 'Nhiệt độ (°C)',
-            salinity: 'Độ mặn (ppt)',
-            alkalinity: 'Độ kiềm (mg/L)',
-            transparency: 'Độ trong (cm)',
-            kali: 'Kali (mg/L)',
-            tan: 'TAN (mg/L)',
-            magie: 'Magie (mg/L)',
-            no3: 'NO3 (mg/L)',
-        };
-        Object.keys(objToScan).forEach(key => {
-            const strKey = String(key).toLowerCase();
-            if (['operationtype', 'operationid', 'pondid', 'notes'].includes(strKey)) return;
-            const val = (objToScan as Record<string, unknown>)[key];
-            if (val != null && typeof val !== 'object' && val !== '') {
-                const metric = metricTypes.find(
-                    m =>
-                        String(m.id).toLowerCase() === strKey ||
-                        String((m as any).code || '').toLowerCase() === strKey ||
-                        String(m.name).toLowerCase() === strKey
-                );
-                let label = metric ? metric.name : commonNames[strKey] ?? key;
-                const nameMatch2 = label.match(/^(.*?)\s*\((.*?)\)$/);
-                if (nameMatch2) {
-                    label = nameMatch2[1].trim();
-                    const unit = nameMatch2[2].trim();
-                    data.push({ label: `${label} (${unit})`, value: String(val) });
-                } else {
-                    data.push({ label, value: String(val) });
-                }
-            }
-        });
-    }
-    return data;
-}
-
-export function convertShrimpHealthCheckRefToActivityData(r: Ref): ActivityData[] {
-    const data: ActivityData[] = [];
-    const uiState = mapShrimpHealthAndEnv({
-        value: (r as any).feedInTrapG ?? 0,
-        healthCheck: r as any,
-        images: (r as any).documents?.map((d: any) => d.publicUrl) || [],
-    });
-    if (uiState.foodAmount != null)
-        data.push({ label: 'Thức ăn cho vào nhá (g)', value: `${uiState.foodAmount}` });
-    if (uiState.leftoverFood) data.push({ label: 'Thức ăn thừa', value: uiState.leftoverFood });
-    if (uiState.intestine) data.push({ label: 'Đường ruột', value: uiState.intestine });
-    if (uiState.intestineColor)
-        data.push({ label: 'Màu đường ruột', value: uiState.intestineColor });
-    if (uiState.stoolColor) data.push({ label: 'Màu phân', value: uiState.stoolColor });
-    if (uiState.liver) data.push({ label: 'Gan', value: uiState.liver });
-    return data;
-}
-
-export function convertSizeMeasurementRefToActivityData(r: Ref): ActivityData[] {
-    const data: ActivityData[] = [];
-    if (r.shrimpSizePcsPerKg != null)
-        data.push({ label: 'Cỡ tôm (con/kg)', value: `${r.shrimpSizePcsPerKg}` });
-    if ((r as any).averageShrimpSize != null && Number((r as any).averageShrimpSize) > 0)
-        data.push({
-            label: 'Trọng lượng tôm TB (g/con)',
-            value: `${(r as any).averageShrimpSize}`,
-        });
-    if (r.estimatedRemainingStockKg != null)
-        data.push({ label: 'Sản lượng còn lại (kg)', value: `${r.estimatedRemainingStockKg}` });
-    if ((r as any).totalShrimpCount != null)
-        data.push({
-            label: 'Tổng số tôm hiện tại (con)',
-            value: `${Math.round(Number((r as any).totalShrimpCount))}`,
-        });
-    if ((r as any).releaseQuantity != null)
-        data.push({ label: 'Số lượng thả (con)', value: `${(r as any).releaseQuantity}` });
-    if ((r as any).survivalRatePercentage != null)
-        data.push({
-            label: 'Tỉ lệ sống (%)',
-            value: `${Math.round(Number((r as any).survivalRatePercentage))}`,
-        });
-    return data;
-}
-
-export function convertSiphonRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    if ((r as any).shrimpLossKg != null)
-        data.push({ label: 'Hao hụt tôm (kg)', value: `${(r as any).shrimpLossKg}` });
-    if (r.materials?.length) pushMaterialRows(data, r.materials, ctx.materialMap);
-    return data;
-}
-
-export function convertWaterChangeRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    const ra = r as any;
-    if (ra.targetWaterLevel != null)
-        data.push({ label: 'Mực nước mục tiêu (cm)', value: `${ra.targetWaterLevel}` });
-    if (ra.waterAdded != null) data.push({ label: 'Số cm cấp', value: `${ra.waterAdded}` });
-    if (ra.waterRemoved != null)
-        data.push({ label: 'Mực nước xả xuống (cm)', value: `${ra.waterRemoved}` });
-    if (ra.previousVolume != null)
-        data.push({ label: 'Thể tích trước (m³)', value: `${ra.previousVolume}` });
-    if (ra.addedVolume != null)
-        data.push({ label: 'Thể tích nước cấp (m³)', value: `${ra.addedVolume}` });
-    if (ra.finalVolume != null)
-        data.push({ label: 'Thể tích sau cấp (m³)', value: `${ra.finalVolume}` });
-    if (r.materials?.length) pushMaterialRows(data, r.materials, ctx.materialMap);
-    return data;
-}
-
-export function convertWaterTreatmentRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    const treatmentType = (r as Record<string, unknown>).treatmentType as string | undefined;
-    if (treatmentType) {
-        const label = TREATMENT_TYPE_LABELS[treatmentType as TreatmentTypeEnum] || treatmentType;
-        data.push({ label: 'Loại hoạt động', value: label });
-    }
-    if (r.materials?.length) pushMaterialRows(data, r.materials, ctx.materialMap);
-    return data;
-}
-
-const HARVEST_TYPE_LABEL: Record<HarvestType | 'CloseCycle', string> = {
-    FullHarvest: 'Thu hết',
-    PartialHarvest: 'Thu tỉa',
-    CloseCycle: 'Đóng chu kỳ',
-};
-
-export function convertHarvestRefToActivityData(r: Ref): ActivityData[] {
-    const data: ActivityData[] = [];
-    const displayType = r.harvestType
-        ? HARVEST_TYPE_LABEL[r.harvestType as keyof typeof HARVEST_TYPE_LABEL] ||
-          String(r.harvestType)
-        : undefined;
-    if (displayType) data.push({ label: 'Loại thu hoạch', value: displayType });
-    if (r.totalWeightKg != null)
-        data.push({ label: 'Sản lượng (kg)', value: `${r.totalWeightKg}` });
-    if (r.shrimpSizePcsPerKg != null)
-        data.push({ label: 'Cỡ tôm (con/kg)', value: `${r.shrimpSizePcsPerKg}` });
-    if (r.referencePrice != null)
-        data.push({ label: 'Giá tham khảo (VNĐ/kg)', value: `${r.referencePrice}` });
-    if ((r as any).revenue != null)
-        data.push({ label: 'Doanh thu (VNĐ)', value: `${(r as any).revenue}` });
-    return data;
-}
-
-export function convertStockTransferRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    if (r.shrimpSizePcsPerKg != null)
-        data.push({ label: 'Cỡ tôm (con/kg)', value: `${r.shrimpSizePcsPerKg}` });
-    if (r.totalStocking != null)
-        data.push({
-            label: 'Tổng số lượng sang (con)',
-            value: `${Number(r.totalStocking).toLocaleString()}`,
-        });
-    if (r.toPonds?.length) {
-        r.toPonds.forEach((pond, index) => {
-            const pondLabel =
-                ctx.pondNameMap[pond.toPondId] ||
-                pond.toPondName ||
-                `Ao đích ${r.toPonds!.length > 1 ? index + 1 : ''}`.trim();
-            data.push({
-                label: `${pondLabel} (con)`,
-                value: Number(pond.quantity).toLocaleString(),
-            });
-        });
-    }
-    return data;
-}
-
-export function convertMaterialsOnlyRefToActivityData(
-    r: Ref,
-    ctx: RefToActivityDataContext
-): ActivityData[] {
-    const data: ActivityData[] = [];
-    if (r.materials?.length) pushMaterialRows(data, r.materials, ctx.materialMap);
     return data;
 }
 
@@ -416,27 +173,38 @@ export function convertReferenceDataToActivityData(
         case 'ReleaseShrimp':
             return convertReleaseShrimpRefToActivityData(r);
         case 'Feeding':
-            return convertFeedingRefToActivityData(r, ctx);
+            return feedingLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         case 'EnvMeasurement':
-            return convertEnvMeasurementRefToActivityData(r, ctx);
+            return envMeasurementLogService.convertReferenceDataToActivityData(
+                r,
+                undefined,
+                ctx.metricTypes
+            );
         case 'ShrimpHealthCheck':
-            return convertShrimpHealthCheckRefToActivityData(r);
+            return shrimpHealthLogService.convertReferenceDataToActivityData(r);
         case 'SizeMeasurement':
-            return convertSizeMeasurementRefToActivityData(r);
+            return sizeMeasurementLogService.convertReferenceDataToActivityData(r);
         case 'Siphon':
-            return convertSiphonRefToActivityData(r, ctx);
+            return siphonLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         case 'WaterChange':
-            return convertWaterChangeRefToActivityData(r, ctx);
+            return waterChangeLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         case 'WaterTreatment':
-            return convertWaterTreatmentRefToActivityData(r, ctx);
+            return waterTreatmentLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         case 'Harvest':
-            return convertHarvestRefToActivityData(r);
+            return harvestLogService.convertReferenceDataToActivityData(r);
         case 'StockTransfer':
-            return convertStockTransferRefToActivityData(r, ctx);
+            return stockTransferLogService.convertReferenceDataToActivityData(
+                r,
+                undefined,
+                undefined,
+                ctx.pondNameMap
+            );
         case 'Incident':
+            return incidentLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         case 'CleanRenovation':
+            return cleanRenovationLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         case 'DryRenovation':
-            return convertMaterialsOnlyRefToActivityData(r, ctx);
+            return dryRenovationLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
         default:
             return convertDefaultRefToActivityData(ref as Record<string, unknown>);
     }

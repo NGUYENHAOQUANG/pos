@@ -1,19 +1,14 @@
-import type { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
-
-/** Material line in feeding detail (API) */
-export interface FeedingMaterial {
-    warehouseItemId: string;
-    quantity: number;
-    /** Material name from BE (available in list response for cross-page display) */
-    name?: string;
-    /** Unit name from BE (available in list response for cross-page display) */
-    unitName?: string;
-}
+import type {
+    IApiResponse,
+    IPaginate,
+    ICreatorEditor,
+    PondLogMaterialType,
+} from '@/shared/types/common.types';
 
 /** Body detail for feeding record (API) */
 export interface FeedingDetailPayload {
     notes: string;
-    materials: FeedingMaterial[];
+    materials: PondLogMaterialType[];
 }
 
 /** Payload when creating a feeding record – POST /pond/{pondId}/feeding-records */
@@ -46,7 +41,7 @@ export interface FeedingRecordItem {
     pondId: string;
     feedingDetail?: {
         notes?: string;
-        materials?: FeedingMaterial[];
+        materials?: PondLogMaterialType[];
     };
     documentIds?: string[];
 }

@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { StyleSheet, TextInput as RNTextInput } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -12,6 +13,9 @@ interface SelectionNotesBoxProps {
 }
 
 export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onNotesChange }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const inputRef = useRef<RNTextInput>(null);
 
     const handleChangeText = (text: string) => {
@@ -30,7 +34,7 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
                     ref={inputRef}
                     style={styles.textArea}
                     placeholder="Nhập ghi chú"
-                    placeholderTextColor={colors.borderSubtle}
+                    placeholderTextColor={theme.borderSubtle}
                     value={notes}
                     onChangeText={handleChangeText}
                     multiline
@@ -42,20 +46,21 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
     );
 };
 
-const styles = StyleSheet.create({
-    textArea: {
-        minHeight: 104,
-        maxHeight: 160,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
-        fontSize: 14,
-        fontWeight: '400',
-        lineHeight: 24,
-        color: colors.text,
-        textAlignVertical: 'top',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        textArea: {
+            minHeight: 104,
+            maxHeight: 160,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: '400',
+            lineHeight: 24,
+            color: theme.text,
+            textAlignVertical: 'top',
+        },
+    });

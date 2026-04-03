@@ -12,11 +12,8 @@ import {
     IUpdateEnvMeasurementReq,
     IEnvMeasurementParams,
 } from '@/features/farm/types/envMeasurement.types';
-import {
-    JobExecution,
-    ENVIRONMENT_METRIC_IDS,
-    EnvironmentMeta,
-} from '@/features/farm/types/farm.types';
+import { JobExecution } from '@/features/farm/types/farm.types';
+import { envMeasurementLogService } from '@/features/farm/services/work-log';
 import { useMemo } from 'react';
 import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
@@ -140,112 +137,9 @@ export const useEnvMeasurementsAsJobs = (pondId: string, params?: IEnvMeasuremen
     const { metricTypes } = useEnvironmentInit();
 
     const jobs: JobExecution[] = useMemo(() => {
-        if (!response?.data?.items) return [];
-
-        const rawItems = response.data.items || [];
-
-        // Group by date
-        const grouped = new Map<string, any[]>();
-        rawItems.forEach((item: any) => {
-            const d = item.createdAt ? new Date(item.createdAt) : new Date();
-            const dateKey = d.toLocaleDateString('en-CA'); // YYYY-MM-DD
-            if (!grouped.has(dateKey)) grouped.set(dateKey, []);
-            grouped.get(dateKey)!.push(item);
-        });
-
-        // Sort each day ASC to assign sequential numbering
-        grouped.forEach(items => {
-            items.sort(
-                (a: any, b: any) =>
-                    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
-        });
-
-        const allJobs: JobExecution[] = [];
-
-        grouped.forEach(dayItems => {
-            dayItems.forEach((item: any, index: number) => {
-                const dateObj = new Date(item.createdAt);
-                const timeStr = dateObj.toLocaleTimeString('en-GB', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                });
-                const entryNumber = index + 1;
-
-                // Construct meta with all metrics
-                const meta: EnvironmentMeta = {};
-                const details = item.envMeasurementDetail?.envMeasurementDetails || [];
-                if (details.length > 0 && metricTypes.length > 0) {
-                    details.forEach((m: any) => {
-                        const metric = metricTypes.find(mt => mt.id === m.metricId);
-                        if (!metric) return;
-
-                        switch (metric.code) {
-                            case ENVIRONMENT_METRIC_IDS.PH:
-                                meta.pH = m.value.toString();
-                                meta.pHWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.DO:
-                                meta.do = m.value.toString();
-                                meta.doWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.TEMPERATURE:
-                                meta.temperature = m.value.toString();
-                                meta.temperatureWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.SALINITY:
-                                meta.salinity = m.value.toString();
-                                meta.salinityWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.ALKALINITY:
-                                meta.alkalinity = m.value.toString();
-                                meta.alkalinityWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.TRANSPARENCY:
-                                meta.transparency = m.value.toString();
-                                meta.transparencyWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.KALI:
-                                meta.kali = m.value.toString();
-                                meta.kaliWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.TAN:
-                                meta.tan = m.value.toString();
-                                meta.tanWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.MAGIE:
-                                meta.magie = m.value.toString();
-                                meta.magieWarning = m.isAlerted;
-                                break;
-                            case ENVIRONMENT_METRIC_IDS.NO3:
-                                meta.no3 = m.value.toString();
-                                meta.no3Warning = m.isAlerted;
-                                break;
-                        }
-                    });
-                }
-
-                allJobs.push({
-                    id: item.id,
-                    label: `Lần ${entryNumber}`,
-                    time: timeStr,
-                    date: item.createdAt,
-                    pondId: item.pondId,
-                    note: item.envMeasurementDetail?.notes,
-                    meta,
-                });
-            });
-        });
-
-        // Sort all jobs DESC (newest first)
-        allJobs.sort((a, b) => {
-            const timeA = new Date(a.date || '').getTime();
-            const timeB = new Date(b.date || '').getTime();
-            return timeB - timeA;
-        });
-
-        return allJobs;
-    }, [response, metricTypes]);
+        const rawItems = response?.data?.items || [];
+        return envMeasurementLogService.mapRecordsToJobs(rawItems, undefined, metricTypes);
+    }, [response?.data?.items, metricTypes]);
 
     return { jobs, isLoading, refetch };
 };

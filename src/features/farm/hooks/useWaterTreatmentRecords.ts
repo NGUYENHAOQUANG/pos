@@ -11,11 +11,9 @@ import {
     IWaterTreatmentRecord,
     CreateWaterTreatmentCommand,
     UpdateWaterTreatmentCommand,
-    TREATMENT_TYPE_LABELS,
 } from '@/features/farm/types/waterTreatment.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { IMaterial } from '@/features/material/types/material.types';
+import { waterTreatmentLogService } from '@/features/farm/services/work-log';
 
 // --- Query Hooks ---
 
@@ -41,71 +39,7 @@ export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTr
         ? responseData
         : responseData?.items || [];
 
-    // Fetch material definitions for name lookup
-    const { materialMap } = useFarmMaterials();
-
-    // Count daily items for "Lần X" numbering
-    const totalPerDay: Record<string, number> = {};
-    rawItems.forEach((item: IWaterTreatmentRecord) => {
-        const d = item.createdAt ? new Date(item.createdAt) : new Date();
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-        totalPerDay[key] = (totalPerDay[key] || 0) + 1;
-    });
-
-    // Sort descending (newest first)
-    const sortedItems = [...rawItems].sort((a, b) => {
-        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return timeB - timeA;
-    });
-
-    const dayCounts: Record<string, number> = {};
-
-    const jobs: JobExecution[] = sortedItems.map((item: IWaterTreatmentRecord) => {
-        const dateObj = item.createdAt ? new Date(item.createdAt) : new Date();
-        const dateKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
-
-        if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
-        dayCounts[dateKey]++;
-        const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
-        const dailyIndex = total - dayCounts[dateKey] + 1;
-
-        // Map treatmentType enum to Vietnamese label
-        const treatmentType = item.waterTreatmentDetail?.treatmentType;
-        const treatmentLabel = treatmentType
-            ? TREATMENT_TYPE_LABELS[treatmentType] || treatmentType
-            : undefined;
-
-        return {
-            id: item.id,
-            label: `Lần ${dailyIndex}`,
-            date: item.createdAt,
-            time: item.createdAt
-                ? dateObj.toLocaleTimeString('en-GB', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                  })
-                : '00:00',
-            note: item.waterTreatmentDetail?.notes?.trim() || undefined,
-            pondId: item.pondId,
-            waterTreatmentType: treatmentLabel,
-            materials: item.waterTreatmentDetail?.materials?.map(m => {
-                const matDef = m.warehouseItemId ? materialMap[m.warehouseItemId] : undefined;
-                return {
-                    material: {
-                        id: m.warehouseItemId,
-                        name: matDef?.name || m.name || 'Vật tư',
-                        unitName: matDef?.unitName || m.unitName || '',
-                    } as IMaterial,
-                    quantity: m.quantity,
-                    unit: matDef?.unitName || m.unitName || '',
-                };
-            }),
-            images: item.documentIds || [],
-            documentIds: item.documentIds || [],
-        };
-    });
+    const jobs: JobExecution[] = waterTreatmentLogService.mapRecordsToJobs(rawItems);
 
     return { jobs, isLoading, error, refetch };
 };

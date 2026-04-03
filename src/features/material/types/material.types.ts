@@ -113,6 +113,7 @@ export interface UpdateMaterialV2Request {
 }
 
 export interface GetMaterialsParams {
+    WarehouseId?: string;
     SearchText?: string;
     MaterialTypeId?: string;
     IsActive?: boolean;

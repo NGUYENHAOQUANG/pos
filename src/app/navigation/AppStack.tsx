@@ -21,7 +21,7 @@ import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environme
 import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment-setting/EnvironmentSettingScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment-log/EnvironmentLogScreen';
 import { CreateCycleScreen } from '@/features/farm/screens/create-cycle/CreateCycleScreen';
-import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
+import { AddSiphonScreen } from '@/features/farm/screens/pondwork/siphon-form/SiphonFormScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
 import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeLogScreen';
@@ -75,6 +75,7 @@ import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/
 import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebViewScreen';
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
+import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
@@ -153,7 +154,7 @@ export type AppStackParamList = {
         isEditMode?: boolean;
         aiCount?: number;
     };
-    AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
+    AddSiphonScreen: { pond: PondData; siphonId?: string };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
     EditWaterTreatmentScreens: {
@@ -259,6 +260,7 @@ export type AppStackParamList = {
     DeleteAccount: undefined;
     PolicyWebView: { url: string; title: string };
     Settings: undefined;
+    PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -374,6 +376,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
             <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="PinSetup" component={PinSetupScreen} />
         </Stack.Navigator>
     );
 };

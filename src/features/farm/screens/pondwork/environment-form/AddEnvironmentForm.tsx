@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
@@ -76,6 +77,9 @@ export const AddEnvironmentForm: React.FC<AddEnvironmentFormProps> = ({
     onCancelDelete,
     UnsavedChangesModal,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     // --- Form Setup ---
     const schema = useMemo(() => createEnvironmentFormSchema(), []);
 
@@ -232,19 +236,20 @@ export const AddEnvironmentForm: React.FC<AddEnvironmentFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        padding: 0,
-        paddingBottom: 100,
-        gap: 8,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            padding: 0,
+            paddingBottom: 100,
+            gap: 8,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+    });

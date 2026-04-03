@@ -149,7 +149,7 @@ export const usePondJobEditHandlers = ({
 
             [JOB_TYPES.SIPHON]: item => {
                 if (!pond) return;
-                navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
+                navigation.navigate('AddSiphonScreen', { pond, siphonId: item.id });
             },
 
             [JOB_TYPES.WATER_TREATMENT]: item => {

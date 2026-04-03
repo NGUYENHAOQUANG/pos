@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { IconCalender } from '@/assets/icons';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { TimePickerModal } from '@/shared/components/modal/TimePickerModal';
@@ -110,6 +111,9 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
     borderRadius = 6,
     disabled = false,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
     // Temporarily hold selected date from calendar before time selection
@@ -176,7 +180,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
                     disabled={disabled}
                 >
                     <Text style={styles.dateText}>{displayText}</Text>
-                    <IconCalender width={15} height={15} />
+                    <IconCalender width={15} height={15} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
@@ -204,37 +208,38 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    inputGroup: {
-        gap: 6,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        inputGroup: {
+            gap: 6,
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
 
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 20,
-    },
-    required: {
-        color: colors.error,
-    },
-    dateInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 6,
-    },
-    dateText: {
-        fontSize: 16,
-        color: colors.text,
-        flex: 1,
-    },
-});
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        required: {
+            color: theme.error,
+        },
+        dateInput: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 6,
+        },
+        dateText: {
+            fontSize: 16,
+            color: theme.text,
+            flex: 1,
+        },
+    });

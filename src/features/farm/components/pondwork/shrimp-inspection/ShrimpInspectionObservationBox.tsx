@@ -10,7 +10,10 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { colors as legacyColors } from '@/styles/colors';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { Button } from '@/shared/components/buttons/Button';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
@@ -71,6 +74,9 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
     aiResult,
     onViewAIDetails,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isModalVisible, setIsModalVisible] = useState(false);
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -106,7 +112,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                 {aiResult ? (
                     <View style={styles.aiResultBox}>
                         <View style={styles.aiResultHeader}>
-                            <IconAICheckOrange width={20} height={20} fill={colors.primaryOrange} />
+                            <IconAICheckOrange width={20} height={20} fill={theme.primaryOrange} />
                             <Text style={styles.aiResultTitle}>
                                 Kết quả chuẩn đoán tình trạng tôm từ AI
                             </Text>
@@ -140,7 +146,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                     variant="outline"
                     onPress={onAICheckPress || (() => {})}
                     renderLeftIcon={
-                        <IconAICheck width={20} height={20} fill={colors.textSecondary} />
+                        <IconAICheck width={20} height={20} fill={theme.textSecondary} />
                     }
                     fullWidth
                 />
@@ -223,7 +229,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                                         style={styles.closeButton}
                                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                                     >
-                                        <CloseIcon width={16} height={16} fill={colors.text} />
+                                        <CloseIcon width={16} height={16} color={theme.text} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -287,168 +293,169 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
     );
 };
 
-const styles = StyleSheet.create({
-    aiSection: {
-        marginBottom: spacing.md,
-    },
-    aiResultBox: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        padding: spacing.md,
-        marginBottom: spacing.md,
-        backgroundColor: colors.white,
-    },
-    aiResultHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-        marginBottom: spacing.sm,
-    },
-    aiResultTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    aiResultRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-    },
-    aiResultLabel: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    aiResultValue: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    statusBadgeGreen: {
-        backgroundColor: colors.green[50],
-        paddingHorizontal: 12,
-        paddingVertical: 2,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.green[100],
-    },
-    statusTextGreen: {
-        color: colors.green[600],
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    statusBadgeRed: {
-        backgroundColor: colors.red[50],
-        paddingHorizontal: 12,
-        paddingVertical: 2,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.red[200],
-    },
-    statusTextRed: {
-        color: colors.red[600],
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    viewDetailLink: {
-        alignSelf: 'center',
-        marginTop: spacing.xs,
-    },
-    viewDetailLinkText: {
-        color: colors.primary,
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    inputGroup: {
-        gap: spacing.sm,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        marginBottom: 4,
-    },
-    radioGroup: {
-        flexWrap: 'wrap',
-    },
-    radioItem: {
-        width: '48%',
-        paddingVertical: 6,
-    },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.xs,
-    },
-    radioOuterSelected: {
-        borderColor: colors.primaryOrange,
-    },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primaryOrange,
-    },
-    radioLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    // Modal Styles
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingBottom: 40,
-    },
-    modalContainer: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        padding: spacing.lg,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: spacing.lg,
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    closeButton: {
-        padding: 4,
-    },
-    modalBody: {
-        width: '100%',
-    },
-    diseaseRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: spacing.sm,
-    },
-    diseaseName: {
-        fontSize: 16,
-        color: colors.text,
-        fontWeight: '500',
-    },
-    diseasePercent: {
-        fontSize: 16,
-        color: colors.text,
-        fontWeight: '500',
-    },
-    noInfoText: {
-        textAlign: 'center',
-        color: colors.textSecondary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        aiSection: {
+            marginBottom: spacing.md,
+        },
+        aiResultBox: {
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            marginBottom: spacing.md,
+            backgroundColor: theme.background,
+        },
+        aiResultHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs,
+            marginBottom: spacing.sm,
+        },
+        aiResultTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        aiResultRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: spacing.sm,
+        },
+        aiResultLabel: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        aiResultValue: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        statusBadgeGreen: {
+            backgroundColor: legacyColors.green[50],
+            paddingHorizontal: 12,
+            paddingVertical: 2,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: legacyColors.green[100],
+        },
+        statusTextGreen: {
+            color: legacyColors.green[600],
+            fontSize: 12,
+            fontWeight: '600',
+        },
+        statusBadgeRed: {
+            backgroundColor: legacyColors.red[50],
+            paddingHorizontal: 12,
+            paddingVertical: 2,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: legacyColors.red[200],
+        },
+        statusTextRed: {
+            color: legacyColors.red[600],
+            fontSize: 12,
+            fontWeight: '600',
+        },
+        viewDetailLink: {
+            alignSelf: 'center',
+            marginTop: spacing.xs,
+        },
+        viewDetailLinkText: {
+            color: theme.primary,
+            fontSize: 14,
+            fontWeight: '500',
+        },
+        inputGroup: {
+            gap: spacing.sm,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            marginBottom: 4,
+        },
+        radioGroup: {
+            flexWrap: 'wrap',
+        },
+        radioItem: {
+            width: '48%',
+            paddingVertical: 6,
+        },
+        radioOuter: {
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.xs,
+        },
+        radioOuterSelected: {
+            borderColor: theme.primaryOrange,
+        },
+        radioInner: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: theme.primaryOrange,
+        },
+        radioLabel: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        // Modal Styles
+        modalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingBottom: 40,
+        },
+        modalContainer: {
+            width: '100%',
+            backgroundColor: theme.background,
+            borderRadius: 24,
+            padding: spacing.lg,
+        },
+        modalHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: spacing.lg,
+        },
+        modalTitle: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        closeButton: {
+            padding: 4,
+        },
+        modalBody: {
+            width: '100%',
+        },
+        diseaseRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: spacing.sm,
+        },
+        diseaseName: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: '500',
+        },
+        diseasePercent: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: '500',
+        },
+        noInfoText: {
+            textAlign: 'center',
+            color: theme.textSecondary,
+        },
+    });

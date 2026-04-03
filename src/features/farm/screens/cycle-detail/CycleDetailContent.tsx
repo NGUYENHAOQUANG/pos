@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
@@ -57,6 +59,9 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
 
     const isNursery = pondType === POND_TYPES.NURSERY;
     const isShowHarvest = pondType === POND_TYPES.CULTIVATION || pondType === POND_TYPES.READY;
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // Derive display values from raw data
     const seasonLabel = useMemo(
@@ -115,7 +120,7 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                 <RefreshControl
                     refreshing={refreshing}
                     onRefresh={onRefresh}
-                    colors={[colors.black]}
+                    colors={[theme.black]}
                 />
             }
         >
@@ -126,7 +131,7 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                     isExpanded={isStockingExpanded}
                     rightComponent={
                         <TouchableOpacity style={styles.iconBtn} onPress={onEditPress}>
-                            <EditIcon />
+                            <EditIcon color={theme.textSecondary} />
                         </TouchableOpacity>
                     }
                     style={styles.cardHeader}
@@ -264,7 +269,7 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                                         <DetailRow
                                             label="Doanh thu (VND)"
                                             value={item.revenue}
-                                            valueStyle={{ color: colors.success }}
+                                            valueStyle={{ color: theme.success }}
                                         />
                                     </>
                                 )}
@@ -277,77 +282,78 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    content: {},
-    card: {
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        marginHorizontal: spacing.md,
-    },
-    cardHeader: {
-        backgroundColor: colors.transparent,
-        borderTopLeftRadius: 12,
-        borderTopRightRadius: 12,
-        paddingHorizontal: spacing.md,
-    },
-    iconBtn: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    line: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: spacing.md,
-    },
-    infoContainer: {
-        paddingBottom: 16,
-        paddingHorizontal: spacing.md,
-        gap: 12,
-    },
-    receivingPondHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    receivingPondTitle: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.textSecondary,
-    },
-    receivingPondCount: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    pondListBox: {
-        backgroundColor: '#F9FAFB',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        padding: spacing.sm,
-        gap: spacing.xs,
-    },
-    pondRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    pondName: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.textSecondary,
-    },
-    pondQuantity: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        content: {},
+        card: {
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+            marginHorizontal: spacing.md,
+        },
+        cardHeader: {
+            backgroundColor: 'transparent',
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            paddingHorizontal: spacing.md,
+        },
+        iconBtn: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        line: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: spacing.md,
+        },
+        infoContainer: {
+            paddingBottom: 16,
+            paddingHorizontal: spacing.md,
+            gap: 12,
+        },
+        receivingPondHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        receivingPondTitle: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+        },
+        receivingPondCount: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        pondListBox: {
+            backgroundColor: theme.backgroundPrimary,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.borderLight,
+            padding: spacing.sm,
+            gap: spacing.xs,
+        },
+        pondRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        pondName: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+        },
+        pondQuantity: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.text,
+        },
+    });

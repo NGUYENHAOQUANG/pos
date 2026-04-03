@@ -7,7 +7,9 @@
  *
  * @see https://rn.mobile.ant.design/components/input-item
  */
-import { colors, sizes, spacing, typography } from '@/styles';
+import { sizes, spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import React, { useState, useCallback } from 'react';
 import {
     Platform,
@@ -86,7 +88,11 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     maxIntegerPlaces?: number;
 }
 
-export const RequiredDot = () => <View style={styles.requiredDot} />;
+export const RequiredDot = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    return <View style={styles.requiredDot} />;
+};
 
 /**
  * Input component with Ant Design styling and system colors
@@ -123,6 +129,9 @@ export function Input({
     maxIntegerPlaces,
     ...restProps
 }: InputProps) {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
 
@@ -172,17 +181,17 @@ export function Input({
 
     // Get border color based on state
     const getBorderColor = (): string => {
-        if (error) return colors.error;
+        if (error) return theme.error;
         // Focus state uses default border color as requested
-        return colors.border;
+        return theme.defaultBorder;
     };
 
     // Get icon color
     const getIconColor = (): string => {
-        if (disabled) return colors.textTertiary;
-        if (error) return colors.error;
-        if (isFocused) return colors.primary;
-        return colors.textSecondary;
+        if (disabled) return theme.textTertiary;
+        if (error) return theme.error;
+        if (isFocused) return theme.primary;
+        return theme.textSecondary;
     };
 
     return (
@@ -226,7 +235,7 @@ export function Input({
                                 styles.input,
                                 inputStyle,
                                 {
-                                    color: colors.textTertiary,
+                                    color: theme.textTertiary,
                                     fontSize: 14,
                                     lineHeight: Platform.OS === 'ios' ? 0 : 1.54 * 14,
                                 },
@@ -239,7 +248,7 @@ export function Input({
                             value={value}
                             onChangeText={handleChangeText}
                             placeholder={placeholder}
-                            placeholderTextColor={colors.textTertiary}
+                            placeholderTextColor={theme.textTertiary}
                             editable={!disabled}
                             secureTextEntry={secureTextEntry && !isPasswordVisible}
                             keyboardType={keyboardType}
@@ -259,10 +268,10 @@ export function Input({
                                 {
                                     fontSize: 14,
                                     color: disabled
-                                        ? colors.textTertiary
+                                        ? theme.textTertiary
                                         : error
-                                        ? colors.error
-                                        : colors.text,
+                                        ? theme.error
+                                        : theme.text,
                                     ...Platform.select({
                                         android: {
                                             lineHeight: 1.54 * 14,
@@ -352,101 +361,102 @@ export function Input({
 
 const INPUT_HEIGHT = 40;
 
-const styles = StyleSheet.create({
-    container: {
-        marginBottom: 12,
-    },
-    requiredDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 3,
-        backgroundColor: colors.error,
-        marginLeft: 2,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 6,
-    },
-    label: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 20,
-    },
-    required: {
-        color: colors.error,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
-        backgroundColor: colors.white,
-        height: INPUT_HEIGHT,
-        paddingHorizontal: 12,
-    },
-    inputContainerFocused: {
-        // Focus styles removed to match default border design
-    },
-    inputContainerError: {
-        borderColor: colors.error,
-    },
-    inputContainerDisabled: {
-        backgroundColor: colors.backgroundSecondary,
-        opacity: 0.6,
-    },
-    iconLeft: {
-        marginRight: spacing.sm,
-    },
-    input: {
-        flex: 1,
-        fontSize: typography.fontSize.sm,
-        fontWeight: '400',
-        color: colors.text,
-        letterSpacing: 0,
-        paddingVertical: 0,
-        height: '100%',
-        ...Platform.select({
-            android: {
-                textAlignVertical: 'center',
-                lineHeight: 22,
-            },
-        }),
-    },
-    inputMultiline: {
-        minHeight: sizes.input.md * 2,
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.sm,
-        textAlignVertical: 'top',
-    },
-    inputDisabled: {
-        color: colors.textTertiary,
-    },
-    iconRightButton: {
-        marginLeft: spacing.sm,
-        padding: spacing.xs,
-    },
-    errorText: {
-        fontSize: typography.fontSize.xs,
-        color: colors.error,
-        marginTop: spacing.xs,
-    },
-    errorTextHidden: {
-        color: 'transparent',
-    },
-    hintText: {
-        color: colors.error,
-    },
-    suffixWrapper: {
-        justifyContent: 'center',
-        paddingLeft: spacing.sm,
-        paddingRight: 0,
-    },
-    suffixText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            marginBottom: 12,
+        },
+        requiredDot: {
+            width: 4,
+            height: 4,
+            borderRadius: 3,
+            backgroundColor: theme.error,
+            marginLeft: 2,
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 6,
+        },
+        label: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        required: {
+            color: theme.error,
+        },
+        inputContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 8,
+            backgroundColor: theme.background,
+            height: INPUT_HEIGHT,
+            paddingHorizontal: 12,
+        },
+        inputContainerFocused: {
+            // Focus styles removed to match default border design
+        },
+        inputContainerError: {
+            borderColor: theme.error,
+        },
+        inputContainerDisabled: {
+            backgroundColor: theme.backgroundSecondary,
+            opacity: 0.6,
+        },
+        iconLeft: {
+            marginRight: spacing.sm,
+        },
+        input: {
+            flex: 1,
+            fontSize: typography.fontSize.sm,
+            fontWeight: '400',
+            color: theme.text,
+            letterSpacing: 0,
+            paddingVertical: 0,
+            height: '100%',
+            ...Platform.select({
+                android: {
+                    textAlignVertical: 'center',
+                    lineHeight: 22,
+                },
+            }),
+        },
+        inputMultiline: {
+            minHeight: sizes.input.md * 2,
+            paddingTop: spacing.sm,
+            paddingBottom: spacing.sm,
+            textAlignVertical: 'top',
+        },
+        inputDisabled: {
+            color: theme.textTertiary,
+        },
+        iconRightButton: {
+            marginLeft: spacing.sm,
+            padding: spacing.xs,
+        },
+        errorText: {
+            fontSize: typography.fontSize.xs,
+            color: theme.error,
+            marginTop: spacing.xs,
+        },
+        errorTextHidden: {
+            color: 'transparent',
+        },
+        hintText: {
+            color: theme.error,
+        },
+        suffixWrapper: {
+            justifyContent: 'center',
+            paddingLeft: spacing.sm,
+            paddingRight: 0,
+        },
+        suffixText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+    });

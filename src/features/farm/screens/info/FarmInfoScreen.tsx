@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmInfoCard } from '@/features/farm/components/info/FarmInfoCard';
@@ -14,6 +15,8 @@ export const FarmInfoScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { farm } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     useEffect(() => {
         setTabBarVisible(false);
         return () => {
@@ -32,9 +35,10 @@ export const FarmInfoScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+    });

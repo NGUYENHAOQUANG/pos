@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { DataRow } from './DataRow';
 import { CardHeader } from './CardHeader';
 import { borderRadius } from '@/styles';
@@ -36,6 +37,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
 
     // Lọc data hiển thị
     const visibleData = expanded || !shouldCollapse ? data : data.slice(0, MAX_VISIBLE_ITEMS);
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // Note component
     const noteComponent = note && (
@@ -82,7 +86,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
                         <Icon
                             name={expanded ? 'chevron-up' : 'chevron-down'}
                             size={16}
-                            color={colors.primary}
+                            color={theme.primary}
                         />
                     </TouchableOpacity>
                 )}
@@ -91,49 +95,50 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-        overflow: 'hidden',
-    },
-    body: {
-        paddingVertical: 12,
-        gap: 8,
-    },
-    noteBox: {
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-        marginHorizontal: 8,
-        backgroundColor: colors.backgroundPrimary,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-    },
-    noteLabel: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        fontWeight: '400',
-        lineHeight: 22,
-    },
-    noteContent: {
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 22,
-        fontWeight: '400',
-    },
-    toggleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    toggleText: {
-        fontSize: 14,
-        color: colors.primary,
-        fontWeight: '400',
-        gap: 8,
-        lineHeight: 22,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'hidden',
+        },
+        body: {
+            paddingVertical: 12,
+            gap: 8,
+        },
+        noteBox: {
+            paddingVertical: 4,
+            paddingHorizontal: 8,
+            marginHorizontal: 8,
+            backgroundColor: theme.backgroundPrimary,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        noteLabel: {
+            fontSize: 12,
+            color: theme.textSecondary,
+            fontWeight: '400',
+            lineHeight: 22,
+        },
+        noteContent: {
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 22,
+            fontWeight: '400',
+        },
+        toggleButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        toggleText: {
+            fontSize: 14,
+            color: theme.primary,
+            fontWeight: '400',
+            gap: 8,
+            lineHeight: 22,
+        },
+    });

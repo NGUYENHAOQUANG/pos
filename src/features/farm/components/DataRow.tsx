@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { StatusHighlight } from './StatusHighlight';
 
 interface DataRowProps {
@@ -12,6 +13,9 @@ interface DataRowProps {
 }
 
 export const DataRow: React.FC<DataRowProps> = ({ label, value, unit, isWarning }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     if (isWarning) {
         return <StatusHighlight label={label} value={value} unit={unit} />;
     }
@@ -32,31 +36,32 @@ export const DataRow: React.FC<DataRowProps> = ({ label, value, unit, isWarning 
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 12,
-        borderRadius: 4,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.gray[500],
-        flex: 1,
-        marginRight: 12,
-    },
-    valueWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 0,
-        maxWidth: '50%',
-        justifyContent: 'flex-end',
-    },
-    value: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        textAlign: 'right',
-        lineHeight: 22,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: 12,
+            borderRadius: 4,
+        },
+        label: {
+            fontSize: 14,
+            color: theme.gray[500],
+            flex: 1,
+            marginRight: 12,
+        },
+        valueWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexShrink: 0,
+            maxWidth: '50%',
+            justifyContent: 'flex-end',
+        },
+        value: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            textAlign: 'right',
+            lineHeight: 22,
+        },
+    });

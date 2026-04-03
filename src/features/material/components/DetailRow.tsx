@@ -17,7 +17,8 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -47,6 +48,9 @@ export const DetailRow: React.FC<DetailRowProps> = ({
     bottomSheetTitle,
     sheetLabel,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const display = value !== null && value !== undefined && value !== '' ? value : '---';
     const isTextValue = typeof display === 'string' || typeof display === 'number';
 
@@ -90,7 +94,7 @@ export const DetailRow: React.FC<DetailRowProps> = ({
                                 activeOpacity={0.7}
                             >
                                 <Text style={styles.seeMoreText}>Xem thêm</Text>
-                                <Ionicons name="arrow-forward" size={14} color={colors.primary} />
+                                <Ionicons name="arrow-forward" size={14} color={theme.primary} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -140,6 +144,9 @@ const DetailBottomSheet: React.FC<DetailBottomSheetProps> = ({
     content,
     contentLabel,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const insets = useSafeAreaInsets();
     const { height: screenHeight } = useWindowDimensions();
     const sheetHeight = screenHeight * 0.75;
@@ -185,7 +192,7 @@ const DetailBottomSheet: React.FC<DetailBottomSheetProps> = ({
                             style={styles.closeBtn}
                             activeOpacity={0.7}
                         >
-                            <Ionicons name="close" size={22} color={colors.text} />
+                            <Ionicons name="close" size={22} color={theme.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -206,123 +213,124 @@ const DetailBottomSheet: React.FC<DetailBottomSheetProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    detailRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-    },
-    detailRowSpaceBetween: {
-        justifyContent: 'space-between',
-    },
-    detailRowColumn: {
-        flexDirection: 'column',
-        gap: 4,
-    },
-    detailLabel: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-    detailValue: {
-        fontSize: 14,
-        color: colors.gray[950],
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    valueInline: {
-        flexShrink: 1,
-    },
-    valueRow: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        gap: 4,
-    },
-    unitText: {
-        fontSize: 12,
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-    valueBlock: {
-        width: '100%',
-    },
-    seeMoreBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        alignSelf: 'center',
-        marginTop: 6,
-    },
-    seeMoreText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.primary,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        detailRow: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+        },
+        detailRowSpaceBetween: {
+            justifyContent: 'space-between',
+        },
+        detailRowColumn: {
+            flexDirection: 'column',
+            gap: 4,
+        },
+        detailLabel: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.textSecondary,
+            lineHeight: 20,
+        },
+        detailValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+            lineHeight: 20,
+        },
+        valueInline: {
+            flexShrink: 1,
+        },
+        valueRow: {
+            flexDirection: 'row',
+            alignItems: 'baseline',
+            gap: 4,
+        },
+        unitText: {
+            fontSize: 12,
+            color: theme.textTertiary,
+            lineHeight: 20,
+        },
+        valueBlock: {
+            width: '100%',
+        },
+        seeMoreBtn: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            alignSelf: 'center',
+            marginTop: 6,
+        },
+        seeMoreText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.primary,
+        },
 
-    // Bottom sheet
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlayLight,
-        justifyContent: 'flex-end',
-    },
-    dismissArea: {
-        flex: 1,
-    },
-    sheet: {
-        backgroundColor: colors.white,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        flexDirection: 'column',
-        overflow: 'hidden',
-    },
-    handle: {
-        width: 36,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: colors.gray[300],
-        alignSelf: 'center',
-        marginTop: 8,
-        marginBottom: 4,
-    },
-    sheetHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 2,
-    },
-    sheetTitle: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    closeBtn: {
-        width: 36,
-        height: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    sheetDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-    },
-    scrollArea: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: 16,
-        paddingTop: 12,
-    },
-    sheetLabel: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 8,
-    },
-    sheetContent: {
-        fontSize: 14,
-        color: colors.gray[600],
-        lineHeight: 22,
-    },
-});
+        // Bottom sheet
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlayLight,
+            justifyContent: 'flex-end',
+        },
+        dismissArea: {
+            flex: 1,
+        },
+        sheet: {
+            backgroundColor: theme.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            flexDirection: 'column',
+            overflow: 'hidden',
+        },
+        handle: {
+            width: 36,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: theme.borderDark,
+            alignSelf: 'center',
+            marginTop: 8,
+            marginBottom: 4,
+        },
+        sheetHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 2,
+        },
+        sheetTitle: {
+            flex: 1,
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        closeBtn: {
+            width: 36,
+            height: 36,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        sheetDivider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+        },
+        scrollArea: {
+            flex: 1,
+        },
+        scrollContent: {
+            padding: 16,
+            paddingTop: 12,
+        },
+        sheetLabel: {
+            fontSize: 15,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 8,
+        },
+        sheetContent: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            lineHeight: 22,
+        },
+    });

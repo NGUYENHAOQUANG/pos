@@ -9,8 +9,10 @@ import {
     LayoutChangeEvent,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
 import { haptics } from '@/shared/utils/haptics';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export interface HeadingBarItem {
     key: string;
@@ -38,6 +40,8 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
 }) => {
     // Track container width for spreadTabs calculation
     const [containerWidth, setContainerWidth] = useState(0);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const handleLayout = useCallback((event: LayoutChangeEvent) => {
         setContainerWidth(event.nativeEvent.layout.width);
@@ -101,52 +105,53 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    backgroundWrapper: {
-        height: 40,
-        backgroundColor: colors.gray[100],
-        borderRadius: borderRadius.full,
-        marginHorizontal: spacing.md,
-        padding: 4,
-        flexDirection: 'row',
-        alignItems: 'center',
-        // No overflow:hidden here - that would clip the background at the corners on Android
-    },
-    // Separate inner view that does the actual clip of scrollable content
-    scrollClip: {
-        flex: 1,
-        height: 36,
-        borderRadius: borderRadius.full,
-        overflow: 'hidden',
-    },
-    scrollView: {
-        flexGrow: 0,
-    },
-    scrollContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    tab: {
-        height: 36,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: borderRadius.full,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    activeTab: {
-        backgroundColor: colors.white,
-        borderWidth: 0.5,
-        borderColor: colors.border,
-    },
-    tabText: {
-        fontSize: 14,
-        lineHeight: 20,
-        color: colors.gray[500],
-        fontWeight: '400',
-    },
-    activeTabText: {
-        color: colors.text,
-        fontWeight: '600',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        backgroundWrapper: {
+            height: 40,
+            backgroundColor: theme.backgroundTertiary, // Using backgroundTertiary for the grayish background
+            borderRadius: borderRadius.full,
+            marginHorizontal: spacing.md,
+            padding: 4,
+            flexDirection: 'row',
+            alignItems: 'center',
+            // No overflow:hidden here - that would clip the background at the corners on Android
+        },
+        // Separate inner view that does the actual clip of scrollable content
+        scrollClip: {
+            flex: 1,
+            height: 36,
+            borderRadius: borderRadius.full,
+            overflow: 'hidden',
+        },
+        scrollView: {
+            flexGrow: 0,
+        },
+        scrollContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        tab: {
+            height: 36,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: borderRadius.full,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        activeTab: {
+            backgroundColor: theme.backgroundButtonActive,
+            borderWidth: 0.5,
+            borderColor: theme.defaultBorder,
+        },
+        tabText: {
+            fontSize: 14,
+            lineHeight: 20,
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+        activeTabText: {
+            color: theme.text,
+            fontWeight: '600',
+        },
+    });

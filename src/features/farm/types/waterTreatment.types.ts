@@ -1,3 +1,5 @@
+import type { PondLogMaterialType } from '@/shared/types/common.types';
+
 export enum TreatmentTypeEnum {
     MineralTreatment = 'MineralTreatment',
     ProbioticTreatment = 'ProbioticTreatment',
@@ -22,16 +24,10 @@ export const TREATMENT_TYPE_OPTIONS = Object.values(TREATMENT_TYPE_LABELS);
 
 // --- Request DTOs ---
 
-/** Material item in create/update request */
-export interface IWaterTreatmentMaterialReq {
-    warehouseItemId: string;
-    quantity: number;
-}
-
 /** Detail payload for CreateWaterTreatment */
 export interface IWaterTreatmentDetailReq {
     treatmentType: TreatmentTypeEnum;
-    materials: IWaterTreatmentMaterialReq[];
+    materials: PondLogMaterialType[];
     notes?: string;
 }
 
@@ -44,7 +40,7 @@ export interface CreateWaterTreatmentCommand {
 /** Detail payload for UpdateWaterTreatment */
 export interface IWaterTreatmentDetailUpdateReq {
     treatmentType?: TreatmentTypeEnum;
-    materials?: IWaterTreatmentMaterialReq[];
+    materials?: PondLogMaterialType[];
     notes?: string;
 }
 
@@ -61,19 +57,11 @@ export interface IAccountCreator {
     fullName?: string;
 }
 
-/** Material item in response */
-export interface IWaterTreatmentMaterialRes {
-    warehouseItemId: string;
-    quantity: number;
-    name?: string;
-    unitName?: string;
-}
-
 /** Detail object in WaterTreatmentDto response */
 export interface IWaterTreatmentDetailRes {
     treatmentType: TreatmentTypeEnum;
     notes?: string;
-    materials?: IWaterTreatmentMaterialRes[];
+    materials?: PondLogMaterialType[];
 }
 
 /** Single water treatment record (GET response) */

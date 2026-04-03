@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
@@ -127,6 +129,9 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
         }
     }, [isFetchingNextPage, showFooterSpinner]);
 
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <View style={styles.filterSection}>
@@ -146,9 +151,9 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                         activeOpacity={0.7}
                     >
                         {selectedFilters.length > 0 ? (
-                            <IconFilter2 width={20} height={20} />
+                            <IconFilter2 width={20} height={20} color={theme.text} />
                         ) : (
-                            <IconFilter width={20} height={20} />
+                            <IconFilter width={20} height={20} color={theme.text} />
                         )}
                     </TouchableOpacity>
                     {selectedFilters.length > 0 && (
@@ -167,7 +172,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
 
             {isLoading && !hasData ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={colors.primary} />
+                    <ActivityIndicator size="large" color={theme.primary} />
                 </View>
             ) : hasData ? (
                 <FlatList
@@ -189,7 +194,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                     ListFooterComponent={
                         showFooterSpinner ? (
                             <View style={styles.footerLoader}>
-                                <ActivityIndicator size="small" color={colors.primary} />
+                                <ActivityIndicator size="small" color={theme.primary} />
                             </View>
                         ) : null
                     }
@@ -217,59 +222,60 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    filterSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.sm,
-        backgroundColor: colors.backgroundPrimary,
-        gap: spacing.sm,
-    },
-    dateRangeContainer: {
-        flex: 1,
-    },
-    dateRange: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderRadius: 12,
-        borderColor: colors.border,
-        paddingHorizontal: spacing.sm,
-        paddingVertical: spacing.sm,
-    },
-    filterButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        borderWidth: 1,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingVertical: spacing.sm,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: spacing.xl,
-    },
-    listContainer: {
-        gap: spacing.sm,
-    },
-    dayCard: {},
-    emptyStateContainer: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        paddingHorizontal: spacing.md,
-    },
-    footerLoader: {
-        paddingVertical: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        filterSection: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.sm,
+            backgroundColor: theme.backgroundPrimary,
+            gap: spacing.sm,
+        },
+        dateRangeContainer: {
+            flex: 1,
+        },
+        dateRange: {
+            backgroundColor: 'transparent',
+            borderWidth: 1,
+            borderRadius: 12,
+            borderColor: theme.defaultBorder,
+            paddingHorizontal: spacing.sm,
+            paddingVertical: spacing.sm,
+        },
+        filterButton: {
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingVertical: spacing.sm,
+        },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: spacing.xl,
+        },
+        listContainer: {
+            gap: spacing.sm,
+        },
+        dayCard: {},
+        emptyStateContainer: {
+            flex: 1,
+            justifyContent: 'flex-start',
+            paddingHorizontal: spacing.md,
+        },
+        footerLoader: {
+            paddingVertical: spacing.md,
+        },
+    });

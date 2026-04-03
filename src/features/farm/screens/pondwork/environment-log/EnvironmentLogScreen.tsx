@@ -1,66 +1,76 @@
-import React, { useMemo, useCallback } from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import React from 'react';
+import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppStackParamList } from '@/app/navigation/AppStack';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
+import { convertEnvironmentMetaToActivityData } from '@/features/farm/utils/metaConverters';
+import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
-import { TrackingGroup } from '@/features/farm/components/TrackingList';
-import { useEnvMeasurements } from '@/features/farm/hooks/useEnvMeasurement';
-import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useEnvMeasurementsAsJobs } from '@/features/farm/hooks/useEnvMeasurement';
+import { ActivityIndicator, View } from 'react-native';
+import { colors } from '@/styles';
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
-import { APP_CONFIG } from '@/shared/constants/config';
-import { groupMeasurements } from '@/features/farm/services/environment-log.service';
-import { IEnvMeasurement } from '@/features/farm/types/envMeasurement.types';
 
-type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
-type ScreenRouteProp = RouteProp<AppStackParamList, 'EnvironmentLogScreen'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'EnvironmentLogScreen'>;
+type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
 export const EnvironmentLogScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pond } = route.params || {};
 
-    // --- Zone ID ---
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
-
-    const { metricTypes } = useEnvironmentInit(selectedZoneId!);
+    const pondId = pond?.id || '';
 
     const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
-    const params = useMemo(
-        () => ({
-            ...dateParams,
-            PageSize: APP_CONFIG.DEFAULT_PAGE_SIZE,
-            OrderBy: 'CreatedAt desc',
-        }),
-        [dateParams]
-    );
+    // Fetch data using standardized hook with date params
+    const { jobs, isLoading, refetch } = useEnvMeasurementsAsJobs(pondId, {
+        CreateAtFrom: dateParams.CreateAtFrom,
+        CreateAtTo: dateParams.CreateAtTo,
+    });
 
-    const { data: envMeasurementsData, isLoading } = useEnvMeasurements(pond?.id || '', params);
-
-    const handleEdit = useCallback(
-        (measurement: IEnvMeasurement) => {
-            if (pond) {
-                navigation.navigate('AddEnvironmentScreen', {
-                    pondId: measurement.pondId,
-                    environmentId: measurement.id,
-                });
+    // Auto refetch when screen is focused (e.g. back from Edit)
+    useFocusEffect(
+        React.useCallback(() => {
+            if (pondId) {
+                refetch();
             }
-        },
-        [pond, navigation]
+        }, [pondId, refetch])
     );
 
-    const groupedData: TrackingGroup[] = useMemo(() => {
-        if (!envMeasurementsData?.data?.items || metricTypes.length === 0) return [];
-        return groupMeasurements(envMeasurementsData.data.items, metricTypes, handleEdit);
-    }, [envMeasurementsData, metricTypes, handleEdit]);
+    const config: LogScreenConfig<EnvironmentMeta> = {
+        jobType: 'ENVIRONMENT',
+        pond,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
+        metaConverter: (_item: JobExecution, meta: EnvironmentMeta) =>
+            convertEnvironmentMetaToActivityData(meta),
+        editRoute: 'AddEnvironmentScreen',
+        getEditParams: (pondData, item) => ({
+            pondId: pondData.id,
+            environmentId: item.id,
+        }),
+        externalData: jobs,
+    };
 
-    const handleStartEnvironment = () => {
+    const { groupedData } = useLogScreenData(config);
+
+    const handleCreateNew = () => {
         if (pond) {
             navigation.navigate('AddEnvironmentScreen', { pondId: pond.id });
         }
     };
+
+    if (isLoading && !jobs.length) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
 
     return (
         <BaseLogScreen
@@ -73,7 +83,7 @@ export const EnvironmentLogScreen: React.FC = () => {
             groupedData={groupedData}
             emptyMessage="Chưa có dữ liệu đo thông số môi trường"
             emptyButtonTitle="Bắt đầu đo thông số môi trường"
-            onEmptyButtonPress={handleStartEnvironment}
+            onEmptyButtonPress={handleCreateNew}
             isLoading={isLoading}
         />
     );

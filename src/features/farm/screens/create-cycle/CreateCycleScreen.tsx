@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import CreateCycleForm from '@/features/farm/screens/create-cycle/CreateCycleForm';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -43,6 +44,9 @@ export const CreateCycleScreen: React.FC = () => {
     const { pondId, zoneId, cycleId, isEditMode: isEditModeParam } = route.params;
     const isEditMode: boolean = isEditModeParam ?? !!cycleId;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // --- State & Form Hook Init ---
     const {
@@ -197,7 +201,7 @@ export const CreateCycleScreen: React.FC = () => {
                 onBack={() => navigation.goBack()}
                 rightIcon={
                     isEditMode ? (
-                        <DeleteIcon width={20} height={20} color={colors.text} />
+                        <DeleteIcon width={20} height={20} color={theme.text} />
                     ) : undefined
                 }
                 onRightPress={isEditMode ? () => setShowDeleteModal(true) : undefined}
@@ -249,11 +253,12 @@ export const CreateCycleScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+    });
 
 export default CreateCycleScreen;
