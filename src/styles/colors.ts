@@ -228,8 +228,8 @@ export const darkTheme: Colors = {
     backgroundButtonActive: '#404040',
 
     // Text colors
-    text: '#F9FAFB',
-    textSecondary: '#9CA3AF',
+    text: '#FAFAFA',
+    textSecondary: '#A3A3A3',
     textTertiary: '#6B7280',
     textMuted: '#FFFFFF8C',
     textInverse: '#0B1117',
