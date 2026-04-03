@@ -4,8 +4,6 @@ import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { GetExportReceiptItemsParams } from '@/features/material/types/exportReceipt.types';
 import { handleError } from '@/shared/utils/errorHandler';
 
-const STALE_TIME_LONG = 5 * 60 * 1000; // 5 minutes
-
 export const useExportReceiptItems = (receiptId?: string, params?: GetExportReceiptItemsParams) => {
     return useQuery({
         queryKey: materialKeys.exportReceiptItems(receiptId || '', params),
@@ -26,7 +24,6 @@ export const useExportReceiptItems = (receiptId?: string, params?: GetExportRece
             });
         },
         enabled: !!receiptId,
-        staleTime: STALE_TIME_LONG,
     });
 };
 

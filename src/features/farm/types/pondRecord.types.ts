@@ -33,7 +33,6 @@ export interface IPondRecordReferenceData {
     // Feeding (operationType: "Feeding")
     materials?: PondLogMaterialType[];
 
-
     // ReleaseShrimp (operationType: "ReleaseShrimp")
     warehouseItemId?: string;
     density?: number;
