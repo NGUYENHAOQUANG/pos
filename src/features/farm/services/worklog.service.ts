@@ -110,7 +110,6 @@ export function normalizeRecordToRef(
 }
 
 export type RefToActivityDataContext = {
-    materialMap: Record<string, { name?: string; unitName?: string }>;
     metricTypes: EnvMetricType[];
     pondNameMap: Record<string, string>;
 };
@@ -162,18 +161,17 @@ const OPERATION_DISPLAY_NAME: Record<string, string> = {
 export function convertReferenceDataToActivityData(
     operationType: string,
     ref: IPondRecordReferenceData | Record<string, unknown>,
-    materialMap: Record<string, { name?: string; unitName?: string }>,
     metricTypes: EnvMetricType[] = [],
     pondNameMap: Record<string, string> = {}
 ): ActivityData[] {
     const r = ref as Ref;
-    const ctx: RefToActivityDataContext = { materialMap, metricTypes, pondNameMap };
+    const ctx: RefToActivityDataContext = { metricTypes, pondNameMap };
 
     switch (operationType) {
         case 'ReleaseShrimp':
             return convertReleaseShrimpRefToActivityData(r);
         case 'Feeding':
-            return feedingLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return feedingLogService.convertReferenceDataToActivityData(r);
         case 'EnvMeasurement':
             return envMeasurementLogService.convertReferenceDataToActivityData(
                 r,
@@ -185,11 +183,11 @@ export function convertReferenceDataToActivityData(
         case 'SizeMeasurement':
             return sizeMeasurementLogService.convertReferenceDataToActivityData(r);
         case 'Siphon':
-            return siphonLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return siphonLogService.convertReferenceDataToActivityData(r);
         case 'WaterChange':
-            return waterChangeLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return waterChangeLogService.convertReferenceDataToActivityData(r);
         case 'WaterTreatment':
-            return waterTreatmentLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return waterTreatmentLogService.convertReferenceDataToActivityData(r);
         case 'Harvest':
             return harvestLogService.convertReferenceDataToActivityData(r);
         case 'StockTransfer':
@@ -200,11 +198,11 @@ export function convertReferenceDataToActivityData(
                 ctx.pondNameMap
             );
         case 'Incident':
-            return incidentLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return incidentLogService.convertReferenceDataToActivityData(r);
         case 'CleanRenovation':
-            return cleanRenovationLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return cleanRenovationLogService.convertReferenceDataToActivityData(r);
         case 'DryRenovation':
-            return dryRenovationLogService.convertReferenceDataToActivityData(r, ctx.materialMap);
+            return dryRenovationLogService.convertReferenceDataToActivityData(r);
         default:
             return convertDefaultRefToActivityData(ref as Record<string, unknown>);
     }
@@ -238,7 +236,6 @@ export interface PondRecordGroup {
 }
 
 export interface BuildPondRecordGroupsOptions {
-    materialMap: Record<string, { name?: string; unitName?: string }>;
     metricTypes: EnvMetricType[];
     pondNameMap: Record<string, string>;
 }
@@ -257,7 +254,7 @@ export function buildPondRecordGroups(
     });
     const dateGroups: Record<string, TimelineActivity[]> = {};
     const dateOrder: string[] = [];
-    const { materialMap, metricTypes, pondNameMap } = options;
+    const { metricTypes, pondNameMap } = options;
 
     sorted.forEach(item => {
         const normalized = normalizeRecordToRef(item);
@@ -277,7 +274,6 @@ export function buildPondRecordGroups(
         const activityData = convertReferenceDataToActivityData(
             operationType,
             referenceData as IPondRecordReferenceData,
-            materialMap,
             metricTypes,
             pondNameMap
         );

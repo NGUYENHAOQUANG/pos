@@ -130,6 +130,21 @@ export const envMeasurementLogService: IBaseLogService<any> = {
             r.envMeasurementDetail?.envMeasurementDetails ||
             r.envMeasurementDetail?.EnvMeasurementDetails;
 
+        // Map code → đơn vị mặc định (fallback khi metric.unitMetric rỗng)
+        const codeUnitMap: Record<string, string> = {
+            ph: '',
+            do: 'mg/L',
+            dissolvedoxygen: 'mg/L',
+            temperature: '°C',
+            salinity: 'ppt',
+            alkalinity: 'mg/L',
+            transparency: 'cm',
+            kali: 'mg/L',
+            tan: 'mg/L',
+            magie: 'mg/L',
+            no3: 'mg/L',
+        };
+
         if (detailsList && Array.isArray(detailsList) && detailsList.length > 0) {
             detailsList.forEach((detail: any) => {
                 const metricId = detail.metricId || detail.MetricId;
@@ -141,15 +156,25 @@ export const envMeasurementLogService: IBaseLogService<any> = {
                     );
                     const isAlerted = detail.isAlerted === true || detail.IsAlerted === true;
 
-                    let finalLabel = metric
-                        ? metric.name
-                        : `Thông số (${strMetricId.substring(0, 4)})`;
+                    let finalLabel: string;
                     let finalUnit: string | undefined;
 
-                    const nameMatch = finalLabel.match(/^(.*?)\s*\((.*?)\)$/);
-                    if (nameMatch) {
-                        finalLabel = nameMatch[1].trim();
-                        finalUnit = nameMatch[2].trim();
+                    if (metric) {
+                        // Lấy tên từ metric.name, đơn vị ưu tiên codeUnitMap (đã format đẹp) trước
+                        finalLabel = metric.name;
+                        const metricCode = String((metric as any).code || '').toLowerCase();
+                        finalUnit =
+                            codeUnitMap[metricCode] ??
+                            ((metric as any).unitDisplay || (metric as any).unitMetric);
+
+                        // Nếu tên đã bao gồm đơn vị trong ngoặc, tách ra
+                        const nameMatch = finalLabel.match(/^(.*?)\s*\((.*?)\)$/);
+                        if (nameMatch) {
+                            finalLabel = nameMatch[1].trim();
+                            if (!finalUnit) finalUnit = nameMatch[2].trim();
+                        }
+                    } else {
+                        finalLabel = `Thông số (${strMetricId.substring(0, 4)})`;
                     }
 
                     data.push({
