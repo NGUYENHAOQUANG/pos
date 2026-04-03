@@ -5,9 +5,9 @@
  * @created 2025-11-16
  */
 import React, { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
@@ -17,43 +17,59 @@ import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
 import { NetworkStatusModal } from '@/shared/components/lostNetwork/NetworkStatusModal';
 import { ErrorBoundary } from '@/shared/components/error/ErrorBoundary';
+import {
+    BiometricLockScreen,
+    useBiometricLock,
+} from '@/shared/components/security/BiometricLockScreen';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
+import { colors } from '@/styles';
 
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 5 * 60 * 1000,
             retry: 3,
             refetchOnReconnect: true,
         },
     },
 });
 
-// Update React Query online status using NetInfo
 onlineManager.setEventListener(setOnline => {
     return NetInfo.addEventListener(state => {
         const isConnected = !!state.isConnected;
         setOnline(isConnected);
-
-        // Force refetch all active queries when connection is restored
-        // This ensures the app tries to download data immediately when network returns
         if (isConnected) {
             queryClient.invalidateQueries();
         }
     });
 });
 
+const AppTheme = {
+    ...DefaultTheme,
+    colors: {
+        ...DefaultTheme.colors,
+        background: colors.white,
+    },
+};
+
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
+    const [appReady, setAppReady] = useState(false);
+    const { isLocked, handleUnlock } = useBiometricLock();
 
     useEffect(() => {
-        // Auto-hide splash screen after 2.5 seconds
-        const timer = setTimeout(() => {
+        const mountTimer = setTimeout(() => {
+            setAppReady(true);
+        }, 2000);
+        const splashTimer = setTimeout(() => {
             setShowSplash(false);
-        }, 2500);
+        }, 3200);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(mountTimer);
+            clearTimeout(splashTimer);
+        };
     }, []);
 
     return (
@@ -63,8 +79,12 @@ export function AppProviders() {
                     <QueryClientProvider client={queryClient}>
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
-                                <NavigationContainer>
-                                    <AppNavigator />
+                                <NavigationContainer theme={AppTheme}>
+                                    {appReady ? (
+                                        <AppNavigator />
+                                    ) : (
+                                        <View style={styles.placeholder} />
+                                    )}
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>
                         </ErrorBoundary>
@@ -72,10 +92,8 @@ export function AppProviders() {
                 </AntdProvider>
             </GestureHandlerRootView>
 
-            {/* Splash Screen overlay - outside navigation stack, prevents back navigation */}
             <SplashScreen visible={showSplash} />
-
-            {/* Network Status Modal - monitors connection globally */}
+            {!showSplash && <BiometricLockScreen visible={isLocked} onUnlock={handleUnlock} />}
             <NetworkStatusModal />
         </SafeAreaProvider>
     );
@@ -84,5 +102,9 @@ export function AppProviders() {
 const styles = StyleSheet.create({
     gestureHandler: {
         flex: 1,
+    },
+    placeholder: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
     },
 });

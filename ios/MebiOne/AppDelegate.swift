@@ -35,6 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeFactory = factory
 
     window = UIWindow(frame: UIScreen.main.bounds)
+    window?.backgroundColor = .white
     window?.makeKeyAndVisible()
     factory.startReactNative(
       withModuleName: "Mebieco",

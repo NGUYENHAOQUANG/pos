@@ -23,7 +23,7 @@ export function AppNavigator() {
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     return (
         <Stack.Navigator
-            initialRouteName="Auth"
+            initialRouteName={isAuthenticated ? 'Main' : 'Auth'}
             screenOptions={{
                 headerShown: false,
             }}
