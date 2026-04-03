@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import {
     GeneralInfoBox,
@@ -69,6 +70,9 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
         onSubmit(documentIds);
         generalInfoBoxRef.current?.markAsSaved();
     };
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     return (
         <Loading isLoading={isSaving}>
@@ -147,20 +151,21 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    headerContainer: {
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        headerContainer: {
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+    });

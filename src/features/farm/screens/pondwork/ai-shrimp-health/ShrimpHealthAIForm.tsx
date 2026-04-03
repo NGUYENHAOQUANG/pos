@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { spacing } from '@/styles';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -77,6 +79,8 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
     onViewCheckEntry,
     selectedEntry,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             <HeaderSection title="AI chẩn đoán tôm" onBack={onBackPress} />
@@ -163,39 +167,40 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingHorizontal: 0,
-        paddingTop: 8,
-        paddingBottom: 100,
-        gap: 8,
-    },
-    countWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingTop: 12,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    countLabel: {
-        fontSize: 16,
-        color: colors.textSecondary,
-    },
-    countValue: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    card: {
-        backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingHorizontal: 0,
+            paddingTop: 8,
+            paddingBottom: 100,
+            gap: 8,
+        },
+        countWrapper: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingTop: 12,
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+        countLabel: {
+            fontSize: 16,
+            color: theme.textSecondary,
+        },
+        countValue: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        card: {
+            backgroundColor: theme.background,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+        },
+    });

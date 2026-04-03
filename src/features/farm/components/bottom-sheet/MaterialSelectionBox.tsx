@@ -3,7 +3,9 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-sheet/SelectMaterialBottomSheet';
@@ -37,6 +39,9 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     specificType,
     isRequired = true,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isModalVisible, setModalVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
     const debouncedSearchText = useDebounce(searchText, 500);
@@ -152,7 +157,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                         onPress={() => handleRemoveMaterial(index)}
                                         style={styles.deleteButton}
                                     >
-                                        <DeleteIcon width={18} height={18} />
+                                        <DeleteIcon width={18} height={18} color={theme.error} />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -164,7 +169,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                     title="Thêm vật tư​"
                     variant="outline"
                     onPress={() => setModalVisible(true)}
-                    renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
+                    renderLeftIcon={<Ionicons name="add" size={20} color={theme.text} />}
                     fullWidth
                     style={styles.addButton}
                     textStyle={styles.addButtonText}
@@ -187,79 +192,80 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    materialCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-    },
-    materialCardsContainer: {
-        gap: 8,
-    },
-    materialName: {
-        fontSize: 15,
-        color: colors.text,
-        flex: 1,
-        marginRight: spacing.sm,
-    },
-    materialActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    quantityBox: {
-        flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        paddingHorizontal: spacing.sm,
-        height: 40,
-        width: 110,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: colors.white,
-    },
-    quantityInput: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-        flex: 1,
-        padding: 0,
-        textAlign: 'center',
-    },
-    unitText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-    },
-    addButton: {
-        borderColor: colors.border,
-    },
-    addButtonText: {
-        color: colors.text,
-    },
-    titleText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        materialCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.background,
+        },
+        materialCardsContainer: {
+            gap: 8,
+        },
+        materialName: {
+            fontSize: 15,
+            color: theme.text,
+            flex: 1,
+            marginRight: spacing.sm,
+        },
+        materialActions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+        },
+        quantityBox: {
+            flexDirection: 'row',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+            paddingHorizontal: spacing.sm,
+            height: 40,
+            width: 110,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: theme.background,
+        },
+        quantityInput: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+            flex: 1,
+            padding: 0,
+            textAlign: 'center',
+        },
+        unitText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        deleteButton: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.background,
+        },
+        addButton: {
+            borderColor: theme.defaultBorder,
+        },
+        addButtonText: {
+            color: theme.text,
+        },
+        titleText: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        titleRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+    });

@@ -4,7 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 /**
  * Skeleton placeholder for the PondDetail header area.
@@ -13,6 +15,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 export const PondDetailHeaderSkeleton: React.FC = () => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     return (
         <View>
@@ -20,7 +24,7 @@ export const PondDetailHeaderSkeleton: React.FC = () => {
             <View style={[styles.headerRow, { paddingTop: insets.top + 12 }]}>
                 {/* Real back button – always tappable even while loading */}
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <ArrowLeftIcon width={20} height={20} />
+                    <ArrowLeftIcon width={20} height={20} color={theme.text} />
                 </TouchableOpacity>
 
                 {/* Title + Subtitle */}
@@ -56,57 +60,58 @@ export const PondDetailHeaderSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    centerContainer: {
-        flex: 1,
-        marginHorizontal: 8,
-        justifyContent: 'center',
-    },
-    subtitleSkeleton: {
-        marginTop: 4,
-    },
-    rightContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    tagSkeleton: {
-        marginRight: spacing.sm,
-    },
-    tabBarContainer: {
-        paddingBottom: 16,
-        paddingTop: 16,
-    },
-    tabBarBackground: {
-        height: 40,
-        backgroundColor: colors.gray[100],
-        borderRadius: borderRadius.full,
-        marginHorizontal: spacing.md,
-        padding: 4,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    tabItem: {
-        flex: 1,
-        height: 36,
-        borderRadius: borderRadius.full,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        headerRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingBottom: 12,
+            paddingHorizontal: 16,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        backButton: {
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        centerContainer: {
+            flex: 1,
+            marginHorizontal: 8,
+            justifyContent: 'center',
+        },
+        subtitleSkeleton: {
+            marginTop: 4,
+        },
+        rightContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        tagSkeleton: {
+            marginRight: spacing.sm,
+        },
+        tabBarContainer: {
+            paddingBottom: 16,
+            paddingTop: 16,
+        },
+        tabBarBackground: {
+            height: 40,
+            backgroundColor: theme.backgroundTertiary,
+            borderRadius: borderRadius.full,
+            marginHorizontal: spacing.md,
+            padding: 4,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        tabItem: {
+            flex: 1,
+            height: 36,
+            borderRadius: borderRadius.full,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+    });

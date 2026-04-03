@@ -4,7 +4,7 @@ import type { PondCategory } from '@/features/farm/types/pond-category.types';
 import type { CycleData } from '@/features/farm/types/cycle.types';
 import type { CreateStockTransferRequest } from '@/features/farm/types/stockTransfer.types';
 import type { ReceivingPondItem } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
-import type { DropdownOption } from '@/features/material/components/DropdownMaterial';
+import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 
 export const stockTransferService = {
     /**
@@ -14,7 +14,7 @@ export const stockTransferService = {
         allPonds: PondData[],
         currentPondId: string,
         categories?: PondCategory[]
-    ): DropdownOption[] => {
+    ): DropDownItem[] => {
         if (allPonds.length === 0) return [];
 
         const categoryMap = new Map<string, string>();
@@ -35,6 +35,7 @@ export const stockTransferService = {
                 return typeName ? allowedTypes.includes(typeName) : false;
             })
             .map(p => ({
+                id: p.id,
                 value: p.id,
                 label: p.name,
             }));

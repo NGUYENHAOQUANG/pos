@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing } from '@/styles';
-import { borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 
 interface DatePickerModalProps {
@@ -21,6 +22,8 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 }) => {
     const [viewDate, setViewDate] = useState(new Date(date));
     const [pendingDate, setPendingDate] = useState(new Date(date));
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // Sync state when modal opens
     useEffect(() => {
@@ -178,7 +181,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
                     style={styles.closeButton}
                     activeOpacity={0.7}
                 >
-                    <Ionicons name="close" size={22} color={colors.text} />
+                    <Ionicons name="close" size={22} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
@@ -191,14 +194,14 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
                     style={styles.navButton}
                     activeOpacity={0.7}
                 >
-                    <Ionicons name="chevron-back" size={18} color={colors.text} />
+                    <Ionicons name="chevron-back" size={18} color={theme.text} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.monthSelector} activeOpacity={0.7}>
                     <Text style={styles.monthText}>
                         Tháng {viewDate.getMonth() + 1}, {viewDate.getFullYear()}
                     </Text>
-                    <Ionicons name="chevron-down" size={16} color={colors.text} />
+                    <Ionicons name="chevron-down" size={16} color={theme.text} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -206,7 +209,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
                     style={styles.navButton}
                     activeOpacity={0.7}
                 >
-                    <Ionicons name="chevron-forward" size={18} color={colors.text} />
+                    <Ionicons name="chevron-forward" size={18} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
@@ -243,161 +246,162 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlayLight,
-        justifyContent: 'flex-end',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-    },
-    container: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 2,
-    },
-    headerSpacer: {
-        width: 32,
-    },
-    headerTitle: {
-        flex: 1,
-        textAlign: 'center',
-        fontSize: 17,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    closeButton: {
-        width: 36,
-        height: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 12,
-    },
-    monthNav: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-        paddingHorizontal: 4,
-    },
-    navButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-    },
-    monthSelector: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    monthText: {
-        fontSize: 17,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    weekHeader: {
-        flexDirection: 'row',
-        marginBottom: 8,
-    },
-    weekDayText: {
-        width: '14.28%',
-        textAlign: 'center',
-        fontSize: 13,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    calendarGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    dayCell: {
-        width: '14.28%',
-        height: 48,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 2,
-    },
-    selectedBg: {
-        position: 'absolute',
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: colors.primary,
-    },
-    dayText: {
-        fontSize: 15,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    adjacentDayText: {
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    selectedDayText: {
-        color: colors.white,
-        fontWeight: '700',
-    },
-    todayText: {
-        color: colors.primary,
-        fontWeight: '700',
-    },
-    todayDot: {
-        position: 'absolute',
-        bottom: 4,
-        width: 16,
-        height: 2,
-        borderRadius: 1,
-        backgroundColor: colors.primary,
-    },
-    footer: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: 32,
-    },
-    cancelButton: {
-        flex: 1,
-        height: 48,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    applyButton: {
-        flex: 1,
-        height: 48,
-        borderRadius: 999,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.primary,
-    },
-    applyButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.white,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlayLight,
+            justifyContent: 'flex-end',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+        },
+        container: {
+            width: '100%',
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.md,
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 2,
+        },
+        headerSpacer: {
+            width: 32,
+        },
+        headerTitle: {
+            flex: 1,
+            textAlign: 'center',
+            fontSize: 17,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        closeButton: {
+            width: 36,
+            height: 36,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+            marginHorizontal: -16,
+            marginBottom: 12,
+        },
+        monthNav: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20,
+            paddingHorizontal: 4,
+        },
+        navButton: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+        },
+        monthSelector: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+        },
+        monthText: {
+            fontSize: 17,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        weekHeader: {
+            flexDirection: 'row',
+            marginBottom: 8,
+        },
+        weekDayText: {
+            width: '14.28%',
+            textAlign: 'center',
+            fontSize: 13,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        calendarGrid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+        },
+        dayCell: {
+            width: '14.28%',
+            height: 48,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 2,
+        },
+        selectedBg: {
+            position: 'absolute',
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: theme.primary,
+        },
+        dayText: {
+            fontSize: 15,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        adjacentDayText: {
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+        selectedDayText: {
+            color: theme.white,
+            fontWeight: '700',
+        },
+        todayText: {
+            color: theme.primary,
+            fontWeight: '700',
+        },
+        todayDot: {
+            position: 'absolute',
+            bottom: 4,
+            width: 16,
+            height: 2,
+            borderRadius: 1,
+            backgroundColor: theme.primary,
+        },
+        footer: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: 32,
+        },
+        cancelButton: {
+            flex: 1,
+            height: 48,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+        },
+        cancelButtonText: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        applyButton: {
+            flex: 1,
+            height: 48,
+            borderRadius: 999,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.primary,
+        },
+        applyButtonText: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.white,
+        },
+    });

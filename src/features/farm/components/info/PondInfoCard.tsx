@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { Text } from '@/shared/components/typography/Text';
-import { colors, typography } from '@/styles';
+import { typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { PondData } from '@/features/farm/types/farm.types';
 import { POND_SHAPE_LABELS, PondShape } from '@/features/farm/types/pond.types';
 
@@ -12,6 +14,8 @@ interface InfoFieldProps {
 }
 
 const InfoField: React.FC<InfoFieldProps> = ({ label, value }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>{label}</Text>
@@ -25,6 +29,8 @@ interface PondInfoCardProps {
 }
 
 export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const pondInfo = {
         name: pond?.name || '{ten ao nuoi tom}',
         // Safely handle if type is string (old) or object (new)
@@ -51,37 +57,38 @@ export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.white,
-        paddingTop: 12,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        marginTop: 8,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-        overflow: 'hidden',
-        marginHorizontal: 16,
-    },
-    fieldContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-    },
-    fieldLabel: {
-        fontSize: 14,
-        lineHeight: 22,
-        color: colors.textSecondary,
-    },
-    fieldValue: {
-        fontSize: 14,
-        fontWeight: typography.fontWeight.bold,
-        lineHeight: 22,
-        color: colors.text,
-        flex: 1,
-        textAlign: 'right',
-        marginLeft: 80,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        card: {
+            backgroundColor: theme.background,
+            paddingTop: 12,
+            paddingBottom: 12,
+            paddingHorizontal: 16,
+            marginTop: 8,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'hidden',
+            marginHorizontal: 16,
+        },
+        fieldContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 8,
+        },
+        fieldLabel: {
+            fontSize: 14,
+            lineHeight: 22,
+            color: theme.textSecondary,
+        },
+        fieldValue: {
+            fontSize: 14,
+            fontWeight: typography.fontWeight.bold,
+            lineHeight: 22,
+            color: theme.text,
+            flex: 1,
+            textAlign: 'right',
+            marginLeft: 80,
+        },
+    });

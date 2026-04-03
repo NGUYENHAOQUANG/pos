@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { Button } from '@/shared/components/buttons/Button';
 import GearSix from '@/assets/Icon/GearSix.svg';
@@ -63,6 +65,9 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onNo3Change,
     limits = {},
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const getLimitError = (value: string, metricCode: string): string | undefined => {
         if (!value || !limits[metricCode]) return undefined;
         const numValue = parseFloat(value);
@@ -104,7 +109,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
                 <View style={styles.errorBox}>
-                    <WarningCircle width={16} height={16} />
+                    <WarningCircle width={16} height={16} fill={theme.error} />
                     <Text style={styles.errorText}>Vui lòng nhập ít nhất 1 chỉ số</Text>
                 </View>
             )}
@@ -216,7 +221,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         variant="outline"
                         onPress={onSetupPress}
                         renderLeftIcon={
-                            <GearSix width={16} height={16} color={colors.textSecondary} />
+                            <GearSix width={16} height={16} color={theme.textSecondary} />
                         }
                         style={styles.setupButton}
                     />
@@ -226,30 +231,31 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     );
 };
 
-const styles = StyleSheet.create({
-    errorBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.errorBackground,
-        borderWidth: 1,
-        borderColor: colors.error,
-        borderRadius: borderRadius.sm,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        gap: spacing.sm,
-    },
-    errorText: {
-        fontWeight: '400',
-        fontStyle: 'normal',
-        fontSize: 14,
-        lineHeight: 22,
-        color: colors.text,
-        flex: 1,
-    },
-    inputContainer: {
-        marginBottom: 0,
-    },
-    setupButton: {
-        marginTop: 4,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        errorBox: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.errorBackground || 'rgba(239, 68, 68, 0.1)',
+            borderWidth: 1,
+            borderColor: theme.error,
+            borderRadius: borderRadius.sm,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            gap: spacing.sm,
+        },
+        errorText: {
+            fontWeight: '400',
+            fontStyle: 'normal',
+            fontSize: 14,
+            lineHeight: 22,
+            color: theme.text,
+            flex: 1,
+        },
+        inputContainer: {
+            marginBottom: 0,
+        },
+        setupButton: {
+            marginTop: 4,
+        },
+    });

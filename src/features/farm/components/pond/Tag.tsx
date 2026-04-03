@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { PondTypeOperation } from '@/features/farm/types/farm.types';
 
 export type TagStatus = 'active' | 'preparing';
@@ -14,6 +16,9 @@ interface TagProps {
 }
 
 export const Tag: React.FC<TagProps> = ({ status, operation, label, style }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const getStyle = () => {
         if (operation) {
             // Map operation codes/names to colors
@@ -65,34 +70,35 @@ export const Tag: React.FC<TagProps> = ({ status, operation, label, style }) => 
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs,
-        borderRadius: borderRadius.full,
-        alignSelf: 'flex-start',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.white,
-    },
-    green: {
-        backgroundColor: colors.green[25],
-        borderColor: colors.green[200],
-        borderWidth: 1,
-    },
-    textGreen: {
-        color: colors.green[600],
-    },
-    orange: {
-        backgroundColor: colors.yellow[25],
-        borderColor: colors.yellow[200],
-        borderWidth: 1,
-    },
-    textOrange: {
-        color: colors.yellow[600],
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.xs,
+            borderRadius: borderRadius.full,
+            alignSelf: 'flex-start',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        text: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        green: {
+            backgroundColor: theme.status.activeBg,
+            borderColor: theme.status.activeBg,
+            borderWidth: 1,
+        },
+        textGreen: {
+            color: theme.status.activeText,
+        },
+        orange: {
+            backgroundColor: theme.status.warningHighlightBg,
+            borderColor: theme.status.warningHighlightBg,
+            borderWidth: 1,
+        },
+        textOrange: {
+            color: theme.status.warningHighlightText,
+        },
+    });

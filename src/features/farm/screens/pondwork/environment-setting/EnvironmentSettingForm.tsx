@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import {
     EnvironmentParameterSection,
     EnvironmentParameter,
@@ -38,6 +39,8 @@ export const SettingEnvironmentForm: React.FC<SettingEnvironmentFormProps> = ({
     onReset,
     UnsavedChangesModal,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             <HeaderMenu title="Thiết lập thông số môi trường" onBack={onBack} />
@@ -83,21 +86,22 @@ export const SettingEnvironmentForm: React.FC<SettingEnvironmentFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
 
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: 16,
-        gap: 8,
-        paddingBottom: 20,
-    },
-});
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            padding: 16,
+            gap: 8,
+            paddingBottom: 20,
+        },
+    });

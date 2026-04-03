@@ -5,6 +5,7 @@
  * @created 2025-11-16
  */
 export const colors = {
+    isDark: false,
     transparent: 'transparent',
     // Primary colors
     primary: '#006AFF',
@@ -136,6 +137,7 @@ export const colors = {
     backgroundButton: '#F9FAFB',
     backgroundIconBtn: '#FAFAFA',
     backgroundSubtle: '#00000005', // Very light black background (5% opacity)
+    backgroundButtonActive: '#FFFFFF',
 
     // Text colors
     text: '#000000ff',
@@ -208,6 +210,65 @@ export const colors = {
         85: 'rgba(255, 255, 255, 0.85)',
         95: 'rgba(255, 255, 255, 0.95)',
     },
-} as const;
+};
 
 export type Colors = typeof colors;
+
+export const darkTheme: Colors = {
+    ...colors,
+    isDark: true,
+
+    background: '#171717',
+    backgroundPrimary: '#0A0A0A',
+    backgroundSecondary: '#404040',
+    backgroundTertiary: '#171717',
+    backgroundButton: '#171717',
+    backgroundIconBtn: '#111827',
+    backgroundSubtle: '#FFFFFF0D',
+    backgroundButtonActive: '#404040',
+
+    // Text colors
+    text: '#F9FAFB',
+    textSecondary: '#9CA3AF',
+    textTertiary: '#6B7280',
+    textMuted: '#FFFFFF8C',
+    textInverse: '#0B1117',
+
+    // Border colors
+    defaultBorder: '#262626',
+    border: '#1F2937',
+    borderMedium: '#374151',
+    borderLight: '#262626',
+    borderDark: '#4B5563',
+    borderDisabled: '#374151',
+    borderSubtle: '#FFFFFF33',
+
+    // Semantic colors
+    success: '#30D158',
+    warning: '#FF9F0A',
+    error: '#FF453A',
+    errorBackground: '#3E1416',
+    info: '#0A84FF',
+
+    // Status colors
+    status: {
+        ...colors.status,
+        totalBg: '#0D2149',
+        totalText: '#5991FF',
+        activeBg: '#123118',
+        activeText: '#4CAF50',
+        warningBg: '#471415',
+        warningText: '#FF6E6E',
+        warningHighlightBg: '#3B2900',
+        warningHighlightText: '#FFC107',
+        otherBg: '#1F2937',
+        otherText: '#D1D5DB',
+    },
+
+    // Schedule colors
+    schedule: {
+        remote: '#0D2A60',
+        schedule: '#423300',
+        local: '#10391A',
+    },
+};

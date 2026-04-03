@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { IconCalender } from '@/assets/icons';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 
@@ -51,6 +53,9 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     endLabel,
     style,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [activeField, setActiveField] = useState<'start' | 'end'>('start');
 
@@ -116,7 +121,12 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                 </View>
 
                 <TouchableOpacity onPress={handlePressCalendar} activeOpacity={0.7}>
-                    <IconCalender width={15} height={15} style={styles.calendarIcon} />
+                    <IconCalender
+                        width={15}
+                        height={15}
+                        style={styles.calendarIcon}
+                        color={theme.text}
+                    />
                 </TouchableOpacity>
             </View>
 
@@ -130,53 +140,54 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        backgroundColor: colors.white,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    textRow: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-    },
-    dateTouchableStart: {
-        alignItems: 'flex-start',
-    },
-    dateTouchableEnd: {
-        alignItems: 'flex-start',
-    },
-    dateTextStart: {
-        fontWeight: '700',
-        fontStyle: 'normal',
-        fontSize: 16,
-        lineHeight: 24,
-        letterSpacing: 0,
-        color: colors.text,
-    },
-    dateTextEnd: {
-        fontWeight: '700',
-        fontStyle: 'normal',
-        fontSize: 16,
-        lineHeight: 24,
-        letterSpacing: 0,
-        color: colors.text,
-    },
-    dashSeparator: {
-        marginHorizontal: 8,
-        fontWeight: '700',
-        fontSize: 16,
-        color: colors.text,
-    },
-    calendarIcon: {
-        marginLeft: 8,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+        },
+        textRow: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+        },
+        dateTouchableStart: {
+            alignItems: 'flex-start',
+        },
+        dateTouchableEnd: {
+            alignItems: 'flex-start',
+        },
+        dateTextStart: {
+            fontWeight: '700',
+            fontStyle: 'normal',
+            fontSize: 16,
+            lineHeight: 24,
+            letterSpacing: 0,
+            color: theme.text,
+        },
+        dateTextEnd: {
+            fontWeight: '700',
+            fontStyle: 'normal',
+            fontSize: 16,
+            lineHeight: 24,
+            letterSpacing: 0,
+            color: theme.text,
+        },
+        dashSeparator: {
+            marginHorizontal: 8,
+            fontWeight: '700',
+            fontSize: 16,
+            color: theme.text,
+        },
+        calendarIcon: {
+            marginLeft: 8,
+        },
+    });

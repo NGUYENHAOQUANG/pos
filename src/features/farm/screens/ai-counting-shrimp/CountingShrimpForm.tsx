@@ -3,7 +3,9 @@ import { Text } from '@/shared/components/typography/Text';
 import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import type { DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
@@ -35,6 +37,8 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
     onSave,
     onBack,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     // ──── Result state ────
     const [result, setResult] = useState('0');
     const [countTimes, setCountTimes] = useState(0);
@@ -262,35 +266,36 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+        },
 
-    checkCountRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingTop: 12,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    checkCountLabel: {
-        fontSize: 16,
-        color: colors.textSecondary,
-    },
-    checkCountValue: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-    },
-});
+        checkCountRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingTop: 12,
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+        checkCountLabel: {
+            fontSize: 16,
+            color: theme.textSecondary,
+        },
+        checkCountValue: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+        },
+    });

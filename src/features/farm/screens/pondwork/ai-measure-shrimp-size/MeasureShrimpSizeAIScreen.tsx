@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useInferencePredict, useGetInferenceResult } from '@/features/farm/hooks/useAI';
 import { useFarmStore } from '@/features/farm/store/farmStore';
@@ -30,6 +30,7 @@ export interface Measurement {
 
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+    const theme = useAppTheme();
 
     // ── Hooks ────────────────────────────────────
     const { mutate: predict, isPending: isPredicting } = useInferencePredict();
@@ -233,7 +234,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     }, [navigation, measurements, currentMeasurement, sizePcsPerKg]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: colors.backgroundPrimary }}>
+        <View style={{ flex: 1, backgroundColor: theme.backgroundPrimary }}>
             <MeasureShrimpSizeAIForm
                 isLoading={isLoading}
                 measurements={measurements}

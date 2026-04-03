@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { spacing, borderRadius, shadows } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export interface ActionMenuItem {
     label: string;
@@ -31,6 +33,8 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
     items,
     width,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <Modal
             visible={visible}
@@ -93,28 +97,31 @@ export const getMenuPosition = (
     }
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    menu: {
-        position: 'absolute',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        ...shadows.md,
-        paddingVertical: spacing.xs,
-        elevation: 8,
-    },
-    menuItem: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-    },
-    menuText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    deleteText: {
-        color: colors.error,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: 'transparent',
+        },
+        menu: {
+            position: 'absolute',
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            ...shadows.md,
+            paddingVertical: spacing.xs,
+            elevation: 8,
+            borderWidth: 1,
+            borderColor: theme.borderDark,
+        },
+        menuItem: {
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+        },
+        menuText: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        deleteText: {
+            color: theme.error,
+        },
+    });

@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { DetailRow } from '@/features/material/components/DetailRow';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 interface Props {
@@ -12,6 +15,9 @@ interface Props {
 }
 
 const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier, remainingQuantity }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -21,26 +27,12 @@ const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier, remaini
 
             {/* Content */}
             <View style={styles.content}>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Mã vật tư:</Text>
-                    <Text style={styles.value}>{materialCode}</Text>
-                </View>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Giá tôm:</Text>
-                    <Text style={styles.value}>{formatNumber(price)} VND/con</Text>
-                </View>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Nhãn hiệu:</Text>
-                    <Text style={styles.value}>{supplier}</Text>
-                </View>
+                <DetailRow label="Mã vật tư:" value={materialCode} />
+                <DetailRow label="Giá tôm:" value={`${formatNumber(price)} VND/con`} />
+                <DetailRow label="Nhãn hiệu:" value={supplier} />
 
                 {remainingQuantity !== undefined && (
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Số lượng còn lại:</Text>
-                        <Text style={styles.value}>{formatNumber(remainingQuantity)}</Text>
-                    </View>
+                    <DetailRow label="Số lượng còn lại:" value={formatNumber(remainingQuantity)} />
                 )}
             </View>
         </View>
@@ -50,53 +42,34 @@ const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier, remaini
 export default BreedInfoCard;
 
 /* ===== STYLES ===== */
-const styles = StyleSheet.create({
-    container: {
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-        overflow: 'hidden',
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
+            overflow: 'hidden',
+        },
 
-    header: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        backgroundColor: colors.backgroundPrimary,
-    },
+        header: {
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.defaultBorder,
+            backgroundColor: theme.backgroundPrimary,
+        },
 
-    headerText: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.text,
-    },
+        headerText: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.semibold,
+            color: theme.text,
+        },
 
-    content: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        gap: spacing.xs,
-        backgroundColor: colors.white,
-    },
-
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-    },
-
-    label: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        fontWeight: typography.fontWeight.regular,
-    },
-
-    value: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text,
-        textAlign: 'right',
-        maxWidth: '60%',
-    },
-});
+        content: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+            gap: spacing.xs,
+            backgroundColor: theme.background,
+        },
+    });
