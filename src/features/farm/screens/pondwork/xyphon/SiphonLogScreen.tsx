@@ -49,7 +49,7 @@ export const SiphonLogScreen: React.FC = () => {
                         : i
                 ),
         editRoute: 'AddSiphonScreen',
-        getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
+        getEditParams: (pondData, item) => ({ pond: pondData, siphonId: item.id }),
     };
 
     const { groupedData } = useLogScreenData(config);
