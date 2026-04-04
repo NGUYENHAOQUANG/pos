@@ -4,7 +4,6 @@ import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
-import Toast from 'react-native-toast-message';
 import {
     useDevices,
     useUpdateDeviceMode,
@@ -12,6 +11,16 @@ import {
 } from '@/features/control/hooks/useDevices';
 import { deviceApi, CreateScheduleRequest } from '@/features/control/api/deviceApi';
 import { EControlMode } from '@/features/control/types/control.types';
+import {
+    showScheduleMissingRunTimeToast,
+    showScheduleMissingStopTimeToast,
+    showSchedulePastStartTimeToast,
+    showScheduleOverlapToast,
+    showScheduleUpdateSuccessToast,
+    showScheduleConfigSuccessToast,
+    showSchedulePartialFailToast,
+    showScheduleSaveFailedToast,
+} from '@/features/farm/utils/toastMessages';
 
 import ActivitySchedule, {
     ScheduleItem,
@@ -247,19 +256,11 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
         // Validate machine config fields when in schedule mode
         if (mode === 'schedule') {
             if (!runDuration.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Thiếu thông tin',
-                    text2: 'Vui lòng nhập thời gian chạy (giây)',
-                });
+                showScheduleMissingRunTimeToast();
                 return;
             }
             if (!stopDuration.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Thiếu thông tin',
-                    text2: 'Vui lòng nhập thời gian dừng (phút)',
-                });
+                showScheduleMissingStopTimeToast();
                 return;
             }
         }
@@ -293,7 +294,6 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
             // Call schedule API for each schedule entry when mode is schedule
             if (mode === 'schedule' && schedules.length > 0) {
                 try {
-                    // Build ISO datetime using local time (not UTC)
                     const toLocalISO = (date: Date): string => {
                         const y = date.getFullYear();
                         const mo = String(date.getMonth() + 1).padStart(2, '0');
@@ -303,15 +303,48 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         const sec = String(date.getSeconds()).padStart(2, '0');
                         return `${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`;
                     };
+                    // Only send schedules with future startTime
+                    const now = new Date();
+                    const validSchedules = schedules.filter(
+                        s => s.startTime && s.endTime && s.startTime > now
+                    );
 
-                    // Send all schedules that have valid start/end time
-                    const validSchedules = schedules.filter(s => s.startTime && s.endTime);
+                    // Check if any new schedule has past startTime
+                    const newPastSchedule = schedules.find(
+                        s => s.isNew && s.startTime && s.startTime <= now
+                    );
+                    if (newPastSchedule) {
+                        showSchedulePastStartTimeToast();
+                        setIsSaving(false);
+                        return;
+                    }
+
+                    // Check overlap only for newly added schedules against existing future ones
+                    const newSchedules = validSchedules.filter(s => s.isNew);
+                    for (const newItem of newSchedules) {
+                        const overlap = validSchedules.find(
+                            s =>
+                                s !== newItem &&
+                                newItem.startTime! >= s.startTime! &&
+                                newItem.startTime! < s.endTime!
+                        );
+                        if (overlap) {
+                            const fmt = (d: Date) =>
+                                `${String(d.getHours()).padStart(2, '0')}:${String(
+                                    d.getMinutes()
+                                ).padStart(2, '0')}`;
+                            showScheduleOverlapToast(
+                                `Lượt ${fmt(newItem.startTime!)}-${fmt(
+                                    newItem.endTime!
+                                )} trùng với ${fmt(overlap.startTime!)}-${fmt(overlap.endTime!)}`
+                            );
+                            setIsSaving(false);
+                            return;
+                        }
+                    }
 
                     if (validSchedules.length === 0) {
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Cập nhật cấu hình thành công',
-                        });
+                        showScheduleConfigSuccessToast();
                     } else {
                         // Send each schedule individually, catch errors per request
                         const results = await Promise.all(
@@ -376,43 +409,25 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         const displayError = specificError || uniqueErrors[0];
 
                         if (failCount === 0) {
-                            Toast.show({
-                                type: 'success',
-                                text1: 'Cập nhật lịch trình thành công',
-                            });
+                            showScheduleUpdateSuccessToast();
                         } else if (successCount > 0) {
-                            Toast.show({
-                                type: 'info',
-                                text1: 'Lưu lịch trình một phần',
-                                text2:
-                                    displayError ||
-                                    `${successCount} thành công, ${failCount} thất bại`,
-                            });
+                            showSchedulePartialFailToast(
+                                displayError || `${successCount} thành công, ${failCount} thất bại`
+                            );
                         } else {
-                            Toast.show({
-                                type: 'error',
-                                text1: 'Lỗi',
-                                text2: displayError || 'Không thể lưu lịch trình',
-                            });
+                            showScheduleSaveFailedToast(displayError);
                             setIsSaving(false);
                             return;
                         }
                     }
                 } catch (error: unknown) {
                     console.error('Failed to create schedules:', error);
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Lỗi',
-                        text2: 'Có lỗi xảy ra khi lưu lịch trình',
-                    });
+                    showScheduleSaveFailedToast('Có lỗi xảy ra khi lưu lịch trình');
                     setIsSaving(false);
                     return;
                 }
             } else {
-                Toast.show({
-                    type: 'success',
-                    text1: 'Cập nhật cấu hình thành công',
-                });
+                showScheduleConfigSuccessToast();
             }
         }
 

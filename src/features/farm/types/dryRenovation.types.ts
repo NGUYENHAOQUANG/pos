@@ -4,17 +4,11 @@ import {
     PaginationParams,
     IDocument,
     ICreatorEditor,
+    PondLogMaterialType,
 } from '@/shared/types/common.types';
 
-export interface IDryRenovationMaterial {
-    warehouseItemId: string;
-    quantity: number;
-    name?: string;
-    unitName?: string;
-}
-
 export interface IDryRenovationDetail {
-    materials?: IDryRenovationMaterial[];
+    materials?: PondLogMaterialType[];
     notes?: string;
 }
 

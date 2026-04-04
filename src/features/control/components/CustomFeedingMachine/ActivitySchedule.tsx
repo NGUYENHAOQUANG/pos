@@ -9,7 +9,11 @@ import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModal
 import { colors } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import { deviceApi } from '@/features/control/api/deviceApi';
-import Toast from 'react-native-toast-message';
+import {
+    showScheduleDeleteSuccessToast,
+    showScheduleDeleteFailedToast,
+    showScheduleCannotEditToast,
+} from '@/features/farm/utils/toastMessages';
 
 const MAX_TURNS = 15;
 
@@ -68,15 +72,10 @@ export default function ActivitySchedule({
         if (!deleteTarget.isNew) {
             try {
                 await deviceApi.deleteSchedule(deleteTarget.id);
-                Toast.show({
-                    type: 'success',
-                    text1: 'Đã xóa lịch trình',
-                });
-            } catch {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Không thể xóa lịch trình',
-                });
+                showScheduleDeleteSuccessToast();
+            } catch (err: unknown) {
+                const normalized = err as { message?: string };
+                showScheduleDeleteFailedToast(normalized?.message);
                 setDeleteTarget(null);
                 return;
             }
@@ -88,6 +87,12 @@ export default function ActivitySchedule({
 
     // Edit time directly on the list
     const handleTimeChange = (id: string, type: 'start' | 'end', newDate: Date) => {
+        const target = schedules.find(item => item.id === id);
+        // Block editing schedules that are active or already completed
+        if (target && !target.isNew && target.endTime && target.endTime <= new Date()) {
+            showScheduleCannotEditToast();
+            return;
+        }
         const updatedSchedules = schedules.map(item => {
             if (item.id === id) {
                 return {

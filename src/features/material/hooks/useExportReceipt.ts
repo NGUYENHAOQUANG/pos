@@ -9,9 +9,6 @@ import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { handleError } from '@/shared/utils';
 
-// Constants for staleTime
-const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
-
 /**
  * Hook to fetch export warehouse receipts
  */
@@ -25,7 +22,6 @@ export const useExportReceipts = (params?: GetExportWarehouseParams) => {
             }
             return response.data || { items: [], totalCount: 0 };
         },
-        staleTime: STALE_TIME_SHORT,
     });
 };
 
@@ -43,7 +39,6 @@ export const useExportReceipt = (id: string) => {
             return null;
         },
         enabled: !!id,
-        staleTime: STALE_TIME_SHORT,
     });
 };
 

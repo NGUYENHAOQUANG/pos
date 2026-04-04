@@ -1,4 +1,10 @@
-import type { ICreatorEditor } from '@/shared/types/common.types';
+import type { ICreatorEditor, PondLogMaterialType } from '@/shared/types/common.types';
+
+export interface ISiphonDetail {
+    shrimpLossKg?: number;
+    notes?: string;
+    materials?: PondLogMaterialType[];
+}
 
 export interface ISiphonRecord {
     id: string;
@@ -9,16 +15,7 @@ export interface ISiphonRecord {
     pondId: string;
     documentIds?: string[];
     value?: number;
-    siphonDetail?: {
-        shrimpLossKg?: number;
-        notes?: string;
-        materials?: Array<{
-            warehouseItemId: string;
-            quantity: number;
-            name?: string;
-            unitName?: string;
-        }>;
-    };
+    siphonDetail?: ISiphonDetail;
 }
 
 export interface ISiphonRecordResponse {
@@ -33,15 +30,14 @@ export interface ISiphonParams {
     // Add other params if needed
 }
 
+export interface ICreateSiphonDetail {
+    shrimpLossKg: number;
+    notes: string;
+    materials: PondLogMaterialType[];
+}
+
 export interface CreateSiphonCommand {
     value: number;
     documentIds: string[];
-    siphonDetail: {
-        shrimpLossKg: number;
-        notes: string;
-        materials: Array<{
-            warehouseItemId: string;
-            quantity: number;
-        }>;
-    };
+    siphonDetail: ICreateSiphonDetail;
 }

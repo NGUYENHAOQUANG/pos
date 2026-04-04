@@ -16,7 +16,6 @@ const CHART_CONTENT_HEIGHT = 350; // Set to fit with padding
 interface Props {
     zoneId: string;
     pondId?: string;
-    pondCode?: string;
 }
 
 export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
@@ -107,11 +106,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
     },
-    headerTitle: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
     body: {
         paddingVertical: 24,
     },
@@ -131,13 +125,5 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,
         paddingHorizontal: 16,
-    },
-    headerButton: {
-        // Ghi đè style của BasicDropDownButton
-        height: 54,
-        borderWidth: 0,
-        backgroundColor: 'transparent',
-        paddingHorizontal: spacing.md,
-        borderRadius: 0,
     },
 });

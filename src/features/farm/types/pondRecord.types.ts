@@ -1,4 +1,9 @@
-import type { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
+import type {
+    IApiResponse,
+    IPaginate,
+    ICreatorEditor,
+    PondLogMaterialType,
+} from '@/shared/types/common.types';
 
 export enum PondRecordOperationType {
     ReleaseShrimp = 'ReleaseShrimp',
@@ -26,10 +31,7 @@ export interface IPondRecordReferenceData {
     notes?: string | null;
 
     // Feeding (operationType: "Feeding")
-    materials?: {
-        warehouseItemId: string;
-        quantity: number;
-    }[];
+    materials?: PondLogMaterialType[];
 
     // ReleaseShrimp (operationType: "ReleaseShrimp")
     warehouseItemId?: string;

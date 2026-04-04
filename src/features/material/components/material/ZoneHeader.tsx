@@ -33,18 +33,16 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
             </View>
 
             {/* Row 2: Dropdown full-width */}
-            {dropdownData && dropdownData.length > 0 && (
-                <DropDownButtonBasic
-                    data={dropdownData}
-                    value={dropdownValue}
-                    onSelect={onDropdownSelect}
-                    placeholder={dropdownPlaceholder}
-                    showIcon={false}
-                    height={40}
-                    borderRadius={12}
-                    style={styles.dropdown}
-                />
-            )}
+            <DropDownButtonBasic
+                data={dropdownData}
+                value={dropdownValue}
+                onSelect={onDropdownSelect}
+                placeholder={dropdownPlaceholder}
+                showIcon={false}
+                height={40}
+                borderRadius={12}
+                style={styles.dropdown}
+            />
         </View>
     );
 };

@@ -26,6 +26,7 @@ export interface IWarehouse {
     name: string;
     code: string;
     zoneId?: string;
+    zoneName?: string;
     description?: string;
     address?: string;
 }
