@@ -23,8 +23,6 @@ export const importReceiptKeys = {
         [...importReceiptKeys.all, 'items', id, params] as const,
 };
 
-const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
-
 // ============ Query Hooks ============
 export const useImportReceipts = (params?: GetImportReceiptsParams) => {
     const queryParams: GetImportReceiptsParams = {
@@ -40,7 +38,6 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
             }
             return response.data;
         },
-        staleTime: STALE_TIME_SHORT,
     });
 };
 
@@ -70,7 +67,6 @@ export const useInfiniteImportReceipts = (
             if (!lastPage.hasNextPage) return undefined;
             return lastPage.pageNumber + 1;
         },
-        staleTime: STALE_TIME_SHORT,
     });
 
     const receipts = React.useMemo(() => {

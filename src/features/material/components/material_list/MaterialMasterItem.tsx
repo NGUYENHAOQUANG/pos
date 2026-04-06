@@ -88,10 +88,10 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
                             <DetailRow label="Loại vật tư:" value={item.type} />
                             <DetailRow label="Nhãn Hàng:" value={item.manufacturer} />
                             <DetailRow
-                                label="Mô tả:"
+                                label="Chú thích:"
                                 value={item.usage}
                                 bottomSheetTitle={item.name}
-                                sheetLabel="Mô tả"
+                                sheetLabel="Chú thích"
                             />
 
                             {/* Edit Button */}

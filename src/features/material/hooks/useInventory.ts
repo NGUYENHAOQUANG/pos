@@ -13,8 +13,6 @@ import {
 } from '@/features/material/types/inventoryCheck.types';
 import { APP_CONFIG } from '@/shared/constants';
 
-const STALE_TIME_SHORT = 2 * 60 * 1000;
-
 export const useInventoryTickets = (params?: GetInventoryChecksParams) => {
     return useQuery({
         queryKey: materialKeys.inventory(params),
@@ -27,7 +25,6 @@ export const useInventoryTickets = (params?: GetInventoryChecksParams) => {
 
             return [];
         },
-        staleTime: STALE_TIME_SHORT,
     });
 };
 
@@ -59,7 +56,6 @@ export const useInfiniteInventoryTickets = (
             return lastPage.pageNumber + 1;
         },
         enabled: options?.enabled,
-        staleTime: STALE_TIME_SHORT,
     });
 
     const items = React.useMemo(() => {

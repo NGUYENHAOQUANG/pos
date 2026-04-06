@@ -5,7 +5,7 @@
  * @created 2025-11-16
  */
 import React, { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -23,6 +23,7 @@ import {
 } from '@/shared/components/security/BiometricLockScreen';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
+import { colors } from '@/styles';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -48,20 +49,27 @@ const AppTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
-        background: '#FFFFFF',
+        background: colors.white,
     },
 };
 
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
+    const [appReady, setAppReady] = useState(false);
     const { isLocked, handleUnlock } = useBiometricLock();
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        const mountTimer = setTimeout(() => {
+            setAppReady(true);
+        }, 2000);
+        const splashTimer = setTimeout(() => {
             setShowSplash(false);
         }, 3200);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(mountTimer);
+            clearTimeout(splashTimer);
+        };
     }, []);
 
     return (
@@ -72,7 +80,11 @@ export function AppProviders() {
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
                                 <NavigationContainer theme={AppTheme}>
-                                    <AppNavigator />
+                                    {appReady ? (
+                                        <AppNavigator />
+                                    ) : (
+                                        <View style={styles.placeholder} />
+                                    )}
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>
                         </ErrorBoundary>
@@ -90,5 +102,9 @@ export function AppProviders() {
 const styles = StyleSheet.create({
     gestureHandler: {
         flex: 1,
+    },
+    placeholder: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
     },
 });
