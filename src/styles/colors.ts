@@ -281,6 +281,15 @@ export const darkTheme: Colors = {
     errorBackground: '#3E1416',
     info: '#0A84FF',
 
+    // Red palette - dark mode overrides
+    red: {
+        ...colors.red,
+        25: '#2A1215',
+        50: '#3E1416',
+        200: '#5C1D20',
+        500: '#FF6B6B',
+    },
+
     // Status colors
     status: {
         ...colors.status,

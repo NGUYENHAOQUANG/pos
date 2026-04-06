@@ -155,7 +155,7 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                         {/* Error message */}
                         {hasError && (
                             <View style={staticStyles.errorRow}>
-                                <WarningCircleIcon width={16} height={16} />
+                                <WarningCircleIcon width={16} height={16} color={theme.red[500]} />
                                 <Text style={themedStyles.errorText}>{data.errorMessage}</Text>
                             </View>
                         )}
