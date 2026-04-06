@@ -224,7 +224,6 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
 const styles = StyleSheet.create({
     header: {
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
     },
     content: {
         paddingBottom: 16,

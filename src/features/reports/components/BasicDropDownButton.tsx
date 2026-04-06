@@ -45,7 +45,8 @@ export const BasicDropDownButton: React.FC<BasicDropDownButtonProps> = ({
                 styles.container,
                 {
                     backgroundColor: theme.backgroundButton,
-                    borderColor: theme.isDark ? 'white' : theme.border,
+                    borderColor: theme.border,
+                    borderBottomWidth: isExpanded ? 1 : 0,
                 },
                 style,
                 // Bo góc dưới khi thu gọn (chỉ có nút, không có nội dung bên dưới)
@@ -85,7 +86,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
-        borderBottomWidth: 1,
     },
     roundedBottom: {
         borderBottomLeftRadius: borderRadius.md,

@@ -77,10 +77,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                 label="Biểu đồ lợi nhuận"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
-                style={[
-                    isExpanded ? styles.headerExpanded : styles.headerCollapsed,
-                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
-                ]}
+                style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
             />
 
             {isExpanded && (
@@ -150,11 +147,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
     },
     headerCollapsed: {
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
     },
     loadingContainer: {
         minHeight: 300,

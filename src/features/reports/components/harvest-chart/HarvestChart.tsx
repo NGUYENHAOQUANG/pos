@@ -117,7 +117,6 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
 const styles = StyleSheet.create({
     sectionHeader: {
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
     },
     body: {
         paddingVertical: 24,

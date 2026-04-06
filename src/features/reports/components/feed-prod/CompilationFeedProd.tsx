@@ -96,10 +96,7 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
                 label="Biểu đồ thức ăn - sản lượng"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
-                style={[
-                    isExpanded ? styles.headerExpanded : styles.headerCollapsed,
-                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
-                ]}
+                style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
             />
 
             {isExpanded && (
@@ -145,11 +142,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
     },
     headerCollapsed: {
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
     },
     content: {
         borderBottomLeftRadius: borderRadius.sm,
