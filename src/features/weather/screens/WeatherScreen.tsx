@@ -22,6 +22,7 @@ import LocationPickerModal from '@/features/weather/components/LocationPickerMod
 import HourlyForecastList from '@/features/weather/components/HourlyForecastList';
 import DailyForecastList from '@/features/weather/components/DailyForecastList';
 import FarmingWeatherAlert from '@/features/weather/components/FarmingWeatherAlert';
+import { CurrentWeatherCard } from '@/features/weather/components/CurrentWeatherCard';
 
 /**
  * Get weather-code based gradient for the hero card.
@@ -193,6 +194,7 @@ const WeatherScreen: React.FC = () => {
                     <HourlyForecastList hourlyData={weatherData.hourly} />
                     <FarmingWeatherAlert current={weatherData.current} daily={weatherData.daily} />
                     <DailyForecastList dailyData={weatherData.daily} />
+                    <CurrentWeatherCard current={weatherData.current} />
 
                     {/* Footer */}
                     <View style={styles.footer}>
