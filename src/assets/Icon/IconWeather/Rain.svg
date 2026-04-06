@@ -1,8 +1,10 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Cloud -->
-  <path d="M6 12a4 4 0 0 1-.37-7.98A5.5 5.5 0 0 1 18.1 6.5 3.5 3.5 0 0 1 19 13.5H6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Cloud body -->
+  <path d="M6 12a4 4 0 0 1-.37-7.98A5.5 5.5 0 0 1 18.1 6.5 3.5 3.5 0 0 1 19 13.5H6z" fill="#90A4AE"/>
+  <!-- Cloud highlight -->
+  <ellipse cx="10.5" cy="6.5" rx="3" ry="1.8" fill="#B0BEC5" opacity="0.6"/>
   <!-- Rain drops -->
-  <line x1="7" y1="16" x2="6" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="11" y1="16" x2="10" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="15" y1="16" x2="14" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="7" y1="16" x2="6" y2="19.5" stroke="#42A5F5" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="11" y1="16" x2="10" y2="19.5" stroke="#42A5F5" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="15" y1="16" x2="14" y2="19.5" stroke="#42A5F5" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

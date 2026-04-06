@@ -236,8 +236,14 @@ export const colors = {
         },
         bg: {
             light: 'rgba(255, 255, 255, 0.15)',
+            page: ['#000000', '#000000', '#000000'],
         },
         rain: 'rgba(120, 200, 255, 0.9)',
+        chart: {
+            lineWarm: '#FFB347',
+            lineMid: '#FFCC33',
+            lineCool: '#66BB6A',
+        },
     },
 } as const;
 

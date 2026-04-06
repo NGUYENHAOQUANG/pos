@@ -11,9 +11,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography, borderRadius } from '@/styles';
-import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import { colors, spacing, typography } from '@/styles';
+import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useWeatherForecast } from '@/features/weather/hooks/useWeatherForecast';
 import { getWeatherInfo, getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
@@ -23,12 +23,18 @@ import HourlyForecastList from '@/features/weather/components/HourlyForecastList
 import DailyForecastList from '@/features/weather/components/DailyForecastList';
 import FarmingWeatherAlert from '@/features/weather/components/FarmingWeatherAlert';
 
-const getGradientForWeather = (code: number, isDay: boolean): readonly string[] => {
-    if (!isDay) return colors.weather.gradients.night;
-    if (code >= 95) return colors.weather.gradients.storm;
-    if (code >= 51) return colors.weather.gradients.rainy;
-    if (code >= 2) return colors.weather.gradients.cloudy;
-    return colors.weather.gradients.clear;
+/**
+ * Get weather-code based gradient for the hero card.
+ * In this layout, this gradient covers the entire screen!
+ */
+const getScreenGradient = (code: number, isDay: boolean): readonly string[] => {
+    // A nice solid Light Blue gradient resembling the provided UI
+    if (!isDay) return ['#2C3E50', '#34495E', '#4A6274'];
+    if (code >= 95) return ['#3A4F63', '#506A7E', '#6B8599']; // Storm
+    if (code >= 51) return ['#4A6D8C', '#6E8FAB', '#8BAEC5']; // Rainy
+
+    // Default bright blue gradient for Sun/Cloud
+    return ['#7AB2FA', '#68A4F1', '#5A99E9'];
 };
 
 const WeatherScreen: React.FC = () => {
@@ -38,7 +44,6 @@ const WeatherScreen: React.FC = () => {
 
     // Dynamic location from store
     const selectedLocation = useWeatherStore(s => s.selectedLocation);
-    const setSelectedLocation = useWeatherStore(s => s.setSelectedLocation);
     const location = selectedLocation;
 
     const {
@@ -47,15 +52,12 @@ const WeatherScreen: React.FC = () => {
         isError,
         refetch,
         isRefetching,
-        isFetching,
     } = useWeatherForecast(location);
 
-    const gradientColors = useMemo(() => {
-        if (!weatherData) return colors.weather.gradients.clear;
-        return getGradientForWeather(
-            weatherData.current.weatherCode,
-            weatherData.current.isDay === 1
-        );
+    /** Screen gradient based on weather code */
+    const screenGradient = useMemo(() => {
+        if (!weatherData) return ['#7AB2FA', '#68A4F1', '#5A99E9'];
+        return getScreenGradient(weatherData.current.weatherCode, weatherData.current.isDay === 1);
     }, [weatherData]);
 
     const handleBack = () => {
@@ -64,31 +66,20 @@ const WeatherScreen: React.FC = () => {
         }
     };
 
-    const lastUpdatedText = useMemo(() => {
-        if (!weatherData?.lastUpdated) return '';
-        const date = new Date(weatherData.lastUpdated);
-        return date.toLocaleTimeString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    }, [weatherData?.lastUpdated]);
-
     // Loading state
     if (isLoading) {
         return (
-            <LinearGradient colors={[...colors.weather.gradients.clear]} style={styles.flex1}>
-                <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
-                    <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                        <ArrowLeftIcon width={20} height={20} color={colors.white} />
+            <LinearGradient colors={['#7AB2FA', '#68A4F1']} style={styles.flex1}>
+                <View style={[styles.heroOverlay, { paddingTop: insets.top + spacing.md }]}>
+                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
+                        <Ionicons name="arrow-back" size={26} color={colors.white} />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.locationButton}
                         onPress={() => setLocationPickerVisible(true)}
+                        style={styles.headerBtnRight}
                     >
-                        <Text style={styles.headerTitle}>Thời tiết</Text>
-                        <AntDesign name="caretdown" size={10} color={colors.weather.text.dim} />
+                        <Feather name="menu" size={26} color={colors.white} />
                     </TouchableOpacity>
-                    <View style={styles.headerPlaceholder} />
                 </View>
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color={colors.white} />
@@ -101,19 +92,17 @@ const WeatherScreen: React.FC = () => {
     // Error state
     if (isError || !weatherData) {
         return (
-            <LinearGradient colors={[...colors.weather.gradients.cloudy]} style={styles.flex1}>
-                <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
-                    <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                        <ArrowLeftIcon width={20} height={20} color={colors.white} />
+            <LinearGradient colors={['#4A6D8C', '#6E8FAB']} style={styles.flex1}>
+                <View style={[styles.heroOverlay, { paddingTop: insets.top + spacing.md }]}>
+                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
+                        <Ionicons name="arrow-back" size={26} color={colors.white} />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.locationButton}
                         onPress={() => setLocationPickerVisible(true)}
+                        style={styles.headerBtnRight}
                     >
-                        <Text style={styles.headerTitle}>Thời tiết</Text>
-                        <AntDesign name="caretdown" size={10} color={colors.weather.text.dim} />
+                        <Feather name="menu" size={26} color={colors.white} />
                     </TouchableOpacity>
-                    <View style={styles.headerPlaceholder} />
                 </View>
                 <View style={styles.centerContainer}>
                     <Text style={styles.errorIcon}>⚠️</Text>
@@ -130,29 +119,13 @@ const WeatherScreen: React.FC = () => {
         weatherData.current.isDay === 1
     );
     const todayForecast = weatherData.daily[0];
+    const lastUpdatedTime = new Date(weatherData.lastUpdated).toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 
     return (
-        <LinearGradient colors={[...gradientColors]} style={styles.flex1}>
-            {/* Header with back button + location picker */}
-            <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
-                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                    <ArrowLeftIcon width={20} height={20} color={colors.white} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.locationButton}
-                    onPress={() => setLocationPickerVisible(true)}
-                    activeOpacity={0.7}
-                >
-                    <Text style={styles.headerTitle}>{location.name}</Text>
-                    {isFetching ? (
-                        <ActivityIndicator size="small" color={colors.weather.text.dim} />
-                    ) : (
-                        <AntDesign name="caretdown" size={10} color={colors.weather.text.dim} />
-                    )}
-                </TouchableOpacity>
-                <View style={styles.headerPlaceholder} />
-            </View>
-
+        <LinearGradient colors={[...screenGradient]} style={styles.flex1}>
             <ScrollView
                 style={styles.flex1}
                 contentContainerStyle={styles.scrollContent}
@@ -165,103 +138,82 @@ const WeatherScreen: React.FC = () => {
                     />
                 }
             >
-                {/* ===== Hero Weather Card (iOS style) ===== */}
-                <View style={styles.heroCard}>
-                    {/* Location name */}
-                    <Text style={styles.locationName}>{location.name}</Text>
-                    <Text style={styles.locationTime}>{lastUpdatedText}</Text>
+                {/* Overlay: hamburger menu */}
+                <View style={[styles.heroOverlay, { paddingTop: insets.top + spacing.md }]}>
+                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
+                        <Ionicons name="arrow-back" size={26} color={colors.white} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setLocationPickerVisible(true)}
+                        style={styles.headerBtnRight}
+                    >
+                        <Feather name="menu" size={26} color={colors.white} />
+                    </TouchableOpacity>
+                </View>
 
-                    {/* Big temperature */}
-                    <Text style={styles.heroTemp}>
-                        {Math.round(weatherData.current.temperature2m)}°
-                    </Text>
+                {/* Hero content matching UI */}
+                <View style={styles.heroSection}>
+                    <View style={styles.heroLeft}>
+                        {/* Huge temperature */}
+                        <Text style={styles.heroTemp}>
+                            {Math.round(weatherData.current.temperature2m)}°
+                        </Text>
 
-                    {/* Weather condition */}
-                    <View style={styles.heroConditionRow}>
-                        <WeatherIcon name={weatherIconKey} size={28} color={colors.white} />
+                        {/* Weather condition */}
                         <Text style={styles.heroCondition}>{weatherInfo.label}</Text>
+
+                        {/* Location name with pin */}
+                        <TouchableOpacity
+                            style={styles.locationRow}
+                            onPress={() => setLocationPickerVisible(true)}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.locationName}>{location.name}</Text>
+                            <Ionicons name="location-sharp" size={14} color={colors.white} />
+                        </TouchableOpacity>
+
+                        {/* High / Low & Feels Like */}
+                        {todayForecast && (
+                            <Text style={styles.heroHighLow}>
+                                {Math.round(todayForecast.temperature2mMax)}° /{' '}
+                                {Math.round(todayForecast.temperature2mMin)}° Cảm giác như{' '}
+                                {Math.round(weatherData.current.apparentTemperature)}°
+                            </Text>
+                        )}
                     </View>
 
-                    {/* High / Low */}
-                    {todayForecast && (
-                        <Text style={styles.heroHighLow}>
-                            C:{Math.round(todayForecast.temperature2mMax)}° T:
-                            {Math.round(todayForecast.temperature2mMin)}°
+                    <View style={styles.heroRight}>
+                        {/* Large icon illustration */}
+                        <WeatherIcon name={weatherIconKey} size={120} color="#FFD700" />
+                    </View>
+                </View>
+
+                {/* Content Cards */}
+                <View style={styles.contentWrapper}>
+                    <HourlyForecastList hourlyData={weatherData.hourly} />
+                    <FarmingWeatherAlert current={weatherData.current} daily={weatherData.daily} />
+                    <DailyForecastList dailyData={weatherData.daily} />
+
+                    {/* Footer */}
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>
+                            Dữ liệu từ Open-Meteo • Cập nhật lúc {lastUpdatedTime}
                         </Text>
-                    )}
-                </View>
-
-                {/* ===== Detail Metrics Row ===== */}
-                <View style={styles.metricsCard}>
-                    <MetricItem
-                        iconName="Thermometer"
-                        label="Cảm giác"
-                        value={`${Math.round(weatherData.current.apparentTemperature)}°`}
-                    />
-                    <View style={styles.metricDivider} />
-                    <MetricItem
-                        iconName="Humidity"
-                        label="Độ ẩm"
-                        value={`${weatherData.current.relativeHumidity2m}%`}
-                    />
-                    <View style={styles.metricDivider} />
-                    <MetricItem
-                        iconName="Wind"
-                        label="Gió"
-                        value={`${Math.round(weatherData.current.windSpeed10m)} km/h`}
-                    />
-                    <View style={styles.metricDivider} />
-                    <MetricItem
-                        iconName="Raindrop"
-                        label="Mưa"
-                        value={`${weatherData.current.rain} mm`}
-                    />
-                </View>
-
-                {/* ===== Farming Alerts ===== */}
-                <FarmingWeatherAlert current={weatherData.current} daily={weatherData.daily} />
-
-                {/* ===== Hourly Forecast ===== */}
-                <HourlyForecastList hourlyData={weatherData.hourly} />
-
-                {/* ===== Daily Forecast ===== */}
-                <DailyForecastList dailyData={weatherData.daily} />
-
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>
-                        Dữ liệu từ Open-Meteo • Cập nhật mỗi 15 phút
-                    </Text>
+                    </View>
                 </View>
             </ScrollView>
 
-            {/* Location Picker Modal */}
             <LocationPickerModal
                 visible={isLocationPickerVisible}
-                currentLocation={location}
-                onSelect={setSelectedLocation}
                 onClose={() => setLocationPickerVisible(false)}
+                currentLocation={location}
+                onSelect={newLoc => useWeatherStore.getState().setSelectedLocation(newLoc)}
             />
         </LinearGradient>
     );
 };
 
-/* ===== Metric Item Sub-component ===== */
-interface MetricItemProps {
-    readonly iconName: string;
-    readonly label: string;
-    readonly value: string;
-}
-
-const MetricItem: React.FC<MetricItemProps> = ({ iconName, label, value }) => (
-    <View style={styles.metricItem}>
-        <WeatherIcon name={iconName} size={20} color={colors.white} />
-        <Text style={styles.metricValue}>{value}</Text>
-        <Text style={styles.metricLabel}>{label}</Text>
-    </View>
-);
-
-export default WeatherScreen;
+export default React.memo(WeatherScreen);
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
@@ -269,41 +221,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.weather.bg.light,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-
-    headerTitle: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.white,
-    },
-
-    locationButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-
-    headerPlaceholder: {
-        width: 40,
-    },
-
     scrollContent: {
-        paddingHorizontal: spacing.md,
         paddingBottom: spacing['2xl'],
     },
 
@@ -317,7 +235,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: spacing.md,
         fontSize: typography.fontSize.sm,
-        color: colors.weather.text.medium,
+        color: 'rgba(255,255,255,0.8)',
     },
 
     errorIcon: {
@@ -334,104 +252,97 @@ const styles = StyleSheet.create({
 
     errorHint: {
         fontSize: typography.fontSize.sm,
-        color: colors.weather.text.dim,
+        color: 'rgba(255,255,255,0.6)',
         marginTop: spacing.xs,
         textAlign: 'center',
     },
 
-    // ── Hero Card ──────────────────────────────────
-    heroCard: {
-        alignItems: 'center',
-        paddingVertical: spacing.lg,
-        marginBottom: spacing.md,
-    },
-
-    locationName: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.white,
-    },
-
-    locationTime: {
-        fontSize: typography.fontSize.sm,
-        color: colors.weather.text.dim,
-        marginTop: 2,
-    },
-
-    heroTemp: {
-        fontSize: 72,
-        fontWeight: typography.fontWeight.light,
-        color: colors.white,
-        marginVertical: spacing.xs,
-    },
-
-    heroConditionRow: {
+    // ── Hero Overlay ──
+    heroOverlay: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: spacing.xs,
+        paddingHorizontal: spacing.xl,
+        paddingBottom: spacing.sm,
+    },
+    headerBtnLeft: {
+        padding: spacing.xs,
+        marginLeft: -spacing.xs,
+    },
+    headerBtnRight: {
+        padding: spacing.xs,
+        marginRight: -spacing.xs,
     },
 
-    heroCondition: {
-        fontSize: typography.fontSize.lg,
-        color: colors.weather.text.light,
-        fontWeight: typography.fontWeight.medium,
-    },
-
-    heroHighLow: {
-        fontSize: typography.fontSize.base,
-        color: colors.weather.text.medium,
-        marginTop: spacing.xs,
-        fontWeight: typography.fontWeight.medium,
-    },
-
-    metricsCard: {
+    // ── Hero Section ────
+    heroSection: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: colors.weather.bg.light,
-        borderRadius: borderRadius.md,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.xs,
-        marginBottom: spacing.md,
+        paddingHorizontal: spacing.xl,
+        paddingTop: spacing.md,
+        paddingBottom: spacing['3xl'],
+        justifyContent: 'space-between',
     },
 
-    metricDivider: {
-        width: 1,
-        height: 32,
-        backgroundColor: colors.weather.border.light,
-    },
-
-    metricItem: {
-        alignItems: 'center',
-        gap: 2,
+    heroLeft: {
         flex: 1,
     },
 
-    metricIcon: {
-        fontSize: typography.fontSize.base,
+    heroRight: {
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
+        paddingRight: spacing.sm,
+        paddingTop: spacing.lg,
     },
 
-    metricValue: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
+    heroTemp: {
+        fontSize: 90,
+        fontWeight: '300',
+        color: colors.white,
+        lineHeight: 100,
+        letterSpacing: -2,
+    },
+
+    heroCondition: {
+        fontSize: typography.fontSize.xl,
+        color: 'rgba(255,255,255,0.9)',
+        fontWeight: typography.fontWeight.medium,
+        marginBottom: spacing.xl,
+    },
+
+    locationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: 6,
+    },
+
+    locationName: {
+        fontSize: typography.fontSize.xl,
+        fontWeight: typography.fontWeight.medium,
         color: colors.white,
     },
 
-    metricLabel: {
-        fontSize: 11,
-        color: colors.weather.text.dim,
+    heroHighLow: {
+        fontSize: typography.fontSize.sm,
+        color: 'rgba(255,255,255,0.8)',
+        fontWeight: typography.fontWeight.regular,
+    },
+
+    contentWrapper: {
+        paddingHorizontal: spacing.md,
+        gap: 10,
     },
 
     // ── Footer ─────────────────────────────────────
     footer: {
         alignItems: 'center',
-        marginTop: spacing.lg,
+        marginTop: spacing.xl,
         paddingTop: spacing.md,
     },
 
     footerText: {
         fontSize: typography.fontSize.xs,
-        color: colors.weather.text.faint,
+        color: 'rgba(255,255,255,0.5)',
         textAlign: 'center',
     },
 });

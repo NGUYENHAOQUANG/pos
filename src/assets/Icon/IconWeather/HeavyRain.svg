@@ -1,11 +1,14 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Cloud -->
-  <path d="M6 11a4 4 0 0 1-.37-7.98A5.5 5.5 0 0 1 18.1 5.5 3.5 3.5 0 0 1 19 12.5H6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-  <!-- Heavy rain -->
-  <line x1="6" y1="15" x2="5" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="10" y1="15" x2="9" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="14" y1="15" x2="13" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="18" y1="15" x2="17" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="8" y1="20" x2="7.5" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="12" y1="20" x2="11.5" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Cloud body (darker for heavy rain) -->
+  <path d="M6 11a4 4 0 0 1-.37-7.98A5.5 5.5 0 0 1 18.1 5.5 3.5 3.5 0 0 1 19 12.5H6z" fill="#78909C"/>
+  <!-- Cloud highlight -->
+  <ellipse cx="10.5" cy="5.5" rx="3" ry="1.5" fill="#90A4AE" opacity="0.5"/>
+  <!-- Heavy rain drops -->
+  <line x1="6" y1="15" x2="5" y2="19" stroke="#1E88E5" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="10" y1="15" x2="9" y2="19" stroke="#1E88E5" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="14" y1="15" x2="13" y2="19" stroke="#1E88E5" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="18" y1="15" x2="17" y2="19" stroke="#1E88E5" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Extra drops (lower row) -->
+  <line x1="8" y1="20" x2="7.5" y2="22.5" stroke="#1E88E5" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="12" y1="20" x2="11.5" y2="22.5" stroke="#1E88E5" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

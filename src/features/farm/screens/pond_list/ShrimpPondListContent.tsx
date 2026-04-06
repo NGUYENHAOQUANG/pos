@@ -77,14 +77,12 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
                 value={selectedFarm}
                 onSelect={onSelectFarm}
                 onMenuPress={onFarmInfoPress}
+                rightTopComponent={
+                    weatherEnabled && currentWeather ? (
+                        <WeatherWidget current={currentWeather} onPress={onWeatherPress} />
+                    ) : undefined
+                }
             />
-
-            {/* Weather Widget */}
-            {weatherEnabled && currentWeather && (
-                <View style={styles.weatherWrapper}>
-                    <WeatherWidget current={currentWeather} onPress={onWeatherPress} />
-                </View>
-            )}
 
             <HeadingFarm
                 selectedTab={selectedTab}

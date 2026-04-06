@@ -79,7 +79,6 @@ import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen'
 
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
-
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -266,6 +265,9 @@ export type AppStackParamList = {
 
     // ============== Weather Screens ==============
     WeatherScreen: undefined;
+    DailyForecastDetail: {
+        dailyData: readonly import('@/features/weather/types/weather.types').IDailyForecast[];
+    };
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
 };
 

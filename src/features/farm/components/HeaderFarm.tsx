@@ -42,6 +42,7 @@ interface HeaderFarmProps {
     onBack?: () => void;
     leftComponent?: React.ReactNode;
     rightAction?: React.ReactNode;
+    rightTopComponent?: React.ReactNode;
 }
 
 export const HeaderFarm = ({
@@ -59,6 +60,7 @@ export const HeaderFarm = ({
     onBack,
     leftComponent,
     rightAction,
+    rightTopComponent,
 }: HeaderFarmProps) => {
     const insets = useSafeAreaInsets();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -198,7 +200,10 @@ export const HeaderFarm = ({
     if (type === 'list') {
         return (
             <View style={[styles.listContainer, { paddingTop: insets.top + 12 }]}>
-                <Text style={styles.listTitle}>Trại Nuôi</Text>
+                <View style={styles.topRow}>
+                    <Text style={styles.listTitle}>Trại Nuôi</Text>
+                    {rightTopComponent}
+                </View>
                 <View style={styles.dropdownRow}>
                     <DropdownHeaderButton
                         data={data}
@@ -236,11 +241,16 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         backgroundColor: 'transparent',
     },
+    topRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.md,
+    },
     listTitle: {
         fontSize: 20,
         fontWeight: '600',
         color: colors.text,
-        marginBottom: spacing.md,
     },
     dropdownRow: {
         flexDirection: 'row',

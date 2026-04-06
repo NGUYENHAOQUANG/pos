@@ -5,6 +5,7 @@ import { colors, spacing, typography, borderRadius } from '@/styles';
 import { ICurrentWeather } from '@/features/weather/types/weather.types';
 import { getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface WeatherWidgetProps {
     readonly current: ICurrentWeather;
@@ -22,20 +23,10 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({ current, onPress }) => {
         <View style={styles.container}>
             <WeatherIcon name={iconKey} size={18} color={colors.blue[600]} />
             <Text style={styles.temp}>{Math.round(current.temperature2m)}°C</Text>
-            <View style={styles.separator} />
             <View style={styles.detailRow}>
-                <WeatherIcon name="Humidity" size={12} color={colors.textSecondary} />
+                <Ionicons name="water-outline" size={12} color={colors.textSecondary} />
                 <Text style={styles.detail}>{current.relativeHumidity2m}%</Text>
             </View>
-            {current.rain > 0 && (
-                <>
-                    <View style={styles.separator} />
-                    <View style={styles.detailRow}>
-                        <WeatherIcon name="Raindrop" size={12} color={colors.textSecondary} />
-                        <Text style={styles.detail}>{current.rain}mm</Text>
-                    </View>
-                </>
-            )}
         </View>
     );
 
@@ -57,23 +48,17 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.blue[50],
+        backgroundColor: colors.blue[50], // or something closer to E4F2FD
         borderRadius: borderRadius.full,
         paddingHorizontal: spacing.sm,
-        paddingVertical: spacing.xs,
-        gap: spacing.xs,
+        paddingVertical: 4,
+        gap: 6,
     },
 
     temp: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.semibold,
         color: colors.text,
-    },
-
-    separator: {
-        width: 1,
-        height: 14,
-        backgroundColor: colors.borderMedium,
     },
 
     detailRow: {
