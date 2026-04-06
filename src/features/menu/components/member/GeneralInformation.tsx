@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing, typography } from '@/styles';
+import { borderRadius, spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input, RequiredDot } from '@/shared/components/forms/Input';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 
@@ -24,6 +26,9 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     onRoleChange,
     disabled = false,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -81,47 +86,48 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        overflow: 'hidden',
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    header: {
-        paddingTop: spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    disabledContent: {
-        // opacity: 0.6, // Removed to keep text dark
-    },
-    inputContainer: {
-        marginBottom: spacing.lg,
-    },
-    roleContainer: {
-        marginBottom: 0,
-    },
-    fieldLabelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.md,
-    },
-    fieldLabelText: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            overflow: 'hidden',
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        header: {
+            paddingTop: spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        headerTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        content: {
+            padding: spacing.md,
+        },
+        disabledContent: {
+            // opacity: 0.6, // Removed to keep text dark
+        },
+        inputContainer: {
+            marginBottom: spacing.lg,
+        },
+        roleContainer: {
+            marginBottom: 0,
+        },
+        fieldLabelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: spacing.md,
+        },
+        fieldLabelText: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.medium,
+            color: theme.text,
+        },
 
-    inputDisabled: {
-        backgroundColor: colors.gray[200],
-    },
-});
+        inputDisabled: {
+            backgroundColor: theme.gray[200],
+        },
+    });

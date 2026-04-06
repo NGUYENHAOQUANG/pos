@@ -1,11 +1,15 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 const SKELETON_COUNT = 10;
 
 const SeasonListSkeletonItem = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.cardContainer}>
             <View style={styles.contentContainer}>
@@ -26,6 +30,9 @@ const SeasonListSkeletonItem = () => {
 };
 
 export const SeasonListSkeleton = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.listContainer}>
             {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
@@ -35,38 +42,39 @@ export const SeasonListSkeleton = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    listContainer: {
-        paddingTop: spacing.xs,
-    },
-    cardContainer: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        marginTop: spacing.sm,
-        marginHorizontal: spacing.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    contentContainer: {
-        flex: 1,
-        marginRight: spacing.md,
-    },
-    tagSkeleton: {
-        marginBottom: 8,
-        borderRadius: 12,
-    },
-    titleSkeleton: {
-        marginBottom: 8,
-    },
-    dateSkeleton: {
-        marginTop: 4,
-    },
-    actionContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        listContainer: {
+            paddingTop: spacing.xs,
+        },
+        cardContainer: {
+            backgroundColor: theme.white,
+            padding: spacing.md,
+            marginTop: spacing.sm,
+            marginHorizontal: spacing.md,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        contentContainer: {
+            flex: 1,
+            marginRight: spacing.md,
+        },
+        tagSkeleton: {
+            marginBottom: 8,
+            borderRadius: 12,
+        },
+        titleSkeleton: {
+            marginBottom: 8,
+        },
+        dateSkeleton: {
+            marginTop: 4,
+        },
+        actionContainer: {
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+    });

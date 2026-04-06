@@ -59,7 +59,7 @@ const COLORS = {
 /** Thông tin user của bot (dùng cho GiftedChat) */
 const BOT_USER = {
     _id: 2,
-    name: 'MeBieco AI',
+    name: 'Mebieco AI',
     avatar: undefined,
 };
 
@@ -194,7 +194,7 @@ export const ChatbotScreen: React.FC = () => {
     useEffect(() => {
         const welcomeMessage: IChatMessage = {
             _id: 'welcome-1',
-            text: '👋 Xin chào! Tôi là MeBieco AI Assistant.\n\nTôi có thể hỗ trợ bạn:\n• Xem thông số ao nuôi\n• Điều khiển thiết bị\n• Báo cáo tổng quan\n\nHãy thử chọn một chủ đề bên dưới!',
+            text: '👋 Xin chào! Tôi là Mebieco AI Assistant.\n\nTôi có thể hỗ trợ bạn:\n• Xem thông số ao nuôi\n• Điều khiển thiết bị\n• Báo cáo tổng quan\n\nHãy thử chọn một chủ đề bên dưới!',
             createdAt: new Date(),
             user: BOT_USER,
             // Không có widget → GiftedChat render text bình thường
@@ -493,7 +493,7 @@ export const ChatbotScreen: React.FC = () => {
                         <View style={styles.onlineIndicator} />
                     </View>
                     <View>
-                        <Text style={styles.headerTitle}>MeBieco AI</Text>
+                        <Text style={styles.headerTitle}>Mebieco AI</Text>
                         <Text style={styles.headerSubtitle}>Trợ lý ảo • Thử nghiệm</Text>
                     </View>
                 </View>

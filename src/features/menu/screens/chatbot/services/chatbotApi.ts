@@ -105,7 +105,7 @@ export const sendMessageToAI = async (text: string): Promise<AIResponse> => {
         // ── Greeting: Trả về text thuần ──────────────────────────────────────
         case 'GREETING':
             return {
-                text: '👋 Xin chào! Tôi là MeBieco AI Assistant.\n\nTôi có thể giúp bạn:\n• Xem thông số ao nuôi\n• Điều khiển thiết bị\n• Báo cáo tổng quan\n\nHãy thử hỏi "Thông số ao 1" hoặc "Bật quạt nước"!',
+                text: '👋 Xin chào! Tôi là Mebieco AI Assistant.\n\nTôi có thể giúp bạn:\n• Xem thông số ao nuôi\n• Điều khiển thiết bị\n• Báo cáo tổng quan\n\nHãy thử hỏi "Thông số ao 1" hoặc "Bật quạt nước"!',
             };
 
         // ── Pond Status: Trả về text + widget POND_STATUS ────────────────────

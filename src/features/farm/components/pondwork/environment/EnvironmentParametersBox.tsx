@@ -109,7 +109,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
                 <View style={styles.errorBox}>
-                    <WarningCircle width={16} height={16} fill={theme.error} />
+                    <WarningCircle width={16} height={16} color={theme.error} />
                     <Text style={styles.errorText}>Vui lòng nhập ít nhất 1 chỉ số</Text>
                 </View>
             )}

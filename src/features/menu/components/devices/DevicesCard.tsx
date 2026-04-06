@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing, typography } from '@/styles';
+import { borderRadius, spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Tag } from '@/features/menu/components/Tag';
 import WarningCircleIcon from '@/assets/Icon/IconDevices/WarningCircle.svg';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
@@ -15,6 +17,9 @@ interface DevicesCardProps {
 }
 
 export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMorePress }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <TouchableOpacity
             style={styles.container}
@@ -65,7 +70,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                         <Text
                             style={[
                                 styles.value,
-                                device.status === 'maintenance' && { color: colors.orange[500] },
+                                device.status === 'maintenance' && { color: theme.orange[500] },
                             ]}
                         >
                             {device.maintenance.operatingTime.current}/{' '}
@@ -83,7 +88,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                         <Text
                             style={[
                                 styles.value,
-                                device.status === 'maintenance' && { color: colors.orange[500] },
+                                device.status === 'maintenance' && { color: theme.orange[500] },
                             ]}
                         >
                             {device.maintenance.usageTime.current}/{' '}
@@ -99,83 +104,84 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.md,
-        marginBottom: spacing.sm,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.sm,
-    },
-    headerContent: {
-        flex: 1,
-        marginRight: spacing.sm,
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    deviceName: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 2,
-    },
-    deviceType: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    moreButton: {
-        marginLeft: spacing.xs,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginVertical: spacing.sm,
-    },
-    dividerFullWidth: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginVertical: spacing.sm,
-        marginHorizontal: -spacing.md,
-    },
-    section: {
-        gap: spacing.xs,
-    },
-    sectionTitle: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: spacing.xs,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: '700',
-    },
-    value: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        textAlign: 'right',
-    },
-    valueContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.md,
+            marginBottom: spacing.sm,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: spacing.sm,
+        },
+        headerContent: {
+            flex: 1,
+            marginRight: spacing.sm,
+        },
+        headerRight: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs,
+        },
+        deviceName: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 2,
+        },
+        deviceType: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+        moreButton: {
+            marginLeft: spacing.xs,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+            marginVertical: spacing.sm,
+        },
+        dividerFullWidth: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+            marginVertical: spacing.sm,
+            marginHorizontal: -spacing.md,
+        },
+        section: {
+            gap: spacing.xs,
+        },
+        sectionTitle: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: spacing.xs,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+            fontWeight: '700',
+        },
+        value: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+            textAlign: 'right',
+        },
+        valueContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs,
+        },
+    });

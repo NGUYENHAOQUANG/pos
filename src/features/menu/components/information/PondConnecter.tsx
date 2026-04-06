@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { PondData } from '@/features/farm/types/farm.types';
 
 interface PondConnecterProps {
@@ -12,6 +13,9 @@ interface PondConnecterProps {
 }
 
 export const PondConnecter: React.FC<PondConnecterProps> = ({ totalPonds, ponds, onPondPress }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <View style={styles.sectionHeader}>
@@ -40,7 +44,7 @@ export const PondConnecter: React.FC<PondConnecterProps> = ({ totalPonds, ponds,
                                     {typeName} - {status}
                                 </Text>
                             </View>
-                            <AntDesign name="right" size={16} color={colors.gray[400]} />
+                            <AntDesign name="right" size={16} color={theme.gray[400]} />
                         </TouchableOpacity>
                     );
                 })}
@@ -49,63 +53,64 @@ export const PondConnecter: React.FC<PondConnecterProps> = ({ totalPonds, ponds,
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        gap: 12,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    countBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 9999,
-        backgroundColor: colors.blue[25],
-        borderWidth: 1,
-        borderColor: colors.blue[200],
-    },
-    pondCount: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.blue[600],
-    },
-    pondsContainer: {
-        gap: 8,
-    },
-    pondCard: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        padding: 12,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        gap: 16,
-    },
-    pondInfo: {
-        flex: 1,
-        gap: 8,
-    },
-    pondName: {
-        fontSize: 16,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    pondDetail: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            gap: 12,
+        },
+        sectionHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            lineHeight: 20,
+            color: theme.gray[950],
+        },
+        countBadge: {
+            paddingHorizontal: 12,
+            paddingVertical: 4,
+            borderRadius: 9999,
+            backgroundColor: theme.blue[25],
+            borderWidth: 1,
+            borderColor: theme.blue[200],
+        },
+        pondCount: {
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.blue[600],
+        },
+        pondsContainer: {
+            gap: 8,
+        },
+        pondCard: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: theme.white,
+            padding: 12,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.gray[200],
+            gap: 16,
+        },
+        pondInfo: {
+            flex: 1,
+            gap: 8,
+        },
+        pondName: {
+            fontSize: 16,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.gray[950],
+        },
+        pondDetail: {
+            fontSize: 16,
+            fontWeight: '400',
+            color: theme.gray[500],
+            lineHeight: 20,
+        },
+    });

@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { RequiredDot } from '@/shared/components/forms/Input';
@@ -38,6 +40,9 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
     disabled = false,
     availableUnits,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const isAllSelected = selectedPermissions.length === PERMISSIONS.length;
 
     const togglePermission = (id: string) => {
@@ -99,14 +104,14 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                         </View>
                         {!disabled && (
                             <TouchableOpacity onPress={onAddUnitPress} style={styles.addUnitButton}>
-                                <Ionicons name="add" size={16} color={colors.primary} />
+                                <Ionicons name="add" size={16} color={theme.primary} />
                                 <Text style={styles.addUnitText}>Thêm đơn vị</Text>
                             </TouchableOpacity>
                         )}
                         {disabled && (
                             <View style={[styles.addUnitButton, styles.disabledElement]}>
-                                <Ionicons name="add" size={16} color={colors.textSecondary} />
-                                <Text style={[styles.addUnitText, { color: colors.textSecondary }]}>
+                                <Ionicons name="add" size={16} color={theme.textSecondary} />
+                                <Text style={[styles.addUnitText, { color: theme.textSecondary }]}>
                                     Thêm đơn vị
                                 </Text>
                             </View>
@@ -129,13 +134,13 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                                         style={[
                                             styles.deleteButton,
                                             styles.disabledElement,
-                                            { backgroundColor: colors.gray[100] },
+                                            { backgroundColor: theme.gray[100] },
                                         ]}
                                     >
                                         <DeleteIcon
                                             width={16}
                                             height={16}
-                                            color={colors.textSecondary}
+                                            color={theme.textSecondary}
                                         />
                                     </View>
                                 )}
@@ -157,7 +162,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                             onToggle={toggleAll}
                             disabled={disabled}
                             labelStyle={styles.checkboxText}
-                            //activeColor={colors.primaryOrange}
+                            //activeColor={theme.primaryOrange}
                         />
                     </View>
 
@@ -178,7 +183,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                                     disabled={disabled}
                                     style={styles.permissionItem}
                                     labelStyle={styles.permissionText}
-                                    //activeColor={colors.primaryOrange}
+                                    //activeColor={theme.primaryOrange}
                                 />
                             );
                         })}
@@ -189,99 +194,100 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    header: {
-        paddingTop: spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    disabledContent: {
-        // opacity: 0.7, // Removed to ensure headers are dark
-    },
-    section: {
-        marginBottom: spacing.md,
-    },
-    fieldLabelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    fieldLabelText: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        header: {
+            paddingTop: spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        headerTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        content: {
+            padding: spacing.md,
+        },
+        disabledContent: {
+            // opacity: 0.7, // Removed to ensure headers are dark
+        },
+        section: {
+            marginBottom: spacing.md,
+        },
+        fieldLabelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        fieldLabelText: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.medium,
+            color: theme.text,
+        },
 
-    rowBetween: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    addUnitButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    addUnitText: {
-        color: colors.primary,
-        fontSize: 14,
-        fontWeight: '400',
-    },
-    checkboxText: {
-        fontSize: 16,
-        color: colors.text,
-    },
-    permissionsList: {
-        gap: spacing.md,
-    },
-    permissionItem: {
-        flex: 1,
-    },
-    permissionText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    selectedUnitsList: {
-        gap: spacing.sm,
-    },
-    selectedUnitItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: spacing.sm,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    selectedUnitText: {
-        fontSize: 16,
-        color: colors.text,
-    },
-    deleteButton: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        backgroundColor: colors.white,
-    },
-    disabledElement: {
-        // opacity: 0.5, // Removed to keep text dark
-    },
-});
+        rowBetween: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        addUnitButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+        },
+        addUnitText: {
+            color: theme.primary,
+            fontSize: 14,
+            fontWeight: '400',
+        },
+        checkboxText: {
+            fontSize: 16,
+            color: theme.text,
+        },
+        permissionsList: {
+            gap: spacing.md,
+        },
+        permissionItem: {
+            flex: 1,
+        },
+        permissionText: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        selectedUnitsList: {
+            gap: spacing.sm,
+        },
+        selectedUnitItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: spacing.sm,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.white,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        selectedUnitText: {
+            fontSize: 16,
+            color: theme.text,
+        },
+        deleteButton: {
+            width: 32,
+            height: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.borderDark,
+            backgroundColor: theme.white,
+        },
+        disabledElement: {
+            // opacity: 0.5, // Removed to keep text dark
+        },
+    });

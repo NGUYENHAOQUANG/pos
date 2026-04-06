@@ -3,7 +3,8 @@ import { View, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-nati
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { DeleteAccountInputStep } from '@/features/menu/components/delete-account/DeleteAccountInputStep';
 import { DeleteAccountOtpStep } from '@/features/menu/components/delete-account/DeleteAccountOtpStep';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 
 interface DeleteAccountFormProps {
@@ -35,6 +36,9 @@ export const DeleteAccountForm: React.FC<DeleteAccountFormProps> = ({
     onCancelDelete,
     onConfirmDelete,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <HeaderSection title="Xoá tài khoản" onBack={onBack} />
@@ -74,12 +78,13 @@ export const DeleteAccountForm: React.FC<DeleteAccountFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+    });

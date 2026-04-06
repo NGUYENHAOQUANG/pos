@@ -2,15 +2,27 @@ import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import SignOutIcon from '@/assets/Icon/IconMenu/SignOut.svg';
 import AvatarIcon from '@/assets/Icon/IconMenu/AvatarNew.svg';
-import { FarmOperation } from '@/features/menu/components/FarmOperation';
-import { RecordManagement } from '@/features/menu/components/RecordManagement';
-import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
+import { MenuSectionItemData, MenuSection } from '@/features/menu/components/MenuSection';
+
+import SwimmingPoolIcon from '@/assets/Icon/IconMenu/SwimmingPool.svg';
+import ToolboxIcon from '@/assets/Icon/IconMenu/Toolbox.svg';
+import ChartBarIcon from '@/assets/Icon/IconMenu/ChartBar.svg';
+import WeatherForecastIcon from '@/assets/Icon/IconMenu/WeatherForecast.svg';
+
+import UserIcon from '@/assets/Icon/IconMenu/User.svg';
+import UsersIcon from '@/assets/Icon/IconMenu/Users.svg';
+import GearSixIcon from '@/assets/Icon/GearSix.svg';
+
+import GavelIcon from '@/assets/Icon/IconMenu/Gavel.svg';
+import ArticleIcon from '@/assets/Icon/IconMenu/Article.svg';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,6 +31,7 @@ import DeviceInfo from 'react-native-device-info';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 interface ProfileCardProps {
     onPress: () => void;
@@ -27,6 +40,8 @@ interface ProfileCardProps {
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ onPress, userData }) => {
     const { name, role, avatarUri } = userData;
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     return (
         <TouchableOpacity style={styles.profileCard} onPress={onPress}>
@@ -55,6 +70,10 @@ export const MenuScreens: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { userData } = useUserProfile();
     const queryClient = useQueryClient();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
+    const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
 
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -71,13 +90,103 @@ export const MenuScreens: React.FC = () => {
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
         queryClient.clear();
-        // Call store logout - this triggers AppNavigator state change
         await logout();
     };
 
     const handleProfilePress = () => {
         navigation.navigate('PersonalInformation');
     };
+
+    const operationsItem: MenuSectionItemData[] = [
+        {
+            id: 'cycle',
+            title: 'Quản lý vụ nuôi',
+            Icon: SwimmingPoolIcon,
+            onPress: () => navigation.navigate('AquacultureManagement'),
+        },
+        {
+            id: 'device-maintenance',
+            title: 'Quản lý bảo trì thiết bị',
+            Icon: ToolboxIcon,
+            onPress: () => navigation.navigate('DeviceManagement'),
+        },
+        {
+            id: 'environment',
+            title: 'Thiết lập thông số môi trường',
+            Icon: ChartBarIcon,
+            onPress: () => navigation.navigate('SettingEnvironment' as any),
+        },
+        ...(weatherEnabled
+            ? [
+                  {
+                      id: 'weather',
+                      title: 'Dự báo thời tiết',
+                      Icon: WeatherForecastIcon,
+                      onPress: () => navigation.navigate('WeatherScreen'),
+                  },
+              ]
+            : []),
+    ];
+
+    const recordsItem: MenuSectionItemData[] = [
+        {
+            id: 'profile',
+            title: 'Thông tin cá nhân',
+            Icon: UserIcon,
+            onPress: () => navigation.navigate('PersonalInformation'),
+        },
+        {
+            id: 'members',
+            title: 'Quản lý thành viên',
+            Icon: UsersIcon,
+            onPress: () => navigation.navigate('MemberManagement'),
+        },
+        {
+            id: 'settings',
+            title: 'Cài đặt',
+            Icon: GearSixIcon,
+            onPress: () => navigation.navigate('Settings'),
+        },
+    ];
+
+    const securityItems: MenuSectionItemData[] = [
+        {
+            id: 'privacy',
+            title: 'Chính sách bảo mật',
+            Icon: GavelIcon,
+            onPress: () =>
+                navigation.navigate('PolicyWebView', {
+                    url: 'https://mebieco.vn/policy-page',
+                    title: 'Chính sách bảo mật',
+                }),
+        },
+        {
+            id: 'terms',
+            title: 'Điều khoản và điều kiện',
+            Icon: ArticleIcon,
+            onPress: () =>
+                navigation.navigate('PolicyWebView', {
+                    url: 'https://mebieco.vn/policy-page',
+                    title: 'Điều khoản và điều kiện',
+                }),
+        },
+    ];
+
+    const actionItems: MenuSectionItemData[] = [
+        {
+            id: 'delete-account',
+            title: 'Xóa tài khoản',
+            Icon: TrashIcon,
+            onPress: () => navigation.navigate('DeleteAccount'),
+        },
+        {
+            id: 'logout',
+            title: 'Đăng xuất',
+            Icon: SignOutIcon,
+            hideArrow: true,
+            onPress: handleLogout,
+        },
+    ];
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -97,56 +206,37 @@ export const MenuScreens: React.FC = () => {
 
                 {/* Content Container (wrapping all menu sections and actions) */}
                 <View style={styles.contentContainer}>
-                    <FarmOperation />
-                    <RecordManagement />
-                    <SecurityManagement />
+                    <MenuSection title="Vận hành trại nuôi" items={operationsItem} />
+                    <MenuSection title="Quản lý hồ sơ" items={recordsItem} />
+                    <MenuSection title="Quản lý bảo mật" items={securityItems} />
 
-                    {/* Chatbot (Beta) */}
-                    <View style={styles.chatbotSection}>
-                        <Text style={styles.chatbotSectionTitle}>Trợ lý AI</Text>
-                        <TouchableOpacity
-                            style={styles.chatbotCard}
-                            onPress={() => navigation.navigate('Chatbot')}
-                            activeOpacity={0.8}
-                        >
-                            <View style={styles.chatbotIconWrapper}>
-                                <AntDesign name="message1" size={18} color="#FFFFFF" />
-                            </View>
-                            <View style={styles.chatbotInfo}>
-                                <Text style={styles.chatbotTitle}>MeBiEco AI Chatbot</Text>
-                                <Text style={styles.chatbotDesc}>Trợ lý ảo hỗ trợ quản lý</Text>
-                            </View>
-                            <View style={styles.chatbotBetaBadge}>
-                                <Text style={styles.chatbotBetaText}>BETA</Text>
-                            </View>
-                            <AntDesign name="right" size={16} color={colors.textSecondary} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.actionsContainer}>
-                        {/* Delete Account */}
-                        <View style={styles.actionCard}>
+                    {/* Chatbot (Beta) - only show when enabled in Settings */}
+                    {chatbotEnabled && (
+                        <View style={styles.chatbotSection}>
+                            <Text style={styles.chatbotSectionTitle}>Trợ lý AI</Text>
                             <TouchableOpacity
-                                style={styles.actionRow}
-                                onPress={() => navigation.navigate('DeleteAccount')}
+                                style={styles.chatbotCard}
+                                onPress={() => navigation.navigate('Chatbot')}
+                                activeOpacity={0.8}
                             >
-                                <View style={styles.actionIconWrapper}>
-                                    <TrashIcon width={18} height={18} />
+                                <View style={styles.chatbotIconWrapper}>
+                                    <AntDesign name="message1" size={18} color="#FFFFFF" />
                                 </View>
-                                <Text style={styles.actionText}>Xóa tài khoản</Text>
-                                <AntDesign name="right" size={16} color={colors.textSecondary} />
+                                <View style={styles.chatbotInfo}>
+                                    <Text style={styles.chatbotTitle}>Mebieco AI Chatbot</Text>
+                                    <Text style={styles.chatbotDesc}>Trợ lý ảo hỗ trợ quản lý</Text>
+                                </View>
+                                <View style={styles.chatbotBetaBadge}>
+                                    <Text style={styles.chatbotBetaText}>BETA</Text>
+                                </View>
+                                <AntDesign name="right" size={16} color={theme.textSecondary} />
                             </TouchableOpacity>
                         </View>
+                    )}
 
-                        {/* Logout */}
-                        <View style={styles.actionCard}>
-                            <TouchableOpacity style={styles.actionRow} onPress={handleLogout}>
-                                <View style={styles.actionIconWrapper}>
-                                    <SignOutIcon width={18} height={18} />
-                                </View>
-                                <Text style={styles.actionText}>Đăng xuất</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    {/* Bottom Actions Group */}
+                    <MenuSection items={actionItems} />
+
                     <View style={styles.versionContainer}>
                         <Text style={styles.versionText}>Phiên bản {DeviceInfo.getVersion()}</Text>
                     </View>
@@ -170,170 +260,144 @@ export const MenuScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    headerTitleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        marginTop: 16,
-    },
-    headerTitle: {
-        fontSize: 20,
-        lineHeight: 28,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    scrollContent: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        gap: 24,
-    },
-    profileCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    avatarContainer: {},
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 200,
-        backgroundColor: colors.gray[100],
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    avatarImage: {
-        width: 64,
-        height: 64,
-        borderRadius: 200,
-    },
-    profileInfo: {
-        flex: 1,
-    },
-    profileName: {
-        fontSize: 16,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.text,
-        marginBottom: 4,
-    },
-    roleTag: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 200,
-        alignSelf: 'flex-start',
-        borderWidth: 1,
-        borderColor: colors.blue[200],
-        backgroundColor: colors.blue[25],
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: 28,
-    },
-    roleText: {
-        color: colors.blue[600],
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    contentContainer: {
-        gap: 32,
-    },
-    actionsContainer: {
-        gap: 8,
-    },
-    actionCard: {
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-    },
-    actionRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 44,
-        paddingHorizontal: 12,
-        gap: 16,
-    },
-    actionIconWrapper: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    actionText: {
-        flex: 1,
-        fontSize: 15,
-        lineHeight: 20,
-        color: colors.gray[950],
-        fontWeight: '400',
-    },
-    bottomSpacer: {
-        height: 8,
-    },
-    versionContainer: {
-        alignItems: 'center',
-        marginTop: -16,
-    },
-    versionText: {
-        fontSize: 13,
-        color: colors.textSecondary,
-    },
-    chatbotSection: {
-        gap: 12,
-    },
-    chatbotSectionTitle: {
-        fontSize: 16,
-        lineHeight: 20,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    chatbotCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 56,
-        paddingHorizontal: 12,
-        gap: 12,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.primaryOrange,
-        borderStyle: 'solid' as const,
-    },
-    chatbotIconWrapper: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: colors.primaryOrange,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    chatbotInfo: {
-        flex: 1,
-    },
-    chatbotTitle: {
-        fontSize: 15,
-        lineHeight: 20,
-        fontWeight: '500',
-        color: colors.gray[950],
-    },
-    chatbotDesc: {
-        fontSize: 12,
-        lineHeight: 16,
-        color: colors.textSecondary,
-    },
-    chatbotBetaBadge: {
-        backgroundColor: colors.primaryOrange,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
-    },
-    chatbotBetaText: {
-        color: colors.white,
-        fontSize: 9,
-        fontWeight: '700',
-        letterSpacing: 0.5,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        headerTitleContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            marginTop: 16,
+        },
+        headerTitle: {
+            fontSize: 20,
+            lineHeight: 28,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        scrollContent: {
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            gap: 24,
+        },
+        profileCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 16,
+        },
+        avatarContainer: {},
+        avatar: {
+            width: 64,
+            height: 64,
+            borderRadius: 200,
+            backgroundColor: theme.backgroundTertiary,
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+        },
+        avatarImage: {
+            width: 64,
+            height: 64,
+            borderRadius: 200,
+        },
+        profileInfo: {
+            flex: 1,
+        },
+        profileName: {
+            fontSize: 16,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.text,
+            marginBottom: 4,
+        },
+        roleTag: {
+            paddingHorizontal: 12,
+            paddingVertical: 4,
+            borderRadius: 200,
+            alignSelf: 'flex-start',
+            borderWidth: 1,
+            borderColor: theme.blue[200],
+            backgroundColor: theme.blue[25],
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 28,
+        },
+        roleText: {
+            color: theme.blue[600],
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+        },
+        contentContainer: {
+            gap: 32,
+        },
+        bottomSpacer: {
+            height: 8,
+        },
+        versionContainer: {
+            alignItems: 'center',
+            marginTop: -16,
+        },
+        versionText: {
+            fontSize: 13,
+            color: theme.textSecondary,
+        },
+        chatbotSection: {
+            gap: 12,
+        },
+        chatbotSectionTitle: {
+            fontSize: 16,
+            lineHeight: 20,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        chatbotCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: 56,
+            paddingHorizontal: 12,
+            gap: 12,
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.primaryOrange,
+            borderStyle: 'solid' as const,
+        },
+        chatbotIconWrapper: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: theme.primaryOrange,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        chatbotInfo: {
+            flex: 1,
+        },
+        chatbotTitle: {
+            fontSize: 15,
+            lineHeight: 20,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        chatbotDesc: {
+            fontSize: 12,
+            lineHeight: 16,
+            color: theme.textSecondary,
+        },
+        chatbotBetaBadge: {
+            backgroundColor: theme.primaryOrange,
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+            borderRadius: 4,
+        },
+        chatbotBetaText: {
+            color: '#FFFFFF',
+            fontSize: 9,
+            fontWeight: '700',
+            letterSpacing: 0.5,
+        },
+    });

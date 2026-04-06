@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -12,9 +12,7 @@ import {
     KeyboardAvoidingView,
     FlatList,
     ActivityIndicator,
-    TextInput as RNTextInput,
 } from 'react-native';
-import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors, spacing, typography } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -59,7 +57,6 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     const [selectedUnit, setSelectedUnit] = useState<string>('');
     // 'form' = material form view, 'product' = product selection list view
     const [currentView, setCurrentView] = useState<'form' | 'product'>('form');
-    const searchInputRef = useRef<RNTextInput>(null);
 
     // Slide-up animation
     useEffect(() => {
@@ -243,22 +240,13 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             </View>
 
             {/* Search Input */}
-            <View style={styles.searchContainer}>
-                <Ionicons
-                    name="search-outline"
-                    size={18}
-                    color={colors.textSecondary}
-                    style={styles.searchIcon}
-                />
-                <TextInput
-                    ref={searchInputRef}
-                    style={styles.searchInput}
-                    placeholder="Tìm vật tư​"
-                    placeholderTextColor={colors.textTertiary}
-                    value={searchText}
-                    onChangeText={text => onSearchChange?.(text)}
-                />
-            </View>
+            <Input
+                placeholder="Tìm vật tư"
+                value={searchText}
+                onChangeText={text => onSearchChange?.(text)}
+                icon="search-outline"
+                containerStyle={{ marginBottom: spacing.md }}
+            />
 
             {/* Material List */}
             <FlatList
@@ -465,6 +453,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.text,
         padding: 0,
+        height: 40,
     },
     list: {
         flex: 1,

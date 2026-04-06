@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface Farm {
     id: string;
@@ -17,6 +18,9 @@ interface FarmConnecterProps {
 }
 
 export const FarmConnecter: React.FC<FarmConnecterProps> = ({ totalFarms, farms, onFarmPress }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <View style={styles.sectionHeader}>
@@ -37,7 +41,7 @@ export const FarmConnecter: React.FC<FarmConnecterProps> = ({ totalFarms, farms,
                             <Text style={styles.farmName}>{farm.name}</Text>
                             <Text style={styles.farmPondCount}>{farm.count} ao</Text>
                         </View>
-                        <AntDesign name="right" size={16} color={colors.gray[400]} />
+                        <AntDesign name="right" size={16} color={theme.gray[400]} />
                     </TouchableOpacity>
                 ))}
             </View>
@@ -45,63 +49,64 @@ export const FarmConnecter: React.FC<FarmConnecterProps> = ({ totalFarms, farms,
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        gap: 12,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    countBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 9999,
-        backgroundColor: colors.blue[25],
-        borderWidth: 1,
-        borderColor: colors.blue[200],
-    },
-    farmCount: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.blue[600],
-    },
-    farmsContainer: {
-        gap: 8,
-    },
-    farmCard: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        padding: 12,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        gap: 16,
-    },
-    farmInfo: {
-        flex: 1,
-        gap: 8,
-    },
-    farmName: {
-        fontSize: 16,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    farmPondCount: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            gap: 12,
+        },
+        sectionHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            lineHeight: 20,
+            color: theme.text,
+        },
+        countBadge: {
+            paddingHorizontal: 12,
+            paddingVertical: 4,
+            borderRadius: 9999,
+            backgroundColor: theme.blue[25],
+            borderWidth: 1,
+            borderColor: theme.blue[200],
+        },
+        farmCount: {
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.blue[600],
+        },
+        farmsContainer: {
+            gap: 8,
+        },
+        farmCard: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            padding: 12,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            gap: 16,
+        },
+        farmInfo: {
+            flex: 1,
+            gap: 8,
+        },
+        farmName: {
+            fontSize: 16,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.text,
+        },
+        farmPondCount: {
+            fontSize: 16,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            lineHeight: 20,
+        },
+    });

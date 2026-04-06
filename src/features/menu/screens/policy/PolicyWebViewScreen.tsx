@@ -4,7 +4,8 @@ import { WebView } from 'react-native-webview';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 type PolicyWebViewScreenProps = NativeStackScreenProps<AppStackParamList, 'PolicyWebView'>;
 
@@ -50,6 +51,8 @@ const INJECTED_JS = `
  * Hides website navigation elements and blocks link navigation
  */
 export const PolicyWebViewScreen: React.FC<PolicyWebViewScreenProps> = ({ route }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const { url, title } = route.params;
     const initialUrl = useRef(url);
 
@@ -72,7 +75,7 @@ export const PolicyWebViewScreen: React.FC<PolicyWebViewScreenProps> = ({ route 
                 }}
                 renderLoading={() => (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={colors.primary} />
+                        <ActivityIndicator size="large" color={theme.primary} />
                     </View>
                 )}
             />
@@ -80,22 +83,23 @@ export const PolicyWebViewScreen: React.FC<PolicyWebViewScreenProps> = ({ route 
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-    },
-    webview: {
-        flex: 1,
-    },
-    loadingContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.white,
+        },
+        webview: {
+            flex: 1,
+        },
+        loadingContainer: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.white,
+        },
+    });

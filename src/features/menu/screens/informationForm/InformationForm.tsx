@@ -5,7 +5,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { launchImageLibrary, Asset } from 'react-native-image-picker';
 
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -36,6 +38,8 @@ export const InformationForm: React.FC<InformationFormProps> = ({
     onSubmit,
     onCancel,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const {
         control,
         handleSubmit,
@@ -205,82 +209,83 @@ export const InformationForm: React.FC<InformationFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingBottom: 20,
-    },
-    sectionContainer: {
-        backgroundColor: colors.white,
-        marginTop: 12,
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.lg,
-    },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
-        paddingVertical: spacing.md,
-    },
-    separator: {
-        height: 1.1,
-        backgroundColor: colors.border,
-        marginBottom: spacing.lg,
-        marginHorizontal: -spacing.md,
-    },
-    separatortwo: {
-        height: 1.1,
-        backgroundColor: colors.border,
-        marginBottom: spacing.lg,
-    },
-    avatarContainer: {
-        alignItems: 'center',
-        marginBottom: spacing.lg,
-    },
-    avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: colors.gray[300],
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: spacing.xs,
-        overflow: 'hidden',
-    },
-    avatarImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-    },
-    changePhotoText: {
-        fontSize: 14,
-        color: colors.primary,
-        fontWeight: '400',
-    },
-    inputContainer: {
-        marginBottom: spacing.md,
-    },
-    footerContainer: {
-        backgroundColor: colors.white,
-        marginTop: 12,
-        padding: spacing.md,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    footerLabel: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    footerValue: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    bottomSpacer: {
-        height: 20,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingBottom: 20,
+        },
+        sectionContainer: {
+            backgroundColor: theme.white,
+            marginTop: 12,
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.lg,
+        },
+        sectionTitle: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: theme.text,
+            paddingVertical: spacing.md,
+        },
+        separator: {
+            height: 1.1,
+            backgroundColor: theme.border,
+            marginBottom: spacing.lg,
+            marginHorizontal: -spacing.md,
+        },
+        separatortwo: {
+            height: 1.1,
+            backgroundColor: theme.border,
+            marginBottom: spacing.lg,
+        },
+        avatarContainer: {
+            alignItems: 'center',
+            marginBottom: spacing.lg,
+        },
+        avatar: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: theme.gray[300],
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: spacing.xs,
+            overflow: 'hidden',
+        },
+        avatarImage: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+        },
+        changePhotoText: {
+            fontSize: 14,
+            color: theme.primary,
+            fontWeight: '400',
+        },
+        inputContainer: {
+            marginBottom: spacing.md,
+        },
+        footerContainer: {
+            backgroundColor: theme.white,
+            marginTop: 12,
+            padding: spacing.md,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        footerLabel: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        footerValue: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        bottomSpacer: {
+            height: 20,
+        },
+    });
