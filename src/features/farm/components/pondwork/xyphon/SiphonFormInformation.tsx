@@ -44,7 +44,7 @@ export const SiphonFormInformation: React.FC<SiphonFormInformationProps> = ({
     return (
         <SafeInputLayout
             contentContainerStyle={{ padding: 0, paddingBottom: 100 }}
-            extraScrollHeight={80}
+            extraScrollHeight={150}
         >
             <GeneralInfoBox
                 ref={generalInfoBoxRef}

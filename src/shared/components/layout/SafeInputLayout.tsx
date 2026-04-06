@@ -21,7 +21,7 @@ export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
     children,
     style,
     contentContainerStyle,
-    extraScrollHeight = 20,
+    extraScrollHeight = 150,
     innerRef,
     refreshControl,
 }) => {

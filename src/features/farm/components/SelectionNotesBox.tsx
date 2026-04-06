@@ -1,10 +1,9 @@
 import React, { useRef } from 'react';
-import { StyleSheet, TextInput as RNTextInput } from 'react-native';
+import { View, StyleSheet, TextInput as RNTextInput } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { colors } from '@/styles';
 import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 interface SelectionNotesBoxProps {
     notes: string;
@@ -24,7 +23,7 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
     };
 
     return (
-        <SafeInputLayout extraScrollHeight={150}>
+        <View style={styles.container}>
             <SelectionInfoBox title="Ghi chú">
                 <TextInput
                     ref={inputRef}
@@ -38,19 +37,22 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
                     maxLength={2000}
                 />
             </SelectionInfoBox>
-        </SafeInputLayout>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+    },
     textArea: {
         minHeight: 104,
         maxHeight: 160,
         paddingVertical: 8,
         paddingHorizontal: 12,
-        backgroundColor: colors.white,
+        backgroundColor: colors.background,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.defaultBorder,
         borderRadius: 8,
         fontSize: 14,
         fontWeight: '400',

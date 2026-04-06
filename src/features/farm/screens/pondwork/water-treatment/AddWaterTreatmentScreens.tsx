@@ -111,7 +111,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                     <SafeInputLayout
                         style={styles.container}
                         contentContainerStyle={styles.scrollContent}
-                        extraScrollHeight={50}
+                        extraScrollHeight={150}
                     >
                         {/* Main Content Component */}
                         <WaterTreatment
