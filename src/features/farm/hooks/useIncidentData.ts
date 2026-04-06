@@ -9,8 +9,7 @@ import type {
 } from '@/features/farm/types/incident.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { incidentService } from '@/features/farm/services/handleproblem-service/incident.service';
+import { incidentLogService } from '@/features/farm/services/work-log';
 
 export const useCreateIncident = () => {
     const queryClient = useQueryClient();
@@ -83,14 +82,12 @@ export const useIncidentList = (pondId: string, params?: GetIncidentListParams) 
     });
 };
 
-/** Map incident list API to JobExecution[] for card display (Troubleshooting) and log screen */
 export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParams) => {
     const { data, isLoading, error, refetch, isRefetching } = useIncidentList(pondId, params);
-    const { materialMap } = useFarmMaterials();
 
     const rawItems: IncidentListItem[] = data?.data?.items ?? [];
 
-    const jobs: JobExecution[] = incidentService.mapIncidentsToJobs(rawItems, materialMap);
+    const jobs: JobExecution[] = incidentLogService.mapRecordsToJobs(rawItems);
 
     return { jobs, isLoading, error, refetch, isRefetching };
 };

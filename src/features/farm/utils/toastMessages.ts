@@ -133,6 +133,51 @@ export const TOAST_MESSAGES_CONFIG = {
             text2: 'Vui lòng lấy kết quả kiểm tra trước khi xem chi tiết.',
         },
     },
+    SCHEDULE: {
+        MISSING_RUN_TIME: {
+            type: 'error',
+            text1: 'Thiếu thông tin',
+            text2: 'Vui lòng nhập thời gian chạy (giây)',
+        },
+        MISSING_STOP_TIME: {
+            type: 'error',
+            text1: 'Thiếu thông tin',
+            text2: 'Vui lòng nhập thời gian dừng (phút)',
+        },
+        PAST_START_TIME: {
+            type: 'error',
+            text1: 'Lưu không thành công',
+            text2: 'Thời gian bắt đầu phải sau thời gian hiện tại',
+        },
+        OVERLAP: {
+            type: 'error',
+            text1: 'Lịch trình bị chồng chéo',
+        },
+        UPDATE_SUCCESS: {
+            type: 'success',
+            text1: 'Cập nhật lịch trình thành công',
+        },
+        CONFIG_SUCCESS: {
+            type: 'success',
+            text1: 'Cập nhật cấu hình thành công',
+        },
+        PARTIAL_FAIL: {
+            type: 'info',
+            text1: 'Lưu lịch trình một phần',
+        },
+        SAVE_FAILED: {
+            type: 'error',
+            text1: 'Lỗi',
+        },
+        DELETE_SUCCESS: {
+            type: 'success',
+            text1: 'Đã xóa lịch trình',
+        },
+        CANNOT_EDIT: {
+            type: 'error',
+            text1: 'Không thể thay đổi lịch trình đã hoạt động',
+        },
+    },
 } as const;
 
 /**
@@ -334,4 +379,53 @@ export const showRemainingWeightErrorToast = () => {
         text1: 'Vui lòng nhập sản lượng còn lại (kg)',
         visibilityTime: 3000,
     });
+};
+
+// ── Schedule toasts ──
+
+export const showScheduleMissingRunTimeToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.MISSING_RUN_TIME);
+};
+
+export const showScheduleMissingStopTimeToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.MISSING_STOP_TIME);
+};
+
+export const showSchedulePastStartTimeToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.PAST_START_TIME);
+};
+
+export const showScheduleOverlapToast = (text2: string) => {
+    AppToast({ ...TOAST_MESSAGES_CONFIG.SCHEDULE.OVERLAP, text2 });
+};
+
+export const showScheduleUpdateSuccessToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.UPDATE_SUCCESS);
+};
+
+export const showScheduleConfigSuccessToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.CONFIG_SUCCESS);
+};
+
+export const showSchedulePartialFailToast = (text2: string) => {
+    AppToast({ ...TOAST_MESSAGES_CONFIG.SCHEDULE.PARTIAL_FAIL, text2 });
+};
+
+export const showScheduleSaveFailedToast = (text2?: string) => {
+    AppToast({
+        ...TOAST_MESSAGES_CONFIG.SCHEDULE.SAVE_FAILED,
+        text2: text2 || 'Không thể lưu lịch trình',
+    });
+};
+
+export const showScheduleDeleteSuccessToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.DELETE_SUCCESS);
+};
+
+export const showScheduleDeleteFailedToast = (message?: string) => {
+    AppToast({ type: 'error', text1: message || 'Không thể xóa lịch trình' });
+};
+
+export const showScheduleCannotEditToast = () => {
+    AppToast(TOAST_MESSAGES_CONFIG.SCHEDULE.CANNOT_EDIT);
 };

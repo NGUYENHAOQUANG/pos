@@ -1,3 +1,5 @@
+import type { PondLogMaterialType } from '@/shared/types/common.types';
+
 export interface IWaterSupplyRecord {
     id: string;
     no?: number;
@@ -19,13 +21,7 @@ export interface IWaterSupplyRecord {
         finalVolume?: number; // Added
         addedVolume?: number; // Added
         note?: string; // Corrected from 'notes' to 'note'
-        materials?: Array<{
-            materialId?: string; // Updated
-            warehouseItemId?: string; // Added to cover both cases
-            quantity: number;
-            name?: string;
-            unitName?: string;
-        }>;
+        materials?: PondLogMaterialType[];
     };
 }
 
@@ -53,9 +49,6 @@ export interface CreateWaterSupplyCommand {
         finalVolume?: number; // Added
         addedVolume?: number; // Added
         note?: string; // Corrected from 'notes' to 'note'
-        materials: Array<{
-            warehouseItemId: string; // Updated from materialId
-            quantity: number;
-        }>;
+        materials: PondLogMaterialType[];
     };
 }

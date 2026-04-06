@@ -73,8 +73,8 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
     const chartDataList = response?.data?.chartData || [];
 
     // Calculate metrics from response summary
-    const getLatestProduction = (): number => summaryData?.totalBiomass || 0;
-    const getLatestConsumed = (): number => summaryData?.totalFood || 0;
+    const getLatestProduction = (): number => (summaryData?.totalBiomass || 0) / 1000;
+    const getLatestConsumed = (): number => (summaryData?.totalFood || 0) / 1000;
     const getLatestFCR = (): number => summaryData?.fcr || 0;
 
     const formatMetricValue = (value: number): string => {
