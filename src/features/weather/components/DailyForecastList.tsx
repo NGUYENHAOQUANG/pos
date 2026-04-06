@@ -1,72 +1,74 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IDailyForecast } from '@/features/weather/types/weather.types';
 import { getWeatherInfo } from '@/features/weather/utils/weatherCodes';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface DailyForecastListProps {
     readonly dailyData: readonly IDailyForecast[];
 }
 
-const WEEKDAY_LABELS: readonly string[] = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+/**
+ * Format day string (e.g. "Hôm nay", "Thứ 2")
+ */
+const formatDay = (dateString: string, index: number): string => {
+    if (index === 0) return 'Hôm nay';
+    if (index === 1) return 'Ngày mai';
+
+    const date = new Date(dateString);
+    const day = date.getDay();
+    if (day === 0) return 'Chủ nhật';
+    return `Thứ ${day + 1}`;
+};
 
 const DailyForecastList: React.FC<DailyForecastListProps> = ({ dailyData }) => {
-    const formatDay = useCallback((timeStr: string, index: number): string => {
-        if (index === 0) return 'Hôm nay';
-        const date = new Date(timeStr);
-        return WEEKDAY_LABELS[date.getDay()];
-    }, []);
-
-    const formatDate = useCallback((timeStr: string): string => {
-        const date = new Date(timeStr);
-        return `${date.getDate()}/${date.getMonth() + 1}`;
-    }, []);
-
     if (dailyData.length === 0) {
         return null;
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.sectionTitle}>Dự báo 7 ngày</Text>
-            <View style={styles.listContainer}>
+            {/* Outer card styled like a translucent block */}
+            <View style={styles.outerCard}>
                 {dailyData.map((item, index) => {
                     const weatherInfo = getWeatherInfo(item.weatherCode);
-                    return (
-                        <View
-                            key={`daily-${index}`}
-                            style={[
-                                styles.dayRow,
-                                index < dailyData.length - 1 && styles.dayRowBorder,
-                            ]}
-                        >
-                            {/* Day name */}
-                            <View style={styles.dayNameSection}>
-                                <Text style={styles.dayName}>{formatDay(item.time, index)}</Text>
-                                <Text style={styles.dayDate}>{formatDate(item.time)}</Text>
-                            </View>
 
-                            {/* Weather icon + rain */}
-                            <View style={styles.weatherSection}>
-                                <WeatherIcon
-                                    name={weatherInfo.icon}
-                                    size={22}
-                                    color={colors.weather.text.light}
-                                />
+                    return (
+                        <View key={`daily-${item.time}-${index}`} style={styles.row}>
+                            {/* Left: Day name */}
+                            <Text style={styles.dayName}>{formatDay(item.time, index)}</Text>
+
+                            {/* Middle: Rain percentage / amount */}
+                            <View style={styles.rainContainer}>
                                 {item.rainSum > 0 && (
-                                    <Text style={styles.rainText}>{item.rainSum.toFixed(1)}mm</Text>
+                                    <>
+                                        <Ionicons
+                                            name="water"
+                                            size={12}
+                                            color={colors.weather.text.light}
+                                        />
+                                        <Text style={styles.rainText}>
+                                            {item.rainSum > 0 ? `${item.rainSum.toFixed(1)}mm` : ''}
+                                        </Text>
+                                    </>
                                 )}
                             </View>
 
-                            {/* Temperature range */}
-                            <View style={styles.tempSection}>
-                                <Text style={styles.tempMax}>
-                                    C:{Math.round(item.temperature2mMax)}°
+                            {/* Middle Right: Icon */}
+                            <View style={styles.iconContainer}>
+                                <WeatherIcon name={weatherInfo.icon} size={24} color="#FFD700" />
+                            </View>
+
+                            {/* Right: High & Low Temp */}
+                            <View style={styles.tempContainer}>
+                                <Text style={styles.highTemp}>
+                                    {Math.round(item.temperature2mMax)}°
                                 </Text>
-                                <Text style={styles.tempMin}>
-                                    T:{Math.round(item.temperature2mMin)}°
+                                <Text style={styles.lowTemp}>
+                                    {Math.round(item.temperature2mMin)}°
                                 </Text>
                             </View>
                         </View>
@@ -82,81 +84,68 @@ export default React.memo(DailyForecastList);
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.md,
+        marginBottom: 0,
     },
 
-    sectionTitle: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.weather.text.medium,
-        marginBottom: spacing.sm,
-        marginLeft: spacing.xs,
+    outerCard: {
+        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        borderRadius: borderRadius.xl,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
     },
 
-    listContainer: {
-        backgroundColor: colors.weather.bg.light,
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
-    },
-
-    dayRow: {
+    row: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-    },
-
-    dayRowBorder: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: colors.weather.border.light,
-    },
-
-    dayNameSection: {
-        width: 65,
     },
 
     dayName: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
+        flex: 2,
+        fontSize: typography.fontSize.base,
         color: colors.white,
+        fontWeight: typography.fontWeight.medium,
     },
 
-    dayDate: {
-        fontSize: typography.fontSize.xs,
-        color: colors.weather.text.dimmer,
-    },
-
-    weatherSection: {
-        flex: 1,
+    rainContainer: {
+        flex: 1.5,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: spacing.xs,
-    },
-
-    dayIconWrapper: {
-        width: 22,
-        height: 22,
+        justifyContent: 'flex-start',
+        gap: 4,
     },
 
     rainText: {
         fontSize: typography.fontSize.xs,
-        color: colors.weather.rain,
+        color: colors.weather.text.light,
     },
 
-    tempSection: {
+    iconContainer: {
+        flex: 1.5,
+        alignItems: 'center',
+    },
+
+    tempContainer: {
+        flex: 2,
         flexDirection: 'row',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         gap: spacing.sm,
     },
 
-    tempMax: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
+    highTemp: {
+        fontSize: typography.fontSize.base,
         color: colors.white,
+        fontWeight: typography.fontWeight.medium,
+        width: 32,
+        textAlign: 'right',
     },
 
-    tempMin: {
-        fontSize: typography.fontSize.sm,
-        color: colors.weather.text.dimmer,
+    lowTemp: {
+        fontSize: typography.fontSize.base,
+        color: colors.weather.text.medium,
+        fontWeight: typography.fontWeight.medium,
+        width: 32,
+        textAlign: 'right',
     },
 });

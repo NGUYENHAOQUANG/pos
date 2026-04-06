@@ -112,27 +112,27 @@ const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, dail
         return colors.weather.alert.infoBg;
     };
 
-    const getAlertText = (type: IWeatherAlert['type']) => {
-        if (type === 'danger') return colors.weather.alert.dangerText;
-        if (type === 'warning') return colors.weather.alert.warningText;
-        return colors.weather.alert.infoText;
+    const getAlertText = () => {
+        return colors.white; // Force pure white text for maximum readability on gradient bg
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.sectionTitle}>Cảnh báo nuôi tôm</Text>
-            <View style={styles.alertList}>
-                {alerts.map((alert, index) => (
-                    <View
-                        key={`alert-${index}`}
-                        style={[styles.alertItem, { backgroundColor: getAlertBg(alert.type) }]}
-                    >
-                        <WeatherIcon name={alert.icon} size={20} color={getAlertText(alert.type)} />
-                        <Text style={[styles.alertMessage, { color: getAlertText(alert.type) }]}>
-                            {alert.message}
-                        </Text>
-                    </View>
-                ))}
+            <View style={styles.outerCard}>
+                <Text style={styles.sectionTitle}>Cảnh báo nuôi tôm</Text>
+                <View style={styles.alertList}>
+                    {alerts.map((alert, index) => (
+                        <View
+                            key={`alert-${index}`}
+                            style={[styles.alertItem, { backgroundColor: getAlertBg(alert.type) }]}
+                        >
+                            <WeatherIcon name={alert.icon} size={20} color={getAlertText()} />
+                            <Text style={[styles.alertMessage, { color: getAlertText() }]}>
+                                {alert.message}
+                            </Text>
+                        </View>
+                    ))}
+                </View>
             </View>
         </View>
     );
@@ -143,13 +143,20 @@ export default React.memo(FarmingWeatherAlert);
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.md,
+        marginBottom: 0,
+    },
+
+    outerCard: {
+        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        borderRadius: borderRadius.xl,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
     },
 
     sectionTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.semibold,
-        color: colors.weather.text.medium,
+        color: colors.white,
         marginBottom: spacing.sm,
         marginLeft: spacing.xs,
     },
@@ -162,7 +169,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         padding: spacing.sm,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.lg,
         gap: spacing.sm,
     },
 

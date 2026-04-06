@@ -1,154 +1,179 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
-import { shadows } from '@/styles/shadows';
-import { ICurrentWeather } from '@/features/weather/types/weather.types';
-import { getWeatherInfo, getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
-import WeatherIcon from '@/features/weather/components/WeatherIcon';
+import { ICurrentWeather } from '../types/weather.types';
+import { colors, typography } from '@/styles';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface CurrentWeatherCardProps {
     readonly current: ICurrentWeather;
-    readonly locationName?: string;
 }
 
-const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({ current, locationName }) => {
-    const weatherInfo = getWeatherInfo(current.weatherCode);
-    const iconKey = getWeatherIconKey(current.weatherCode, current.isDay === 1);
+export const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({ current }) => {
+    // Determine Feels Like descriptive text
+    const tempDiff = current.apparentTemperature - current.temperature2m;
+    let feelsLikeDesc = 'Nhiệt độ tương đương thực tế.';
+    if (tempDiff >= 2) feelsLikeDesc = 'Cảm giác nóng hơn do độ ẩm.';
+    else if (tempDiff <= -2) feelsLikeDesc = 'Cảm giác gió lạnh hơn.';
+
+    // Wind direction format
+    const getDirection = (deg: number) => {
+        const val = Math.floor(deg / 22.5 + 0.5);
+        const arr = [
+            'Bắc',
+            'BĐB',
+            'ĐB',
+            'ĐĐB',
+            'Đông',
+            'ĐĐN',
+            'ĐN',
+            'NĐN',
+            'Nam',
+            'NTN',
+            'TN',
+            'TTN',
+            'Tây',
+            'TTB',
+            'TB',
+            'BTB',
+        ];
+        return arr[val % 16];
+    };
 
     return (
-        <View style={styles.container}>
-            {/* Main temperature area */}
-            <View style={styles.mainSection}>
-                <WeatherIcon name={iconKey} size={48} color={colors.blue[600]} />
-                <Text style={styles.temperature}>{Math.round(current.temperature2m)}°C</Text>
-                <Text style={styles.weatherLabel}>{weatherInfo.label}</Text>
-                {locationName && <Text style={styles.location}>📍 {locationName}</Text>}
+        <View style={styles.gridContainer}>
+            {/* Feels Like Square */}
+            <View style={styles.metricSquare}>
+                <View style={styles.metricHeader}>
+                    <FontAwesome5 name="thermometer-half" size={12} color="rgba(255,255,255,0.7)" />
+                    <Text style={styles.metricTitle}>CẢM GIÁC NHƯ</Text>
+                </View>
+                <View style={styles.metricBody}>
+                    <Text style={styles.metricValue}>
+                        {Math.round(current.apparentTemperature)}°
+                    </Text>
+                </View>
+                <View style={styles.metricFooter}>
+                    <Text style={styles.metricDesc}>{feelsLikeDesc}</Text>
+                </View>
             </View>
 
-            {/* Detail metrics */}
-            <View style={styles.metricsRow}>
-                <MetricItem
-                    iconName="Thermometer"
-                    label="Cảm giác"
-                    value={`${Math.round(current.apparentTemperature)}°C`}
-                />
-                <MetricItem
-                    iconName="Humidity"
-                    label="Độ ẩm"
-                    value={`${current.relativeHumidity2m}%`}
-                />
-                <MetricItem
-                    iconName="Wind"
-                    label="Gió"
-                    value={`${Math.round(current.windSpeed10m)} km/h`}
-                />
-                <MetricItem iconName="Raindrop" label="Mưa" value={`${current.rain} mm`} />
+            {/* Precipitation Square */}
+            <View style={styles.metricSquare}>
+                <View style={styles.metricHeader}>
+                    <Ionicons name="water" size={14} color="rgba(255,255,255,0.7)" />
+                    <Text style={styles.metricTitle}>LƯỢNG MƯA</Text>
+                </View>
+                <View style={styles.metricBody}>
+                    <Text style={styles.metricValue}>
+                        {current.rain}
+                        <Text style={styles.metricUnit}> mm</Text>
+                    </Text>
+                </View>
+                <View style={styles.metricFooter}>
+                    <Text style={styles.metricDesc}>
+                        {current.rain === 0
+                            ? 'Không có mưa trong thời điểm hiện tại.'
+                            : 'Đang có mưa, hãy chủ động công việc.'}
+                    </Text>
+                </View>
             </View>
 
-            {/* Pressure row */}
-            <View style={styles.pressureRow}>
-                <WeatherIcon name="Pressure" size={14} color={colors.textTertiary} />
-                <Text style={styles.pressureLabel}>Áp suất:</Text>
-                <Text style={styles.pressureValue}>{Math.round(current.pressure)} hPa</Text>
+            {/* Wind Square */}
+            <View style={styles.metricSquare}>
+                <View style={styles.metricHeader}>
+                    <Feather name="wind" size={14} color="rgba(255,255,255,0.7)" />
+                    <Text style={styles.metricTitle}>GIÓ</Text>
+                </View>
+                <View style={styles.metricBody}>
+                    <Text style={styles.metricValue}>
+                        {Math.round(current.windSpeed10m)}
+                        <Text style={styles.metricUnit}> km/h</Text>
+                    </Text>
+                </View>
+                <View style={styles.metricFooter}>
+                    <Text style={styles.metricDesc}>
+                        Hướng: {getDirection(current.windDirection10m)}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Humidity & Pressure */}
+            <View style={styles.metricSquare}>
+                <View style={styles.metricHeader}>
+                    <MaterialCommunityIcons
+                        name="weather-partly-rainy"
+                        size={16}
+                        color="rgba(255,255,255,0.7)"
+                    />
+                    <Text style={styles.metricTitle}>ĐỘ ẨM & ÁP SUẤT</Text>
+                </View>
+                <View style={styles.metricBody}>
+                    <Text style={styles.metricValue}>
+                        {Math.round(current.relativeHumidity2m)}
+                        <Text style={styles.metricUnit}> %</Text>
+                    </Text>
+                </View>
+                <View style={styles.metricFooter}>
+                    <Text style={styles.metricDesc}>
+                        Áp suất: {Math.round(current.pressure)} hPa
+                    </Text>
+                </View>
             </View>
         </View>
     );
 };
 
-/* ===== Metric Item Sub-component ===== */
-
-interface MetricItemProps {
-    readonly iconName: string;
-    readonly label: string;
-    readonly value: string;
-}
-
-const MetricItem: React.FC<MetricItemProps> = ({ iconName, label, value }) => (
-    <View style={styles.metricItem}>
-        <WeatherIcon name={iconName} size={18} color={colors.blue[600]} />
-        <Text style={styles.metricValue}>{value}</Text>
-        <Text style={styles.metricLabel}>{label}</Text>
-    </View>
-);
-
-export default CurrentWeatherCard;
-
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.blue[50],
-        borderRadius: borderRadius.md,
-        padding: spacing.md,
-        ...shadows.md,
-    },
-
-    mainSection: {
-        alignItems: 'center',
-        paddingVertical: spacing.sm,
-    },
-
-    temperature: {
-        fontSize: typography.fontSize['4xl'],
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginTop: spacing.xs,
-    },
-
-    weatherLabel: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.textSecondary,
-        marginTop: spacing.xs,
-    },
-
-    location: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textTertiary,
-        marginTop: spacing.xs,
-    },
-
-    metricsRow: {
+    gridContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        paddingVertical: spacing.sm,
-        marginTop: spacing.md,
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 10,
     },
-
-    metricItem: {
+    metricSquare: {
+        width: '48%',
+        aspectRatio: 1, // Make it perfectly square
+        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        borderRadius: 20,
+        padding: 14,
+        justifyContent: 'space-between',
+    },
+    metricHeader: {
+        flexDirection: 'row',
         alignItems: 'center',
-        gap: 2,
+        gap: 6,
     },
-
-    metricValue: {
-        fontSize: typography.fontSize.sm,
+    metricTitle: {
+        fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.semibold,
-        color: colors.text,
+        color: 'rgba(255,255,255,0.7)',
+        textTransform: 'uppercase',
     },
-
-    metricLabel: {
-        fontSize: typography.fontSize.xs,
-        color: colors.textSecondary,
-    },
-
-    pressureRow: {
-        flexDirection: 'row',
+    metricBody: {
+        flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: spacing.sm,
-        gap: spacing.xs,
     },
-
-    pressureLabel: {
-        fontSize: typography.fontSize.xs,
-        color: colors.textTertiary,
-    },
-
-    pressureValue: {
-        fontSize: typography.fontSize.xs,
+    metricValue: {
+        fontSize: 32,
         fontWeight: typography.fontWeight.medium,
-        color: colors.textSecondary,
+        color: colors.white,
+    },
+    metricUnit: {
+        fontSize: typography.fontSize.lg,
+        color: 'rgba(255,255,255,0.9)',
+    },
+    metricFooter: {
+        justifyContent: 'flex-end',
+    },
+    metricDesc: {
+        fontSize: typography.fontSize.xs,
+        fontWeight: typography.fontWeight.regular,
+        color: colors.white,
+        lineHeight: 18,
     },
 });

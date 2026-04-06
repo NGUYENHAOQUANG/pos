@@ -30,11 +30,14 @@ const parseCurrentWeather = (raw: IOpenMeteoFullResponse['current']): ICurrentWe
 
 const parseHourlyForecast = (raw: IOpenMeteoFullResponse['hourly']): IHourlyForecast[] => {
     const now = new Date();
+    // Compare only at the hour level to prevent skipping the current hour
+    now.setMinutes(0, 0, 0);
+
     const items: IHourlyForecast[] = [];
 
     for (let i = 0; i < raw.time.length && items.length < HOURLY_FORECAST_HOURS; i++) {
         const forecastTime = new Date(raw.time[i]);
-        // Only include future hours
+        // Only include current and future hours
         if (forecastTime >= now) {
             items.push({
                 time: raw.time[i],

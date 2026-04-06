@@ -270,6 +270,9 @@ export type AppStackParamList = {
 
     // ============== Weather Screens ==============
     WeatherScreen: undefined;
+    DailyForecastDetail: {
+        dailyData: readonly import('@/features/weather/types/weather.types').IDailyForecast[];
+    };
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
     Chatbot: undefined;
 };
