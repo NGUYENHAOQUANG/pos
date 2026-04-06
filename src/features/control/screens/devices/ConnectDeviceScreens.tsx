@@ -12,7 +12,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { ConnectDevice } from '@/features/control/components/devices/ConnectDevice';
-import { colors } from '@/styles';
 import { useConnectDevice } from '@/features/control/hooks/useDevices';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
 
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
         width: QR_FRAME_SIZE,
         height: QR_FRAME_SIZE,
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: 'rgba(255,255,255,0.3)',
         backgroundColor: 'transparent',
         borderRadius: 8,
         shadowOffset: { width: 0, height: 0 },

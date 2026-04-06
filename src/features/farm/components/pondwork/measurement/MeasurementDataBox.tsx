@@ -94,7 +94,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 title="Kiểm tra kích thước tôm bằng AI"
                 variant="outline"
                 onPress={onAIMeasurePress || (() => {})}
-                renderLeftIcon={<IconAICheck width={20} height={20} fill={theme.text} />}
+                renderLeftIcon={<IconAICheck width={20} height={20} color={theme.text} />}
                 fullWidth
             />
 

@@ -2,7 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
 
 interface Props {
     children: ReactNode;
@@ -56,39 +56,11 @@ export class ErrorBoundary extends Component<Props, State> {
             }
 
             return (
-                <View style={styles.container}>
-                    {/* Content area - centered */}
-                    <View style={styles.content}>
-                        <Text style={styles.title}>😔 Oops! Có lỗi xảy ra</Text>
-                        <Text style={styles.message}>
-                            Chúng tôi xin lỗi vì sự bất tiện này. Ứng dụng đã gặp lỗi không mong
-                            muốn.
-                        </Text>
-
-                        {__DEV__ && this.state.error && (
-                            <View style={styles.errorDetails}>
-                                <Text style={styles.errorTitle}>Error Details (Dev Mode):</Text>
-                                <Text style={styles.errorText}>{this.state.error.toString()}</Text>
-                                {this.state.errorInfo && (
-                                    <Text style={styles.errorStack}>
-                                        {this.state.errorInfo.componentStack}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    </View>
-
-                    {/* Button area - pinned to bottom */}
-                    <View style={styles.buttonContainer}>
-                        <Button
-                            title="Thử lại"
-                            onPress={this.handleReset}
-                            variant="primary"
-                            size="large"
-                            fullWidth
-                        />
-                    </View>
-                </View>
+                <ErrorBoundaryFallback
+                    error={this.state.error}
+                    errorInfo={this.state.errorInfo}
+                    onReset={this.handleReset}
+                />
             );
         }
 
@@ -96,55 +68,109 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.xl,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '700',
-        marginBottom: spacing.sm,
-        textAlign: 'center',
-        color: colors.text,
-    },
-    message: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginBottom: spacing.lg,
-        color: colors.textSecondary,
-        lineHeight: 24,
-    },
-    errorDetails: {
-        backgroundColor: colors.backgroundPrimary,
-        padding: spacing.md,
-        borderRadius: 8,
-        maxHeight: 300,
-        width: '100%',
-    },
-    errorTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        marginBottom: spacing.sm,
-        color: colors.text,
-    },
-    errorText: {
-        fontSize: 12,
-        color: colors.error,
-        marginBottom: spacing.sm,
-    },
-    errorStack: {
-        fontSize: 10,
-        color: colors.textSecondary,
-    },
-    buttonContainer: {
-        paddingHorizontal: spacing.xl,
-        paddingBottom: 40,
-    },
-});
+// ─── Functional Fallback Component (Supports Theme Hooks) ───────────
+import { useAppTheme } from '@/styles/themeContext';
+
+interface ErrorBoundaryFallbackProps {
+    error: Error | null;
+    errorInfo: ErrorInfo | null;
+    onReset: () => void;
+}
+
+const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
+    error,
+    errorInfo,
+    onReset,
+}) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
+    return (
+        <View style={themedStyles.container}>
+            {/* Content area - centered */}
+            <View style={themedStyles.content}>
+                <Text style={themedStyles.title}>😔 Oops! Có lỗi xảy ra</Text>
+                <Text style={themedStyles.message}>
+                    Chúng tôi xin lỗi vì sự bất tiện này. Ứng dụng đã gặp lỗi không mong muốn.
+                </Text>
+
+                {__DEV__ && error && (
+                    <View style={themedStyles.errorDetails}>
+                        <Text style={themedStyles.errorTitle}>Error Details (Dev Mode):</Text>
+                        <Text style={themedStyles.errorText}>{error.toString()}</Text>
+                        {errorInfo && (
+                            <Text style={themedStyles.errorStack}>{errorInfo.componentStack}</Text>
+                        )}
+                    </View>
+                )}
+            </View>
+
+            {/* Button area - pinned to bottom */}
+            <View style={themedStyles.buttonContainer}>
+                <Button
+                    title="Thử lại"
+                    onPress={onReset}
+                    variant="primary"
+                    size="large"
+                    fullWidth
+                />
+            </View>
+        </View>
+    );
+};
+
+const getStyles = (theme: ReturnType<typeof useAppTheme>) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        content: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: spacing.xl,
+        },
+        title: {
+            fontSize: 24,
+            fontWeight: '700',
+            marginBottom: spacing.sm,
+            textAlign: 'center',
+            color: theme.text,
+        },
+        message: {
+            fontSize: 16,
+            textAlign: 'center',
+            marginBottom: spacing.lg,
+            color: theme.textSecondary,
+            lineHeight: 24,
+        },
+        errorDetails: {
+            backgroundColor: theme.backgroundSecondary,
+            padding: spacing.md,
+            borderRadius: 8,
+            maxHeight: 300,
+            width: '100%',
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        errorTitle: {
+            fontSize: 14,
+            fontWeight: '700',
+            marginBottom: spacing.sm,
+            color: theme.text,
+        },
+        errorText: {
+            fontSize: 12,
+            color: theme.error,
+            marginBottom: spacing.sm,
+        },
+        errorStack: {
+            fontSize: 10,
+            color: theme.textSecondary,
+        },
+        buttonContainer: {
+            paddingHorizontal: spacing.xl,
+            paddingBottom: 40,
+        },
+    });

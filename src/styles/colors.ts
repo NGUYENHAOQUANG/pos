@@ -267,7 +267,7 @@ export const darkTheme: Colors = {
 
     // Border colors
     defaultBorder: '#262626',
-    border: '#1F2937',
+    border: '#262626',
     borderMedium: '#374151',
     borderLight: '#262626',
     borderDark: '#4B5563',

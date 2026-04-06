@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -15,7 +15,9 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components';
 import OTPIcon from '@/assets/Icon/OTP.svg';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -50,6 +52,8 @@ export default function RegisterScreen() {
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
     const { keyboardVisible } = useKeyboard();
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -216,11 +220,11 @@ export default function RegisterScreen() {
                                 style={styles.backButton}
                                 onPress={() => navigation.goBack()}
                             >
-                                <Ionicons name="arrow-back" size={20} color={colors.text} />
+                                <Ionicons name="arrow-back" size={20} color={theme.text} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.logoSection}>
-                            <OTPIcon width={60} height={40} />
+                            <OTPIcon width={60} height={40} color={theme.text} />
                         </View>
                         <View style={styles.contentSection}>
                             <Text style={styles.title}>Tạo tài khoản</Text>
@@ -273,107 +277,108 @@ export default function RegisterScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    keyboardInner: {
-        flex: 1,
-    },
-    mainContentContainer: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    backButtonSection: {
-        height: 64,
-        justifyContent: 'center',
-        paddingHorizontal: spacing.md,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 2,
-    },
-    logoSection: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.lg,
-        alignItems: 'flex-start',
-    },
-    contentSection: {
-        paddingHorizontal: spacing.md,
-    },
-    title: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: '600',
-        color: '#0B1117',
-        paddingVertical: spacing.md,
-    },
-    subtitle: {
-        fontSize: typography.fontSize.lg,
-        color: colors.gray[500],
-        lineHeight: 24,
-    },
-    phoneNumber: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-        lineHeight: 28,
-    },
-    otpInputSection: {
-        width: '100%',
-        alignItems: 'center',
-        paddingVertical: spacing.md,
-    },
-    errorText: {
-        color: colors.error,
-        fontSize: typography.fontSize.sm,
-        marginBottom: spacing.md,
-    },
-    errorPlaceholder: {
-        height: spacing.md,
-    },
-    resendContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    resendLabel: {
-        color: colors.gray[500],
-        fontSize: 14,
-    },
-    timerText: {
-        color: colors.gray[500],
-        fontSize: 14,
-    },
-    disabledLink: {
-        color: colors.gray[400],
-    },
-    activeLink: {
-        color: colors.primary,
-        fontWeight: '500',
-        textDecorationLine: 'underline',
-    },
-    submitButton: {
-        backgroundColor: colors.primary,
-        borderRadius: 25,
-        height: 40,
-    },
-    footer: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.xl + spacing.sm + 12,
-        paddingTop: spacing.xs,
-    },
-    footerKeyboardOpen: {
-        paddingBottom: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        keyboardInner: {
+            flex: 1,
+        },
+        mainContentContainer: {
+            flex: 1,
+            justifyContent: 'space-between',
+        },
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+        },
+        backButtonSection: {
+            height: 64,
+            justifyContent: 'center',
+            paddingHorizontal: spacing.md,
+        },
+        backButton: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: theme.backgroundButtonActive,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 2,
+        },
+        logoSection: {
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.lg,
+            alignItems: 'flex-start',
+        },
+        contentSection: {
+            paddingHorizontal: spacing.md,
+        },
+        title: {
+            fontSize: typography.fontSize['2xl'],
+            fontWeight: '600',
+            color: theme.text,
+            paddingVertical: spacing.md,
+        },
+        subtitle: {
+            fontSize: typography.fontSize.lg,
+            color: theme.textSecondary,
+            lineHeight: 24,
+        },
+        phoneNumber: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.text,
+            lineHeight: 28,
+        },
+        otpInputSection: {
+            width: '100%',
+            alignItems: 'center',
+            paddingVertical: spacing.md,
+        },
+        errorText: {
+            color: theme.error,
+            fontSize: typography.fontSize.sm,
+            marginBottom: spacing.md,
+        },
+        errorPlaceholder: {
+            height: spacing.md,
+        },
+        resendContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        resendLabel: {
+            color: theme.textSecondary,
+            fontSize: 14,
+        },
+        timerText: {
+            color: theme.textSecondary,
+            fontSize: 14,
+        },
+        disabledLink: {
+            color: theme.textTertiary,
+        },
+        activeLink: {
+            color: theme.primary,
+            fontWeight: '500',
+            textDecorationLine: 'underline',
+        },
+        submitButton: {
+            backgroundColor: theme.primary,
+            borderRadius: 25,
+            height: 40,
+        },
+        footer: {
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.xl + spacing.sm + 12,
+            paddingTop: spacing.xs,
+        },
+        footerKeyboardOpen: {
+            paddingBottom: spacing.md,
+        },
+    });

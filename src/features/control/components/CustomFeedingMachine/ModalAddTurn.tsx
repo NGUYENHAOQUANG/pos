@@ -3,7 +3,8 @@ import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-
 import { Text } from '@/shared/components/typography/Text';
 import ClockIcon from '@/assets/Icon/IconDevices/Clock.svg';
 import { TimePickerModal } from '@/shared/components/modal/TimePickerModal';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 
 interface ModalAddTurnProps {
@@ -19,6 +20,8 @@ export default function ModalAddTurn({
     placeholder = 'chọn thời gian',
     style,
 }: ModalAddTurnProps) {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const [isPickerVisible, setPickerVisible] = useState(false);
 
     const formatTime = (date: Date | null) => {
@@ -32,15 +35,15 @@ export default function ModalAddTurn({
     };
 
     return (
-        <View style={[styles.container, style]}>
+        <View style={[staticStyles.container, style]}>
             <TouchableOpacity onPress={() => setPickerVisible(true)} activeOpacity={0.7}>
-                <View style={styles.inputContainer}>
+                <View style={themedStyles.inputContainer}>
                     {value ? (
                         <Text
                             style={[
-                                styles.input,
+                                themedStyles.input,
                                 {
-                                    color: colors.textSecondary,
+                                    color: theme.textSecondary,
                                     fontSize: 16,
                                 },
                             ]}
@@ -53,12 +56,17 @@ export default function ModalAddTurn({
                             text={placeholder}
                             containerStyle={{ flex: 1 }}
                             style={{
-                                color: colors.gray[400],
+                                color: theme.gray[400],
                                 fontSize: 14,
                             }}
                         />
                     )}
-                    <ClockIcon width={20} height={20} color={colors.text} style={styles.icon} />
+                    <ClockIcon
+                        width={20}
+                        height={20}
+                        color={theme.text}
+                        style={staticStyles.icon}
+                    />
                 </View>
             </TouchableOpacity>
 
@@ -75,29 +83,32 @@ export default function ModalAddTurn({
     );
 }
 
-const styles = StyleSheet.create({
+// Static styles
+const staticStyles = StyleSheet.create({
     container: {
         width: '100%',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        height: 40,
-        paddingHorizontal: 8,
-    },
-    input: {
-        flex: 1,
-        color: colors.text,
-        textAlign: 'center',
-    },
-    activeInput: {
-        color: colors.text,
     },
     icon: {
         marginLeft: 5,
     },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        inputContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+            height: 40,
+            paddingHorizontal: 8,
+        },
+        input: {
+            flex: 1,
+            color: theme.text,
+            textAlign: 'center',
+        },
+    });

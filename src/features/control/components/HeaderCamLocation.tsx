@@ -2,7 +2,9 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     DropdownHeaderButton,
@@ -38,6 +40,8 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
 }) => {
     const insets = useSafeAreaInsets();
     const buttonRef = React.useRef<View>(null);
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
 
     // Adapt FarmLocation to DropDownHeaderItem
     const dropdownData: DropDownHeaderItem[] = locations.map(loc => ({
@@ -70,7 +74,7 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
     };
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top + 12 }, style]}>
+        <View style={[themedStyles.container, { paddingTop: insets.top + 12 }, style]}>
             {/* Location Picker Reuse */}
             <View style={styles.locationContainer}>
                 <DropdownHeaderButton
@@ -84,42 +88,48 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
             {/* Help Button */}
             <TouchableOpacity
                 ref={buttonRef}
-                style={styles.menuButton}
+                style={themedStyles.menuButton}
                 onPress={handleHelpPress}
                 activeOpacity={0.7}
             >
-                <Ionicons name="help-circle-outline" size={24} color={colors.text} />
+                <Ionicons name="help-circle-outline" size={24} color={theme.text} />
             </TouchableOpacity>
         </View>
     );
 };
 
+// Static styles
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        minHeight: 64,
-        paddingTop: spacing.md,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        zIndex: 1000,
-    },
     locationContainer: {
         flex: 1,
         alignItems: 'flex-start',
     },
-    menuButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        backgroundColor: colors.white,
-    },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            minHeight: 64,
+            paddingTop: spacing.md,
+            paddingBottom: 12,
+            paddingHorizontal: 16,
+            backgroundColor: theme.background,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+            zIndex: 1000,
+        },
+        menuButton: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.borderDark,
+            backgroundColor: theme.background,
+        },
+    });

@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface TimeProps {
     startTime?: string;
@@ -9,10 +11,13 @@ interface TimeProps {
 }
 
 export const Time: React.FC<TimeProps> = ({ startTime = '00:00', endTime = '00:00' }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
     return (
         <View style={styles.container}>
-            <Text style={styles.timeText}>{startTime}</Text>
-            <Text style={styles.timeText}>{endTime}</Text>
+            <Text style={themedStyles.timeText}>{startTime}</Text>
+            <Text style={themedStyles.timeText}>{endTime}</Text>
         </View>
     );
 };
@@ -23,10 +28,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: spacing.xs,
     },
-    timeText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
-    },
 });
+
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        timeText: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.text,
+            lineHeight: 22,
+        },
+    });

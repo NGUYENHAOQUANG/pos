@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface StatusItemProps {
     label: string;
@@ -9,6 +10,7 @@ interface StatusItemProps {
     valueColor?: string;
     backgroundColor?: string;
     borderColor?: string;
+    theme: Colors;
 }
 
 const StatusItem: React.FC<StatusItemProps> = ({
@@ -17,17 +19,21 @@ const StatusItem: React.FC<StatusItemProps> = ({
     valueColor,
     backgroundColor,
     borderColor,
+    theme,
 }) => (
     <View
         style={[
             styles.itemContainer,
             {
-                borderColor: borderColor || colors.defaultBorder,
-                backgroundColor: backgroundColor || 'white',
+                borderColor: borderColor || theme.defaultBorder,
+                backgroundColor: backgroundColor || theme.background,
             },
         ]}
     >
-        <Text style={[styles.label, { color: valueColor }]} numberOfLines={1}>
+        <Text
+            style={[styles.label, { color: valueColor || theme.textSecondary }]}
+            numberOfLines={1}
+        >
             {label}
         </Text>
         <Text style={[styles.value, { color: valueColor }]} numberOfLines={1}>
@@ -49,25 +55,29 @@ export const DevicesStatus: React.FC<DevicesStatusProps> = ({
     warningPonds = 0,
     otherPonds = 0,
 }) => {
+    const theme = useAppTheme();
+
     return (
         <View style={styles.container}>
-            <StatusItem
-                label="Tổng ao"
-                value={totalPonds}
-                valueColor={colors.gray[800]} // Hoặc colors.text
-            />
+            <StatusItem label="Tổng ao" value={totalPonds} valueColor={theme.text} theme={theme} />
             <View style={styles.spacer} />
-            <StatusItem label="Hoạt động" value={activePonds} valueColor={colors.gray[800]} />
+            <StatusItem
+                label="Hoạt động"
+                value={activePonds}
+                valueColor={theme.text}
+                theme={theme}
+            />
             <View style={styles.spacer} />
             <StatusItem
                 label="Lỗi"
                 value={warningPonds}
-                valueColor={colors.red[600]}
-                backgroundColor={colors.red[25]}
-                borderColor={colors.red[200]}
+                valueColor={theme.error}
+                backgroundColor={theme.errorBackground}
+                borderColor={theme.isDark ? theme.errorBackground : theme.red[200]}
+                theme={theme}
             />
             <View style={styles.spacer} />
-            <StatusItem label="Khác" value={otherPonds} valueColor={colors.gray[800]} />
+            <StatusItem label="Khác" value={otherPonds} valueColor={theme.text} theme={theme} />
         </View>
     );
 };
@@ -86,7 +96,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: colors.border,
     },
     spacer: {
         width: 8,
@@ -97,7 +106,6 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 12,
-        color: colors.textSecondary,
         fontWeight: '400',
         marginBottom: 8,
     },

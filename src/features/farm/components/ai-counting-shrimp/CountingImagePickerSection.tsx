@@ -106,7 +106,7 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
                 variant="outline"
                 onPress={() => setSheetVisible(true)}
                 disabled={isProcessing}
-                renderLeftIcon={<IconCamera width={20} height={20} fill={theme.textSecondary} />}
+                renderLeftIcon={<IconCamera width={20} height={20} color={theme.text} />}
                 style={styles.ctaButton}
                 textStyle={styles.ctaLabel}
             />

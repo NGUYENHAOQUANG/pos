@@ -13,7 +13,8 @@ import { Text } from '@/shared/components/typography/Text';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScrollPicker from 'react-native-wheel-scrollview-picker';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 const spacing = { sm: 8, md: 16, lg: 24 };
 const typography = {
@@ -50,6 +51,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     showSeconds = true,
 }) => {
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
 
     const defaultTime = time || new Date();
     const [selectedHour, setSelectedHour] = useState(defaultTime.getHours());
@@ -109,24 +112,29 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     /** Render each item inside the ScrollPicker */
     const renderItem = useCallback(
         (data: string, _index: number, isSelected: boolean) => (
-            <View style={styles.pickerItem}>
-                <Text style={[styles.pickerItemText, isSelected && styles.pickerItemTextSelected]}>
+            <View style={staticStyles.pickerItem}>
+                <Text
+                    style={[
+                        themedStyles.pickerItemText,
+                        isSelected && themedStyles.pickerItemTextSelected,
+                    ]}
+                >
                     {data}
                 </Text>
             </View>
         ),
-        []
+        [themedStyles]
     );
 
     return (
         <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-            <View style={styles.modalRoot}>
+            <View style={themedStyles.modalRoot}>
                 {/* Overlay - tap to dismiss */}
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
                 <Animated.View
                     style={[
-                        styles.container,
+                        themedStyles.container,
                         {
                             paddingBottom: insets.bottom + 20,
                             transform: [{ translateY: slideAnim }],
@@ -134,39 +142,39 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     ]}
                 >
                     {/* Header */}
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                            <Text style={styles.cancelText}>Hủy</Text>
+                    <View style={staticStyles.header}>
+                        <TouchableOpacity onPress={onClose} style={staticStyles.closeButton}>
+                            <Text style={themedStyles.cancelText}>Hủy</Text>
                         </TouchableOpacity>
-                        <Text style={styles.headerTitle}>Chọn thời gian</Text>
-                        <TouchableOpacity onPress={handleConfirm} style={styles.closeButton}>
-                            <Text style={styles.confirmText}>Xong</Text>
+                        <Text style={themedStyles.headerTitle}>Chọn thời gian</Text>
+                        <TouchableOpacity onPress={handleConfirm} style={staticStyles.closeButton}>
+                            <Text style={themedStyles.confirmText}>Xong</Text>
                         </TouchableOpacity>
                     </View>
 
                     {/* Time Picker Labels */}
-                    <View style={styles.labelsContainer}>
-                        <View style={styles.labelColumn}>
-                            <Text style={styles.columnLabel}>Giờ</Text>
+                    <View style={staticStyles.labelsContainer}>
+                        <View style={staticStyles.labelColumn}>
+                            <Text style={themedStyles.columnLabel}>Giờ</Text>
                         </View>
-                        <View style={styles.labelSpacer} />
-                        <View style={styles.labelColumn}>
-                            <Text style={styles.columnLabel}>Phút</Text>
+                        <View style={staticStyles.labelSpacer} />
+                        <View style={staticStyles.labelColumn}>
+                            <Text style={themedStyles.columnLabel}>Phút</Text>
                         </View>
                         {showSeconds && (
                             <>
-                                <View style={styles.labelSpacer} />
-                                <View style={styles.labelColumn}>
-                                    <Text style={styles.columnLabel}>Giây</Text>
+                                <View style={staticStyles.labelSpacer} />
+                                <View style={staticStyles.labelColumn}>
+                                    <Text style={themedStyles.columnLabel}>Giây</Text>
                                 </View>
                             </>
                         )}
                     </View>
 
                     {/* Time Picker Body */}
-                    <View style={styles.pickerBody}>
+                    <View style={staticStyles.pickerBody}>
                         {/* Hour */}
-                        <View style={styles.columnContainer}>
+                        <View style={staticStyles.columnContainer}>
                             <ScrollPicker
                                 key={`hour-${mountKey}`}
                                 dataSource={HOUR_DATA}
@@ -180,19 +188,19 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                 wrapperHeight={PICKER_HEIGHT}
                                 wrapperBackground="transparent"
                                 itemHeight={ITEM_HEIGHT}
-                                highlightColor={colors.gray[200]}
+                                highlightColor={theme.borderDark}
                                 highlightBorderWidth={1}
                                 renderItem={renderItem}
                             />
                         </View>
 
                         {/* Separator : */}
-                        <View style={styles.separatorContainer}>
-                            <Text style={styles.separatorText}>:</Text>
+                        <View style={staticStyles.separatorContainer}>
+                            <Text style={themedStyles.separatorText}>:</Text>
                         </View>
 
                         {/* Minute */}
-                        <View style={styles.columnContainer}>
+                        <View style={staticStyles.columnContainer}>
                             <ScrollPicker
                                 key={`minute-${mountKey}`}
                                 dataSource={MINUTE_DATA}
@@ -206,7 +214,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                 wrapperHeight={PICKER_HEIGHT}
                                 wrapperBackground="transparent"
                                 itemHeight={ITEM_HEIGHT}
-                                highlightColor={colors.gray[200]}
+                                highlightColor={theme.borderDark}
                                 highlightBorderWidth={1}
                                 renderItem={renderItem}
                             />
@@ -214,14 +222,14 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
                         {/* Separator : (seconds) */}
                         {showSeconds && (
-                            <View style={styles.separatorContainer}>
-                                <Text style={styles.separatorText}>:</Text>
+                            <View style={staticStyles.separatorContainer}>
+                                <Text style={themedStyles.separatorText}>:</Text>
                             </View>
                         )}
 
                         {/* Second */}
                         {showSeconds && (
-                            <View style={styles.columnContainer}>
+                            <View style={staticStyles.columnContainer}>
                                 <ScrollPicker
                                     key={`second-${mountKey}`}
                                     dataSource={SECOND_DATA}
@@ -235,7 +243,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                     wrapperHeight={PICKER_HEIGHT}
                                     wrapperBackground="transparent"
                                     itemHeight={ITEM_HEIGHT}
-                                    highlightColor={colors.gray[200]}
+                                    highlightColor={theme.borderDark}
                                     highlightBorderWidth={1}
                                     renderItem={renderItem}
                                 />
@@ -248,20 +256,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    modalRoot: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        paddingHorizontal: 16,
-        paddingBottom: 40,
-    },
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        padding: spacing.lg,
-        elevation: 10,
-    },
+const staticStyles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -269,22 +264,8 @@ const styles = StyleSheet.create({
         marginBottom: spacing.lg,
         paddingBottom: spacing.sm,
     },
-    headerTitle: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
     closeButton: {
         padding: 4,
-    },
-    cancelText: {
-        color: colors.textSecondary,
-        fontSize: 14,
-    },
-    confirmText: {
-        color: colors.primary,
-        fontWeight: '700',
-        fontSize: 14,
     },
     labelsContainer: {
         flexDirection: 'row',
@@ -309,36 +290,66 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: PICKER_HEIGHT,
     },
-    columnLabel: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
     separatorContainer: {
         justifyContent: 'center',
         alignItems: 'center',
         width: 12,
         height: PICKER_HEIGHT,
     },
-    separatorText: {
-        fontSize: typography.fontSize.xxl,
-        fontWeight: 'bold',
-        color: colors.text,
-    },
-    // ScrollPicker item styles
     pickerItem: {
         height: ITEM_HEIGHT,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    pickerItemText: {
-        fontSize: 20,
-        color: colors.gray[400],
-        fontWeight: typography.fontWeight.medium,
-    },
-    pickerItemTextSelected: {
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
-    },
 });
+
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        modalRoot: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+            paddingHorizontal: 16,
+            paddingBottom: 40,
+        },
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: 24,
+            padding: spacing.lg,
+            elevation: 10,
+        },
+        headerTitle: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+        },
+        cancelText: {
+            color: theme.textSecondary,
+            fontSize: 14,
+        },
+        confirmText: {
+            color: theme.primary,
+            fontWeight: '700',
+            fontSize: 14,
+        },
+        columnLabel: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            fontWeight: '600',
+            textAlign: 'center',
+        },
+        separatorText: {
+            fontSize: typography.fontSize.xxl,
+            fontWeight: 'bold',
+            color: theme.text,
+        },
+        pickerItemText: {
+            fontSize: 20,
+            color: theme.textSecondary,
+            fontWeight: typography.fontWeight.medium,
+        },
+        pickerItemTextSelected: {
+            color: theme.text,
+            fontWeight: typography.fontWeight.bold,
+        },
+    });

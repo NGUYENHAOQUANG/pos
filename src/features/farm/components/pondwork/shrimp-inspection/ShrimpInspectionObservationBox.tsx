@@ -145,9 +145,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                     title="Kiểm tra tôm bằng AI"
                     variant="outline"
                     onPress={onAICheckPress || (() => {})}
-                    renderLeftIcon={
-                        <IconAICheck width={20} height={20} fill={theme.textSecondary} />
-                    }
+                    renderLeftIcon={<IconAICheck width={20} height={20} color={theme.text} />}
                     fullWidth
                 />
             </View>

@@ -11,7 +11,9 @@ import {
 } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components/buttons/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import BarcodeIcon from '@/assets/Icon/IconDevices/Barcode.svg';
@@ -36,24 +38,26 @@ export const ConnectDevice: React.FC<ConnectDeviceProps> = ({
     isFlashOn,
     onToggleFlash,
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const [deviceCode, setDeviceCode] = useState('');
 
     const handleConnect = () => {
         if (onConnect) {
             onConnect(deviceCode);
         }
-        setDeviceCode(''); // Reset after connect
+        setDeviceCode('');
         onClose();
     };
 
     return (
         <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <TouchableWithoutFeedback onPress={onClose}>
-                <View style={styles.overlay}>
+                <View style={staticStyles.overlay}>
                     {/* Flash Button positioned absolutely in the overlay */}
                     {onToggleFlash && (
                         <TouchableOpacity
-                            style={styles.flashButton}
+                            style={staticStyles.flashButton}
                             onPress={onToggleFlash}
                             activeOpacity={0.8}
                         >
@@ -67,47 +71,57 @@ export const ConnectDevice: React.FC<ConnectDeviceProps> = ({
 
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        style={styles.keyboardView}
+                        style={staticStyles.keyboardView}
                     >
                         <TouchableWithoutFeedback>
                             <View
                                 style={[
-                                    styles.container,
+                                    themedStyles.container,
                                     { height: Math.max(320, height * CARD_HEIGHT_RATIO) },
                                 ]}
                             >
-                                <View style={styles.header}>
-                                    <Text style={styles.title}>Kết nối thiết bị - {pondName}</Text>
-                                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                                        <Ionicons name="close" size={24} color={colors.gray[400]} />
+                                <View style={themedStyles.header}>
+                                    <Text style={themedStyles.title}>
+                                        Kết nối thiết bị - {pondName}
+                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={onClose}
+                                        style={staticStyles.closeButton}
+                                    >
+                                        <Ionicons
+                                            name="close"
+                                            size={24}
+                                            color={theme.textSecondary}
+                                        />
                                     </TouchableOpacity>
                                 </View>
-                                {/* ... rest of content */}
 
-                                <View style={styles.content}>
-                                    <TouchableOpacity style={styles.qrSection}>
+                                <View style={staticStyles.content}>
+                                    <TouchableOpacity style={staticStyles.qrSection}>
                                         <BarcodeIcon
                                             width={32}
                                             height={32}
                                             style={{ marginRight: spacing.sm }}
                                         />
-                                        <Text style={styles.qrText}>
+                                        <Text style={themedStyles.qrText}>
                                             Quét mã trên thiết bị để kết nối
                                         </Text>
                                     </TouchableOpacity>
 
-                                    <View style={styles.dividerContainer}>
-                                        <View style={styles.dividerLine} />
-                                        <Text style={styles.dividerText}>hoặc</Text>
-                                        <View style={styles.dividerLine} />
+                                    <View style={staticStyles.dividerContainer}>
+                                        <View style={themedStyles.dividerLine} />
+                                        <Text style={themedStyles.dividerText}>hoặc</Text>
+                                        <View style={themedStyles.dividerLine} />
                                     </View>
 
-                                    <View style={styles.inputSection}>
-                                        <Text style={styles.inputLabel}>Nhập mã thiết bị</Text>
+                                    <View style={staticStyles.inputSection}>
+                                        <Text style={themedStyles.inputLabel}>
+                                            Nhập mã thiết bị
+                                        </Text>
                                         <TextInput
-                                            style={styles.input}
+                                            style={themedStyles.input}
                                             placeholder="Nhập mã thiết bị"
-                                            placeholderTextColor={colors.gray[400]}
+                                            placeholderTextColor={theme.textSecondary}
                                             value={deviceCode}
                                             onChangeText={setDeviceCode}
                                         />
@@ -117,7 +131,7 @@ export const ConnectDevice: React.FC<ConnectDeviceProps> = ({
                                         title="Kết nối"
                                         onPress={handleConnect}
                                         variant="primary"
-                                        style={styles.connectButton}
+                                        style={staticStyles.connectButton}
                                         disabled={!deviceCode}
                                     />
                                 </View>
@@ -130,7 +144,8 @@ export const ConnectDevice: React.FC<ConnectDeviceProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
+// Static styles
+const staticStyles = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'transparent',
@@ -138,29 +153,6 @@ const styles = StyleSheet.create({
     },
     keyboardView: {
         width: '100%',
-    },
-    container: {
-        backgroundColor: colors.white,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-        width: '100%',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        padding: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    title: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        textAlign: 'left',
-        marginRight: spacing.sm,
     },
     closeButton: {
         padding: 4,
@@ -185,7 +177,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         justifyContent: 'center',
         alignItems: 'center',
-        // Add shadow for better visibility on transparent/overlay bg
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -197,43 +188,69 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    qrText: {
-        fontSize: 14,
-        color: colors.text,
-    },
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: colors.border,
-    },
-    dividerText: {
-        marginHorizontal: spacing.md,
-        color: colors.textSecondary,
-        fontSize: 14,
-    },
-    inputSection: {
-        // marginBottom removed
-    },
-    inputLabel: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        marginBottom: 4,
-    },
-    input: {
-        height: 48,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        paddingHorizontal: spacing.md,
-        fontSize: 16,
-        color: colors.text,
-    },
+    inputSection: {},
     connectButton: {
         width: '100%',
     },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+            width: '100%',
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            padding: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+        },
+        title: {
+            flex: 1,
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+            textAlign: 'left',
+            marginRight: spacing.sm,
+        },
+        qrText: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        dividerLine: {
+            flex: 1,
+            height: 1,
+            backgroundColor: theme.border,
+        },
+        dividerText: {
+            marginHorizontal: spacing.md,
+            color: theme.textSecondary,
+            fontSize: 14,
+        },
+        inputLabel: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.text,
+            marginBottom: 4,
+        },
+        input: {
+            height: 48,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: borderRadius.sm,
+            paddingHorizontal: spacing.md,
+            fontSize: 16,
+            color: theme.text,
+        },
+    });

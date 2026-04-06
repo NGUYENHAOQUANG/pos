@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     ScrollView,
     StatusBar,
@@ -17,7 +17,9 @@ import { CompleteProfilePayload } from '@/features/auth/types/auth.types';
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
 import InfoIcon from '@/assets/Icon/Info.svg';
 
@@ -33,6 +35,8 @@ export default function InfoScreen() {
 
     const { user, completeProfile } = useAuthStore();
     const { keyboardVisible } = useKeyboard();
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     const handleSubmit = async () => {
         if (!fullName.trim()) {
@@ -91,7 +95,7 @@ export default function InfoScreen() {
                                 </View>
 
                                 <View style={styles.infoIconSection}>
-                                    <InfoIcon width={48} height={48} />
+                                    <InfoIcon width={48} height={48} color={theme.text} />
                                 </View>
 
                                 <View style={styles.contentSection}>
@@ -163,73 +167,74 @@ export default function InfoScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-        overflow: 'hidden',
-    },
-    keyboardInner: {
-        flex: 1,
-    },
-    mainContentContainer: {
-        flex: 1,
-    },
-    scrollView: { flex: 1 },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    topEmptySpace: {
-        height: spacing.md,
-    },
-    logoSection: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-    },
-    infoIconSection: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.lg,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-    },
-    contentSection: {
-        paddingHorizontal: spacing.md,
-        marginTop: spacing.sm,
-    },
-    inputSpacing: {
-        marginBottom: spacing.lg,
-    },
-    screenTitle: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: '600',
-        color: '#0B1117',
-        textAlign: 'left',
-        paddingVertical: spacing.md,
-    },
-    formContent: {
-        marginTop: spacing.sm,
-    },
-    submitButton: {
-        backgroundColor: colors.primary,
-        borderRadius: 25,
-        height: 40,
-    },
-    footer: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.xl + spacing.sm + 12,
-        paddingTop: spacing.xs,
-    },
-    footerKeyboardOpen: {
-        paddingBottom: spacing.md,
-    },
-    labelBase: {
-        color: colors.text,
-    },
-    optionalText: {
-        color: colors.gray[400],
-        fontWeight: '400',
-        fontSize: 14,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+            overflow: 'hidden',
+        },
+        keyboardInner: {
+            flex: 1,
+        },
+        mainContentContainer: {
+            flex: 1,
+        },
+        scrollView: { flex: 1 },
+        scrollContent: {
+            flexGrow: 1,
+        },
+        topEmptySpace: {
+            height: spacing.md,
+        },
+        logoSection: {
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.md,
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+        },
+        infoIconSection: {
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.lg,
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+        },
+        contentSection: {
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.sm,
+        },
+        inputSpacing: {
+            marginBottom: spacing.lg,
+        },
+        screenTitle: {
+            fontSize: typography.fontSize['2xl'],
+            fontWeight: '600',
+            color: theme.text,
+            textAlign: 'left',
+            paddingVertical: spacing.md,
+        },
+        formContent: {
+            marginTop: spacing.sm,
+        },
+        submitButton: {
+            backgroundColor: theme.primary,
+            borderRadius: 25,
+            height: 40,
+        },
+        footer: {
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.xl + spacing.sm + 12,
+            paddingTop: spacing.xs,
+        },
+        footerKeyboardOpen: {
+            paddingBottom: spacing.md,
+        },
+        labelBase: {
+            color: theme.text,
+        },
+        optionalText: {
+            color: theme.textTertiary,
+            fontWeight: '400',
+            fontSize: 14,
+        },
+    });

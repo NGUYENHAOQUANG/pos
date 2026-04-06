@@ -19,7 +19,8 @@ import Animated, {
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { AnimatedLogo } from '@/shared/components/brand/AnimatedLogo';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -37,6 +38,8 @@ const RING_SIZE = 120;
 
 const RippleRing: React.FC<RippleRingProps> = ({ delay, startAnimation }) => {
     const progress = useSharedValue(0);
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     useEffect(() => {
         // Wait for logo animation to settle before starting ripples
@@ -88,12 +91,13 @@ interface SplashBubbleProps {
     duration: number;
 }
 
-const SplashBubble: React.FC<SplashBubbleProps> = ({
+const SplashBubble: React.FC<SplashBubbleProps & { bubbleColor: string }> = ({
     initialX,
     initialY,
     size,
     delay,
     duration,
+    bubbleColor,
 }) => {
     const translateY = useSharedValue(0);
     const opacity = useSharedValue(0);
@@ -124,8 +128,9 @@ const SplashBubble: React.FC<SplashBubbleProps> = ({
     return (
         <Animated.View
             style={[
-                styles.bubble,
                 {
+                    position: 'absolute',
+                    backgroundColor: bubbleColor,
                     left: initialX,
                     top: initialY,
                     width: size,
@@ -145,6 +150,8 @@ interface SplashScreenProps {
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimationComplete }) => {
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
     // Logo animation values
     const logoScale = useSharedValue(0);
     const logoOpacity = useSharedValue(0);
@@ -225,6 +232,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimation
                         size={bubble.size}
                         delay={bubble.delay}
                         duration={bubble.duration}
+                        bubbleColor={theme.isDark ? 'rgba(255,255,255,0.8)' : theme.primary}
                     />
                 ))}
             </View>
@@ -249,66 +257,62 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimation
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 9999,
-    },
-    centerContent: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logoWrapper: {
-        zIndex: 10,
-    },
-    // Water ripple ring - two-tone container
-    rippleRing: {
-        position: 'absolute',
-        width: RING_SIZE,
-        height: RING_SIZE,
-        borderRadius: RING_SIZE / 2,
-        overflow: 'hidden',
-    },
-    // Top half clip container (orange)
-    rippleHalfTop: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: RING_SIZE / 2,
-        overflow: 'hidden',
-    },
-    rippleHalfTopInner: {
-        width: RING_SIZE,
-        height: RING_SIZE,
-        borderRadius: RING_SIZE / 2,
-        borderWidth: 1.5,
-        borderColor: colors.primaryOrange + 'B0',
-    },
-    // Bottom half clip container (blue)
-    rippleHalfBottom: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: RING_SIZE / 2,
-        overflow: 'hidden',
-    },
-    rippleHalfBottomInner: {
-        width: RING_SIZE,
-        height: RING_SIZE,
-        borderRadius: RING_SIZE / 2,
-        borderWidth: 1.5,
-        borderColor: colors.primary + 'B0',
-        position: 'absolute',
-        bottom: 0,
-    },
-    // Floating bubble base style
-    bubble: {
-        position: 'absolute',
-        backgroundColor: colors.primary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: theme.isDark ? theme.backgroundPrimary : theme.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+        },
+        centerContent: {
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        logoWrapper: {
+            zIndex: 10,
+        },
+        // Water ripple ring - two-tone container
+        rippleRing: {
+            position: 'absolute',
+            width: RING_SIZE,
+            height: RING_SIZE,
+            borderRadius: RING_SIZE / 2,
+            overflow: 'hidden',
+        },
+        // Top half clip container (orange)
+        rippleHalfTop: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: RING_SIZE / 2,
+            overflow: 'hidden',
+        },
+        rippleHalfTopInner: {
+            width: RING_SIZE,
+            height: RING_SIZE,
+            borderRadius: RING_SIZE / 2,
+            borderWidth: 1.5,
+            borderColor: theme.primaryOrange + 'B0',
+        },
+        // Bottom half clip container (blue)
+        rippleHalfBottom: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: RING_SIZE / 2,
+            overflow: 'hidden',
+        },
+        rippleHalfBottomInner: {
+            width: RING_SIZE,
+            height: RING_SIZE,
+            borderRadius: RING_SIZE / 2,
+            borderWidth: 1.5,
+            borderColor: theme.primary + 'B0',
+            position: 'absolute',
+            bottom: 0,
+        },
+    });

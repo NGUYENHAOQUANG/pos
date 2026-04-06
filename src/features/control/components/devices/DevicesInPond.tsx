@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { DeviceCard } from './Devices';
-import { ButtonControlSwitch } from './ButtonControlSwitch'; // Assuming it's in the same folder or adjusted path
+import { ButtonControlSwitch } from './ButtonControlSwitch';
 import { EControlMode, DeviceData } from '../../types/control.types';
+import { useAppTheme } from '@/styles/themeContext';
 
 export const DevicesInPond = () => {
+    const theme = useAppTheme();
+
     // Mock Data for Feeder Section
     const [feeders, setFeeders] = useState<DeviceData[]>([
         {
             id: 'f1',
             name: 'Máy cho ăn',
-
             mode: EControlMode.MANUAL,
             isOn: true,
             type: 'feeder',
@@ -64,7 +66,7 @@ export const DevicesInPond = () => {
             {/* Feeder Section */}
             <View style={styles.section}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.sectionTitle}>Máy cho ăn</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Máy cho ăn</Text>
                     <ButtonControlSwitch
                         onSwitchToManual={() =>
                             setFeeders(prev =>
@@ -96,7 +98,7 @@ export const DevicesInPond = () => {
             {/* Other Devices Section */}
             <View style={styles.section}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.sectionTitle}>Thiết bị khác</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Thiết bị khác</Text>
                     <ButtonControlSwitch
                         onSwitchToManual={() =>
                             setOtherDevices(prev =>
@@ -143,12 +145,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 12,
-        paddingHorizontal: 4, // Align visually
+        paddingHorizontal: 4,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#1F2937',
     },
     cardWrapper: {
         // Just single item full width usually
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
     gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginHorizontal: -6, // Negative margin for grid gap compensation
+        marginHorizontal: -6,
     },
     gridItem: {
         width: '50%',

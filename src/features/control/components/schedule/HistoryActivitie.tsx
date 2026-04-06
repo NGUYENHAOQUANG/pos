@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, Image, ImageSourcePropType } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ScheduleDescriptionTab } from './ScheduleDescriptionTab';
 import { ScheduleActivityPill } from './ScheduleActivityPill';
 
@@ -84,46 +86,45 @@ const timeToMinutes = (time: string): number => {
     return h * 60 + m;
 };
 
-// Start Helper to get background color based on device mode history
-const getBackgroundColor = (device: DeviceColumnData, time: string): string => {
+// Helper to get background color based on device mode history
+const getBackgroundColor = (device: DeviceColumnData, time: string, theme: Colors): string => {
     if (!device.modeHistory || device.modeHistory.length === 0) {
-        // Default fallback
-        return colors.white; // Or some default
+        return theme.background;
     }
 
     const slotMinutes = timeToMinutes(time);
 
-    // Find the mode that covers this time slot
     const activeMode = device.modeHistory.find(slot => {
         const start = timeToMinutes(slot.startTime);
         const end = timeToMinutes(slot.endTime);
         return slotMinutes >= start && slotMinutes < end;
     });
 
-    if (!activeMode) return colors.white;
+    if (!activeMode) return theme.background;
 
     switch (activeMode.mode) {
         case 'remote':
-            return colors.schedule.remote;
+            return theme.schedule.remote;
         case 'schedule':
-            return colors.schedule.schedule;
+            return theme.schedule.schedule;
         case 'local':
-            return colors.schedule.local;
+            return theme.schedule.local;
         default:
-            return colors.white;
+            return theme.background;
     }
 };
-// End Helper
 
 export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
     devices = DEFAULT_DEVICES,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [now, setNow] = React.useState(new Date());
 
     React.useEffect(() => {
         const timer = setInterval(() => {
             setNow(new Date());
-        }, 60000); // Update every minute
+        }, 60000);
         return () => clearInterval(timer);
     }, []);
 
@@ -133,16 +134,13 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
 
     return (
         <View style={styles.container}>
-            {/* Legend Component */}
             <ScheduleDescriptionTab type="history" />
 
-            {/* Schedule table */}
-            <View style={styles.tableContainer}>
-                {/* Header with device icons */}
+            <View style={staticStyles.tableContainer}>
                 <View style={styles.header}>
                     <View style={styles.timeColumnHeader} />
                     {devices.map((device, index) => {
-                        const iconColor = device.color || colors.primary;
+                        const iconColor = device.color || theme.primary;
                         const iconSource = DEVICE_ICONS[device.type];
                         return (
                             <View key={index} style={styles.deviceColumn}>
@@ -151,7 +149,7 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                                     style={{ width: 32, height: 32 }}
                                     resizeMode="contain"
                                 />
-                                <Text style={[styles.deviceCount, { color: iconColor }]}>
+                                <Text style={[staticStyles.deviceCount, { color: iconColor }]}>
                                     {device.count}
                                 </Text>
                             </View>
@@ -159,25 +157,22 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                     })}
                 </View>
 
-                {/* Time slots with activities */}
-                <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    style={staticStyles.scrollContainer}
+                    showsVerticalScrollIndicator={false}
+                >
                     {DEFAULT_TIME_SLOTS.map((time, index) => {
                         const isFullHour = time.endsWith(':00');
-
-                        // Check if this slot contains the current time
                         const [slotHour, slotMinute] = time.split(':').map(Number);
                         const slotTotalMinutes = slotHour * 60 + slotMinute;
                         const isCurrentSlot =
                             currentTotalMinutes >= slotTotalMinutes &&
                             currentTotalMinutes < slotTotalMinutes + 15;
-
-                        // Calculate top offset: (minutes into slot / 15) * 20 (height)
                         const minutesIntoSlot = currentTotalMinutes - slotTotalMinutes;
                         const topOffset = (minutesIntoSlot / 15) * 20;
 
                         return (
-                            <View key={index} style={styles.timeRow}>
-                                {/* Time label column with tick */}
+                            <View key={index} style={staticStyles.timeRow}>
                                 <View style={styles.timeColumn}>
                                     <Text
                                         style={[styles.timeText, isFullHour && styles.timeTextBold]}
@@ -187,16 +182,11 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                                     <View style={styles.timeTick} />
                                 </View>
 
-                                {/* Device columns (grid cells) */}
                                 {devices.map((device, deviceIndex) => {
-                                    // Per-device activity logic
                                     const deviceActivities = device.activities || [];
                                     const showIndicator = hasActivity(time, deviceActivities);
+                                    const backgroundColor = getBackgroundColor(device, time, theme);
 
-                                    // Dynamic background color
-                                    const backgroundColor = getBackgroundColor(device, time);
-
-                                    // Check neighbors for connectivity AND same background color
                                     const prevTime =
                                         index > 0 ? DEFAULT_TIME_SLOTS[index - 1] : null;
                                     const nextTime =
@@ -205,13 +195,12 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                                             : null;
 
                                     const prevBg = prevTime
-                                        ? getBackgroundColor(device, prevTime)
+                                        ? getBackgroundColor(device, prevTime, theme)
                                         : null;
                                     const nextBg = nextTime
-                                        ? getBackgroundColor(device, nextTime)
+                                        ? getBackgroundColor(device, nextTime, theme)
                                         : null;
 
-                                    // Active if neighbors have activity AND same background color
                                     const isPrevActive = prevTime
                                         ? hasActivity(prevTime, deviceActivities) &&
                                           prevBg === backgroundColor
@@ -223,16 +212,14 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
 
                                     return (
                                         <View key={deviceIndex} style={styles.gridCell}>
-                                            {/* Background Layer */}
                                             <View
-                                                style={[styles.cellBackground, { backgroundColor }]}
+                                                style={[
+                                                    staticStyles.cellBackground,
+                                                    { backgroundColor },
+                                                ]}
                                             />
-
-                                            {/* Grid Lines */}
                                             <View style={styles.horizontalLine} />
                                             <View style={styles.dashedLine} />
-
-                                            {/* Render indicator for ALL devices now */}
                                             <ScheduleActivityPill
                                                 isActive={showIndicator}
                                                 isPrevActive={isPrevActive}
@@ -242,7 +229,6 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                                     );
                                 })}
 
-                                {/* Current time line - Absolute over the whole row if this is the current slot */}
                                 {isCurrentSlot && (
                                     <View style={[styles.currentTimeLine, { top: topOffset }]} />
                                 )}
@@ -255,44 +241,10 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-        marginHorizontal: spacing.md,
-        marginBottom: spacing.md,
-        borderRadius: 16,
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
-        paddingTop: spacing.md,
-        gap: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
+// Static styles
+const staticStyles = StyleSheet.create({
     tableContainer: {
         flex: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'stretch', // Ensure vertical lines connect
-    },
-    timeColumnHeader: {
-        width: 60,
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[300],
-    },
-    deviceColumn: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[300],
-        paddingBottom: spacing.sm,
-    },
-    deviceIcon: {
-        width: 32,
-        height: 32,
-        marginBottom: 4,
     },
     deviceCount: {
         fontSize: 13,
@@ -307,70 +259,105 @@ const styles = StyleSheet.create({
         height: 20,
         position: 'relative',
     },
-    timeColumn: {
-        width: 60,
-        height: '100%',
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[300],
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'relative',
-    },
-    timeText: {
-        fontSize: 11,
-        color: colors.textSecondary,
-        textAlign: 'center',
-    },
-    timeTick: {
-        position: 'absolute',
-        right: 0,
-        top: '50%',
-        width: 6,
-        height: 1,
-        backgroundColor: colors.gray[300],
-    },
-    timeTextBold: {
-        fontWeight: '600',
-        color: colors.text,
-    },
-    gridCell: {
-        flex: 1,
-        height: '100%',
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[400],
-        position: 'relative',
-    },
-    horizontalLine: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: '50%',
-        height: 1,
-        backgroundColor: colors.gray[400],
-        zIndex: -1,
-    },
-    dashedLine: {
-        position: 'absolute',
-        left: '50%',
-        top: 0,
-        bottom: 0,
-        width: 1,
-        borderLeftWidth: 1,
-        borderLeftColor: colors.gray[400],
-        borderStyle: 'dashed',
-        zIndex: -1,
-    },
     cellBackground: {
         ...StyleSheet.absoluteFillObject,
         zIndex: -2,
     },
-    currentTimeLine: {
-        position: 'absolute',
-        left: 60,
-        right: 0,
-        top: '50%',
-        height: 1,
-        backgroundColor: colors.error,
-        zIndex: 10,
-    },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+            marginHorizontal: spacing.md,
+            marginBottom: spacing.md,
+            borderRadius: 16,
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.md,
+            paddingTop: spacing.md,
+            gap: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'stretch',
+        },
+        timeColumnHeader: {
+            width: 60,
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[300],
+        },
+        deviceColumn: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[300],
+            paddingBottom: spacing.sm,
+        },
+        timeColumn: {
+            width: 60,
+            height: '100%',
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[300],
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+        },
+        timeText: {
+            fontSize: 11,
+            color: theme.textSecondary,
+            textAlign: 'center',
+        },
+        timeTick: {
+            position: 'absolute',
+            right: 0,
+            top: '50%',
+            width: 6,
+            height: 1,
+            backgroundColor: theme.gray[300],
+        },
+        timeTextBold: {
+            fontWeight: '600',
+            color: theme.text,
+        },
+        gridCell: {
+            flex: 1,
+            height: '100%',
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[400],
+            position: 'relative',
+        },
+        horizontalLine: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: '50%',
+            height: 1,
+            backgroundColor: theme.gray[400],
+            zIndex: -1,
+        },
+        dashedLine: {
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            bottom: 0,
+            width: 1,
+            borderLeftWidth: 1,
+            borderLeftColor: theme.gray[400],
+            borderStyle: 'dashed',
+            zIndex: -1,
+        },
+        currentTimeLine: {
+            position: 'absolute',
+            left: 60,
+            right: 0,
+            top: '50%',
+            height: 1,
+            backgroundColor: theme.error,
+            zIndex: 10,
+        },
+    });

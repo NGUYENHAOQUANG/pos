@@ -8,7 +8,8 @@ import {
     Dimensions,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
 
 interface ButtonControlSwitchProps {
@@ -20,6 +21,9 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
     onSwitchToSchedule,
     onSwitchToManual,
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
     const [visible, setVisible] = useState(false);
     const [dropdownTop, setDropdownTop] = useState(0);
     const [dropdownRight, setDropdownRight] = useState(24);
@@ -55,7 +59,7 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
                     <View style={styles.modalOverlay}>
                         <View
                             style={[
-                                styles.menuContainer,
+                                themedStyles.menuContainer,
                                 { top: dropdownTop, right: dropdownRight },
                             ]}
                         >
@@ -66,11 +70,11 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
                                     setVisible(false);
                                 }}
                             >
-                                <Text style={styles.menuText}>
+                                <Text style={themedStyles.menuText}>
                                     Chuyển tất cả máy theo lịch trình
                                 </Text>
                             </TouchableOpacity>
-                            <View style={styles.separator} />
+                            <View style={themedStyles.separator} />
                             <TouchableOpacity
                                 style={styles.menuItem}
                                 onPress={() => {
@@ -78,7 +82,9 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
                                     setVisible(false);
                                 }}
                             >
-                                <Text style={styles.menuText}>Chuyển tất cả máy theo thủ công</Text>
+                                <Text style={themedStyles.menuText}>
+                                    Chuyển tất cả máy theo thủ công
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -88,6 +94,7 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
     );
 };
 
+// Static styles
 const styles = StyleSheet.create({
     container: {
         zIndex: 10,
@@ -97,34 +104,38 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.05)', // Faint overlay
-    },
-    menuContainer: {
-        position: 'absolute',
-        // right: 24, // Handled dynamically
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        paddingVertical: 4,
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        elevation: 5,
-        minWidth: 260,
-        zIndex: 100,
+        backgroundColor: 'rgba(0,0,0,0.05)',
     },
     menuItem: {
         paddingVertical: 12,
         paddingHorizontal: 16,
     },
-    menuText: {
-        fontSize: 16,
-        color: colors.gray[800],
-        fontWeight: '400',
-    },
-    separator: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: 16,
-    },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        menuContainer: {
+            position: 'absolute',
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            paddingVertical: 4,
+            shadowColor: theme.shadow,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 5,
+            minWidth: 260,
+            zIndex: 100,
+        },
+        menuText: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        separator: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: 16,
+        },
+    });

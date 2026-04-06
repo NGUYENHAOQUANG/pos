@@ -6,7 +6,7 @@ import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 import { DeviceStat, PondDeviceStats } from '../../types/control.types';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 // Use PNG images for performance (300x smaller than SVG with embedded raster)
 const FanIcon = require('@/assets/Icon/IconDevices/Fan.png');
@@ -46,6 +46,8 @@ interface PondCardProps {
 
 export const PondCard: React.FC<PondCardProps> = React.memo(
     ({ pondName, onPressDetail, isEmpty = false, deviceStats, compact = false }) => {
+        const theme = useAppTheme();
+
         // Filter to only device types that this pond actually has
         const visibleTypes = React.useMemo(() => {
             if (!deviceStats) return [];
@@ -64,10 +66,12 @@ export const PondCard: React.FC<PondCardProps> = React.memo(
         return (
             <View style={styles.wrapper}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>{pondName}</Text>
+                    <Text style={[styles.title, { color: theme.text }]}>{pondName}</Text>
                     {!isEmpty && (
                         <TouchableOpacity onPress={onPressDetail} activeOpacity={0.7}>
-                            <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+                            <Text style={[styles.detailButtonText, { color: theme.primary }]}>
+                                Xem chi tiết
+                            </Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -120,12 +124,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: '600',
-        color: colors.gray[900],
     },
     detailButtonText: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.primary,
     },
     gridContainer: {
         gap: 10,
