@@ -53,7 +53,7 @@ const DailyForecastList: React.FC<DailyForecastListProps> = ({ dailyData }) => {
                                 <WeatherIcon
                                     name={weatherInfo.icon}
                                     size={22}
-                                    color="rgba(255, 255, 255, 0.9)"
+                                    color={colors.weather.text.light}
                                 />
                                 {item.rainSum > 0 && (
                                     <Text style={styles.rainText}>{item.rainSum.toFixed(1)}mm</Text>
@@ -77,7 +77,7 @@ const DailyForecastList: React.FC<DailyForecastListProps> = ({ dailyData }) => {
     );
 };
 
-export default DailyForecastList;
+export default React.memo(DailyForecastList);
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
@@ -88,13 +88,13 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.semibold,
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: colors.weather.text.medium,
         marginBottom: spacing.sm,
         marginLeft: spacing.xs,
     },
 
     listContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: colors.weather.bg.light,
         borderRadius: borderRadius.md,
         overflow: 'hidden',
     },
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
 
     dayRowBorder: {
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+        borderBottomColor: colors.weather.border.light,
     },
 
     dayNameSection: {
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
 
     dayDate: {
         fontSize: typography.fontSize.xs,
-        color: 'rgba(255, 255, 255, 0.6)',
+        color: colors.weather.text.dimmer,
     },
 
     weatherSection: {
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
 
     rainText: {
         fontSize: typography.fontSize.xs,
-        color: 'rgba(120, 200, 255, 0.9)',
+        color: colors.weather.rain,
     },
 
     tempSection: {
@@ -157,6 +157,6 @@ const styles = StyleSheet.create({
 
     tempMin: {
         fontSize: typography.fontSize.sm,
-        color: 'rgba(255, 255, 255, 0.6)',
+        color: colors.weather.text.dimmer,
     },
 });

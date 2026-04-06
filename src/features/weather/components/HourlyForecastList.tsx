@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IHourlyForecast } from '@/features/weather/types/weather.types';
@@ -20,6 +20,25 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
         });
     }, []);
 
+    const renderItem = useCallback(
+        ({ item }: { item: IHourlyForecast }) => {
+            const weatherInfo = getWeatherInfo(item.weatherCode);
+            return (
+                <View style={styles.hourItem}>
+                    <Text style={styles.hourText}>{formatHour(item.time)}</Text>
+                    <WeatherIcon
+                        name={weatherInfo.icon}
+                        size={22}
+                        color={colors.weather.text.light}
+                    />
+                    <Text style={styles.hourTemp}>{Math.round(item.temperature2m)}°</Text>
+                    {item.rain > 0 && <Text style={styles.hourRain}>{item.rain}mm</Text>}
+                </View>
+            );
+        },
+        [formatHour]
+    );
+
     if (hourlyData.length === 0) {
         return null;
     }
@@ -28,37 +47,20 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>Dự báo theo giờ</Text>
             <View style={styles.cardWrapper}>
-                <ScrollView
+                <FlatList
                     horizontal
+                    data={hourlyData}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.scrollContent}
-                >
-                    {hourlyData.map((item, index) => {
-                        const weatherInfo = getWeatherInfo(item.weatherCode);
-                        return (
-                            <View key={`hourly-${index}`} style={styles.hourItem}>
-                                <Text style={styles.hourText}>{formatHour(item.time)}</Text>
-                                <WeatherIcon
-                                    name={weatherInfo.icon}
-                                    size={22}
-                                    color="rgba(255, 255, 255, 0.9)"
-                                />
-                                <Text style={styles.hourTemp}>
-                                    {Math.round(item.temperature2m)}°
-                                </Text>
-                                {item.rain > 0 && (
-                                    <Text style={styles.hourRain}>{item.rain}mm</Text>
-                                )}
-                            </View>
-                        );
-                    })}
-                </ScrollView>
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => `hourly-${item.time}-${index}`}
+                />
             </View>
         </View>
     );
 };
 
-export default HourlyForecastList;
+export default React.memo(HourlyForecastList);
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
@@ -69,13 +71,13 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.semibold,
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: colors.weather.text.medium,
         marginBottom: spacing.sm,
         marginLeft: spacing.xs,
     },
 
     cardWrapper: {
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: colors.weather.bg.light,
         borderRadius: borderRadius.md,
         paddingVertical: spacing.sm,
     },
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
 
     hourText: {
         fontSize: typography.fontSize.xs,
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: colors.weather.text.dim,
         fontWeight: typography.fontWeight.medium,
     },
 
@@ -110,7 +112,7 @@ const styles = StyleSheet.create({
 
     hourRain: {
         fontSize: 10,
-        color: 'rgba(120, 200, 255, 0.9)',
+        color: colors.weather.rain,
         marginTop: 2,
     },
 });

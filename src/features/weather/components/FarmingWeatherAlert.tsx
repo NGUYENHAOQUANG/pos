@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { spacing, typography, borderRadius } from '@/styles';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 import { ICurrentWeather, IDailyForecast } from '@/features/weather/types/weather.types';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
 
@@ -103,20 +103,20 @@ const analyzeAlerts = (
     return alerts;
 };
 
-const ALERT_COLORS = {
-    danger: 'rgba(255, 80, 80, 0.25)',
-    warning: 'rgba(255, 180, 50, 0.25)',
-    info: 'rgba(100, 220, 120, 0.25)',
-} as const;
-
-const ALERT_TEXT_COLORS = {
-    danger: '#FFB3B3',
-    warning: '#FFE0A0',
-    info: '#B0F0C0',
-} as const;
-
 const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, daily }) => {
     const alerts = useMemo(() => analyzeAlerts(current, daily), [current, daily]);
+
+    const getAlertBg = (type: IWeatherAlert['type']) => {
+        if (type === 'danger') return colors.weather.alert.dangerBg;
+        if (type === 'warning') return colors.weather.alert.warningBg;
+        return colors.weather.alert.infoBg;
+    };
+
+    const getAlertText = (type: IWeatherAlert['type']) => {
+        if (type === 'danger') return colors.weather.alert.dangerText;
+        if (type === 'warning') return colors.weather.alert.warningText;
+        return colors.weather.alert.infoText;
+    };
 
     return (
         <View style={styles.container}>
@@ -125,16 +125,10 @@ const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, dail
                 {alerts.map((alert, index) => (
                     <View
                         key={`alert-${index}`}
-                        style={[styles.alertItem, { backgroundColor: ALERT_COLORS[alert.type] }]}
+                        style={[styles.alertItem, { backgroundColor: getAlertBg(alert.type) }]}
                     >
-                        <WeatherIcon
-                            name={alert.icon}
-                            size={20}
-                            color={ALERT_TEXT_COLORS[alert.type]}
-                        />
-                        <Text
-                            style={[styles.alertMessage, { color: ALERT_TEXT_COLORS[alert.type] }]}
-                        >
+                        <WeatherIcon name={alert.icon} size={20} color={getAlertText(alert.type)} />
+                        <Text style={[styles.alertMessage, { color: getAlertText(alert.type) }]}>
                             {alert.message}
                         </Text>
                     </View>
@@ -144,7 +138,7 @@ const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, dail
     );
 };
 
-export default FarmingWeatherAlert;
+export default React.memo(FarmingWeatherAlert);
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
@@ -155,7 +149,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.semibold,
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: colors.weather.text.medium,
         marginBottom: spacing.sm,
         marginLeft: spacing.xs,
     },

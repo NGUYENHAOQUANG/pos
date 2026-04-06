@@ -26,7 +26,7 @@ export const ShrimpPondListScreens: React.FC = () => {
     const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
     const weatherEnabled = useSettingsStore(state => state.weatherEnabled);
     const selectedLocation = useWeatherStore(state => state.selectedLocation);
-    const { data: weatherData } = useWeatherForecast(selectedLocation);
+    const { data: weatherData } = useWeatherForecast(selectedLocation, { enableNotify: true });
 
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
     const zones = useMemo(() => zonesData || [], [zonesData]);

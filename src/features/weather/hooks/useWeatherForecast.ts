@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { WeatherNotificationService } from '@/features/weather/services/weatherNotification.service';
 import { weatherApi } from '@/features/weather/api/weatherApi';
 import { IWeatherData, IWeatherLocation } from '@/features/weather/types/weather.types';
@@ -19,7 +19,10 @@ export const weatherKeys = {
  * Hook to fetch weather forecast for a given location
  * Auto-refreshes every 15 minutes for near real-time data
  */
-export const useWeatherForecast = (location: IWeatherLocation | null) => {
+export const useWeatherForecast = (
+    location: IWeatherLocation | null,
+    options?: { enableNotify?: boolean }
+) => {
     const query = useQuery<IWeatherData>({
         queryKey: weatherKeys.forecast(location?.latitude ?? 0, location?.longitude ?? 0),
         queryFn: () => weatherApi.getWeatherForecast(location!.latitude, location!.longitude),
@@ -27,22 +30,25 @@ export const useWeatherForecast = (location: IWeatherLocation | null) => {
         refetchInterval: REFETCH_INTERVAL,
         staleTime: STALE_TIME,
         retry: 2,
+        placeholderData: keepPreviousData,
     });
 
     useEffect(() => {
-        WeatherNotificationService.initialize().catch(() => {
-            // Ignore permission silently if user denies it
-            console.log('Push notification permission denied / ignored.');
-        });
-    }, []);
+        if (options?.enableNotify) {
+            WeatherNotificationService.initialize().catch(() => {
+                // Ignore permission silently if user denies it
+                console.log('Push notification permission denied / ignored.');
+            });
+        }
+    }, [options?.enableNotify]);
 
     useEffect(() => {
-        if (query.data) {
+        if (query.data && options?.enableNotify) {
             WeatherNotificationService.checkAndNotify(query.data.current, query.data.daily).catch(
                 console.error
             );
         }
-    }, [query.data, query.data?.current.time]);
+    }, [query.data, query.data?.current.time, options?.enableNotify]);
 
     return query;
 };

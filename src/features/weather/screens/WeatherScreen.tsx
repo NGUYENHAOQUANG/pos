@@ -23,23 +23,12 @@ import HourlyForecastList from '@/features/weather/components/HourlyForecastList
 import DailyForecastList from '@/features/weather/components/DailyForecastList';
 import FarmingWeatherAlert from '@/features/weather/components/FarmingWeatherAlert';
 
-/**
- * Gradient colors for weather backgrounds based on weather condition
- */
-const WEATHER_GRADIENTS = {
-    clear: ['#1B6CB0', '#3A8FD6', '#73BAE8'],
-    cloudy: ['#4A6D8C', '#6E8FAB', '#8BAEC5'],
-    rainy: ['#3A4F63', '#506A7E', '#6B8599'],
-    storm: ['#2C3E50', '#34495E', '#4A6274'],
-    night: ['#0F2027', '#203A43', '#2C5364'],
-} as const;
-
 const getGradientForWeather = (code: number, isDay: boolean): readonly string[] => {
-    if (!isDay) return WEATHER_GRADIENTS.night;
-    if (code >= 95) return WEATHER_GRADIENTS.storm;
-    if (code >= 51) return WEATHER_GRADIENTS.rainy;
-    if (code >= 2) return WEATHER_GRADIENTS.cloudy;
-    return WEATHER_GRADIENTS.clear;
+    if (!isDay) return colors.weather.gradients.night;
+    if (code >= 95) return colors.weather.gradients.storm;
+    if (code >= 51) return colors.weather.gradients.rainy;
+    if (code >= 2) return colors.weather.gradients.cloudy;
+    return colors.weather.gradients.clear;
 };
 
 const WeatherScreen: React.FC = () => {
@@ -58,10 +47,11 @@ const WeatherScreen: React.FC = () => {
         isError,
         refetch,
         isRefetching,
+        isFetching,
     } = useWeatherForecast(location);
 
     const gradientColors = useMemo(() => {
-        if (!weatherData) return WEATHER_GRADIENTS.clear;
+        if (!weatherData) return colors.weather.gradients.clear;
         return getGradientForWeather(
             weatherData.current.weatherCode,
             weatherData.current.isDay === 1
@@ -86,7 +76,7 @@ const WeatherScreen: React.FC = () => {
     // Loading state
     if (isLoading) {
         return (
-            <LinearGradient colors={[...WEATHER_GRADIENTS.clear]} style={styles.flex1}>
+            <LinearGradient colors={[...colors.weather.gradients.clear]} style={styles.flex1}>
                 <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
                     <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                         <ArrowLeftIcon width={20} height={20} color={colors.white} />
@@ -96,7 +86,7 @@ const WeatherScreen: React.FC = () => {
                         onPress={() => setLocationPickerVisible(true)}
                     >
                         <Text style={styles.headerTitle}>Thời tiết</Text>
-                        <AntDesign name="caretdown" size={10} color="rgba(255,255,255,0.7)" />
+                        <AntDesign name="caretdown" size={10} color={colors.weather.text.dim} />
                     </TouchableOpacity>
                     <View style={styles.headerPlaceholder} />
                 </View>
@@ -111,7 +101,7 @@ const WeatherScreen: React.FC = () => {
     // Error state
     if (isError || !weatherData) {
         return (
-            <LinearGradient colors={[...WEATHER_GRADIENTS.cloudy]} style={styles.flex1}>
+            <LinearGradient colors={[...colors.weather.gradients.cloudy]} style={styles.flex1}>
                 <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
                     <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                         <ArrowLeftIcon width={20} height={20} color={colors.white} />
@@ -121,7 +111,7 @@ const WeatherScreen: React.FC = () => {
                         onPress={() => setLocationPickerVisible(true)}
                     >
                         <Text style={styles.headerTitle}>Thời tiết</Text>
-                        <AntDesign name="caretdown" size={10} color="rgba(255,255,255,0.7)" />
+                        <AntDesign name="caretdown" size={10} color={colors.weather.text.dim} />
                     </TouchableOpacity>
                     <View style={styles.headerPlaceholder} />
                 </View>
@@ -151,9 +141,14 @@ const WeatherScreen: React.FC = () => {
                 <TouchableOpacity
                     style={styles.locationButton}
                     onPress={() => setLocationPickerVisible(true)}
+                    activeOpacity={0.7}
                 >
                     <Text style={styles.headerTitle}>{location.name}</Text>
-                    <AntDesign name="caretdown" size={10} color="rgba(255,255,255,0.7)" />
+                    {isFetching ? (
+                        <ActivityIndicator size="small" color={colors.weather.text.dim} />
+                    ) : (
+                        <AntDesign name="caretdown" size={10} color={colors.weather.text.dim} />
+                    )}
                 </TouchableOpacity>
                 <View style={styles.headerPlaceholder} />
             </View>
@@ -286,7 +281,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: borderRadius.full,
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: colors.weather.bg.light,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -322,7 +317,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: spacing.md,
         fontSize: typography.fontSize.sm,
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: colors.weather.text.medium,
     },
 
     errorIcon: {
@@ -339,7 +334,7 @@ const styles = StyleSheet.create({
 
     errorHint: {
         fontSize: typography.fontSize.sm,
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: colors.weather.text.dim,
         marginTop: spacing.xs,
         textAlign: 'center',
     },
@@ -359,7 +354,7 @@ const styles = StyleSheet.create({
 
     locationTime: {
         fontSize: typography.fontSize.sm,
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: colors.weather.text.dim,
         marginTop: 2,
     },
 
@@ -378,23 +373,22 @@ const styles = StyleSheet.create({
 
     heroCondition: {
         fontSize: typography.fontSize.lg,
-        color: 'rgba(255, 255, 255, 0.9)',
+        color: colors.weather.text.light,
         fontWeight: typography.fontWeight.medium,
     },
 
     heroHighLow: {
         fontSize: typography.fontSize.base,
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: colors.weather.text.medium,
         marginTop: spacing.xs,
         fontWeight: typography.fontWeight.medium,
     },
 
-    // ── Metrics Card ───────────────────────────────
     metricsCard: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: colors.weather.bg.light,
         borderRadius: borderRadius.md,
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.xs,
@@ -404,7 +398,7 @@ const styles = StyleSheet.create({
     metricDivider: {
         width: 1,
         height: 32,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backgroundColor: colors.weather.border.light,
     },
 
     metricItem: {
@@ -425,7 +419,7 @@ const styles = StyleSheet.create({
 
     metricLabel: {
         fontSize: 11,
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: colors.weather.text.dim,
     },
 
     // ── Footer ─────────────────────────────────────
@@ -437,7 +431,7 @@ const styles = StyleSheet.create({
 
     footerText: {
         fontSize: typography.fontSize.xs,
-        color: 'rgba(255, 255, 255, 0.5)',
+        color: colors.weather.text.faint,
         textAlign: 'center',
     },
 });
