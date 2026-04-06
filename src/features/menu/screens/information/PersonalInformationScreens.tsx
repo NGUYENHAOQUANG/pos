@@ -11,7 +11,8 @@ import { useUserFarmStats } from '@/features/menu/hooks/useUserFarmStats';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { FarmConnecter } from '@/features/menu/components/information/FarmConnecter';
 import { PondConnecter } from '@/features/menu/components/information/PondConnecter';
@@ -33,6 +34,9 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { handleError } from '@/shared/utils';
 
 export const PersonalInformationScreens: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { setTabBarVisible } = useTabBarVisibility();
     const { userData, refetch } = useUserProfile();
@@ -336,63 +340,64 @@ export const PersonalInformationScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        padding: 16,
-        gap: 24,
-    },
-    bottomSpacer: {
-        height: 20,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            padding: 16,
+            gap: 24,
+        },
+        bottomSpacer: {
+            height: 20,
+        },
 
-    /* Section Styles */
-    sectionWrapper: {
-        gap: 12,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        lineHeight: 20,
-        fontWeight: '600',
-        color: colors.gray[950],
-    },
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        padding: 12,
-        gap: 24,
-    },
-    avatarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: colors.gray[100],
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    avatarImage: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-    },
-    changePhotoText: {
-        color: colors.blue[600],
-        fontSize: 14,
-        fontWeight: '500',
-        textDecorationLine: 'underline',
-    },
-    formFieldsWrapper: {
-        gap: 4,
-    },
-});
+        /* Section Styles */
+        sectionWrapper: {
+            gap: 12,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            lineHeight: 20,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        cardContainer: {
+            backgroundColor: theme.background,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            padding: 12,
+            gap: 24,
+        },
+        avatarContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 16,
+        },
+        avatar: {
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: theme.gray[100],
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+        },
+        avatarImage: {
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+        },
+        changePhotoText: {
+            color: theme.blue[600],
+            fontSize: 14,
+            fontWeight: '500',
+            textDecorationLine: 'underline',
+        },
+        formFieldsWrapper: {
+            gap: 4,
+        },
+    });

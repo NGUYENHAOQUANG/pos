@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { Tag } from '@/features/menu/components/Tag';
 import { Button } from '@/shared/components/buttons/Button';
@@ -12,6 +14,8 @@ interface AquacultureItemProps {
 }
 
 export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const formatDate = (date: string | Date) => {
         if (!date) return '...';
         const d = typeof date === 'string' ? new Date(date) : date;
@@ -57,53 +61,54 @@ export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        borderRadius: borderRadius.sm,
-        marginTop: spacing.sm,
-        marginHorizontal: spacing.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    content: {
-        flex: 1,
-        minWidth: 0,
-        marginRight: spacing.md,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.xs,
-    },
-    nameWrapper: {
-        flex: 1,
-        minWidth: 0,
-        marginRight: spacing.sm,
-    },
-    name: {
-        fontSize: typography.fontSize.base,
-        fontWeight: '600',
-        color: colors.text,
-        marginBottom: 8,
-    },
-    tag: {
-        marginBottom: 8,
-    },
-    date: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-    },
-    editButton: {
-        flexShrink: 0,
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-    },
-    editButtonText: {
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            padding: spacing.md,
+            borderRadius: borderRadius.sm,
+            marginTop: spacing.sm,
+            marginHorizontal: spacing.md,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        content: {
+            flex: 1,
+            minWidth: 0,
+            marginRight: spacing.md,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: spacing.xs,
+        },
+        nameWrapper: {
+            flex: 1,
+            minWidth: 0,
+            marginRight: spacing.sm,
+        },
+        name: {
+            fontSize: typography.fontSize.base,
+            fontWeight: '600',
+            color: theme.text,
+            marginBottom: 8,
+        },
+        tag: {
+            marginBottom: 8,
+        },
+        date: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+        },
+        editButton: {
+            flexShrink: 0,
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+        },
+        editButtonText: {
+            color: theme.text,
+        },
+    });

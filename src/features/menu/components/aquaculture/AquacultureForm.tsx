@@ -4,14 +4,13 @@ import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
-import {
-    DropDownButton,
-    DropDownItem,
-} from '@/features/menu/components/aquaculture/DropDownButton';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 
 import { RequiredDot } from '@/shared/components/forms/Input';
 import {
@@ -59,6 +58,8 @@ interface StatusOption {
 export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureFormProps>(
     ({ isEditMode, initialData, zoneOptions, onSubmit, onHasChangesChange }, ref) => {
         const initializedRef = useRef(false);
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
 
         const {
             control,
@@ -153,7 +154,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                     );
                                 }
                                 return (
-                                    <DropDownButton
+                                    <DropDownButtonBasic
                                         data={zoneOptions}
                                         value={selectedZone}
                                         onSelect={(item: DropDownItem) => {
@@ -191,7 +192,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                     inputStyle={
                                         value ? styles.inputTextFilled : styles.inputTextPlaceholder
                                     }
-                                    placeholderTextColor={colors.gray[400]}
+                                    placeholderTextColor={theme.textSecondary}
                                     error={errors.name?.message}
                                 />
                             )}
@@ -216,7 +217,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                     inputStyle={
                                         value ? styles.inputTextFilled : styles.inputTextPlaceholder
                                     }
-                                    placeholderTextColor={colors.gray[400]}
+                                    placeholderTextColor={theme.textSecondary}
                                     disabled
                                 />
                             )}
@@ -314,7 +315,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                                 : styles.inputTextPlaceholder,
                                         ]}
                                         placeholder="Nhập ghi chú"
-                                        placeholderTextColor={colors.gray[400]}
+                                        placeholderTextColor={theme.textSecondary}
                                         value={value || ''}
                                         onChangeText={text => {
                                             if (text.length > 1999) {
@@ -338,144 +339,145 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
     }
 );
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: 'transparent',
-        flex: 1,
-        marginHorizontal: spacing.md,
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        paddingHorizontal: 16,
-        paddingVertical: spacing.sm + 4,
-        flexGrow: 0,
-        gap: spacing.md,
-    },
-    labelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    requiredDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: colors.error,
-        marginLeft: 4,
-        marginBottom: 2,
-    },
-    content: {},
-    fieldContainer: {
-        gap: 6,
-    },
-    row: {
-        flexDirection: 'row',
-        marginBottom: 0,
-        gap: 16,
-    },
-    flex1: {
-        flex: 1,
-        gap: 6,
-    },
-    zIndex10: {
-        zIndex: 10,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    required: {
-        color: colors.error,
-    },
-    dropdown: {
-        zIndex: 100,
-    },
-    inputGroup: {
-        gap: 6,
-    },
-    noMarginBottom: {
-        marginBottom: 0,
-    },
-    textArea: {
-        height: 114,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        textAlignVertical: 'top',
-    },
-    customInputBox: {
-        height: 44,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-    },
-    customInputDisabledBox: {
-        height: 44,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        backgroundColor: colors.gray[100],
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-    },
-    inputTextFilled: {
-        fontSize: 16,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    inputTextPlaceholder: {
-        fontSize: 16,
-        fontWeight: '400',
-        lineHeight: 20,
-        color: colors.gray[400],
-    },
-    inputDisabledBox: {
-        backgroundColor: colors.gray[100],
-    },
-    fullCodeContainer: {
-        position: 'absolute',
-        top: 72,
-        right: 0,
-        minWidth: 260,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        paddingHorizontal: spacing.sm + 4,
-        paddingVertical: spacing.sm + 2,
-        zIndex: 100,
-        elevation: 5,
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 2,
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: 'transparent',
+            flex: 1,
+            marginHorizontal: spacing.md,
         },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-    },
-    fullCodeText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        lineHeight: 22,
-    },
-    fullCodeValue: {
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
-    errorText: {
-        fontSize: typography.fontSize.xs,
-        color: colors.error,
-        marginTop: 2,
-    },
-});
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            paddingHorizontal: 16,
+            paddingVertical: spacing.sm + 4,
+            flexGrow: 0,
+            gap: spacing.md,
+        },
+        labelRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        requiredDot: {
+            width: 4,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: theme.error,
+            marginLeft: 4,
+            marginBottom: 2,
+        },
+        content: {},
+        fieldContainer: {
+            gap: 6,
+        },
+        row: {
+            flexDirection: 'row',
+            marginBottom: 0,
+            gap: 16,
+        },
+        flex1: {
+            flex: 1,
+            gap: 6,
+        },
+        zIndex10: {
+            zIndex: 10,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.text,
+        },
+        required: {
+            color: theme.error,
+        },
+        dropdown: {
+            zIndex: 100,
+        },
+        inputGroup: {
+            gap: 6,
+        },
+        noMarginBottom: {
+            marginBottom: 0,
+        },
+        textArea: {
+            height: 114,
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+            textAlignVertical: 'top',
+        },
+        customInputBox: {
+            height: 44,
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+        },
+        customInputDisabledBox: {
+            height: 44,
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            backgroundColor: theme.backgroundSecondary,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+        },
+        inputTextFilled: {
+            fontSize: 16,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.text,
+        },
+        inputTextPlaceholder: {
+            fontSize: 16,
+            fontWeight: '400',
+            lineHeight: 20,
+            color: theme.textSecondary,
+        },
+        inputDisabledBox: {
+            backgroundColor: theme.backgroundSecondary,
+        },
+        fullCodeContainer: {
+            position: 'absolute',
+            top: 72,
+            right: 0,
+            minWidth: 260,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+            paddingHorizontal: spacing.sm + 4,
+            paddingVertical: spacing.sm + 2,
+            zIndex: 100,
+            elevation: 5,
+            shadowColor: theme.shadow,
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+        },
+        fullCodeText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            lineHeight: 22,
+        },
+        fullCodeValue: {
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+        },
+        errorText: {
+            fontSize: typography.fontSize.xs,
+            color: theme.error,
+            marginTop: 2,
+        },
+    });

@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
+import { spacing, borderRadius, shadows, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export interface DropDownItem {
     id: string | number;
@@ -43,6 +45,9 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
     height = 40,
     borderRadius: customBorderRadius,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value);
     const dropdownButtonRef = useRef<View>(null);
@@ -108,7 +113,7 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
                     <AntDesign
                         name={isDropdownVisible ? 'up' : 'down'}
                         size={14}
-                        color={colors.gray[400]}
+                        color={theme.gray[400]}
                     />
                 </TouchableOpacity>
             </View>
@@ -148,58 +153,59 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        zIndex: 1000,
-    },
-    dropdownButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        justifyContent: 'space-between',
-    },
-    buttonText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        flex: 1,
-        marginRight: spacing.sm,
-    },
-    modalOverlay: {
-        flex: 1,
-    },
-    dropdownContainer: {
-        position: 'absolute',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        ...shadows.md,
-        maxHeight: 250,
-    },
-    dropdownScrollContent: {
-        paddingVertical: spacing.xs,
-    },
-    dropdownItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: spacing.sm + 2,
-        paddingHorizontal: spacing.md,
-        marginHorizontal: spacing.xs,
-        borderRadius: borderRadius.sm,
-    },
-    dropdownItemSelected: {
-        backgroundColor: colors.gray[200],
-    },
-    dropdownItemText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-    },
-    dropdownItemTextSelected: {
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            zIndex: 1000,
+        },
+        dropdownButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.white,
+            paddingHorizontal: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.borderDark,
+            justifyContent: 'space-between',
+        },
+        buttonText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+            flex: 1,
+            marginRight: spacing.sm,
+        },
+        modalOverlay: {
+            flex: 1,
+        },
+        dropdownContainer: {
+            position: 'absolute',
+            backgroundColor: theme.white,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.borderDark,
+            ...shadows.md,
+            maxHeight: 250,
+        },
+        dropdownScrollContent: {
+            paddingVertical: spacing.xs,
+        },
+        dropdownItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: spacing.sm + 2,
+            paddingHorizontal: spacing.md,
+            marginHorizontal: spacing.xs,
+            borderRadius: borderRadius.sm,
+        },
+        dropdownItemSelected: {
+            backgroundColor: theme.gray[200],
+        },
+        dropdownItemText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+        },
+        dropdownItemTextSelected: {
+            fontWeight: typography.fontWeight.medium,
+            color: theme.text,
+        },
+    });

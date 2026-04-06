@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
 import { useSettingsStore, AutoLockTimeout } from '@/features/menu/store/settingsStore';
@@ -29,24 +31,28 @@ const SettingRow: React.FC<SettingRowProps> = ({
     value,
     onValueChange,
     disabled = false,
-}) => (
-    <View style={[styles.settingRow, disabled && styles.settingRowDisabled]}>
-        <View style={styles.settingInfo}>
-            <Text style={[styles.settingTitle, disabled && styles.settingTextDisabled]}>
-                {title}
-            </Text>
-            <Text style={[styles.settingSubtitle, disabled && styles.settingTextDisabled]}>
-                {subtitle}
-            </Text>
+}) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    return (
+        <View style={[styles.settingRow, disabled && styles.settingRowDisabled]}>
+            <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, disabled && styles.settingTextDisabled]}>
+                    {title}
+                </Text>
+                <Text style={[styles.settingSubtitle, disabled && styles.settingTextDisabled]}>
+                    {subtitle}
+                </Text>
+            </View>
+            <ButtonDevices
+                value={value}
+                onValueChange={onValueChange}
+                trackColor={theme.primaryOrange}
+                disabled={disabled}
+            />
         </View>
-        <ButtonDevices
-            value={value}
-            onValueChange={onValueChange}
-            trackColor={colors.primaryOrange}
-            disabled={disabled}
-        />
-    </View>
-);
+    );
+};
 
 interface AutoLockSelectorProps {
     currentValue: AutoLockTimeout;
@@ -61,6 +67,8 @@ const AutoLockSelector: React.FC<AutoLockSelectorProps> = ({
     disabled = false,
     onExpand,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [expanded, setExpanded] = useState(false);
     const currentLabel = AUTO_LOCK_OPTIONS.find(o => o.value === currentValue)?.label ?? '';
 
@@ -92,7 +100,7 @@ const AutoLockSelector: React.FC<AutoLockSelectorProps> = ({
                 <Ionicons
                     name={expanded ? 'chevron-up' : 'chevron-down'}
                     size={20}
-                    color={disabled ? colors.gray[400] : colors.textSecondary}
+                    color={disabled ? theme.gray[400] : theme.textSecondary}
                 />
             </TouchableOpacity>
 
@@ -116,7 +124,7 @@ const AutoLockSelector: React.FC<AutoLockSelectorProps> = ({
                                     {option.label}
                                 </Text>
                                 {isActive && (
-                                    <Ionicons name="checkmark" size={18} color={colors.primary} />
+                                    <Ionicons name="checkmark" size={18} color={theme.primary} />
                                 )}
                             </TouchableOpacity>
                         );
@@ -128,6 +136,9 @@ const AutoLockSelector: React.FC<AutoLockSelectorProps> = ({
 };
 
 export const SettingsScreen: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const soundEnabled = useSettingsStore(s => s.soundEnabled);
     const hapticEnabled = useSettingsStore(s => s.hapticEnabled);
@@ -307,7 +318,7 @@ export const SettingsScreen: React.FC = () => {
                                     }
                                     activeOpacity={0.7}
                                 >
-                                    <Ionicons name="key-outline" size={18} color={colors.primary} />
+                                    <Ionicons name="key-outline" size={18} color={theme.primary} />
                                     <Text style={styles.pinActionText}>Đổi mã PIN</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
@@ -317,8 +328,8 @@ export const SettingsScreen: React.FC = () => {
                                     }
                                     activeOpacity={0.7}
                                 >
-                                    <Ionicons name="trash-outline" size={18} color={colors.error} />
-                                    <Text style={[styles.pinActionText, { color: colors.error }]}>
+                                    <Ionicons name="trash-outline" size={18} color={theme.error} />
+                                    <Text style={[styles.pinActionText, { color: theme.error }]}>
                                         Xóa mã PIN
                                     </Text>
                                 </TouchableOpacity>
@@ -340,112 +351,113 @@ export const SettingsScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-    contentContainer: {
-        padding: spacing.md,
-        gap: 32,
-        paddingBottom: 40,
-    },
-    section: {
-        gap: 8,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-        overflow: 'hidden',
-    },
-    settingRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        gap: 12,
-    },
-    settingInfo: {
-        flex: 1,
-        gap: 4,
-    },
-    settingTitle: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    settingSubtitle: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.textSecondary,
-    },
-    settingRowDisabled: {
-        opacity: 0.4,
-    },
-    settingTextDisabled: {
-        color: colors.gray[400],
-    },
-    selectorHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        gap: 12,
-    },
-    optionsList: {
-        borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-    },
-    optionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: colors.borderLight,
-    },
-    optionItemActive: {
-        backgroundColor: colors.blue[25],
-    },
-    optionText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-    },
-    optionTextActive: {
-        fontWeight: '500',
-        color: colors.primary,
-    },
-    pinActions: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    pinActionButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-        paddingVertical: 10,
-    },
-    pinActionText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.primary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+        contentContainer: {
+            padding: spacing.md,
+            gap: 32,
+            paddingBottom: 40,
+        },
+        section: {
+            gap: 8,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'hidden',
+        },
+        settingRow: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            paddingHorizontal: 12,
+            paddingVertical: 12,
+            gap: 12,
+        },
+        settingInfo: {
+            flex: 1,
+            gap: 4,
+        },
+        settingTitle: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        settingSubtitle: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+        },
+        settingRowDisabled: {
+            opacity: 0.4,
+        },
+        settingTextDisabled: {
+            color: theme.gray[400],
+        },
+        selectorHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+            paddingVertical: 12,
+            gap: 12,
+        },
+        optionsList: {
+            borderTopWidth: 1,
+            borderTopColor: theme.borderLight,
+        },
+        optionItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: theme.borderLight,
+        },
+        optionItemActive: {
+            backgroundColor: theme.blue[25],
+        },
+        optionText: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.text,
+        },
+        optionTextActive: {
+            fontWeight: '500',
+            color: theme.primary,
+        },
+        pinActions: {
+            flexDirection: 'row',
+            gap: 8,
+        },
+        pinActionButton: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            backgroundColor: theme.white,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+            paddingVertical: 10,
+        },
+        pinActionText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.primary,
+        },
+    });

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
@@ -24,6 +26,9 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
     triggerValidation,
     initialData,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [operatingTime, setOperatingTime] = useState(initialData?.operatingTime || '');
     const [usageTime, setUsageTime] = useState(initialData?.usageTime || '');
 
@@ -80,24 +85,23 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        marginBottom: 100,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    title: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginBottom: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200],
-        paddingBottom: spacing.sm,
-        marginHorizontal: -spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            padding: spacing.md,
+            marginBottom: 100,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        title: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+            marginBottom: spacing.md,
+            paddingBottom: spacing.sm,
+            marginHorizontal: -spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+    });

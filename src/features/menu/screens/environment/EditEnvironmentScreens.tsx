@@ -5,7 +5,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EditEnvironmentCard } from '@/features/menu/components/environment/EditEnvironmentCard';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
@@ -18,6 +19,9 @@ import {
 import { useEnvironmentSettingStore } from '@/features/farm/store/environmentSettingStore';
 
 export const EditEnvironmentScreens: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation();
     const route = useRoute<any>();
 
@@ -162,30 +166,31 @@ export const EditEnvironmentScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingTop: 8,
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-    },
-    resetButton: {
-        borderColor: colors.primary,
-        flex: 1,
-        minWidth: 0,
-    },
-    resetButtonText: {
-        color: colors.primary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingTop: 8,
+            paddingHorizontal: 16,
+            paddingBottom: 16,
+        },
+        footer: {
+            backgroundColor: theme.white,
+            borderTopWidth: 1,
+            borderTopColor: theme.borderLight,
+        },
+        resetButton: {
+            borderColor: theme.primary,
+            flex: 1,
+            minWidth: 0,
+        },
+        resetButtonText: {
+            color: theme.primary,
+        },
+    });

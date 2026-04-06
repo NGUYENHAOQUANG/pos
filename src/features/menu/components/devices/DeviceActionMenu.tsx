@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { spacing, borderRadius, shadows } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface DeviceActionMenuProps {
     visible: boolean;
@@ -22,6 +24,9 @@ export const DeviceActionMenu: React.FC<DeviceActionMenuProps> = ({
     onDelete,
     position,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <Modal
             visible={visible}
@@ -63,30 +68,31 @@ export const DeviceActionMenu: React.FC<DeviceActionMenuProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    menu: {
-        position: 'absolute',
-        width: 200,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        ...shadows.md,
-        paddingVertical: spacing.xs,
-        elevation: 5,
-    },
-    menuItem: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-    },
-    menuText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    deleteText: {
-        fontSize: 14,
-        color: colors.error,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: 'transparent',
+        },
+        menu: {
+            position: 'absolute',
+            width: 200,
+            backgroundColor: theme.white,
+            borderRadius: borderRadius.md,
+            ...shadows.md,
+            paddingVertical: spacing.xs,
+            elevation: 5,
+        },
+        menuItem: {
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+        },
+        menuText: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        deleteText: {
+            fontSize: 14,
+            color: theme.error,
+        },
+    });

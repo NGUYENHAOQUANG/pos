@@ -11,7 +11,9 @@ import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { SeasonListSkeleton } from '@/features/menu/components/aquaculture/SeasonListSkeleton';
 import { useSeasons } from '@/features/menu/hooks/useSeasons';
@@ -19,7 +21,7 @@ import { useSeasons } from '@/features/menu/hooks/useSeasons';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
-import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
+import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -31,6 +33,8 @@ export const AquacultureManagementScreens: React.FC = () => {
     // Use React Query hook with infinite scroll
     const [selectedTab, setSelectedTab] = useState('all');
     const [selectedZoneId, setSelectedZoneId] = useState<string>('');
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const {
         seasons,
@@ -170,7 +174,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                 onBack={handleGoBack}
                 rightAction={
                     <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
-                        <Ionicons name="add" size={24} color={colors.text} />
+                        <Ionicons name="add" size={24} color={theme.text} />
                     </TouchableOpacity>
                 }
             />
@@ -180,7 +184,7 @@ export const AquacultureManagementScreens: React.FC = () => {
 
             {/* Dropdown Filter Section (White Background) */}
             <View style={styles.filterSection}>
-                <DropDownButton
+                <DropDownButtonBasic
                     data={zoneOptions}
                     value={selectedDropdownValue}
                     onSelect={handleZoneSelect}
@@ -222,7 +226,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                         ListFooterComponent={
                             isFetchingNextPage ? (
                                 <View style={styles.loaderFooter}>
-                                    <ActivityIndicator color={colors.primary} />
+                                    <ActivityIndicator color={theme.primary} />
                                 </View>
                             ) : null
                         }
@@ -242,45 +246,46 @@ export const AquacultureManagementScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    headingBar: {
-        backgroundColor: colors.white,
-        paddingVertical: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    content: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    filterSection: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.md,
-        zIndex: 100,
-    },
-    addButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-    },
-    listContent: {
-        paddingBottom: spacing.xl,
-    },
-    loaderFooter: {
-        paddingVertical: spacing.md,
-        alignItems: 'center' as const,
-    },
-    emptyScrollContent: {
-        flexGrow: 1,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        headingBar: {
+            backgroundColor: theme.background,
+            paddingVertical: spacing.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        content: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        filterSection: {
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.md,
+            paddingBottom: spacing.md,
+            zIndex: 100,
+        },
+        addButton: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.background,
+        },
+        listContent: {
+            paddingBottom: spacing.xl,
+        },
+        loaderFooter: {
+            paddingVertical: spacing.md,
+            alignItems: 'center' as const,
+        },
+        emptyScrollContent: {
+            flexGrow: 1,
+        },
+    });

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -33,6 +35,9 @@ const parseDate = (dateStr: string): Date => {
 };
 
 export const AddDeviceScreens = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ParamList, 'AddDevice'>>();
     const deviceId = route.params?.deviceId;
@@ -167,7 +172,7 @@ export const AddDeviceScreens = () => {
                 onBack={handleBack}
                 rightIcon={
                     isEditMode ? (
-                        <DeleteIcon width={20} height={20} color={colors.text} />
+                        <DeleteIcon width={20} height={20} color={theme.text} />
                     ) : undefined
                 }
                 onRightPress={isEditMode ? () => setDeleteModalVisible(true) : undefined}
@@ -214,23 +219,24 @@ export const AddDeviceScreens = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingTop: spacing.md,
-        paddingHorizontal: spacing.md,
-        paddingBottom: 100,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingTop: spacing.md,
+            paddingHorizontal: spacing.md,
+            paddingBottom: 100,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+        },
+    });

@@ -3,7 +3,9 @@ import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EquipmentMaintenance } from '@/features/menu/components/devices/EquipmentMaintenance';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
@@ -18,6 +20,9 @@ type EditEquimentMaintenanceScreenRouteProp = RouteProp<
 >;
 
 export const EditEquimentMaintenanceScreens = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation();
     const route = useRoute<EditEquimentMaintenanceScreenRouteProp>();
     // Expecting deviceId and maintenanceId (or the full maintenance record object)
@@ -124,7 +129,7 @@ export const EditEquimentMaintenanceScreens = () => {
             <HeaderMenu
                 title="Bảo trì thiết bị"
                 onBack={() => navigation.goBack()}
-                rightIcon={<IconTrashOutlined width={20} height={20} color={colors.text} />}
+                rightIcon={<IconTrashOutlined width={20} height={20} color={theme.text} />}
                 onRightPress={handleDelete}
             />
             <ScrollView contentContainerStyle={styles.content}>
@@ -158,22 +163,23 @@ export const EditEquimentMaintenanceScreens = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.md,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            paddingTop: spacing.sm,
+            paddingBottom: spacing.md,
+        },
+        footer: {
+            backgroundColor: theme.white,
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+        },
+    });
