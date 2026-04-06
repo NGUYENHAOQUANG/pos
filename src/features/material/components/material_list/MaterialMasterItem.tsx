@@ -11,7 +11,8 @@ import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DetailRow } from '@/features/material/components/DetailRow';
 
@@ -52,6 +53,9 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
     ({ item, onEdit, hideRemaining, alwaysExpanded, showStatus }) => {
         const [isExpanded, setIsExpanded] = useState(alwaysExpanded || false);
 
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         const toggleExpand = () => {
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             setIsExpanded(!isExpanded);
@@ -72,7 +76,7 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
                             label="Trạng thái:"
                             value={item.isActive ? 'Hoạt động' : 'Ngưng'}
                             valueStyle={{
-                                color: item.isActive ? colors.green[600] : colors.red[500],
+                                color: item.isActive ? theme.success : theme.error,
                             }}
                         />
                     )}
@@ -118,7 +122,7 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
                             <Ionicons
                                 name={isExpanded ? 'chevron-up' : 'chevron-down'}
                                 size={16}
-                                color={colors.primary}
+                                color={theme.primary}
                             />
                         </TouchableOpacity>
                     )}
@@ -129,98 +133,99 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
     arePropsEqual
 );
 
-const styles = StyleSheet.create({
-    container: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        gap: 4,
-    },
-    bodyContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 16,
-        gap: 12,
-    },
-    name: {
-        fontSize: 14,
-        fontWeight: '600',
-        lineHeight: 20,
-        color: colors.gray[950],
-        flex: 1,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    infoText: {
-        fontSize: 14,
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-    label: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.gray[500],
-    },
-    detailRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-    },
-    detailLabel: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-    detailValue: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.gray[950],
-        lineHeight: 20,
-    },
-    editButton: {
-        marginTop: spacing.sm,
-    },
-    expandToggle: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginVertical: spacing.sm,
-    },
-    expandText: {
-        fontSize: 14,
-        color: colors.primary,
-        marginRight: 4,
-        fontWeight: '600',
-    },
-    actionRow: {
-        flexDirection: 'row',
-        marginTop: spacing.md,
-    },
-    actionButton: {
-        flex: 1,
-    },
-    spacer: {
-        width: spacing.md,
-    },
-    separatorCenter: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginVertical: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            marginBottom: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 12,
+            paddingHorizontal: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+            gap: 4,
+        },
+        bodyContainer: {
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 16,
+            gap: 12,
+        },
+        name: {
+            fontSize: 14,
+            fontWeight: '600',
+            lineHeight: 20,
+            color: theme.text,
+            flex: 1,
+        },
+        infoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        infoText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            lineHeight: 20,
+        },
+        label: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        detailRow: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+        },
+        detailLabel: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            lineHeight: 20,
+        },
+        detailValue: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        editButton: {
+            marginTop: spacing.sm,
+        },
+        expandToggle: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginVertical: spacing.sm,
+        },
+        expandText: {
+            fontSize: 14,
+            color: theme.primary,
+            marginRight: 4,
+            fontWeight: '600',
+        },
+        actionRow: {
+            flexDirection: 'row',
+            marginTop: spacing.md,
+        },
+        actionButton: {
+            flex: 1,
+        },
+        spacer: {
+            width: spacing.md,
+        },
+        separatorCenter: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginVertical: spacing.sm,
+        },
+    });

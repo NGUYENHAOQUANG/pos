@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import Warning from '@/assets/Icon/Warning.svg';
 
 interface StatusHighlightProps {
@@ -11,6 +13,9 @@ interface StatusHighlightProps {
 }
 
 export const StatusHighlight: React.FC<StatusHighlightProps> = ({ label, value }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <Text style={styles.label}>{label}</Text>
@@ -23,31 +28,32 @@ export const StatusHighlight: React.FC<StatusHighlightProps> = ({ label, value }
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: colors.transparent,
-        paddingHorizontal: 12,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.gray[500],
-        lineHeight: 22,
-    },
-    valueContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    value: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.red[500],
-        lineHeight: 22,
-    },
-    icon: {
-        marginRight: 8,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: colors.transparent,
+            paddingHorizontal: 12,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            lineHeight: 22,
+        },
+        valueContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        value: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: colors.red[500],
+            lineHeight: 22,
+        },
+        icon: {
+            marginRight: 8,
+        },
+    });

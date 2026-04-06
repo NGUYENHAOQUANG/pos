@@ -4,7 +4,8 @@ import Animated from 'react-native-reanimated';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles';
 import {
     inventoryFormSchema,
     InventoryFormValues,
@@ -57,6 +58,8 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
     const scrollViewRef = useRef<Animated.ScrollView>(null);
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // ─── Form ──────────────────────────────────────────────
     const { control, handleSubmit, setValue, getValues, reset } = useForm<InventoryFormValues>({
@@ -136,7 +139,7 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
     if (isLoadingDetail) {
         return (
             <>
-                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
                 <View style={styles.container}>
                     <HeaderMeterial title={title} onBackPress={onBackPress} />
                     <AddMaterialSkeleton />
@@ -147,7 +150,7 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
 
     return (
         <>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+            <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
             <View style={styles.container}>
                 <HeaderMeterial
                     title={title}
@@ -207,17 +210,18 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    contentContainer: {
-        paddingBottom: 100,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        contentContainer: {
+            paddingBottom: 100,
+        },
+    });
 
 export const InventoryForm = React.memo(InventoryFormComponent);

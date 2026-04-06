@@ -1,7 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, borderRadius, spacing } from '@/styles';
 
 interface ButtonMaterialListProps {
     title: string;
@@ -18,6 +19,9 @@ export const ButtonMaterialList: React.FC<ButtonMaterialListProps> = ({
     textStyle,
     icon,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <TouchableOpacity
             style={[styles.button, icon ? styles.row : undefined, style]}
@@ -30,27 +34,28 @@ export const ButtonMaterialList: React.FC<ButtonMaterialListProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    button: {
-        paddingVertical: spacing.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-    },
-    row: {
-        flexDirection: 'row',
-        paddingHorizontal: spacing.md,
-        justifyContent: 'flex-start', // Align start when icon is present
-    },
-    iconContainer: {
-        marginRight: spacing.sm,
-    },
-    text: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        button: {
+            paddingVertical: spacing.sm,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: theme.borderDark,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.background,
+        },
+        row: {
+            flexDirection: 'row',
+            paddingHorizontal: spacing.md,
+            justifyContent: 'flex-start',
+        },
+        iconContainer: {
+            marginRight: spacing.sm,
+        },
+        text: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+    });

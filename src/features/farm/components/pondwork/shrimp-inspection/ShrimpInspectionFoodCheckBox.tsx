@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
@@ -26,6 +28,9 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
     leftoverFood,
     onLeftoverFoodChange,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const handleFoodAmountChange = (val: string) => {
         if (onFoodAmountChange) onFoodAmountChange(val);
     };
@@ -57,46 +62,47 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
     );
 };
 
-const styles = StyleSheet.create({
-    inputGroup: {
-        gap: spacing.sm,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 22,
-    },
-    radioGroup: {
-        flexWrap: 'wrap',
-    },
-    radioItem: {
-        width: '48%',
-        paddingVertical: 6,
-    },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.xs,
-    },
-    radioOuterSelected: {
-        borderColor: colors.primaryOrange,
-    },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primaryOrange,
-    },
-    radioLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-        lineHeight: 22,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        inputGroup: {
+            gap: spacing.sm,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 22,
+        },
+        radioGroup: {
+            flexWrap: 'wrap',
+        },
+        radioItem: {
+            width: '48%',
+            paddingVertical: 6,
+        },
+        radioOuter: {
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.xs,
+        },
+        radioOuterSelected: {
+            borderColor: theme.primaryOrange,
+        },
+        radioInner: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: theme.primaryOrange,
+        },
+        radioLabel: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+            lineHeight: 22,
+        },
+    });

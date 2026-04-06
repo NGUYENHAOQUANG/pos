@@ -21,7 +21,9 @@ import {
 import { documentApi } from '@/features/material/api/documentApi';
 import { APP_CONFIG } from '@/shared/constants/config';
 import { showImageSizeExceededToast } from '@/features/farm/utils/toastMessages';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, colors as legacyColors } from '@/styles/colors';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { IconCloseOutlined } from '@/assets/icons';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
@@ -68,6 +70,9 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
         },
         ref
     ) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         // Internal state for date
         const initialDateValue = useRef<Date>(initialDate || new Date());
         const [selectedDate, setSelectedDate] = useState<Date>(initialDateValue.current);
@@ -562,7 +567,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                                                         <View style={styles.loadingOverlay}>
                                                             <ActivityIndicator
                                                                 size="small"
-                                                                color={colors.white}
+                                                                color={theme.white}
                                                             />
                                                         </View>
                                                     )}
@@ -570,7 +575,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                                                         <View style={styles.loadingOverlay}>
                                                             <ActivityIndicator
                                                                 size="small"
-                                                                color={colors.error}
+                                                                color={theme.error}
                                                             />
                                                         </View>
                                                     )}
@@ -584,7 +589,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                                                         <IconCloseOutlined
                                                             width={12}
                                                             height={12}
-                                                            color={colors.textSecondary}
+                                                            color={theme.textSecondary}
                                                         />
                                                     </TouchableOpacity>
                                                 )}
@@ -630,122 +635,123 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
 
 const IMAGE_GAP = 8;
 
-const styles = StyleSheet.create({
-    inputGroup: {
-        gap: spacing.sm,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 22,
-    },
-    addImageButtonFull: {
-        width: '100%',
-        height: 48,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        gap: 8,
-    },
-    addImageText: {
-        fontSize: 16,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    imagesGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: IMAGE_GAP,
-        marginTop: spacing.xs,
-    },
-    imageItem: {
-        borderRadius: borderRadius.sm,
-        overflow: 'visible',
-        position: 'relative',
-    },
-    imageInner: {
-        width: '100%',
-        height: '100%',
-        borderRadius: borderRadius.sm,
-        overflow: 'hidden',
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    imageLoading: {
-        opacity: 0.7,
-    },
-    loadingOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 5,
-    },
-    removeButton: {
-        position: 'absolute',
-        top: -8,
-        right: -8,
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        backgroundColor: '#F3F4F6',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    required: {
-        color: colors.error,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        columnGap: spacing.sm,
-        rowGap: spacing.sm,
-    },
-    radioItem: {
-        width: '48%',
-        paddingVertical: 6,
-    },
-    harvestRadioItem: {
-        paddingVertical: 6,
-    },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.xs,
-    },
-    radioOuterSelected: {
-        borderColor: colors.primaryOrange,
-    },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primaryOrange,
-    },
-    radioLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-        lineHeight: 22,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        inputGroup: {
+            gap: spacing.sm,
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 22,
+        },
+        addImageButtonFull: {
+            width: '100%',
+            height: 48,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.full,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            gap: 8,
+        },
+        addImageText: {
+            fontSize: 16,
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+        imagesGrid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: IMAGE_GAP,
+            marginTop: spacing.xs,
+        },
+        imageItem: {
+            borderRadius: borderRadius.sm,
+            overflow: 'visible',
+            position: 'relative',
+        },
+        imageInner: {
+            width: '100%',
+            height: '100%',
+            borderRadius: borderRadius.sm,
+            overflow: 'hidden',
+        },
+        image: {
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+        },
+        imageLoading: {
+            opacity: 0.7,
+        },
+        loadingOverlay: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 5,
+        },
+        removeButton: {
+            position: 'absolute',
+            top: -8,
+            right: -8,
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: legacyColors.borderLight || theme.defaultBorder,
+            backgroundColor: '#F3F4F6',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 10,
+        },
+        required: {
+            color: theme.error,
+        },
+        radioGroup: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            columnGap: spacing.sm,
+            rowGap: spacing.sm,
+        },
+        radioItem: {
+            width: '48%',
+            paddingVertical: 6,
+        },
+        harvestRadioItem: {
+            paddingVertical: 6,
+        },
+        radioOuter: {
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.xs,
+        },
+        radioOuterSelected: {
+            borderColor: theme.primaryOrange,
+        },
+        radioInner: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: theme.primaryOrange,
+        },
+        radioLabel: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+            lineHeight: 22,
+        },
+    });

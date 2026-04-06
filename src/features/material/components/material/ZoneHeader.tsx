@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 
 interface ZoneHeaderProps {
     title?: string;
@@ -23,6 +24,8 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
     rightComponent,
 }) => {
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     return (
         <View style={[styles.wrapper, { paddingTop: insets.top + 12 }]}>
@@ -47,30 +50,31 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    wrapper: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.sm,
-        backgroundColor: colors.transparent,
-        zIndex: 1000,
-        overflow: 'visible',
-    },
-    topRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: spacing.md,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: colors.text,
-        flex: 1,
-    },
-    rightWrapper: {
-        marginLeft: spacing.sm,
-    },
-    dropdown: {
-        width: '100%',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        wrapper: {
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.sm,
+            backgroundColor: theme.transparent,
+            zIndex: 1000,
+            overflow: 'visible',
+        },
+        topRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: spacing.md,
+        },
+        title: {
+            fontSize: 20,
+            fontWeight: '600',
+            color: theme.text,
+            flex: 1,
+        },
+        rightWrapper: {
+            marginLeft: spacing.sm,
+        },
+        dropdown: {
+            width: '100%',
+        },
+    });

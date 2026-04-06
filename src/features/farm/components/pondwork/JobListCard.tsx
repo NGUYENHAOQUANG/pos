@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { JobCard, JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobExecution } from '@/features/farm/types/farm.types';
 
@@ -31,6 +33,9 @@ export const JobListCard: React.FC<JobListCardProps> = ({
 }) => {
     const displayDateLabel = `Hôm nay, ${new Date().toLocaleDateString('vi-VN')}`;
 
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Date Header standalone */}
@@ -55,20 +60,21 @@ export const JobListCard: React.FC<JobListCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        // Removed white background to show individual job cards directly on screen background
-    },
-    listContainer: {
-        paddingTop: spacing.sm,
-        paddingHorizontal: 16,
-    },
-    dateHeader: {
-        fontSize: 15,
-        fontWeight: '500',
-        color: colors.text,
-        paddingHorizontal: spacing.md,
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            // Removed white background to show individual job cards directly on screen background
+        },
+        listContainer: {
+            paddingTop: spacing.sm,
+            paddingHorizontal: 16,
+        },
+        dateHeader: {
+            fontSize: 15,
+            fontWeight: '500',
+            color: theme.text,
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.md,
+            marginBottom: spacing.xs,
+        },
+    });

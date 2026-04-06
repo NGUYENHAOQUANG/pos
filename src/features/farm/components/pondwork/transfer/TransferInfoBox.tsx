@@ -1,12 +1,14 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle, Keyboard } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import DeleteBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
 import { IconError } from '@/assets/icons';
-import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { Input, RequiredDot } from '@/shared/components/forms/Input';
 
@@ -23,9 +25,8 @@ interface TransferInfoBoxProps {
     onReceivingPondsChange: (ponds: ReceivingPondItem[]) => void;
     onReceivingPondPress?: (id: string) => void;
     totalEstimatedShrimp?: number;
-    pondOptions: DropdownOption[];
+    pondOptions: DropDownItem[];
     containerStyle?: ViewStyle;
-    onDropdownOpen?: () => void;
 }
 
 export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
@@ -37,9 +38,9 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     totalEstimatedShrimp,
     pondOptions,
     containerStyle,
-    onDropdownOpen,
 }) => {
-    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     // Calculate total quantity from all rows
     const totalQuantity = useMemo(() => {
         return receivingPonds.reduce((sum, pond) => {
@@ -128,29 +129,12 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
         [receivingPonds, onReceivingPondsChange, onReceivingPondPress]
     );
 
-    const handleToggleDropdown = useCallback(
-        (pondId: string) => {
-            Keyboard.dismiss();
-            setOpenDropdownId(prev => {
-                if (prev === pondId) {
-                    return null;
-                }
-                onDropdownOpen?.();
-                setTimeout(() => {
-                    setOpenDropdownId(pondId);
-                }, 400);
-                return null;
-            });
-        },
-        [onDropdownOpen]
-    );
-
     const selectedPondIds = useMemo(() => {
         return receivingPonds.map(p => p.receivingPond).filter((id): id is string => !!id);
     }, [receivingPonds]);
 
     const getAvailableOptions = useCallback(
-        (currentPondId: string | undefined): DropdownOption[] => {
+        (currentPondId: string | undefined): DropDownItem[] => {
             return pondOptions.filter(option => {
                 const isSelectedInOtherRow = selectedPondIds.some(
                     selectedId =>
@@ -205,16 +189,19 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                                         <RequiredDot />
                                     </View>
                                 )}
-                                <DropdownMaterial
-                                    value={pond.receivingPond}
-                                    onChange={val => handleReceivingPondSelect(pond.id, val)}
-                                    options={availableOptions}
-                                    placeholder="Chọn"
-                                    showAllOption={false}
-                                    isOpen={openDropdownId === pond.id}
-                                    onToggle={() => handleToggleDropdown(pond.id)}
-                                    useAutoScroll={true}
-                                />
+                                <View style={{ position: 'relative', zIndex: 10 }}>
+                                    <DropDownButtonBasic
+                                        data={availableOptions}
+                                        value={availableOptions.find(
+                                            o => String(o.id) === pond.receivingPond
+                                        )}
+                                        onSelect={item => {
+                                            handleReceivingPondSelect(pond.id, String(item.id));
+                                        }}
+                                        placeholder="Chọn"
+                                        showIcon={false}
+                                    />
+                                </View>
                             </View>
 
                             {/* Quantity */}
@@ -255,7 +242,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
 
                 {/* Add Receiving Pond Link */}
                 <TouchableOpacity style={styles.addLink} onPress={handleAddRow} activeOpacity={0.7}>
-                    <Ionicons name="add" size={16} color={colors.primary} />
+                    <Ionicons name="add" size={16} color={theme.primary} />
                     <Text style={styles.addLinkText}>Thêm ao nhận</Text>
                 </TouchableOpacity>
             </View>
@@ -263,99 +250,100 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    transferMethodContainer: {
-        gap: spacing.sm,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    required: {
-        color: colors.error,
-    },
-    pillButton: {
-        height: 22,
-        backgroundColor: colors.blue[50],
-        paddingHorizontal: spacing.sm,
-        borderRadius: borderRadius.xs,
-        borderColor: colors.blue[400],
-        borderWidth: 1,
-    },
-    pillButtonText: {
-        fontSize: 12,
-        fontWeight: '400',
-        color: colors.primary,
-        lineHeight: 20,
-    },
-    errorBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.errorBackground,
-        borderWidth: 1,
-        borderColor: colors.error,
-        borderRadius: borderRadius.sm,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        gap: spacing.sm,
-    },
-    errorText: {
-        fontWeight: '400',
-        fontStyle: 'normal',
-        fontSize: 14,
-        lineHeight: 22,
-        color: colors.text,
-        flex: 1,
-    },
-    rowContainer: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        alignItems: 'flex-start',
-    },
-    receivingPondContainer: {
-        gap: spacing.sm,
-    },
-    column: {
-        flex: 1,
-        gap: spacing.sm,
-    },
-    inputRow: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        alignItems: 'center',
-    },
-    inputContainer: {
-        flex: 1,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 11,
-    },
-    addLink: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-        marginTop: spacing.xs,
-    },
-    addLinkText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.primary,
-        marginLeft: spacing.xs,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        transferMethodContainer: {
+            gap: spacing.sm,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.text,
+            lineHeight: 22,
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        required: {
+            color: theme.error,
+        },
+        pillButton: {
+            height: 22,
+            backgroundColor: theme.blue[50],
+            paddingHorizontal: spacing.sm,
+            borderRadius: borderRadius.xs,
+            borderColor: theme.blue[400],
+            borderWidth: 1,
+        },
+        pillButtonText: {
+            fontSize: 12,
+            fontWeight: '400',
+            color: theme.primary,
+            lineHeight: 20,
+        },
+        errorBox: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.errorBackground,
+            borderWidth: 1,
+            borderColor: theme.error,
+            borderRadius: borderRadius.sm,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            gap: spacing.sm,
+        },
+        errorText: {
+            fontWeight: '400',
+            fontStyle: 'normal',
+            fontSize: 14,
+            lineHeight: 22,
+            color: theme.text,
+            flex: 1,
+        },
+        rowContainer: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            alignItems: 'flex-start',
+        },
+        receivingPondContainer: {
+            gap: spacing.sm,
+        },
+        column: {
+            flex: 1,
+            gap: spacing.sm,
+        },
+        inputRow: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            alignItems: 'center',
+        },
+        inputContainer: {
+            flex: 1,
+        },
+        deleteButton: {
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 11,
+        },
+        addLink: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignSelf: 'flex-start',
+            marginTop: spacing.xs,
+        },
+        addLinkText: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.primary,
+            marginLeft: spacing.xs,
+        },
+    });

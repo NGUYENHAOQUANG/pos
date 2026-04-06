@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CollapseHeadProps {
@@ -23,6 +25,9 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
     showIcon = false,
     rightComponent,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={[styles.container, style]} /* onPress={onToggle} */>
             <Text style={[styles.title, titleStyle]} numberOfLines={1}>
@@ -34,7 +39,7 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
                     <Ionicons
                         name={isExpanded ? 'chevron-up' : 'chevron-down'}
                         size={20}
-                        color={colors.gray[700]}
+                        color={theme.textSecondary}
                     />
                 )}
             </View>
@@ -42,29 +47,30 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-        borderColor: colors.border,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        lineHeight: 22,
-        color: colors.text,
-        flex: 1,
-    },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 12,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderTopLeftRadius: borderRadius.md,
+            borderTopRightRadius: borderRadius.md,
+            borderColor: theme.defaultBorder,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: '600',
+            lineHeight: 22,
+            color: theme.text,
+            flex: 1,
+        },
+        actions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+        },
+    });

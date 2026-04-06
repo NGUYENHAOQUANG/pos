@@ -17,7 +17,8 @@ import Animated, {
     runOnJS,
 } from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -28,6 +29,8 @@ interface ButtonMetaerialProps {
 
 export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = React.memo(
     ({ onShowMenu, isOpen }) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
         const buttonRef = useRef<View>(null);
         const isMeasuring = useRef(false);
         const lastPosition = useRef<{ x: number; y: number; width: number; height: number } | null>(
@@ -77,7 +80,7 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = React.memo(
             >
                 <Text style={styles.buttonText}>Thêm</Text>
                 <Animated.View style={animatedIconStyle}>
-                    <Ionicons name="add" size={20} color={colors.text} />
+                    <Ionicons name="add" size={20} color={theme.text} />
                 </Animated.View>
             </TouchableOpacity>
         );
@@ -107,6 +110,8 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
 
     const [isVisible, setIsVisible] = useState(false);
     const animation = useSharedValue(0);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     React.useEffect(() => {
         if (isOpen) {
@@ -162,7 +167,7 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
                     <TouchableHighlight
                         key={index}
                         style={styles.menuItem}
-                        underlayColor="#F5F5F7"
+                        underlayColor={theme.backgroundTertiary}
                         onPress={() => {
                             onClose();
                             setTimeout(() => {
@@ -178,69 +183,70 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
     );
 });
 
-const styles = StyleSheet.create({
-    container: {
-        alignItems: 'flex-end',
-    },
-    button: {
-        flexDirection: 'row',
-        height: 40,
-        paddingHorizontal: 12,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    buttonText: {
-        fontSize: 14,
-        lineHeight: 22,
-        fontWeight: '500',
-        color: colors.text,
-        marginRight: spacing.xs,
-    },
-    absoluteOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        zIndex: 2000,
-        elevation: 2000,
-    },
-    modalOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'transparent',
-    },
-    overlayContainer: {
-        position: 'absolute',
-        zIndex: 1000,
-    },
-    menuContainer: {
-        position: 'absolute',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        paddingVertical: spacing.xs,
-        minWidth: 280,
-        zIndex: 1001,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.15,
-                shadowRadius: 12,
-            },
-            android: {
-                elevation: 8,
-            },
-        }),
-    },
-    menuItem: {
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.md,
-        borderRadius: borderRadius.sm,
-        marginHorizontal: spacing.xs,
-    },
-    menuItemText: {
-        fontSize: 16,
-        color: colors.text,
-        fontWeight: '400',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            alignItems: 'flex-end',
+        },
+        button: {
+            flexDirection: 'row',
+            height: 40,
+            paddingHorizontal: 12,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        buttonText: {
+            fontSize: 14,
+            lineHeight: 22,
+            fontWeight: '500',
+            color: theme.text,
+            marginRight: spacing.xs,
+        },
+        absoluteOverlay: {
+            ...StyleSheet.absoluteFillObject,
+            zIndex: 2000,
+            elevation: 2000,
+        },
+        modalOverlay: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'transparent',
+        },
+        overlayContainer: {
+            position: 'absolute',
+            zIndex: 1000,
+        },
+        menuContainer: {
+            position: 'absolute',
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            paddingVertical: spacing.xs,
+            minWidth: 280,
+            zIndex: 1001,
+            ...Platform.select({
+                ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 12,
+                },
+                android: {
+                    elevation: 8,
+                },
+            }),
+        },
+        menuItem: {
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.md,
+            borderRadius: borderRadius.sm,
+            marginHorizontal: spacing.xs,
+        },
+        menuItemText: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: '400',
+        },
+    });

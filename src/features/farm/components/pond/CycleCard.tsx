@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography } from '@/styles';
+import { typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import ChevronRight from '@/assets/Icon/ChevronRight.svg';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { Tag } from './Tag';
+import { DetailRow } from '@/features/material/components/DetailRow';
 
 interface CycleCardProps {
     cycle: CycleData;
@@ -23,6 +26,9 @@ export const CycleCard: React.FC<CycleCardProps> = ({
     status = 'Chưa hoàn thành',
     onPress,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     if (!cycle) return null;
 
     const isCompleted = status === 'Hoàn thành';
@@ -54,96 +60,80 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                         label={status}
                         style={{ paddingHorizontal: 8, paddingVertical: 4 }}
                     />
-                    <ChevronRight width={18} height={18} style={styles.arrowIcon} />
+                    <ChevronRight
+                        width={18}
+                        height={18}
+                        style={styles.arrowIcon}
+                        color={theme.textSecondary}
+                    />
                 </View>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.body}>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Ngày nuôi (DOC):</Text>
-                    <Text style={styles.value}>{doc}</Text>
-                </View>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Số lượng thả (Pls):</Text>
-                    <Text style={styles.value}>
-                        {typeof stockingQuantity === 'number'
+                <DetailRow label="Ngày nuôi (DOC):" value={doc} />
+                <DetailRow
+                    label="Số lượng thả (Pls):"
+                    value={
+                        typeof stockingQuantity === 'number'
                             ? stockingQuantity.toLocaleString()
-                            : '-'}
-                    </Text>
-                </View>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tôm giống:</Text>
-                    <Text style={styles.value}>{breed}</Text>
-                </View>
+                            : '-'
+                    }
+                />
+                <DetailRow label="Tôm giống:" value={breed} />
             </View>
         </TouchableOpacity>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        width: '100%',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 16,
-    },
-    header: {
-        flexDirection: 'row',
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 8,
-        alignItems: 'center',
-    },
-    leftColumn: {
-        flex: 1,
-    },
-    cycleName: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 2,
-        lineHeight: 22,
-    },
-    dateText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        lineHeight: 22,
-    },
-    rightColumn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-    },
-    arrowIcon: {
-        marginLeft: 8,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
-    },
-    body: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 16,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: spacing.xs,
-    },
-    label: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        fontWeight: typography.fontWeight.regular,
-    },
-    value: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            width: '100%',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 16,
+        },
+        header: {
+            flexDirection: 'row',
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 8,
+            alignItems: 'center',
+        },
+        leftColumn: {
+            flex: 1,
+        },
+        cycleName: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 2,
+            lineHeight: 22,
+        },
+        dateText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            lineHeight: 22,
+        },
+        rightColumn: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+        },
+        arrowIcon: {
+            marginLeft: 8,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+        },
+        body: {
+            paddingHorizontal: 16,
+            paddingTop: 8,
+            paddingBottom: 16,
+            gap: 8,
+        },
+    });

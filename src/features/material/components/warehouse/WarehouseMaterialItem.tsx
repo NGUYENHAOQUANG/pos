@@ -4,7 +4,8 @@ import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 import { useMaterial } from '@/features/material/hooks';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { DetailRow } from '@/features/material/components/DetailRow';
@@ -45,6 +46,9 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
 
         // Fetch details for this material item using the hook
         const { data: detail } = useMaterial(item.materialId);
+
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
 
         return (
             <View style={styles.container}>
@@ -105,7 +109,7 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                             <Ionicons
                                 name={isExpanded ? 'chevron-up' : 'chevron-down'}
                                 size={16}
-                                color={colors.primary}
+                                color={theme.primary}
                             />
                         </TouchableOpacity>
                     )}
@@ -145,104 +149,105 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
     arePropsEqual
 );
 
-const styles = StyleSheet.create({
-    container: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        gap: 4,
-    },
-    bodyContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 16,
-    },
-    name: {
-        fontSize: 14,
-        fontWeight: '600',
-        lineHeight: 20,
-        color: colors.gray[950],
-        flex: 1,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    infoText: {
-        fontSize: 14,
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-    label: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.gray[500],
-    },
-    detailRow: {
-        gap: 12,
-    },
-    detailLabel: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.gray[500],
-        flex: 1,
-        lineHeight: 20,
-    },
-    detailValue: {
-        fontSize: 14,
-        color: colors.gray[950],
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    editButton: {
-        marginTop: spacing.sm,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        alignSelf: 'stretch',
-    },
-    expandToggle: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 8,
-        marginBottom: 12,
-    },
-    expandText: {
-        fontSize: 14,
-        color: colors.primary,
-        marginRight: 4,
-        fontWeight: '600',
-    },
-    actionRow: {
-        flexDirection: 'row',
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-        marginHorizontal: -16,
-        paddingHorizontal: 16,
-    },
-    actionButton: {
-        flex: 1,
-    },
-    spacer: {
-        width: 16,
-    },
-    separatorCenter: {
-        backgroundColor: colors.borderLight,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            marginBottom: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 12,
+            paddingHorizontal: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+            gap: 4,
+        },
+        bodyContainer: {
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 16,
+        },
+        name: {
+            fontSize: 14,
+            fontWeight: '600',
+            lineHeight: 20,
+            color: theme.text,
+            flex: 1,
+        },
+        infoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        infoText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            lineHeight: 20,
+        },
+        label: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        detailRow: {
+            gap: 12,
+        },
+        detailLabel: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.textSecondary,
+            flex: 1,
+            lineHeight: 20,
+        },
+        detailValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+            lineHeight: 20,
+        },
+        editButton: {
+            marginTop: spacing.sm,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: spacing.lg,
+            alignSelf: 'stretch',
+        },
+        expandToggle: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 8,
+            marginBottom: 12,
+        },
+        expandText: {
+            fontSize: 14,
+            color: theme.primary,
+            marginRight: 4,
+            fontWeight: '600',
+        },
+        actionRow: {
+            flexDirection: 'row',
+            paddingTop: 12,
+            borderTopWidth: 1,
+            borderTopColor: theme.borderLight,
+            marginHorizontal: -16,
+            paddingHorizontal: 16,
+        },
+        actionButton: {
+            flex: 1,
+        },
+        spacer: {
+            width: 16,
+        },
+        separatorCenter: {
+            backgroundColor: theme.borderLight,
+        },
+    });

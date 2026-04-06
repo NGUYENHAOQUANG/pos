@@ -5,9 +5,10 @@
  * @created 2025-11-16
  */
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { useAppTheme } from '@/styles/themeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
@@ -23,7 +24,6 @@ import {
 } from '@/shared/components/security/BiometricLockScreen';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
-import { colors } from '@/styles';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -45,31 +45,30 @@ onlineManager.setEventListener(setOnline => {
     });
 });
 
-const AppTheme = {
-    ...DefaultTheme,
-    colors: {
-        ...DefaultTheme.colors,
-        background: colors.white,
-    },
-};
-
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
-    const [appReady, setAppReady] = useState(false);
     const { isLocked, handleUnlock } = useBiometricLock();
+    const themeColors = useAppTheme();
+
+    const AppTheme = {
+        ...(themeColors.isDark ? DarkTheme : DefaultTheme),
+        colors: {
+            ...(themeColors.isDark ? DarkTheme.colors : DefaultTheme.colors),
+            background: themeColors.backgroundPrimary,
+            primary: themeColors.primary,
+            card: themeColors.background,
+            text: themeColors.text,
+            border: themeColors.border,
+            notification: themeColors.error,
+        },
+    };
 
     useEffect(() => {
-        const mountTimer = setTimeout(() => {
-            setAppReady(true);
-        }, 2000);
-        const splashTimer = setTimeout(() => {
+        const timer = setTimeout(() => {
             setShowSplash(false);
         }, 3200);
 
-        return () => {
-            clearTimeout(mountTimer);
-            clearTimeout(splashTimer);
-        };
+        return () => clearTimeout(timer);
     }, []);
 
     return (
@@ -80,11 +79,7 @@ export function AppProviders() {
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
                                 <NavigationContainer theme={AppTheme}>
-                                    {appReady ? (
-                                        <AppNavigator />
-                                    ) : (
-                                        <View style={styles.placeholder} />
-                                    )}
+                                    <AppNavigator />
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>
                         </ErrorBoundary>
@@ -102,9 +97,5 @@ export function AppProviders() {
 const styles = StyleSheet.create({
     gestureHandler: {
         flex: 1,
-    },
-    placeholder: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
     },
 });

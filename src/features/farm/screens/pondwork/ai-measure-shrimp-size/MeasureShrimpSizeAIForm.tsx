@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius, colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
@@ -80,6 +82,9 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     weight,
     onWeightChange,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const aiCount = currentMeasurement?.count ?? null;
     const sizeShrimp1 =
         currentMeasurement?.sizes && currentMeasurement.sizes.length > 0
@@ -191,7 +196,12 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                             {countTimes > 0 && (
                                 <>
                                     <View style={styles.infoBox}>
-                                        <InfoIcon width={20} height={20} style={styles.infoIcon} />
+                                        <InfoIcon
+                                            width={20}
+                                            height={20}
+                                            style={styles.infoIcon}
+                                            color={theme.info}
+                                        />
                                         <Text style={styles.infoText}>
                                             Bạn có thể chụp thêm hình để đo thêm nếu cần.
                                         </Text>
@@ -249,7 +259,7 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
                         activeOpacity={0.7}
                         style={styles.closeButton}
                     >
-                        <CloseIcon width={24} height={24} color={colors.text} />
+                        <CloseIcon width={24} height={24} color={theme.text} />
                     </TouchableOpacity>
                 </View>
 
@@ -288,161 +298,164 @@ export const MeasureShrimpSizeAIForm: React.FC<Props> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingHorizontal: 0,
-        paddingTop: 8,
-        paddingBottom: 100,
-        gap: 8,
-    },
-    summaryContainer: {
-        gap: 12,
-        paddingVertical: spacing.sm,
-    },
-    summaryRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    summaryLabel: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.textSecondary,
-        flex: 1,
-        lineHeight: 24,
-    },
-    summaryValue: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-        marginLeft: spacing.md,
-    },
-    infoBox: {
-        backgroundColor: colors.white,
-        padding: 16,
-        borderRadius: 8,
-        marginTop: 4,
-        marginBottom: 4,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderColor: colors.border,
-        borderWidth: 1,
-    },
-    infoIcon: {
-        marginRight: 8,
-    },
-    infoText: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-        lineHeight: 20,
-        flex: 1,
-    },
-    addMoreText: {
-        color: colors.text,
-    },
-    statusPill: {
-        borderRadius: 100,
-        paddingHorizontal: spacing.md,
-        paddingVertical: 4,
-        borderWidth: 1,
-        marginLeft: spacing.md,
-        maxWidth: '60%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    statusText: {
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    statusPillNormal: {
-        backgroundColor: colors.green[50],
-        borderColor: colors.green[200],
-    },
-    statusTextNormal: {
-        color: colors.green[600],
-    },
-    checkCountRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingTop: 12,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    checkCountLabel: {
-        fontSize: 16,
-        color: colors.textSecondary,
-    },
-    checkCountValue: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    sheetContainer: {
-        maxHeight: '70%',
-        borderRadius: 24,
-        margin: 16,
-        paddingBottom: 24,
-    },
-    sheetHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    sheetHeaderTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    closeButton: {
-        padding: 4,
-    },
-    sheetListContent: {
-        padding: spacing.md,
-        gap: spacing.sm,
-    },
-    sheetItemCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-    },
-    sheetItemLabel: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    sizePill: {
-        borderRadius: borderRadius.full,
-        paddingHorizontal: spacing.sm,
-        paddingVertical: 4,
-        borderWidth: 1,
-        backgroundColor: colors.green[25],
-        borderColor: colors.green[200],
-    },
-    sizePillText: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: colors.green[600],
-    },
-    sheetFooter: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingHorizontal: 0,
+            paddingTop: 8,
+            paddingBottom: 100,
+            gap: 8,
+        },
+        summaryContainer: {
+            gap: 12,
+            paddingVertical: spacing.sm,
+        },
+        summaryRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        summaryLabel: {
+            fontSize: 16,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            flex: 1,
+            lineHeight: 24,
+        },
+        summaryValue: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+            marginLeft: spacing.md,
+        },
+        infoBox: {
+            backgroundColor: theme.background,
+            padding: 16,
+            borderRadius: 8,
+            marginTop: 4,
+            marginBottom: 4,
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderColor: theme.defaultBorder,
+            borderWidth: 1,
+        },
+        infoIcon: {
+            marginRight: 8,
+            color: theme.info,
+        },
+        infoText: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+            lineHeight: 20,
+            flex: 1,
+        },
+        addMoreText: {
+            color: theme.text,
+        },
+        statusPill: {
+            borderRadius: 100,
+            paddingHorizontal: spacing.md,
+            paddingVertical: 4,
+            borderWidth: 1,
+            marginLeft: spacing.md,
+            maxWidth: '60%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        statusText: {
+            fontSize: 14,
+            fontWeight: '500',
+        },
+        statusPillNormal: {
+            backgroundColor: colors.green[50],
+            borderColor: colors.green[200],
+        },
+        statusTextNormal: {
+            color: colors.green[600],
+        },
+        checkCountRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingTop: 12,
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+        checkCountLabel: {
+            fontSize: 16,
+            color: theme.textSecondary,
+        },
+        checkCountValue: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        sheetContainer: {
+            maxHeight: '70%',
+            borderRadius: 24,
+            margin: 16,
+            paddingBottom: 24,
+            backgroundColor: theme.background,
+        },
+        sheetHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.defaultBorder,
+        },
+        sheetHeaderTitle: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        closeButton: {
+            padding: 4,
+        },
+        sheetListContent: {
+            padding: spacing.md,
+            gap: spacing.sm,
+        },
+        sheetItemCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+        },
+        sheetItemLabel: {
+            flex: 1,
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        sizePill: {
+            borderRadius: borderRadius.full,
+            paddingHorizontal: spacing.sm,
+            paddingVertical: 4,
+            borderWidth: 1,
+            backgroundColor: colors.green[25],
+            borderColor: colors.green[200],
+        },
+        sizePillText: {
+            fontSize: 13,
+            fontWeight: '500',
+            color: colors.green[600],
+        },
+        sheetFooter: {
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.sm,
+        },
+    });

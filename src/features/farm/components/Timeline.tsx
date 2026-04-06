@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ActivityCard, ActivityData } from './ActivityCard';
 
 export interface TimelineEntryProps {
@@ -21,6 +22,9 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
     note,
     noteOnTop,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <Text style={styles.timeText}>{time}</Text>
@@ -35,14 +39,15 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'column',
-    },
-    timeText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.textSecondary,
-        marginBottom: 8,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'column',
+        },
+        timeText: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            marginBottom: 8,
+        },
+    });

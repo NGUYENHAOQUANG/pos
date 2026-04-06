@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { /* useState, */ useEffect, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import CreateCycleForm from '@/features/farm/screens/create-cycle/CreateCycleForm';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import DeleteIcon from '@/assets/Icon/Delete.svg';
+// import DeleteIcon from '@/assets/Icon/Delete.svg';
 import {
     showPondNotFoundToast,
     showCycleFormValidationToast,
@@ -16,10 +17,10 @@ import {
 import {
     useCreateCycle,
     useUpdateCycle,
-    useDeleteCycle,
+    // useDeleteCycle,
     useCycleDetail,
 } from '@/features/farm/hooks/useCycle';
-import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+// import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useSeasonList } from '@/features/menu/hooks/useSeason';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
@@ -42,7 +43,10 @@ export const CreateCycleScreen: React.FC = () => {
 
     const { pondId, zoneId, cycleId, isEditMode: isEditModeParam } = route.params;
     const isEditMode: boolean = isEditModeParam ?? !!cycleId;
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    // const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // --- State & Form Hook Init ---
     const {
@@ -119,7 +123,7 @@ export const CreateCycleScreen: React.FC = () => {
     // --- Mutations ---
     const { mutate: createCycle, isPending: isCreating } = useCreateCycle();
     const { mutate: updateCycle, isPending: isUpdating } = useUpdateCycle();
-    const deleteCycleMutation = useDeleteCycle();
+    // const deleteCycleMutation = useDeleteCycle();
 
     const onSubmit = (formData: CreateCycleFormValues) => {
         if (!pondId) {
@@ -166,17 +170,17 @@ export const CreateCycleScreen: React.FC = () => {
         );
     };
 
-    const onDelete = async () => {
-        if (pondId && cycleId) {
-            try {
-                await deleteCycleMutation.mutateAsync({ pondId, cycleId });
-                setShowDeleteModal(false);
-                setTimeout(() => navigation.navigate('MainTabs' as never), 300);
-            } catch (_error) {
-                setShowDeleteModal(false);
-            }
-        }
-    };
+    // const onDelete = async () => {
+    //     if (pondId && cycleId) {
+    //         try {
+    //             await deleteCycleMutation.mutateAsync({ pondId, cycleId });
+    //             setShowDeleteModal(false);
+    //             setTimeout(() => navigation.navigate('MainTabs' as never), 300);
+    //         } catch (_error) {
+    //             setShowDeleteModal(false);
+    //         }
+    //     }
+    // };
 
     const onAIPress = useCallback(() => {
         navigation.navigate('CountingShrimp', { pondId, zoneId });
@@ -195,12 +199,12 @@ export const CreateCycleScreen: React.FC = () => {
             <HeaderSection
                 title={isEditMode ? 'Chỉnh sửa chu kỳ nuôi' : 'Tạo chu kỳ nuôi'}
                 onBack={() => navigation.goBack()}
-                rightIcon={
-                    isEditMode ? (
-                        <DeleteIcon width={20} height={20} color={colors.text} />
-                    ) : undefined
-                }
-                onRightPress={isEditMode ? () => setShowDeleteModal(true) : undefined}
+                // rightIcon={
+                //     isEditMode ? (
+                //         <DeleteIcon width={20} height={20} color={theme.text} />
+                //     ) : undefined
+                // }
+                // onRightPress={isEditMode ? () => setShowDeleteModal(true) : undefined}
             />
 
             <View style={{ flex: 1 }}>
@@ -235,7 +239,7 @@ export const CreateCycleScreen: React.FC = () => {
                 }
             />
 
-            <ConfirmationModalUI
+            {/* <ConfirmationModalUI
                 visible={showDeleteModal}
                 onConfirm={onDelete}
                 onCancel={() => setShowDeleteModal(false)}
@@ -244,16 +248,17 @@ export const CreateCycleScreen: React.FC = () => {
                 confirmText="Xóa chu kỳ"
                 cancelText="Không"
                 showSuccessToast={false}
-            />
+            /> */}
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+    });
 
 export default CreateCycleScreen;

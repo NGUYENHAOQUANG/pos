@@ -139,6 +139,7 @@ export const SettingsScreen: React.FC = () => {
     const lockMethod = useSettingsStore(s => s.lockMethod);
     const autoLockTimeout = useSettingsStore(s => s.autoLockTimeout);
     const pinHash = useSettingsStore(s => s.pinHash);
+    const themeMode = useSettingsStore(s => s.themeMode);
     const toggleSound = useSettingsStore(s => s.toggleSound);
     const toggleHaptic = useSettingsStore(s => s.toggleHaptic);
     const toggleAlertSound = useSettingsStore(s => s.toggleAlertSound);
@@ -149,6 +150,9 @@ export const SettingsScreen: React.FC = () => {
     const toggleWeather = useSettingsStore(s => s.toggleWeather);
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
+    const setThemeMode = useSettingsStore(s => s.setThemeMode);
+
+    const isDarkMode = themeMode === 'dark';
 
     const [biometricAvailable, setBiometricAvailable] = useState(false);
     const [biometricLabel, setBiometricLabel] = useState('');
@@ -218,9 +222,17 @@ export const SettingsScreen: React.FC = () => {
                         </View>
                     </View>
 
-                    {/* Animation Section */}
+                    {/* Animation & Theme Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Giao diện & hiệu ứng</Text>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Chế độ tối (Dark Mode)"
+                                subtitle="Sử dụng giao diện màu tối cho ứng dụng"
+                                value={isDarkMode}
+                                onValueChange={val => setThemeMode(val ? 'dark' : 'light')}
+                            />
+                        </View>
                         <View style={styles.card}>
                             <SettingRow
                                 title="Trượt chuyển tab"

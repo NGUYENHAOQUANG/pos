@@ -7,7 +7,9 @@
  *
  * @see https://rn.mobile.ant.design/components/button
  */
-import { borderRadius, colors, sizes, spacing, typography } from '@/styles';
+import { borderRadius, sizes, spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { haptics } from '@/shared/utils/haptics';
 import React from 'react';
 import {
@@ -73,6 +75,9 @@ export function Button({
     textStyle,
     adjustsFontSizeToFit = true,
 }: ButtonProps) {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const isDisabled = disabled || loading;
 
     // Get button styles based on variant and size
@@ -98,19 +103,19 @@ export function Button({
     const getIconColor = (): string => {
         if (isDisabled) {
             return variant === 'primary' || variant === 'outline'
-                ? colors.textTertiary
-                : colors.textTertiary;
+                ? theme.textTertiary
+                : theme.textTertiary;
         }
         switch (variant) {
             case 'primary':
-                return colors.white;
+                return theme.white;
             case 'outline':
-                return colors.text;
+                return theme.text;
             case 'ghost':
             case 'text':
-                return colors.primary;
+                return theme.primary;
             default:
-                return colors.white;
+                return theme.white;
         }
     };
 
@@ -146,10 +151,10 @@ export function Button({
                     size="small"
                     color={
                         variant === 'primary'
-                            ? colors.white
+                            ? theme.white
                             : variant === 'outline'
-                            ? colors.text
-                            : colors.primary
+                            ? theme.text
+                            : theme.primary
                     }
                 />
             ) : (
@@ -190,107 +195,108 @@ export function Button({
     );
 }
 
-const styles = StyleSheet.create({
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: 'transparent',
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        button: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: 'transparent',
+        },
 
-    // Variant styles
-    primary: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
-    },
-    outline: {
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-    },
-    ghost: {
-        backgroundColor: 'transparent',
-        borderColor: colors.primary,
-    },
-    text: {
-        backgroundColor: 'transparent',
-        borderColor: 'transparent',
-        borderWidth: 0,
-    },
+        // Variant styles
+        primary: {
+            backgroundColor: theme.primary,
+            borderColor: theme.primary,
+        },
+        outline: {
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+        },
+        ghost: {
+            backgroundColor: 'transparent',
+            borderColor: theme.primary,
+        },
+        text: {
+            backgroundColor: 'transparent',
+            borderColor: 'transparent',
+            borderWidth: 0,
+        },
 
-    // Size styles
-    smallSize: {
-        minHeight: sizes.button.sm,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs,
-    },
-    mediumSize: {
-        minHeight: sizes.button.md,
-        paddingHorizontal: 12,
-        paddingVertical: spacing.sm,
-    },
-    largeSize: {
-        minHeight: sizes.button.lg,
-        paddingHorizontal: spacing.xl,
-        paddingVertical: spacing.md,
-    },
+        // Size styles
+        smallSize: {
+            minHeight: sizes.button.sm,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.xs,
+        },
+        mediumSize: {
+            minHeight: sizes.button.md,
+            paddingHorizontal: 12,
+            paddingVertical: spacing.sm,
+        },
+        largeSize: {
+            minHeight: sizes.button.lg,
+            paddingHorizontal: spacing.xl,
+            paddingVertical: spacing.md,
+        },
 
-    // Text styles
-    buttonText: {
-        fontWeight: typography.fontWeight.medium,
-        textAlign: 'center',
-    },
-    primaryText: {
-        color: colors.white,
-    },
-    outlineText: {
-        color: colors.text,
-    },
-    ghostText: {
-        color: colors.primary,
-    },
-    textText: {
-        color: colors.primary,
-    },
+        // Text styles
+        buttonText: {
+            fontWeight: typography.fontWeight.medium,
+            textAlign: 'center',
+        },
+        primaryText: {
+            color: theme.white,
+        },
+        outlineText: {
+            color: theme.text,
+        },
+        ghostText: {
+            color: theme.primary,
+        },
+        textText: {
+            color: theme.primary,
+        },
 
-    // Size text styles
-    smallText: {
-        fontSize: typography.fontSize.sm,
-        lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
-    },
-    mediumText: {
-        fontSize: typography.fontSize.base,
-        lineHeight: typography.fontSize.base * typography.lineHeight.normal,
-    },
-    largeText: {
-        fontSize: typography.fontSize.lg,
-        lineHeight: typography.fontSize.lg * typography.lineHeight.normal,
-    },
+        // Size text styles
+        smallText: {
+            fontSize: typography.fontSize.sm,
+            lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
+        },
+        mediumText: {
+            fontSize: typography.fontSize.base,
+            lineHeight: typography.fontSize.base * typography.lineHeight.normal,
+        },
+        largeText: {
+            fontSize: typography.fontSize.lg,
+            lineHeight: typography.fontSize.lg * typography.lineHeight.normal,
+        },
 
-    // Content layout
-    content: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    iconLeft: {
-        marginRight: spacing.xs,
-    },
-    iconRight: {
-        marginLeft: spacing.xs,
-    },
+        // Content layout
+        content: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        iconLeft: {
+            marginRight: spacing.xs,
+        },
+        iconRight: {
+            marginLeft: spacing.xs,
+        },
 
-    // States
-    disabled: {
-        opacity: 0.5,
-    },
-    disabledText: {
-        opacity: 0.7,
-    },
+        // States
+        disabled: {
+            opacity: 0.5,
+        },
+        disabledText: {
+            opacity: 0.7,
+        },
 
-    // Full width
-    fullWidth: {
-        width: '100%',
-    },
-});
+        // Full width
+        fullWidth: {
+            width: '100%',
+        },
+    });

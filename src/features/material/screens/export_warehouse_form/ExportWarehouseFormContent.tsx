@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 import Animated from 'react-native-reanimated';
 
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 import { Zone } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/pond.types';
 
@@ -74,6 +75,8 @@ const ExportWarehouseFormInner: React.FC<ExportWarehouseFormProps> = ({
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
     const scrollViewRef = useRef<any>(null);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // ─── Form ───────────────────────────────────────────────
     const { control, handleSubmit, reset, setValue, getValues } =
@@ -227,7 +230,7 @@ const ExportWarehouseFormInner: React.FC<ExportWarehouseFormProps> = ({
     if (isLoadingDetail) {
         return (
             <>
-                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
                 <View style={styles.container}>
                     <HeaderMeterial title="Chỉnh Sửa Phiếu Xuất Kho" onBackPress={onBackPress} />
                     <AddMaterialSkeleton />
@@ -316,18 +319,19 @@ const ExportWarehouseFormInner: React.FC<ExportWarehouseFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    contentScroll: {
-        flex: 1,
-    },
-    contentContainer: {
-        gap: spacing.sm,
-        paddingBottom: 100,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        contentScroll: {
+            flex: 1,
+        },
+        contentContainer: {
+            gap: spacing.sm,
+            paddingBottom: 100,
+        },
+    });
 
 export const ExportWarehouseForm = React.memo(ExportWarehouseFormInner);

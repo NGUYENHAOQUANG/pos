@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
@@ -33,6 +34,7 @@ const StockingInfoSection: React.FC<Props> = ({
 }) => {
     const activeBreedSource = useWatch({ control, name: 'breedSource' });
     const activeStockingQuantity = useWatch({ control, name: 'stockingQuantity' });
+    const theme = useAppTheme();
 
     const estimatedCost = useMemo(() => {
         if (!activeBreedSource || !activeStockingQuantity) {
@@ -153,7 +155,7 @@ const StockingInfoSection: React.FC<Props> = ({
                     title="Kiểm đếm tôm giống bằng AI"
                     variant="outline"
                     onPress={onPressCountingShrimp || (() => {})}
-                    renderLeftIcon={<IconAICheck width={20} height={20} fill={colors.text} />}
+                    renderLeftIcon={<IconAICheck width={20} height={20} fill={theme.text} />}
                     fullWidth
                 />
             </View>

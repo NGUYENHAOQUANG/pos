@@ -4,7 +4,9 @@ import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -38,6 +40,9 @@ export const FeedingManagementScreens = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pondId, jobId, itemToEdit } = route.params || {};
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const isEditMode = !!jobId;
 
@@ -332,7 +337,7 @@ export const FeedingManagementScreens = () => {
                     updateMutation.isPending ||
                     (isEditMode && !formHasChanges)
                 }
-                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                style={{ borderTopWidth: 1, borderTopColor: theme.defaultBorder }}
             />
             {isEditMode && (
                 <ConfirmationModalUI
@@ -345,15 +350,16 @@ export const FeedingManagementScreens = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    contentContainer: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        contentContainer: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingBottom: spacing.md,
+        },
+    });

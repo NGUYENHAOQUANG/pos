@@ -3,7 +3,9 @@ import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/shared/components/buttons/Button';
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { usePreventDoubleTap } from '@/shared/hooks/usePreventDoubleTap';
 
 export type ButtonBarMode = 'total' | 'single' | 'double';
@@ -47,6 +49,9 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     containerStyle,
     equalWidth = false,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const insets = useSafeAreaInsets();
     // Use actual safe area insets with minimum fallback
     const paddingBottom = Math.max(insets.bottom, 12);
@@ -97,7 +102,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                                 secondaryButtonStyle,
                             ])}
                             textStyle={StyleSheet.flatten([
-                                { color: colors.text },
+                                { color: theme.text },
                                 secondaryButtonTextStyle,
                             ])}
                             disabled={secondaryButtonDisabled}
@@ -145,54 +150,55 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        paddingTop: 16, // Fixed top padding 16 as requested
-        paddingHorizontal: spacing.md,
-        // paddingBottom is handled dynamically
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-    },
-    totalContainer: {
-        justifyContent: 'center',
-        flex: 1,
-    },
-    totalLabel: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: 2,
-    },
-    totalValue: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.error,
-    },
-    primaryButton: {
-        minWidth: 120,
-        height: 40,
-        borderRadius: borderRadius.full,
-    },
-    secondaryButton: {
-        minWidth: 100,
-        height: 40,
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
-    },
-    flexButton: {
-        flex: 1,
-        height: 40,
-    },
-    fullButton: {
-        flex: 1,
-        height: 40,
-    },
-    spacer: {
-        width: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            paddingTop: 16, // Fixed top padding 16 as requested
+            paddingHorizontal: spacing.md,
+            // paddingBottom is handled dynamically
+        },
+        row: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+        },
+        totalContainer: {
+            justifyContent: 'center',
+            flex: 1,
+        },
+        totalLabel: {
+            fontSize: 14,
+            color: theme.text,
+            marginBottom: 2,
+        },
+        totalValue: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.error,
+        },
+        primaryButton: {
+            minWidth: 120,
+            height: 40,
+            borderRadius: borderRadius.full,
+        },
+        secondaryButton: {
+            minWidth: 100,
+            height: 40,
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.full,
+        },
+        flexButton: {
+            flex: 1,
+            height: 40,
+        },
+        fullButton: {
+            flex: 1,
+            height: 40,
+        },
+        spacer: {
+            width: spacing.sm,
+        },
+    });

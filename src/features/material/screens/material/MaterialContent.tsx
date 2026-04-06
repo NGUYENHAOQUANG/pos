@@ -14,7 +14,8 @@ import { MaterialListScreen } from '@/features/material/screens/material_list/Ma
 import { InventoryListScreen } from '@/features/material/screens/inventory_list/InventoryListScreen';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles';
 
 export enum TabType {
     Warehouse = 'warehouse',
@@ -69,6 +70,9 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
     handleHistoryPress,
     actions,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
@@ -130,12 +134,13 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+    });
