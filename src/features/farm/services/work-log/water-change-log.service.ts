@@ -79,10 +79,8 @@ export const waterChangeLogService: IBaseLogService<IWaterSupplyRecord> = {
     },
 
     convertReferenceDataToActivityData: (
-        ref: IPondRecordReferenceData | Record<string, unknown>,
-        ...extraContexts: unknown[]
+        ref: IPondRecordReferenceData | Record<string, unknown>
     ): ActivityData[] => {
-        const materialMap = (extraContexts[0] as Record<string, any>) || {};
         const data: ActivityData[] = [];
         const ra = ref as any;
         if (ra.targetWaterLevel != null)
@@ -96,7 +94,7 @@ export const waterChangeLogService: IBaseLogService<IWaterSupplyRecord> = {
             data.push({ label: 'Thể tích nước cấp (m³)', value: `${ra.addedVolume}` });
         if (ra.finalVolume != null)
             data.push({ label: 'Thể tích sau cấp (m³)', value: `${ra.finalVolume}` });
-        pushMaterialRows(data, ra.materials, materialMap);
+        pushMaterialRows(data, ra.materials);
         return data;
     },
 };

@@ -136,69 +136,40 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                 {selectedIndex !== null &&
                     (() => {
                         const pos = getTooltipCenter(arcs[selectedIndex]);
-
-                        const isRightSide = pos.cx > 0;
                         const isBottomSide = pos.cy > 0;
 
-                        // Prevent pushing right outside container bound
-                        const marginSafeguard = 100;
+                        const padding = 16;
+                        const tooltipWidth = containerWidth * 0.55;
+                        const tooltipHeight = 80;
 
-                        // Determine if there's enough room to naturally push outwards
-                        let anchorLeft: number | undefined;
-                        let anchorRight: number | undefined;
+                        // Center horizontally
+                        const tooltipLeft = (containerWidth - tooltipWidth) / 2;
 
-                        if (isRightSide) {
-                            // Normally point outwards from right slice (grow right -> anchor left)
-                            if (pos.x + marginSafeguard < containerWidth) {
-                                anchorLeft = pos.x;
-                            } else {
-                                // Too close to right crop, point inwards (grow left -> anchor right)
-                                anchorRight = containerWidth - pos.x;
-                            }
+                        // Vertical: above slice if bottom half, below if top half, clamped
+                        let tooltipTop: number;
+                        if (isBottomSide) {
+                            tooltipTop = pos.y - tooltipHeight - 10;
                         } else {
-                            // Normally point outwards from left slice (grow left -> anchor right)
-                            if (pos.x - marginSafeguard > 0) {
-                                anchorRight = containerWidth - pos.x;
-                            } else {
-                                // Too close to left crop, point inwards (grow right -> anchor left)
-                                anchorLeft = pos.x;
-                            }
+                            tooltipTop = pos.y + 10;
                         }
+                        tooltipTop = Math.max(
+                            padding,
+                            Math.min(tooltipTop, svgHeight - tooltipHeight - padding)
+                        );
 
                         return (
                             <View
                                 style={[
                                     styles.tooltipWrapper,
                                     {
-                                        left: anchorLeft,
-                                        right: anchorRight,
-
-                                        top: isBottomSide ? pos.y : undefined,
-                                        bottom: !isBottomSide ? svgHeight - pos.y : undefined,
+                                        left: tooltipLeft,
+                                        top: tooltipTop,
+                                        width: tooltipWidth,
                                     },
                                 ]}
                                 pointerEvents="none"
                             >
-                                <View
-                                    style={[
-                                        styles.tooltip,
-                                        {
-                                            // Offset the popup slightly inwards using transforms based on its side
-                                            transform: [
-                                                {
-                                                    translateX: isRightSide
-                                                        ? anchorLeft !== undefined
-                                                            ? -15
-                                                            : 15
-                                                        : anchorRight !== undefined
-                                                        ? 15
-                                                        : -15,
-                                                },
-                                                { translateY: isBottomSide ? -15 : 15 },
-                                            ],
-                                        },
-                                    ]}
-                                >
+                                <View style={styles.tooltip}>
                                     <View style={styles.tooltipTitleRow}>
                                         <View
                                             style={[
@@ -206,7 +177,7 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                                                 { backgroundColor: data[selectedIndex].color },
                                             ]}
                                         />
-                                        <Text style={styles.tooltipTitle}>
+                                        <Text style={styles.tooltipTitle} numberOfLines={2}>
                                             {data[selectedIndex].label}
                                         </Text>
                                     </View>
@@ -286,6 +257,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: colors.black,
+        flexShrink: 1,
     },
     tooltipDetail: {
         fontSize: 12,

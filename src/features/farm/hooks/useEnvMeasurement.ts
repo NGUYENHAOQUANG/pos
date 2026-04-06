@@ -138,7 +138,7 @@ export const useEnvMeasurementsAsJobs = (pondId: string, params?: IEnvMeasuremen
 
     const jobs: JobExecution[] = useMemo(() => {
         const rawItems = response?.data?.items || [];
-        return envMeasurementLogService.mapRecordsToJobs(rawItems, undefined, metricTypes);
+        return envMeasurementLogService.mapRecordsToJobs(rawItems, metricTypes);
     }, [response?.data?.items, metricTypes]);
 
     return { jobs, isLoading, refetch };

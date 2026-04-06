@@ -12,7 +12,7 @@ import {
     DropDownButton,
     DropDownItem,
 } from '@/features/menu/components/aquaculture/DropDownButton';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+
 import { RequiredDot } from '@/shared/components/forms/Input';
 import {
     aquacultureFormSchema,
@@ -182,7 +182,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                             name="name"
                             control={control}
                             render={({ field: { onChange, value } }) => (
-                                <FarmInput
+                                <Input
                                     value={value}
                                     onChangeText={onChange}
                                     placeholder="Tên vụ nuôi"

@@ -94,5 +94,6 @@ export interface PondLogMaterialType {
     warehouseItemId: string;
     quantity: number;
     name?: string | null;
+    materialName?: string | null; // Dùng cho nhật kí công việc
     unitName?: string | null;
 }

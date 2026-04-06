@@ -71,12 +71,10 @@ export const feedingLogService: IBaseLogService<FeedingRecordItem> = {
     },
 
     convertReferenceDataToActivityData: (
-        ref: IPondRecordReferenceData | Record<string, unknown>,
-        ...extraContexts: unknown[]
+        ref: IPondRecordReferenceData | Record<string, unknown>
     ): ActivityData[] => {
-        const materialMap = (extraContexts[0] as Record<string, any>) || {};
         const data: ActivityData[] = [];
-        pushMaterialRows(data, (ref as any).materials, materialMap);
+        pushMaterialRows(data, (ref as any).materials);
         return data;
     },
 };

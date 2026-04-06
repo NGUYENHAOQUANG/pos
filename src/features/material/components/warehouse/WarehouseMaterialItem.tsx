@@ -86,9 +86,9 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                             {!alwaysExpanded && <View style={styles.separatorCenter} />}
                             <DetailRow label="Loại vật tư:" value={detail?.type} />
                             <DetailRow label="Nhà sản xuất:" value={detail?.manufacturer} />
-                            <DetailRow label="Công dụng:" value={detail?.usage} />
+                            <DetailRow label="Chú thích:" value={detail?.usage} />
                             <DetailRow label="Đơn vị sử dụng:" value={detail?.unitName} />
-                            <DetailRow label="Liều dùng:" value={detail?.unitOfUse} />
+                            {/* <DetailRow label="Liều dùng:" value={detail?.unitOfUse} /> */}
                         </View>
                     )}
 
