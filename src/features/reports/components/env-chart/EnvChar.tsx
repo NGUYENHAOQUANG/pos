@@ -113,7 +113,7 @@ export default function EnvChar({
     // Derived dimensions
     const CHART_LEFT_PADDING = 60;
     const CHART_RIGHT_PADDING = 30; // half label width to prevent clipping at edge
-    const MIN_DATE_SPACING = 10; // px per day interval
+    const MIN_DATE_SPACING = 15; // px per day interval
     const chartAreaWidth = Math.max(0, layout.width);
 
     // X-axis dates from metadata only
@@ -382,7 +382,7 @@ export default function EnvChar({
                                     if (isLast && !isSeventhDay) {
                                         const prevLabelIndex =
                                             Math.floor((xTicks.length - 1) / 7) * 7;
-                                        if (i - prevLabelIndex < 3) return null;
+                                        if (i - prevLabelIndex < 4) return null;
                                     }
 
                                     return (
