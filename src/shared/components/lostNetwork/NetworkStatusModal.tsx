@@ -15,59 +15,113 @@ export const NetworkStatusModal = () => {
     // Initialize as true to avoid showing "Restored" on app launch if connected
     const prevConnectedRef = useRef<boolean | null>(true);
 
+    // Timers
+    const lostTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const restoredTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Dọn dẹp timer
+    const clearTimers = () => {
+        if (lostTimerRef.current) clearTimeout(lostTimerRef.current);
+        if (restoredTimerRef.current) clearTimeout(restoredTimerRef.current);
+        lostTimerRef.current = null;
+        restoredTimerRef.current = null;
+    };
+
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+            // Đôi khi isConnected có thể null (unknown state), ta chỉ xử lý khi nó thực sự true hoặc false
+            if (state.isConnected === null) return;
+
             const connected = state.isConnected;
 
-            // If currently disconnected
+            // Nếu mất kết nối
             if (connected === false) {
-                setStatusType('lost');
-                setVisible(true);
-            }
-            // If connected now but was previously disconnected
-            else if (connected === true && prevConnectedRef.current === false) {
-                setStatusType('restored');
-                setVisible(true);
+                // Xoá mọi timer báo Khôi phục nếu đứt mạng lại
+                if (restoredTimerRef.current) clearTimeout(restoredTimerRef.current);
 
-                // Auto hide after 2 seconds
-                setTimeout(() => {
-                    setVisible(false);
-                }, 2000);
+                // Set timeout: Nếu rớt mạng quá 1 giây mới báo, tránh chớp nháy (blip) mạng trên iOS gây đóng băng
+                if (!lostTimerRef.current && prevConnectedRef.current !== false) {
+                    lostTimerRef.current = setTimeout(() => {
+                        setStatusType('lost');
+                        setVisible(true);
+                        prevConnectedRef.current = false;
+                    }, 1000); // 1s delay
+                }
             }
+            // Nếu có kết nối lại
+            else if (connected === true) {
+                // Huỷ báo mất mạng nếu mạng có lại ngay lặp tức
+                if (lostTimerRef.current) {
+                    clearTimeout(lostTimerRef.current);
+                    lostTimerRef.current = null;
+                }
 
-            prevConnectedRef.current = connected;
+                if (prevConnectedRef.current === false) {
+                    // Update state inside a timeout to prevent React thread freezing from native events on iOS
+                    setTimeout(() => {
+                        setStatusType('restored');
+                        setVisible(true);
+                        prevConnectedRef.current = true;
+
+                        // Tự động ẩn sau 1.5s
+                        restoredTimerRef.current = setTimeout(() => {
+                            setVisible(false);
+                            restoredTimerRef.current = null;
+                        }, 1500);
+                    }, 0);
+                }
+            }
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            clearTimers();
+        };
     }, []);
 
-    // Khi app trở lại foreground (vd: thoát camera, quay từ màn hình khác)
-    // cần kiểm tra lại mạng vì event NetInfo có thể bị bỏ qua khi app ở background
+    // Kiểm tra mạng khi app từ background quay lại (Active)
     useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
             if (nextAppState === 'active') {
                 NetInfo.fetch().then((state: NetInfoState) => {
+                    if (state.isConnected === null) return;
                     const connected = state.isConnected;
+
                     if (connected === false) {
-                        setStatusType('lost');
-                        setVisible(true);
-                        prevConnectedRef.current = false;
-                    } else {
+                        if (restoredTimerRef.current) clearTimeout(restoredTimerRef.current);
+                        if (!lostTimerRef.current && prevConnectedRef.current !== false) {
+                            lostTimerRef.current = setTimeout(() => {
+                                setStatusType('lost');
+                                setVisible(true);
+                                prevConnectedRef.current = false;
+                            }, 500);
+                        }
+                    } else if (connected === true) {
+                        if (lostTimerRef.current) {
+                            clearTimeout(lostTimerRef.current);
+                            lostTimerRef.current = null;
+                        }
+
                         if (prevConnectedRef.current === false) {
-                            setStatusType('restored');
-                            setVisible(true);
                             setTimeout(() => {
-                                setVisible(false);
-                            }, 2000);
+                                setStatusType('restored');
+                                setVisible(true);
+                                prevConnectedRef.current = true;
+
+                                restoredTimerRef.current = setTimeout(() => {
+                                    setVisible(false);
+                                    restoredTimerRef.current = null;
+                                }, 1500);
+                            }, 0);
                         } else {
-                            // Nếu đã có mạng và không phải khôi phục từ trạng thái mất mạng, đảm bảo modal đã tắt
+                            // Đảm bảo ẩn modal nếu đã có mạng từ trước
                             setVisible(false);
                         }
-                        prevConnectedRef.current = true;
                     }
                 });
             }
         });
+
         return () => subscription.remove();
     }, []);
 

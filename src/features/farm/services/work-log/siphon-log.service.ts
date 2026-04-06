@@ -74,15 +74,13 @@ export const siphonLogService: IBaseLogService<ISiphonRecord> = {
     },
 
     convertReferenceDataToActivityData: (
-        ref: IPondRecordReferenceData | Record<string, unknown>,
-        ...extraContexts: unknown[]
+        ref: IPondRecordReferenceData | Record<string, unknown>
     ): ActivityData[] => {
-        const materialMap = (extraContexts[0] as Record<string, any>) || {};
         const data: ActivityData[] = [];
         if ((ref as any).shrimpLossKg != null) {
             data.push({ label: 'Hao hụt tôm (kg)', value: `${(ref as any).shrimpLossKg}` });
         }
-        pushMaterialRows(data, (ref as any).materials, materialMap);
+        pushMaterialRows(data, (ref as any).materials);
         return data;
     },
 };

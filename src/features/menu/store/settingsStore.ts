@@ -9,7 +9,7 @@ export type AutoLockTimeout = 0 | 1 | 5 | 15 | 30 | 60;
 /** Lock method for app security */
 export type LockMethod = 'none' | 'biometric' | 'pin' | 'both';
 
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark';
 
 interface SettingsState {
     soundEnabled: boolean;
@@ -58,7 +58,7 @@ export const useSettingsStore = create<SettingsStore>()(
             lockMethod: 'none' as LockMethod,
             autoLockTimeout: 0 as AutoLockTimeout,
             pinHash: null,
-            themeMode: 'system',
+            themeMode: 'light',
 
             toggleSound: () =>
                 set(state => {

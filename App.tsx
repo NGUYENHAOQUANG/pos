@@ -7,10 +7,9 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/config/toastConfig';
-import { StatusBar, useColorScheme } from 'react-native';
+import { StatusBar, Appearance, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProviders } from '@/app/providers';
-import { LogBox } from 'react-native';
 import notifee from '@notifee/react-native';
 import { NetworkStatusModal, SessionExpiredModal } from '@/shared/components';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -43,10 +42,15 @@ function App(): React.JSX.Element {
         checkPermission();
     }, []);
 
-    const scheme = useColorScheme();
     const themeMode = useSettingsStore(s => s.themeMode);
-    const activeScheme = themeMode === 'system' ? scheme : themeMode;
+    const activeScheme = themeMode;
     const theme = activeScheme === 'dark' ? darkTheme : colors;
+
+    useEffect(() => {
+        if (activeScheme) {
+            Appearance.setColorScheme(activeScheme);
+        }
+    }, [activeScheme]);
 
     //   useEffect(() => {
     //     const setupNotifications = async () => {

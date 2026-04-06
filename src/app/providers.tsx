@@ -7,7 +7,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { useAppTheme } from '@/styles/themeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
@@ -44,17 +45,23 @@ onlineManager.setEventListener(setOnline => {
     });
 });
 
-const AppTheme = {
-    ...DefaultTheme,
-    colors: {
-        ...DefaultTheme.colors,
-        background: '#FFFFFF',
-    },
-};
-
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
     const { isLocked, handleUnlock } = useBiometricLock();
+    const themeColors = useAppTheme();
+
+    const AppTheme = {
+        ...(themeColors.isDark ? DarkTheme : DefaultTheme),
+        colors: {
+            ...(themeColors.isDark ? DarkTheme.colors : DefaultTheme.colors),
+            background: themeColors.backgroundPrimary,
+            primary: themeColors.primary,
+            card: themeColors.background,
+            text: themeColors.text,
+            border: themeColors.border,
+            notification: themeColors.error,
+        },
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {

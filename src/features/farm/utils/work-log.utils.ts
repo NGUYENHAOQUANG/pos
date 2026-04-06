@@ -54,14 +54,12 @@ export const formatTimeAndDate = (createdDate: Date): { timeStr: string; dateStr
 
 export function pushMaterialRows(
     data: ActivityData[],
-    materials: PondLogMaterialType[] | undefined,
-    materialMap: Record<string, { name?: string; unitName?: string }>
+    materials: PondLogMaterialType[] | undefined
 ): void {
     if (!materials || !materials.length) return;
     materials.forEach(m => {
-        const mat = materialMap[m.warehouseItemId];
-        const matName = mat?.name || m.name || 'Vật tư';
-        const matUnit = mat?.unitName || m.unitName;
+        const matName = m.materialName || 'Vật tư';
+        const matUnit = m.unitName;
         const label = matUnit ? `${matName} (${matUnit})` : matName;
         data.push({ label, value: m.quantity });
     });

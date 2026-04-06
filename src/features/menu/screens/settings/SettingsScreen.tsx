@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -151,8 +151,7 @@ export const SettingsScreen: React.FC = () => {
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
     const setThemeMode = useSettingsStore(s => s.setThemeMode);
 
-    const systemScheme = useColorScheme();
-    const isDarkMode = (themeMode === 'system' ? systemScheme : themeMode) === 'dark';
+    const isDarkMode = themeMode === 'dark';
 
     const [biometricAvailable, setBiometricAvailable] = useState(false);
     const [biometricLabel, setBiometricLabel] = useState('');

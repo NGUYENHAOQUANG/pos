@@ -14,7 +14,6 @@ import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/Track
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { usePondRecordGroups } from '@/features/farm/hooks/usePondRecords';
 import { buildPondRecordGroups } from '@/features/farm/services/worklog.service';
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { mapRecordItemToJobExecution } from '@/features/farm/services/worklog.service';
@@ -55,7 +54,6 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
         if (hasNextPage && !isFetchingNextPage) fetchNextPage();
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const { materialMap } = useFarmMaterials();
     const { metricTypes } = useEnvironmentInit();
     const ponds = useFarmStore(s => s.ponds);
     const pondNameMap = useMemo(() => {
@@ -69,11 +67,10 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     const groups = useMemo(
         () =>
             buildPondRecordGroups(rawItems, {
-                materialMap,
                 metricTypes,
                 pondNameMap,
             }),
-        [rawItems, materialMap, metricTypes, pondNameMap]
+        [rawItems, metricTypes, pondNameMap]
     );
 
     const groupedLogs: TrackingGroup[] = useMemo(() => {

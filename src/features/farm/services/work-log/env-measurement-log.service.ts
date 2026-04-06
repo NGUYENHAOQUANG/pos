@@ -122,25 +122,119 @@ export const envMeasurementLogService: IBaseLogService<any> = {
         const r = ref as any;
         const data: ActivityData[] = [];
 
-        if (r.envMeasurementDetails?.length) {
-            r.envMeasurementDetails.forEach((d: any) => {
-                const metric = metricTypes.find(m => m.id === d.metricId);
-                const metricName = metric?.name || metric?.code || 'Chỉ số';
-                const labelName = (metric as any)?.unit
-                    ? `${metricName} (${(metric as any).unit})`
-                    : metricName;
-                data.push({
-                    label: labelName,
-                    value:
-                        d.value != null
-                            ? Number.isInteger(d.value)
-                                ? `${d.value}`
-                                : `${d.value}`
-                            : '-',
-                    isWarning: d.isAlerted,
-                });
+        // Hỗ trợ rút dữ liệu từ nhiều dạng cấu trúc trả về khác nhau của API
+        const detailsList =
+            r.envMeasurements ||
+            r.EnvMeasurements ||
+            r.envMeasurementDetails ||
+            r.envMeasurementDetail?.envMeasurementDetails ||
+            r.envMeasurementDetail?.EnvMeasurementDetails;
+
+        // Map code → đơn vị mặc định (fallback khi metric.unitMetric rỗng)
+        const codeUnitMap: Record<string, string> = {
+            ph: '',
+            do: 'mg/L',
+            dissolvedoxygen: 'mg/L',
+            temperature: '°C',
+            salinity: 'ppt',
+            alkalinity: 'mg/L',
+            transparency: 'cm',
+            kali: 'mg/L',
+            tan: 'mg/L',
+            magie: 'mg/L',
+            no3: 'mg/L',
+        };
+
+        if (detailsList && Array.isArray(detailsList) && detailsList.length > 0) {
+            detailsList.forEach((detail: any) => {
+                const metricId = detail.metricId || detail.MetricId;
+                const value = detail.value ?? detail.Value;
+                if (metricId != null && value != null) {
+                    const strMetricId = String(metricId).toLowerCase();
+                    const metric = metricTypes.find(
+                        m => String(m.id).toLowerCase() === strMetricId
+                    );
+                    const isAlerted = detail.isAlerted === true || detail.IsAlerted === true;
+
+                    let finalLabel: string;
+                    let finalUnit: string | undefined;
+
+                    if (metric) {
+                        // Lấy tên từ metric.name, đơn vị ưu tiên codeUnitMap (đã format đẹp) trước
+                        finalLabel = metric.name;
+                        const metricCode = String((metric as any).code || '').toLowerCase();
+                        finalUnit =
+                            codeUnitMap[metricCode] ??
+                            ((metric as any).unitDisplay || (metric as any).unitMetric);
+
+                        // Nếu tên đã bao gồm đơn vị trong ngoặc, tách ra
+                        const nameMatch = finalLabel.match(/^(.*?)\s*\((.*?)\)$/);
+                        if (nameMatch) {
+                            finalLabel = nameMatch[1].trim();
+                            if (!finalUnit) finalUnit = nameMatch[2].trim();
+                        }
+                    } else {
+                        finalLabel = `Thông số (${strMetricId.substring(0, 4)})`;
+                    }
+
+                    data.push({
+                        label: finalUnit ? `${finalLabel} (${finalUnit})` : finalLabel,
+                        value: `${value}`,
+                        isWarning: isAlerted,
+                    });
+                }
+            });
+        } else {
+            // Fallback: Quét trực tiếp object nếu không có array chi tiết
+            const objToScan =
+                detailsList && typeof detailsList === 'object' && !Array.isArray(detailsList)
+                    ? detailsList
+                    : r;
+            const commonNames: Record<string, string> = {
+                ph: 'pH',
+                dissolvedoxygen: 'DO (mg/L)',
+                do: 'DO (mg/L)',
+                temperature: 'Nhiệt độ (°C)',
+                temp: 'Nhiệt độ (°C)',
+                salinity: 'Độ mặn (ppt)',
+                alkalinity: 'Độ kiềm (mg/L)',
+                transparency: 'Độ trong (cm)',
+                kali: 'Kali (mg/L)',
+                tan: 'TAN (mg/L)',
+                magie: 'Magie (mg/L)',
+                no3: 'NO3 (mg/L)',
+            };
+            Object.keys(objToScan).forEach(key => {
+                const strKey = String(key).toLowerCase();
+                if (
+                    ['operationtype', 'operationid', 'pondid', 'notes', 'Id', 'CreatedAt'].includes(
+                        strKey
+                    )
+                )
+                    return;
+
+                const val = (objToScan as Record<string, unknown>)[key];
+                if (val != null && typeof val !== 'object' && val !== '') {
+                    const metric = metricTypes.find(
+                        m =>
+                            String(m.id).toLowerCase() === strKey ||
+                            String((m as any).code || '').toLowerCase() === strKey ||
+                            String(m.name).toLowerCase() === strKey
+                    );
+                    let label = metric ? metric.name : commonNames[strKey] ?? key;
+
+                    const nameMatch2 = label.match(/^(.*?)\s*\((.*?)\)$/);
+                    if (nameMatch2) {
+                        label = nameMatch2[1].trim();
+                        const unit = nameMatch2[2].trim();
+                        data.push({ label: `${label} (${unit})`, value: String(val) });
+                    } else {
+                        data.push({ label, value: String(val) });
+                    }
+                }
             });
         }
+
         return data;
     },
 };
