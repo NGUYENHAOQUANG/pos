@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableWithoutFeedback, Dimensions } from 'react-na
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { G, Path } from 'react-native-svg';
 import * as shape from 'd3-shape';
+import { useAppTheme } from '@/styles/themeContext';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { CostItem } from './costChartData';
@@ -40,6 +41,7 @@ interface CostChartProps {
 
 const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const theme = useAppTheme();
 
     // Make the outer container width match the card content width (screen - 32px padding).
     const screenWidth = Dimensions.get('window').width;
@@ -105,7 +107,7 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                                     <Path
                                         d={d || ''}
                                         fill={item.color}
-                                        stroke={colors.white}
+                                        stroke={theme.background}
                                         strokeWidth={strokeWidth}
                                         onPress={() => setSelectedIndex(isSelected ? null : index)}
                                     />
@@ -122,13 +124,17 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                             width: innerRadius * 2,
                             height: innerRadius * 2,
                             borderRadius: innerRadius,
-                            backgroundColor: colors.white,
+
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
                     >
-                        <Text style={styles.totalLabel}>Tổng chi phí</Text>
-                        <Text style={styles.totalValue}>{totalDisplay}</Text>
+                        <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>
+                            Tổng chi phí
+                        </Text>
+                        <Text style={[styles.totalValue, { color: theme.text }]}>
+                            {totalDisplay}
+                        </Text>
                     </View>
                 </View>
 
@@ -169,7 +175,16 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                                 ]}
                                 pointerEvents="none"
                             >
-                                <View style={styles.tooltip}>
+                                <View
+                                    style={[
+                                        styles.tooltip,
+                                        {
+                                            backgroundColor: theme.backgroundButton,
+                                            borderColor: theme.border,
+                                            borderWidth: 1,
+                                        },
+                                    ]}
+                                >
                                     <View style={styles.tooltipTitleRow}>
                                         <View
                                             style={[
@@ -177,19 +192,42 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
                                                 { backgroundColor: data[selectedIndex].color },
                                             ]}
                                         />
-                                        <Text style={styles.tooltipTitle} numberOfLines={2}>
+                                        <Text
+                                            style={[styles.tooltipTitle, { color: theme.text }]}
+                                            numberOfLines={2}
+                                        >
                                             {data[selectedIndex].label}
                                         </Text>
                                     </View>
-                                    <Text style={styles.tooltipDetail}>
+                                    <Text
+                                        style={[
+                                            styles.tooltipDetail,
+                                            { color: theme.textSecondary },
+                                        ]}
+                                    >
                                         Chi phí:{' '}
-                                        <Text style={styles.tooltipDetailBold}>
+                                        <Text
+                                            style={[
+                                                styles.tooltipDetailBold,
+                                                { color: theme.text },
+                                            ]}
+                                        >
                                             {formatCompactCurrency(data[selectedIndex].value)}
                                         </Text>
                                     </Text>
-                                    <Text style={styles.tooltipDetail}>
+                                    <Text
+                                        style={[
+                                            styles.tooltipDetail,
+                                            { color: theme.textSecondary },
+                                        ]}
+                                    >
                                         Tỉ trọng:{' '}
-                                        <Text style={styles.tooltipDetailBold}>
+                                        <Text
+                                            style={[
+                                                styles.tooltipDetailBold,
+                                                { color: theme.text },
+                                            ]}
+                                        >
                                             {data[selectedIndex].percentage}%
                                         </Text>
                                     </Text>
@@ -232,7 +270,6 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     tooltip: {
-        backgroundColor: colors.white,
         padding: 10,
         borderRadius: 8,
         flexDirection: 'column',

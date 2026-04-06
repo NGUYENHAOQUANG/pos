@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { DropDownHeaderItem } from '@/shared/components/forms/DropdownHeaderButton';
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
 import { Logo } from '@/shared/components/brand/Logo';
@@ -41,18 +42,27 @@ export const HeadingReports = ({
     seasonDisabled,
 }: HeadingReportsProps) => {
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View
+            style={[
+                styles.container,
+                { paddingTop: insets.top, backgroundColor: theme.backgroundPrimary },
+            ]}
+        >
             {/* Top Row: Logo and Notification Action */}
             <View style={styles.topRow}>
                 <Logo size="squareXs" />
                 <TouchableOpacity
-                    style={styles.notificationButton}
+                    style={[
+                        styles.notificationButton,
+                        { backgroundColor: theme.background, borderColor: theme.borderDark },
+                    ]}
                     // TODO: Navigate to notification screen
                     onPress={() => {}}
                 >
-                    <Ionicons name="notifications-outline" size={20} color={colors.text} />
+                    <Ionicons name="notifications-outline" size={20} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
@@ -97,7 +107,6 @@ export const HeadingReports = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.backgroundPrimary,
         paddingBottom: spacing.md,
         zIndex: 100,
     },
@@ -116,8 +125,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: borderRadius.sm,
         borderWidth: 1,
-        borderColor: colors.borderDark,
-        backgroundColor: colors.white,
     },
     row: {
         paddingHorizontal: 16,

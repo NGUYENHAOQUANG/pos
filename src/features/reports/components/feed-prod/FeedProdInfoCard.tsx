@@ -1,7 +1,8 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, borderRadius, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
 import InfoIcon from '@/assets/Icon/IconReport/I.svg';
 
 interface FeedProdInfoCardProps {
@@ -13,10 +14,13 @@ const DEFAULT_MESSAGE = 'Hiệu suất đang ổn định. Không cần điều 
 export const FeedProdInfoCard: React.FC<FeedProdInfoCardProps> = ({
     message = DEFAULT_MESSAGE,
 }) => {
+    const theme = useAppTheme();
     return (
-        <View style={styles.card}>
+        <View
+            style={[styles.card, { backgroundColor: theme.background, borderColor: theme.border }]}
+        >
             <InfoIcon width={20} height={20} style={styles.icon} />
-            <Text style={styles.message}>{message}</Text>
+            <Text style={[styles.message, { color: theme.textSecondary }]}>{message}</Text>
         </View>
     );
 };
@@ -25,10 +29,10 @@ const styles = StyleSheet.create({
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.white,
+
         borderRadius: borderRadius.sm,
         borderWidth: 1,
-        borderColor: colors.border,
+
         padding: spacing.sm,
         marginHorizontal: spacing.md,
         marginBottom: spacing.md,
@@ -39,7 +43,7 @@ const styles = StyleSheet.create({
     message: {
         flex: 1,
         fontSize: 12,
-        color: colors.text,
+
         fontWeight: '400',
     },
 });

@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
@@ -35,6 +36,7 @@ export const PondIndex = ({
     selectedId,
     onPress,
 }: PondIndexProps) => {
+    const theme = useAppTheme();
     const parseValueAndUnit = (value: string): { value: string; unit: string } => {
         const firstSpace = value.indexOf(' ');
         if (firstSpace === -1) return { value, unit: '' };
@@ -63,6 +65,7 @@ export const PondIndex = ({
                         key={item.id}
                         style={[
                             styles.card,
+                            { backgroundColor: theme.background, borderColor: theme.border },
                             isEqualWidth && styles.cardEqual,
                             isSelected && { borderColor: item.color, borderWidth: 2 },
                         ]}
@@ -70,12 +73,21 @@ export const PondIndex = ({
                         onPress={onPress ? () => onPress(item.id) : undefined}
                     >
                         <View style={[styles.indicator, { backgroundColor: item.color }]} />
-                        <Text style={styles.title} numberOfLines={1}>
+                        <Text
+                            style={[styles.title, { color: theme.textSecondary }]}
+                            numberOfLines={1}
+                        >
                             {item.name}
                         </Text>
                         <View style={styles.valueRow}>
-                            <Text style={styles.valueNumber}>{valuePart}</Text>
-                            {unitPart ? <Text style={styles.valueUnit}>{unitPart}</Text> : null}
+                            <Text style={[styles.valueNumber, { color: theme.text }]}>
+                                {valuePart}
+                            </Text>
+                            {unitPart ? (
+                                <Text style={[styles.valueUnit, { color: theme.textSecondary }]}>
+                                    {unitPart}
+                                </Text>
+                            ) : null}
                         </View>
                     </CardWrapper>
                 );
@@ -98,11 +110,10 @@ const styles = StyleSheet.create({
         minWidth: 88,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
+
         paddingHorizontal: 10,
         paddingTop: 8,
         paddingBottom: 12,
-        backgroundColor: colors.white,
     },
     scrollContentEqual: {
         width: '100%',
@@ -119,7 +130,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 12,
-        color: colors.textSecondary,
+
         fontWeight: '400',
         marginBottom: 4,
     },
@@ -130,12 +141,12 @@ const styles = StyleSheet.create({
     },
     valueNumber: {
         fontSize: 16,
-        color: colors.text,
+
         fontWeight: '700',
     },
     valueUnit: {
         fontSize: 14,
-        color: colors.textSecondary,
+
         fontWeight: '400',
         marginLeft: 2,
     },

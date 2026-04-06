@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
 
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
@@ -28,6 +28,7 @@ import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const ReportsScreen = () => {
+    const theme = useAppTheme();
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const bottomBarHeight = useBottomTabBarHeight();
     const queryClient = useQueryClient();
@@ -151,7 +152,7 @@ export const ReportsScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.backgroundPrimary }]}>
             <HeadingReports
                 farmData={farmOptions}
                 selectedFarm={selectedFarm}
@@ -190,7 +191,6 @@ export const ReportsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.backgroundPrimary,
     },
     content: {
         flex: 1,

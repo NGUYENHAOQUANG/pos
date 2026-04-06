@@ -7,6 +7,7 @@ import { View, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-nativ
 import { Text } from '@/shared/components/typography/Text';
 import CaretDownIcon from '@/assets/Icon/IconReport/CaretDown.svg';
 import { colors, typography, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { DetailRow } from '@/features/material/components/DetailRow';
 
 import { HarvestRecordWithNames } from '@/features/reports/hooks/useHarvestStatsTable';
@@ -17,9 +18,10 @@ interface Props {
     index: number;
 }
 
-const TIMELINE_SECONDARY_COLOR = colors.gray[200];
-
 export const HarvestItemCard = ({ item, index }: Props) => {
+    const theme = useAppTheme();
+    const TIMELINE_SECONDARY_COLOR = theme.isDark ? theme.border : colors.white;
+
     const [expanded, setExpanded] = useState(false);
 
     const toggleExpand = () => {
@@ -28,18 +30,20 @@ export const HarvestItemCard = ({ item, index }: Props) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             {/* Timeline column */}
             <View style={styles.timelineColumn}>
                 <View
                     style={[
                         styles.timelineDot,
+                        { borderColor: theme.text },
                         index > 0 && { borderColor: TIMELINE_SECONDARY_COLOR },
                     ]}
                 />
                 <View
                     style={[
                         styles.timelineLine,
+                        { backgroundColor: theme.text },
                         index > 0 && { backgroundColor: TIMELINE_SECONDARY_COLOR },
                     ]}
                 />
@@ -49,7 +53,9 @@ export const HarvestItemCard = ({ item, index }: Props) => {
             <View style={styles.contentColumn}>
                 {/* Top row: harvestDate + Xem thêm */}
                 <View style={styles.topRow}>
-                    <Text style={styles.dateText}>{item.formattedDate}</Text>
+                    <Text style={[styles.dateText, { color: theme.text }]}>
+                        {item.formattedDate}
+                    </Text>
                     <TouchableOpacity
                         onPress={toggleExpand}
                         style={styles.topAction}
@@ -67,8 +73,15 @@ export const HarvestItemCard = ({ item, index }: Props) => {
                 </View>
 
                 {/* Inner card */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>{item.pondName}</Text>
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor: theme.background, borderColor: theme.border },
+                    ]}
+                >
+                    <Text style={[styles.cardTitle, { color: theme.textSecondary }]}>
+                        {item.pondName}
+                    </Text>
 
                     <View style={styles.content}>
                         {/* Main info */}
@@ -131,14 +144,13 @@ const styles = StyleSheet.create({
         height: 8,
         borderRadius: 4,
         borderWidth: 2,
-        borderColor: colors.text,
-        backgroundColor: colors.white,
+
         marginTop: 4,
     },
     timelineLine: {
         flex: 1,
         width: 1,
-        backgroundColor: colors.text,
+
         marginTop: 2,
     },
     contentColumn: {
@@ -153,7 +165,7 @@ const styles = StyleSheet.create({
     },
     dateText: {
         fontSize: 14,
-        color: colors.text,
+
         fontWeight: '600',
     },
     topAction: {
@@ -167,17 +179,15 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     card: {
-        backgroundColor: colors.white,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingTop: 10,
         paddingBottom: 12,
         borderWidth: 1,
-        borderColor: colors.borderLight,
     },
     cardTitle: {
         fontSize: 13,
-        color: colors.textSecondary,
+
         marginBottom: spacing.sm,
         fontFamily: typography.fontFamily.regular,
     },

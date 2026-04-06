@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { borderRadius, colors } from '@/styles';
+import { borderRadius } from '@/styles';
 import { typography } from '@/styles/typography';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import CostChart from './CostChart';
@@ -8,11 +8,12 @@ import { CostItem, CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from './costChartDa
 import BottomCostChart from './BottomCostChart';
 
 import { Loading } from '@/shared/components/ui/Loading';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import CostChartIcon from '@/assets/Icon/IconReport/CostChartIcon.svg';
 import { PondIndexCard } from '../env-chart/PondIndexCard';
 import { useCostDonut } from '../../hooks/useCostDonut';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { useAppTheme } from '@/styles/themeContext';
 
 const truncateToDecimals = (value: number, decimals: number) => {
     const multiplier = Math.pow(10, decimals);
@@ -37,6 +38,8 @@ interface CompilationCostChartProps {
 }
 
 const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
 
     const {
@@ -147,7 +150,9 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
                             <BottomCostChart data={costItems} />
 
                             {/* Divider */}
-                            <View style={styles.divider} />
+                            <View
+                                style={[styles.divider, { backgroundColor: theme.borderLight }]}
+                            />
                         </>
                     )}
                 </View>
@@ -160,16 +165,14 @@ const styles = StyleSheet.create({
     header: {
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     headerTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.bold,
-        color: colors.text,
+
         textTransform: 'uppercase',
     },
     content: {
-        backgroundColor: colors.white,
         paddingBottom: 16,
         borderBottomLeftRadius: borderRadius.sm,
         borderBottomRightRadius: borderRadius.sm,
@@ -186,7 +189,6 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: colors.borderLight,
         marginBottom: 8,
     },
     loadingContainer: {

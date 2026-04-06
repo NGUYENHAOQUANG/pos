@@ -1,7 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, StyleProp, View } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
 
 interface BasicDropDownButtonProps {
@@ -25,10 +26,27 @@ export const BasicDropDownButton: React.FC<BasicDropDownButtonProps> = ({
     prefixIcon,
     suffixContent,
 }) => {
+    const theme = useAppTheme();
+
+    const renderPrefixIcon = () => {
+        if (!prefixIcon) return null;
+        if (React.isValidElement(prefixIcon)) {
+            return React.cloneElement(
+                prefixIcon as React.ReactElement,
+                { color: theme.text } as any
+            );
+        }
+        return prefixIcon;
+    };
+
     return (
         <TouchableOpacity
             style={[
                 styles.container,
+                {
+                    backgroundColor: theme.backgroundButton,
+                    borderColor: theme.isDark ? 'white' : theme.border,
+                },
                 style,
                 // Bo góc dưới khi thu gọn (chỉ có nút, không có nội dung bên dưới)
                 isExpanded === false && styles.roundedBottom,
@@ -37,14 +55,21 @@ export const BasicDropDownButton: React.FC<BasicDropDownButtonProps> = ({
             activeOpacity={0.7}
         >
             <View style={styles.labelRow}>
-                {prefixIcon && <View style={styles.prefixIcon}>{prefixIcon}</View>}
-                <Text style={[styles.text, !label && styles.placeholder]} numberOfLines={1}>
+                {prefixIcon && <View style={styles.prefixIcon}>{renderPrefixIcon()}</View>}
+                <Text
+                    style={[
+                        styles.text,
+                        { color: theme.text },
+                        !label && [styles.placeholder, { color: theme.textSecondary }],
+                    ]}
+                    numberOfLines={1}
+                >
                     {label || placeholder}
                 </Text>
                 {suffixContent}
             </View>
             <View style={[styles.expandedIcon, !isExpanded && styles.expandedIconRotate]}>
-                <ExpandedIcon width={10} height={6} />
+                <ExpandedIcon width={10} height={6} color={theme.text} />
             </View>
         </TouchableOpacity>
     );
@@ -58,11 +83,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
         borderBottomWidth: 1,
-        borderColor: colors.border,
     },
     roundedBottom: {
         borderBottomLeftRadius: borderRadius.md,
@@ -79,7 +102,6 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.text,
         marginRight: spacing.xs,
     },
     expandedIcon: {
@@ -91,6 +113,5 @@ const styles = StyleSheet.create({
     },
     placeholder: {
         fontWeight: '400',
-        color: colors.textSecondary,
     },
 });

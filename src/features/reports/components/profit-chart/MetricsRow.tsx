@@ -1,6 +1,7 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 
 interface MetricsRowProps {
@@ -32,6 +33,7 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     rawTotalCost,
     rawEstimatedProfit,
 }) => {
+    const theme = useAppTheme();
     const items = [
         {
             id: 'revenue',
@@ -64,7 +66,7 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     ];
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.metricsTopRow}>
                 {items.slice(0, 2).map(item => (
                     <View key={item.id} style={styles.metricItem}>
@@ -95,7 +97,6 @@ const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 16,
         paddingVertical: spacing.md,
-        backgroundColor: colors.white,
     },
     metricsTopRow: {
         flexDirection: 'row',

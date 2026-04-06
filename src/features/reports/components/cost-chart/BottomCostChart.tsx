@@ -1,7 +1,8 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles/colors';
+
 import { typography } from '@/styles/typography';
 import { CostItem } from './costChartData';
 
@@ -10,12 +11,13 @@ interface Props {
 }
 
 const BottomCostChart = ({ data }: Props) => {
+    const theme = useAppTheme();
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             {data.map((item, index) => (
                 <View key={index} style={styles.itemContainer}>
                     <View style={[styles.dot, { backgroundColor: item.color }]} />
-                    <Text style={styles.label}>{item.label}</Text>
+                    <Text style={[styles.label, { color: theme.textSecondary }]}>{item.label}</Text>
                 </View>
             ))}
         </View>
@@ -44,7 +46,6 @@ const styles = StyleSheet.create({
     label: {
         fontSize: typography.fontSize.xs,
         fontFamily: typography.fontFamily.regular,
-        color: colors.textSecondary,
     },
 });
 

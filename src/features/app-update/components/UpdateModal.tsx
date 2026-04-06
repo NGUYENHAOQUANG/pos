@@ -6,9 +6,10 @@ import { useAppUpdate } from '@/features/app-update/hooks/useAppUpdate';
 import MebiEcoLogo from '@/assets/MebiEco-Logo.svg';
 
 export const UpdateModal: React.FC = () => {
-    const { needsUpdate, openStore, currentVersion, storeVersion } = useAppUpdate();
+    const { openStore, currentVersion, storeVersion } = useAppUpdate();
 
-    if (!needsUpdate) return null;
+    // if (!needsUpdate) return null;
+    return null; // Tạm thời ẩn modal cập nhật
 
     return (
         <Modal visible={true} transparent={true} animationType="fade" statusBarTranslucent>

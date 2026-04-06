@@ -1,9 +1,12 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Loading } from '@/shared/components/ui/Loading';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, LayoutChangeEvent, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { scaleLinear } from 'd3-scale';
-import { colors } from '@/styles';
+import { colors, type Colors } from '@/styles';
 import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.svg';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
@@ -21,6 +24,13 @@ const FIXED_Y_TICKS = [0, 8, 16, 24, 32, 40];
 const Y_DOMAIN_MAX = 40;
 
 // --- COLORS ---
+const getChartColors = (theme: Colors) => ({
+    grid: theme.borderLight,
+    text: theme.textSecondary,
+    white: theme.background,
+    border: theme.border,
+    black: theme.text,
+});
 /** Filter type for pond categories */
 type PondFilterType = 'active' | 'prep' | 'functional';
 
@@ -45,22 +55,13 @@ const FILTER_COLORS: Record<PondFilterType, FilterColorConfig> = {
     },
 };
 
-const CHART_COLORS = {
-    grid: colors.gray[100],
-    text: colors.textSecondary,
-    white: colors.white,
-    border: colors.border,
-    black: colors.black,
-};
-
-import { Loading } from '@/shared/components/ui/Loading';
-import chartStyles from '@/features/reports/styles/chart.styles';
-
 interface ActivePondChartProps {
     zoneId: string;
 }
 
 export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [expanded, setExpanded] = useState(false);
     const [containerWidth, setContainerWidth] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState<PondFilterType>('active');
@@ -159,6 +160,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
     const currentPrepTotal = kpis?.availablePonds || 0;
     const currentFunctionalTotal = kpis?.functionalPonds || 0;
     const totalPonds = kpis?.totalPonds || 0;
+    const activeChartColors = getChartColors(theme);
 
     // Map filter id to PondFilterType
     const handleFilterPress = (id: string) => {
@@ -211,13 +213,15 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
     return (
         <View style={chartStyles.container} onLayout={onLayout}>
             <BasicDropDownButton
-                prefixIcon={<ActivePondChartIcon width={20} height={20} color={colors.text} />}
+                prefixIcon={<ActivePondChartIcon width={20} height={20} color={theme.text} />}
                 label="Tổng số ao hoạt động"
                 isExpanded={expanded}
                 onPress={handleToggle}
                 suffixContent={
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{totalPonds}</Text>
+                    <View style={[styles.badge, { backgroundColor: theme.text }]}>
+                        <Text style={[styles.badgeText, { color: theme.background }]}>
+                            {totalPonds}
+                        </Text>
                     </View>
                 }
             />
@@ -244,14 +248,24 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                     />
                                 </View>
 
-                                <Text style={styles.yAxisUnitLabel}>Số ao</Text>
+                                <Text
+                                    style={[styles.yAxisUnitLabel, { color: theme.textSecondary }]}
+                                >
+                                    Số ao
+                                </Text>
 
-                                <View style={styles.mainWrapper}>
+                                <View
+                                    style={[
+                                        styles.mainWrapper,
+                                        { backgroundColor: theme.background },
+                                    ]}
+                                >
                                     {/* --- CỘT TRÁI: TRỤC Y (CỐ ĐỊNH) --- */}
                                     <View
                                         style={{
                                             width: Y_AXIS_WIDTH,
-                                            backgroundColor: colors.white,
+                                            backgroundColor: theme.background,
+
                                             zIndex: 2,
                                             // marginTop: 10,
                                         }}
@@ -264,7 +278,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                         x={-5}
                                                         y={yScale(tick) + 4}
                                                         fontSize="12"
-                                                        fill={CHART_COLORS.text}
+                                                        fill={activeChartColors.text}
                                                         textAnchor="end"
                                                     >
                                                         {tick}
@@ -275,7 +289,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                     y1={yScale(0) + 4}
                                                     x2={0}
                                                     y2={0}
-                                                    stroke={colors.white}
+                                                    stroke={theme.background}
                                                     strokeWidth={0}
                                                 />
                                             </G>
@@ -321,7 +335,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                             y1={yScale(tick)}
                                                             x2={chartContentWidth}
                                                             y2={yScale(tick)}
-                                                            stroke={CHART_COLORS.grid}
+                                                            stroke={activeChartColors.grid}
                                                             strokeWidth={1}
                                                         />
                                                     ))}
@@ -358,7 +372,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                         y1={yScale(0)}
                                                         x2={chartContentWidth}
                                                         y2={yScale(0)}
-                                                        stroke={colors.gray[200]}
+                                                        stroke={activeChartColors.grid}
                                                         strokeWidth={1}
                                                     />
 
@@ -369,14 +383,14 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                                 y1={yScale(0)}
                                                                 x2={tick.x}
                                                                 y2={yScale(0) + 5}
-                                                                stroke={colors.gray[300]}
+                                                                stroke={activeChartColors.grid}
                                                                 strokeWidth={1}
                                                             />
                                                             <SvgText
                                                                 x={tick.x}
                                                                 y={yScale(0) + 18}
                                                                 fontSize="12"
-                                                                fill={CHART_COLORS.text}
+                                                                fill={activeChartColors.text}
                                                                 textAnchor="middle"
                                                             >
                                                                 {formatDate(tick.date)}
@@ -399,7 +413,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
 
 const styles = StyleSheet.create({
     badge: {
-        backgroundColor: colors.gray[900],
+        backgroundColor: colors.gray[900], // Sẽ ghi đè inline bằng theme.text
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 4,
@@ -407,7 +421,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     badgeText: {
-        color: colors.white,
+        color: colors.white, // Sẽ ghi đè inline bằng theme.background
         fontSize: 12,
         fontWeight: '600',
         textAlign: 'center',
@@ -418,7 +432,6 @@ const styles = StyleSheet.create({
 
     mainWrapper: {
         flexDirection: 'row',
-        backgroundColor: colors.white,
     },
     pondIndexWrapper: {
         paddingHorizontal: 16,
@@ -427,7 +440,7 @@ const styles = StyleSheet.create({
     },
     yAxisUnitLabel: {
         fontSize: 12,
-        color: colors.textSecondary,
+
         paddingLeft: 16,
         marginBottom: 8,
     },

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '../BasicDropDownButton';
@@ -16,7 +15,8 @@ import {
     PADDING_TOP,
     PADDING_BOTTOM,
 } from '@/features/reports/components/profit-chart/chartData';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
+import { useAppTheme } from '@/styles/themeContext';
 import ProfitChartIcon from '@/assets/Icon/IconReport/ProfitChartIcon.svg';
 
 interface CompilationProfitChartProps {
@@ -54,6 +54,8 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
     zoneId,
     pondId,
 }) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { data: response, isLoading: queryLoading } = useProfitStats({
@@ -75,7 +77,10 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                 label="Biểu đồ lợi nhuận"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
-                style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
+                style={[
+                    isExpanded ? styles.headerExpanded : styles.headerCollapsed,
+                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
+                ]}
             />
 
             {isExpanded && (
@@ -102,7 +107,9 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                 rawTotalCost={statsData?.kpis?.totalMaterialCost}
                                 rawEstimatedProfit={statsData?.kpis?.totalEstimatedProfit}
                             />
-                            <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
+                            <Text style={[styles.chartTitle, { color: theme.text }]}>
+                                Lợi nhuận(Tỉ đồng)
+                            </Text>
                             <Chart
                                 chartWidth={chartWidth}
                                 chartHeight={chartHeight}
@@ -118,7 +125,14 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                                 { backgroundColor: item.color },
                                             ]}
                                         />
-                                        <Text style={styles.legendText}>{item.label}</Text>
+                                        <Text
+                                            style={[
+                                                styles.legendText,
+                                                { color: theme.textSecondary },
+                                            ]}
+                                        >
+                                            {item.label}
+                                        </Text>
                                     </View>
                                 ))}
                             </View>
@@ -137,14 +151,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        backgroundColor: colors.white,
     },
     headerCollapsed: {
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        backgroundColor: colors.white,
     },
     loadingContainer: {
         minHeight: 300,
@@ -153,10 +163,8 @@ const styles = StyleSheet.create({
     },
     chartTitle: {
         fontSize: 12,
-        color: colors.text,
         paddingLeft: 16,
         paddingVertical: 8,
-        backgroundColor: colors.white,
         lineHeight: 18,
     },
     legendContainer: {
@@ -165,7 +173,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 8,
         paddingBottom: 16,
-        backgroundColor: colors.white,
     },
     legendItem: {
         flexDirection: 'row',
@@ -181,6 +188,5 @@ const styles = StyleSheet.create({
     },
     legendText: {
         fontSize: 12,
-        color: colors.textSecondary,
     },
 });
