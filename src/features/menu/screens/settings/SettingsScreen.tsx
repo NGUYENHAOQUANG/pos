@@ -145,7 +145,6 @@ export const SettingsScreen: React.FC = () => {
     const toggleTabSlide = useSettingsStore(s => s.toggleTabSlide);
     const toggleTabSwipe = useSettingsStore(s => s.toggleTabSwipe);
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
-    //const toggleLiquidGlass = useSettingsStore(s => s.toggleLiquidGlass);
     const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
     const toggleWeather = useSettingsStore(s => s.toggleWeather);
     const setLockMethod = useSettingsStore(s => s.setLockMethod);

@@ -1,20 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import {
-    View,
-    StyleSheet,
-    Modal,
-    TouchableOpacity,
-    FlatList,
-    TextInput,
-    KeyboardAvoidingView,
-    Platform,
-    Dimensions,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, FlatList, TextInput, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IWeatherLocation } from '@/features/weather/types/weather.types';
 import { WEATHER_LOCATIONS } from '@/features/weather/utils/weatherLocations';
+import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -78,79 +69,67 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
         item.name ?? `location-${index}`;
 
     return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-            <KeyboardAvoidingView
-                style={styles.modalOverlay}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-                {/* Dismiss backdrop */}
-                <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={handleClose} />
+        <AnimatedBottomSheet
+            visible={visible}
+            onClose={handleClose}
+            statusBarTranslucent
+            containerStyle={[
+                styles.sheet,
+                { paddingBottom: insets.bottom + spacing.md, height: SHEET_HEIGHT },
+            ]}
+        >
+            {/* Handle bar */}
+            <View style={styles.handleBar} />
 
-                {/* Bottom sheet */}
-                <View
-                    style={[
-                        styles.sheet,
-                        { paddingBottom: insets.bottom + spacing.md, height: SHEET_HEIGHT },
-                    ]}
-                >
-                    {/* Handle bar */}
-                    <View style={styles.handleBar} />
+            {/* Header */}
+            <View style={styles.sheetHeader}>
+                <Text style={styles.sheetTitle}>Chọn vùng nuôi</Text>
+                <TouchableOpacity onPress={handleClose}>
+                    <AntDesign name="close" size={22} color={colors.textSecondary} />
+                </TouchableOpacity>
+            </View>
 
-                    {/* Header */}
-                    <View style={styles.sheetHeader}>
-                        <Text style={styles.sheetTitle}>Chọn vùng nuôi</Text>
-                        <TouchableOpacity onPress={handleClose}>
-                            <AntDesign name="close" size={22} color={colors.textSecondary} />
-                        </TouchableOpacity>
+            {/* Search input */}
+            <View style={styles.searchContainer}>
+                <AntDesign
+                    name="search1"
+                    size={16}
+                    color={colors.textTertiary}
+                    style={styles.searchIcon}
+                />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Tìm tên thành phố/tỉnh"
+                    placeholderTextColor={colors.textTertiary}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+                {searchText.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchText('')}>
+                        <AntDesign name="closecircle" size={16} color={colors.textTertiary} />
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            {/* Location list */}
+            <FlatList
+                data={[...filteredLocations]}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                style={styles.list}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+                keyboardShouldPersistTaps="handled"
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>Không tìm thấy "{searchText}"</Text>
                     </View>
-
-                    {/* Search input */}
-                    <View style={styles.searchContainer}>
-                        <AntDesign
-                            name="search1"
-                            size={16}
-                            color={colors.textTertiary}
-                            style={styles.searchIcon}
-                        />
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder="Tìm tên thành phố/tỉnh"
-                            placeholderTextColor={colors.textTertiary}
-                            value={searchText}
-                            onChangeText={setSearchText}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                        />
-                        {searchText.length > 0 && (
-                            <TouchableOpacity onPress={() => setSearchText('')}>
-                                <AntDesign
-                                    name="closecircle"
-                                    size={16}
-                                    color={colors.textTertiary}
-                                />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    {/* Location list */}
-                    <FlatList
-                        data={[...filteredLocations]}
-                        renderItem={renderItem}
-                        keyExtractor={keyExtractor}
-                        style={styles.list}
-                        contentContainerStyle={styles.listContent}
-                        showsVerticalScrollIndicator={false}
-                        nestedScrollEnabled
-                        keyboardShouldPersistTaps="handled"
-                        ListEmptyComponent={
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không tìm thấy "{searchText}"</Text>
-                            </View>
-                        }
-                    />
-                </View>
-            </KeyboardAvoidingView>
-        </Modal>
+                }
+            />
+        </AnimatedBottomSheet>
     );
 };
 
@@ -158,20 +137,8 @@ export default LocationPickerModal;
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-
-    backdrop: {
-        flex: 1,
-        backgroundColor: colors.overlayLight,
-    },
-
     sheet: {
         backgroundColor: colors.white,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
         paddingHorizontal: spacing.md,
     },
 
