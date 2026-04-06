@@ -80,6 +80,9 @@ import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen'
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
 
+// Notifications
+import { useNotificationSetup } from '@/features/notifications';
+
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -272,6 +275,8 @@ export type AppStackParamList = {
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
 export const AppStack: React.FC = () => {
+    useNotificationSetup();
+
     return (
         <Stack.Navigator
             initialRouteName="MainTabs"

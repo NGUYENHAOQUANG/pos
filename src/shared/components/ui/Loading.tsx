@@ -233,11 +233,15 @@ export const Loading: React.FC<LoadingProps> = ({
         );
     }
 
-    // Standalone mode: FadeOut exiting handles unmount
+    const shouldAnimateExit = animateExit && !logoLoadingEnabled;
     return (
         <Animated.View
-            style={styles.container}
-            exiting={animateExit ? FadeOut.duration(800) : undefined}
+            style={[
+                styles.container,
+                // Logo loading needs white bg so the SVG mask blends correctly
+                logoLoadingEnabled && { backgroundColor: colors.white },
+            ]}
+            exiting={shouldAnimateExit ? FadeOut.duration(800) : undefined}
         >
             {Spinner}
         </Animated.View>
@@ -258,7 +262,5 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlayLoading,
         zIndex: 9999,
     },
-    dot: {
-        // Base position center, animated via transform
-    },
+    dot: {},
 });
