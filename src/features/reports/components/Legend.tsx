@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
@@ -19,8 +20,17 @@ interface LegendProps {
  * Reusable Legend component for charts
  */
 export const Legend: React.FC<LegendProps> = ({ items }) => {
+    const theme = useAppTheme();
     return (
-        <View style={styles.container}>
+        <View
+            style={[
+                styles.container,
+                {
+                    backgroundColor: theme.background,
+                    borderTopColor: theme.isDark ? '#FFFFFF' : theme.borderLight,
+                },
+            ]}
+        >
             {items.map((item, index) => (
                 <LegendItemComponent key={index} label={item.label} color={item.color} />
             ))}
@@ -56,10 +66,11 @@ interface LegendItemComponentProps {
 }
 
 const LegendItemComponent: React.FC<LegendItemComponentProps> = ({ label, color }) => {
+    const theme = useAppTheme();
     return (
         <View style={styles.legendItem}>
             <View style={[styles.legendSquare, { backgroundColor: color }]} />
-            <Text style={styles.legendText}>{label}</Text>
+            <Text style={[styles.legendText, { color: theme.textSecondary }]}>{label}</Text>
         </View>
     );
 };
@@ -72,9 +83,8 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         gap: spacing.md,
         paddingVertical: spacing.md,
-        backgroundColor: colors.white,
+
         borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
         borderBottomLeftRadius: borderRadius.sm,
         borderBottomRightRadius: borderRadius.sm,
     },
@@ -91,7 +101,7 @@ const styles = StyleSheet.create({
     legendText: {
         fontSize: 14,
         fontWeight: '400',
-        color: colors.text,
+
         lineHeight: 20,
     },
 });

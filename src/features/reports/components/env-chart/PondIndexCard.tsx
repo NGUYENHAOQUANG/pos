@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles/colors';
 
 export interface PondIndexCardData {
     id: string;
@@ -37,6 +37,7 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({
     isActive = true,
     tooltipValue,
 }) => {
+    const theme = useAppTheme();
     const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
     const isProdSummary = variant === 'prodSummary';
     const [showTooltip, setShowTooltip] = useState(false);
@@ -51,22 +52,44 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({
         <View
             style={[
                 styles.card,
+                { backgroundColor: theme.background, borderColor: theme.border },
                 isProdSummary && styles.cardProd,
-                isActive && onPress && item.color ? { borderColor: item.color } : undefined,
+                isActive && onPress && item.color
+                    ? { borderColor: item.color, borderWidth: 2 }
+                    : undefined,
             ]}
         >
             {item.color ? (
                 <View style={[styles.indicator, { backgroundColor: item.color }]} />
             ) : null}
-            <Text style={[styles.title, isProdSummary && styles.titleProd]} numberOfLines={1}>
+            <Text
+                style={[
+                    styles.title,
+                    { color: theme.textSecondary },
+                    isProdSummary && styles.titleProd,
+                ]}
+                numberOfLines={1}
+            >
                 {item.name}
             </Text>
             <View style={styles.valueRow}>
-                <Text style={[styles.valueNumber, isProdSummary && styles.valueNumberProd]}>
+                <Text
+                    style={[
+                        styles.valueNumber,
+                        { color: theme.text },
+                        isProdSummary && { fontWeight: '700' },
+                    ]}
+                >
                     {valuePart}
                 </Text>
                 {unitPart ? (
-                    <Text style={[styles.valueUnit, isProdSummary && styles.valueUnitProd]}>
+                    <Text
+                        style={[
+                            styles.valueUnit,
+                            { color: theme.textSecondary },
+                            isProdSummary && { fontSize: 14 },
+                        ]}
+                    >
                         {unitPart}
                     </Text>
                 ) : null}
@@ -74,8 +97,14 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({
 
             {/* Tooltip overlay */}
             {showTooltip && tooltipValue ? (
-                <Pressable style={styles.tooltipOverlay} onPress={() => setShowTooltip(false)}>
-                    <Text style={styles.tooltipText}>{tooltipValue}</Text>
+                <Pressable
+                    style={[
+                        styles.tooltipOverlay,
+                        { backgroundColor: theme.isDark ? '#2D3748' : '#FFFFFF' },
+                    ]}
+                    onPress={() => setShowTooltip(false)}
+                >
+                    <Text style={[styles.tooltipText, { color: theme.text }]}>{tooltipValue}</Text>
                 </Pressable>
             ) : null}
         </View>
@@ -102,16 +131,14 @@ const styles = StyleSheet.create({
         minWidth: 88,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: colors.gray[200],
+
         paddingHorizontal: 12,
         paddingTop: 8,
         paddingBottom: 10,
-        backgroundColor: colors.white,
     },
     cardProd: {
         flex: 1,
         borderRadius: 8,
-        borderColor: colors.gray[200],
     },
     cardInactive: {
         opacity: 0.4,
@@ -124,7 +151,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 12,
-        color: colors.textSecondary,
+
         fontWeight: '400',
         marginBottom: 4,
     },
@@ -140,7 +167,7 @@ const styles = StyleSheet.create({
     },
     valueNumber: {
         fontSize: 16,
-        color: colors.text,
+
         fontWeight: '500',
     },
     valueNumberProd: {
@@ -149,7 +176,7 @@ const styles = StyleSheet.create({
     },
     valueUnit: {
         fontSize: 12,
-        color: colors.textSecondary,
+
         fontWeight: '500',
         marginLeft: 4,
     },
@@ -161,7 +188,7 @@ const styles = StyleSheet.create({
         bottom: '100%',
         left: 0,
         right: 0,
-        backgroundColor: colors.white,
+
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
@@ -176,7 +203,7 @@ const styles = StyleSheet.create({
     },
     tooltipText: {
         fontSize: 14,
-        color: colors.text,
+
         fontWeight: '500',
         textAlign: 'center',
     },

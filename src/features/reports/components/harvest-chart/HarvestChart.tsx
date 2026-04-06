@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 import { Chart, HarvestChartData } from './Chart';
 import { useHarvestStats } from '@/features/reports/hooks/useHarvestStats';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import HarvestChartIcon from '@/assets/Icon/IconReport/HarvestChartIcon.svg';
 
 const CHART_CONTENT_HEIGHT = 350; // Set to fit with padding
@@ -19,7 +20,9 @@ interface Props {
 }
 
 export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
+    const chartStyles = useChartStyles();
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const theme = useAppTheme();
 
     const { data: response, isLoading: queryLoading } = useHarvestStats({
         ZoneId: zoneId,
@@ -61,12 +64,21 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
                 prefixIcon={<HarvestChartIcon width={20} height={20} />}
                 label="Biểu đồ thu hoạch"
                 onPress={() => setIsCollapsed(!isCollapsed)}
-                style={styles.sectionHeader}
+                style={[
+                    styles.sectionHeader,
+                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
+                ]}
                 isExpanded={!isCollapsed}
             />
 
             {!isCollapsed && (
-                <View style={[styles.body, isLoading ? styles.loadingContainer : undefined]}>
+                <View
+                    style={[
+                        styles.body,
+                        { backgroundColor: theme.background },
+                        isLoading ? styles.loadingContainer : undefined,
+                    ]}
+                >
                     {isLoading ? (
                         <Loading />
                     ) : chartData.length === 0 ? (
@@ -85,7 +97,9 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
                                 />
                             </View>
 
-                            <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
+                            <Text style={[styles.chartTitle, { color: theme.textSecondary }]}>
+                                Khối lượng (Tấn)
+                            </Text>
 
                             <Chart
                                 data={chartData}
@@ -104,7 +118,6 @@ const styles = StyleSheet.create({
     sectionHeader: {
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     body: {
         paddingVertical: 24,
@@ -123,7 +136,7 @@ const styles = StyleSheet.create({
         marginVertical: 12,
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.medium,
-        color: colors.textSecondary,
+
         paddingHorizontal: 16,
     },
 });

@@ -4,10 +4,11 @@ import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 
 import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '../BasicDropDownButton';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import DropIcon from '@/assets/Icon/IconReport/Drop.svg';
 import { useWaterUsageStats } from '../../hooks/useWaterUsageStats';
 import { scaleLinear, formatNumberVietnamese, parseWaterUsageData } from './waterUsageHelpers';
@@ -25,6 +26,8 @@ interface WaterUsageChartProps {
 }
 
 const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
 
     const {
@@ -77,15 +80,29 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
                     ) : (
                         <>
                             {/* Summary Stats */}
-                            <View style={styles.statsContainer}>
-                                <Text style={styles.statLabel}>Tổng lượng nước cấp</Text>
-                                <Text style={styles.statValue}>
+                            <View
+                                style={[
+                                    styles.statsContainer,
+                                    {
+                                        backgroundColor: theme.backgroundButton,
+                                        borderColor: theme.border,
+                                    },
+                                ]}
+                            >
+                                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                                    Tổng lượng nước cấp
+                                </Text>
+                                <Text style={[styles.statValue, { color: theme.text }]}>
                                     {formatNumberVietnamese(totalWaterSupplied, false)}{' '}
-                                    <Text style={styles.statUnit}>m³</Text>
+                                    <Text style={[styles.statUnit, { color: theme.textSecondary }]}>
+                                        m³
+                                    </Text>
                                 </Text>
                             </View>
 
-                            <Text style={styles.yAxisTitle}>Lượng nước m3</Text>
+                            <Text style={[styles.yAxisTitle, { color: theme.textSecondary }]}>
+                                Lượng nước m3
+                            </Text>
 
                             {/* Chart: fixed Y-axis + scrollable content */}
                             <View style={styles.chartRow}>
@@ -107,7 +124,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
                                                 x={16}
                                                 y={y + 4}
                                                 fontSize={12}
-                                                fill={colors.textSecondary}
+                                                fill={theme.textSecondary}
                                                 textAnchor="start"
                                             >
                                                 {tick === 0 ? '0' : formatNumberVietnamese(tick)}
@@ -133,7 +150,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
                                                     y1={y}
                                                     x2={scrollWidth}
                                                     y2={y}
-                                                    stroke={colors.borderLight}
+                                                    stroke={theme.borderLight}
                                                     strokeWidth={1}
                                                 />
                                             );
@@ -158,7 +175,11 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
                                                     y={yTop}
                                                     width={BAR_WIDTH}
                                                     height={h}
-                                                    fill={colors.orange[600]}
+                                                    fill={
+                                                        theme.isDark
+                                                            ? colors.orange[900]
+                                                            : colors.orange[600]
+                                                    }
                                                     rx={2}
                                                     ry={2}
                                                 />
@@ -175,13 +196,13 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
                                                         y1={DRAW_HEIGHT + PADDING_TOP}
                                                         x2={cx}
                                                         y2={DRAW_HEIGHT + PADDING_TOP + 5}
-                                                        stroke={colors.border}
+                                                        stroke={theme.border}
                                                     />
                                                     <SvgText
                                                         x={cx}
                                                         y={DRAW_HEIGHT + PADDING_TOP + 20}
                                                         fontSize={12}
-                                                        fill={colors.textSecondary}
+                                                        fill={theme.textSecondary}
                                                         textAnchor="middle"
                                                     >
                                                         {bar.dateLabel}
@@ -204,42 +225,34 @@ const styles = StyleSheet.create({
     header: {
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     content: {
-        backgroundColor: colors.white,
         paddingBottom: 16,
     },
     statsContainer: {
         alignItems: 'flex-start',
         padding: 16,
         borderWidth: 1,
-        borderColor: colors.border,
         marginHorizontal: 16,
         marginVertical: 12,
         borderRadius: 12,
-        backgroundColor: colors.white,
     },
     statLabel: {
         fontSize: 14,
-        color: colors.text,
         marginBottom: 4,
     },
     statValue: {
         fontSize: 14,
         fontWeight: typography.fontWeight.bold,
-        color: colors.black,
         lineHeight: 20,
     },
     statUnit: {
         fontSize: 12,
         fontWeight: '400',
-        color: colors.black,
         lineHeight: 18,
     },
     yAxisTitle: {
         fontSize: 12,
-        color: colors.text,
         paddingLeft: 16,
         marginVertical: 12,
     },

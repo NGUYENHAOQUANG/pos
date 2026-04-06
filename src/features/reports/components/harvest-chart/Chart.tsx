@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
 import { colors, typography } from '@/styles';
@@ -15,6 +16,7 @@ interface ChartProps {
 
 export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) => {
     // Process Data
+    const theme = useAppTheme();
     const processedData = useMemo(() => {
         const maxValue = Math.max(...data.map(d => d.yield));
 
@@ -93,7 +95,6 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                         height: chartHeight - PADDING_BOTTOM + 20, // ensure label visibility
                         width: PADDING_LEFT,
                         zIndex: 10,
-                        backgroundColor: colors.white,
                     }}
                     pointerEvents="none"
                 >
@@ -106,7 +107,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                     key={`y-label-${value}`}
                                     x={16}
                                     y={y + 4} // Optical vertical alignment
-                                    fill={colors.gray[500]}
+                                    fill={theme.textSecondary}
                                     fontSize={12}
                                     textAnchor="start"
                                 >
@@ -132,7 +133,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                     y1={y}
                                     x2={actualWidth - PADDING_RIGHT}
                                     y2={y}
-                                    stroke={colors.gray[100]}
+                                    stroke={theme.borderLight}
                                     strokeWidth={1}
                                 />
                             );
@@ -152,7 +153,9 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                         y={y}
                                         width={barWidth}
                                         height={barHeight}
-                                        fill={colors.orange[900]}
+                                        fill={
+                                            theme.isDark ? colors.orange[900] : colors.orange[600]
+                                        }
                                         rx={2}
                                         ry={2}
                                     />
@@ -161,7 +164,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                     <SvgText
                                         x={x}
                                         y={y - 8}
-                                        fill={colors.textSecondary}
+                                        fill={theme.textSecondary}
                                         fontSize={12}
                                         fontWeight={typography.fontWeight.medium.toString()}
                                         textAnchor="middle"
@@ -173,7 +176,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                     <SvgText
                                         x={x}
                                         y={PADDING_TOP + drawHeight + 16}
-                                        fill={colors.gray[600]}
+                                        fill={theme.textSecondary}
                                         fontSize={12}
                                         textAnchor="middle"
                                     >

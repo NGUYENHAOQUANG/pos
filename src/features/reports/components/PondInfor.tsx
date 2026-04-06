@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, typography } from '@/styles';
+import { typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 export const PondInfor = () => {
+    const theme = useAppTheme();
     // Mock data based on the image requirement
     const data = {
         area: '2.500 m²',
@@ -14,24 +16,30 @@ export const PondInfor = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.header, { borderBottomColor: theme.borderLight }]}>
+                <Text style={[styles.headerTitle, { color: theme.textSecondary }]}>
                     {data.area} - {data.stockingDate}
                 </Text>
             </View>
             <View style={styles.body}>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Ngày nuôi (DOC):</Text>
-                    <Text style={styles.value}>{data.doc}</Text>
+                    <Text style={[styles.label, { color: theme.textSecondary }]}>
+                        Ngày nuôi (DOC):
+                    </Text>
+                    <Text style={[styles.value, { color: theme.text }]}>{data.doc}</Text>
                 </View>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Số lượng thả (Pls):</Text>
-                    <Text style={styles.value}>{data.quantity.toLocaleString('vi-VN')}</Text>
+                    <Text style={[styles.label, { color: theme.textSecondary }]}>
+                        Số lượng thả (Pls):
+                    </Text>
+                    <Text style={[styles.value, { color: theme.text }]}>
+                        {data.quantity.toLocaleString('vi-VN')}
+                    </Text>
                 </View>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Tôm giống:</Text>
-                    <Text style={styles.value}>{data.breed}</Text>
+                    <Text style={[styles.label, { color: theme.textSecondary }]}>Tôm giống:</Text>
+                    <Text style={[styles.value, { color: theme.text }]}>{data.breed}</Text>
                 </View>
             </View>
         </View>
@@ -40,19 +48,17 @@ export const PondInfor = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
         marginBottom: 8,
     },
     header: {
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     headerTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.bold,
-        color: colors.text,
+
         textAlign: 'center', // Image looks like it might be centered or left, usually headers are left but the format [area] - [date] suggests a centered or prominent display. Let's keep it default left or check image again. Image shows it's just text. Let's stick to standard left align for header titles usually, but the image shows "[diện tích] - [ngày thả]" which looks like a title.
         // Actually looking at the uploaded image: "[diện tích] - [ngày thả]" is at the top.
         // Since it's a "Pond Info" card, consistent with others.
@@ -72,12 +78,12 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        color: colors.text,
+
         fontWeight: '500', // Looks slightly bold
     },
     value: {
         fontSize: 14,
-        color: colors.text,
+
         fontWeight: '400',
     },
 });
