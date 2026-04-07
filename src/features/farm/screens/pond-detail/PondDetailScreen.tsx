@@ -133,11 +133,9 @@ export const PondDetailScreen: React.FC = () => {
 
     const { data: shrimpSeeds } = useShrimpSeeds(warehouseId ?? undefined);
 
-    const { data: currentCycle } = useActiveCycle(pond?.id || '');
+    const { data: currentCycle, isLoading: isLoadingCycle } = useActiveCycle(pondId);
 
-    const { refetch: refetchCycles, isRefetching: isRefetchingCycles } = useCyclesByPond(
-        pond?.id || ''
-    );
+    const { refetch: refetchCycles, isRefetching: isRefetchingCycles } = useCyclesByPond(pondId);
     // We no longer need cycles as an array here
     // const cycles = useMemo(() => cyclesData?.data?.items || [], [cyclesData]);
 
@@ -293,6 +291,7 @@ export const PondDetailScreen: React.FC = () => {
             selectedTab={selectedTab}
             setSelectedTab={setSelectedTab}
             isLoading={isLoading}
+            isLoadingCycle={isLoadingCycle}
             isRefetchingCycles={isRefetchingCycles}
             refreshing={refreshing}
             onRefresh={onRefresh}
