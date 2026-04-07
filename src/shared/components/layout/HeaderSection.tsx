@@ -28,6 +28,7 @@ export interface HeaderSectionProps {
     // Back specific (used if leftComponent is not provided)
     onBack?: () => void;
     showBackButton?: boolean;
+    backButtonDisabled?: boolean;
 
     // Right Action specific
     rightIcon?: React.ReactNode;
@@ -47,6 +48,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     rightComponent,
     onBack,
     showBackButton = true,
+    backButtonDisabled = false,
     rightIcon,
     onRightPress,
     rightButtonStyle,
@@ -70,7 +72,11 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
         if (leftComponent) return leftComponent;
         if (showBackButton) {
             return (
-                <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
+                <TouchableOpacity
+                    style={[styles.iconButton, backButtonDisabled && { opacity: 0.5 }]}
+                    onPress={handleBack}
+                    disabled={backButtonDisabled}
+                >
                     {/* Use ArrowLeft SVG icon for back navigation */}
                     <ArrowLeftIcon width={20} height={20} color={theme.text} />
                 </TouchableOpacity>

@@ -18,7 +18,7 @@ import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModal
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ShrimpInspectionMeta, JobExecution } from '@/features/farm/types/farm.types';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { Loading } from '@/shared/components/ui/Loading';
+
 import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { ShrimpInspectionFormValues } from '@/features/farm/schemas/shrimpInspectionSchema';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -76,81 +76,80 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
     const styles = getStyles(theme);
 
     return (
-        <Loading isLoading={isSaving}>
-            <View style={styles.container}>
-                <HeaderSection
-                    title="Kiểm tra tôm"
-                    onBack={onBack}
-                    rightComponent={
-                        itemToEdit ? <DeleteButton onPress={onDeletePress} /> : undefined
-                    }
-                    containerStyle={styles.headerContainer}
-                />
+        <View style={styles.container}>
+            <HeaderSection
+                title="Kiểm tra tôm"
+                onBack={onBack}
+                backButtonDisabled={isSaving}
+                rightComponent={itemToEdit ? <DeleteButton onPress={onDeletePress} /> : undefined}
+                containerStyle={styles.headerContainer}
+            />
 
-                {isLoadingDetail ? (
-                    <EnvSkeleton />
-                ) : (
-                    <SafeInputLayout
-                        contentContainerStyle={styles.scrollContent}
-                        extraScrollHeight={100}
-                    >
-                        <GeneralInfoBox
-                            ref={generalInfoBoxRef}
-                            date={selectedDate}
-                            onDateChange={onSelectedDateChange}
-                            type="withImage"
-                            imageUris={values.images || []}
-                            onImagesChange={onImagesChange}
-                            documentIds={meta.documentIds}
-                            disabledDate={true}
-                        />
-
-                        <ShrimpInspectionFoodCheckBox
-                            foodAmount={values.foodAmount || ''}
-                            onFoodAmountChange={val => onChange({ foodAmount: val })}
-                            leftoverFood={values.leftoverFood || 'Hết'}
-                            onLeftoverFoodChange={val => onChange({ leftoverFood: val })}
-                        />
-
-                        <ShrimpInspectionObservationBox
-                            intestine={values.intestine || 'Đầy'}
-                            onIntestineChange={val => onChange({ intestine: val })}
-                            intestineColor={values.intestineColor || 'Màu thức ăn'}
-                            onIntestineColorChange={val => onChange({ intestineColor: val })}
-                            stoolColor={values.stoolColor || 'Màu thức ăn'}
-                            onStoolColorChange={val => onChange({ stoolColor: val })}
-                            liver={values.liver || 'Bình thường'}
-                            onLiverChange={val => onChange({ liver: val })}
-                            onAICheckPress={onAICheckPress}
-                            aiResult={aiResult}
-                        />
-
-                        <SelectionNotesBox
-                            notes={values.notes || ''}
-                            onNotesChange={val => onChange({ notes: val })}
-                        />
-                    </SafeInputLayout>
-                )}
-
-                <View style={styles.footer}>
-                    <ButtonBarFarm
-                        primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                        secondaryTitle="Huỷ"
-                        onPrimaryPress={handleSavePress}
-                        onSecondaryPress={onBack}
-                        primaryDisabled={itemToEdit ? primaryDisabled : false}
+            {isLoadingDetail ? (
+                <EnvSkeleton />
+            ) : (
+                <SafeInputLayout
+                    contentContainerStyle={styles.scrollContent}
+                    extraScrollHeight={100}
+                >
+                    <GeneralInfoBox
+                        ref={generalInfoBoxRef}
+                        date={selectedDate}
+                        onDateChange={onSelectedDateChange}
+                        type="withImage"
+                        imageUris={values.images || []}
+                        onImagesChange={onImagesChange}
+                        documentIds={meta.documentIds}
+                        disabledDate={true}
                     />
-                </View>
 
-                <ConfirmationModalUI
-                    visible={isDeleteModalVisible}
-                    onConfirm={onConfirmDelete}
-                    onCancel={onCancelDelete}
-                    successMessage="Đã xoá kiểm tra tôm"
-                    showSuccessToast={false}
+                    <ShrimpInspectionFoodCheckBox
+                        foodAmount={values.foodAmount || ''}
+                        onFoodAmountChange={val => onChange({ foodAmount: val })}
+                        leftoverFood={values.leftoverFood || 'Hết'}
+                        onLeftoverFoodChange={val => onChange({ leftoverFood: val })}
+                    />
+
+                    <ShrimpInspectionObservationBox
+                        intestine={values.intestine || 'Đầy'}
+                        onIntestineChange={val => onChange({ intestine: val })}
+                        intestineColor={values.intestineColor || 'Màu thức ăn'}
+                        onIntestineColorChange={val => onChange({ intestineColor: val })}
+                        stoolColor={values.stoolColor || 'Màu thức ăn'}
+                        onStoolColorChange={val => onChange({ stoolColor: val })}
+                        liver={values.liver || 'Bình thường'}
+                        onLiverChange={val => onChange({ liver: val })}
+                        onAICheckPress={onAICheckPress}
+                        aiResult={aiResult}
+                    />
+
+                    <SelectionNotesBox
+                        notes={values.notes || ''}
+                        onNotesChange={val => onChange({ notes: val })}
+                    />
+                </SafeInputLayout>
+            )}
+
+            <View style={styles.footer}>
+                <ButtonBarFarm
+                    primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                    secondaryTitle="Huỷ"
+                    onPrimaryPress={handleSavePress}
+                    onSecondaryPress={onBack}
+                    primaryDisabled={itemToEdit ? primaryDisabled : false}
+                    secondaryDisabled={isSaving}
+                    isLoading={isSaving}
                 />
             </View>
-        </Loading>
+
+            <ConfirmationModalUI
+                visible={isDeleteModalVisible}
+                onConfirm={onConfirmDelete}
+                onCancel={onCancelDelete}
+                successMessage="Đã xoá kiểm tra tôm"
+                showSuccessToast={false}
+            />
+        </View>
     );
 };
 

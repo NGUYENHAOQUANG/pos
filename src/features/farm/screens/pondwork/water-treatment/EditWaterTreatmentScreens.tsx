@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import {
     showMaterialQuantityZeroToast,
@@ -19,8 +19,7 @@ import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/Ma
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
-import { Loading } from '@/shared/components/ui/Loading';
-
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { waterTreatmentApi } from '@/features/farm/api/waterTreatmentApi';
 import {
     useUpdateWaterTreatment,
@@ -46,6 +45,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     // Mutations
     const updateMutation = useUpdateWaterTreatment();
     const deleteMutation = useDeleteWaterTreatment();
+
+    const isSavingActively = updateMutation.isPending || deleteMutation.isPending;
 
     // Fetch warehouse materials - needed for mapping detail data
     const { materials } = useFarmMaterials();
@@ -240,16 +241,19 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     };
 
     return (
-        <>
+        <View style={styles.container}>
             {/* Header */}
             <HeaderSection
                 title="Xử lý nước"
                 onBack={handleBack}
+                backButtonDisabled={isSavingActively}
                 rightComponent={<DeleteButton onPress={handleDelete} />}
             />
 
-            <Loading isLoading={isLoadingDetail}>
-                {isLoadingDetail ? null : (
+            <View style={{ flex: 1 }}>
+                {isLoadingDetail ? (
+                    <EnvSkeleton />
+                ) : (
                     <SafeInputLayout
                         style={styles.container}
                         contentContainerStyle={styles.scrollContent}
@@ -269,7 +273,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                         />
                     </SafeInputLayout>
                 )}
-            </Loading>
+            </View>
 
             {/* Footer Buttons */}
             <ButtonBarFarm
@@ -277,7 +281,9 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleBack}
-                primaryDisabled={!hasChanges}
+                isLoading={isSavingActively}
+                secondaryDisabled={isSavingActively}
+                primaryDisabled={isSavingActively || !hasChanges}
                 style={{
                     borderTopWidth: 1,
                     borderTopColor: theme.defaultBorder,
@@ -292,7 +298,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
             />
-        </>
+        </View>
     );
 };
 

@@ -32,6 +32,9 @@ export const AddSiphonScreen: React.FC = () => {
     const updateMutation = useUpdateSiphonRecord();
     const deleteMutation = useDeleteSiphonRecord();
 
+    const isSavingActively =
+        createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+
     // ── Data fetching ───────────────────────────────────────────────
     const { materials } = useFarmMaterials();
     const { data: detail, isLoading: isLoadingDetail } = useSiphonDetail(pond?.id, siphonId);
@@ -115,6 +118,7 @@ export const AddSiphonScreen: React.FC = () => {
         <SiphonFormContent
             isEditing={isEditing}
             isLoadingDetail={isEditing && isLoadingDetail}
+            isSaving={isSavingActively}
             initialValues={initialValues}
             initialSnapshot={initialSnapshot}
             selectedDate={date}

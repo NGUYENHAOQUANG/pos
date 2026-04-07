@@ -39,6 +39,7 @@ interface HeaderFarmProps {
     tagType?: PondType | string;
     status?: TagStatus; // Added status prop
     onBack?: () => void;
+    backButtonDisabled?: boolean;
     leftComponent?: React.ReactNode;
     rightAction?: React.ReactNode;
     rightTopComponent?: React.ReactNode;
@@ -57,6 +58,7 @@ export const HeaderFarm = ({
     tagType,
     status,
     onBack,
+    backButtonDisabled,
     leftComponent,
     rightAction,
     rightTopComponent,
@@ -117,6 +119,7 @@ export const HeaderFarm = ({
                 rightComponent={rightAction || undefined} // HeaderSection handles undefined check, but safe to pass
                 onBack={onBack}
                 showBackButton={!leftComponent}
+                backButtonDisabled={backButtonDisabled}
             />
         );
     }
@@ -157,6 +160,7 @@ export const HeaderFarm = ({
                     rightComponent={rightNode}
                     onBack={onBack}
                     showBackButton={true}
+                    backButtonDisabled={backButtonDisabled}
                     containerStyle={styles.detailHeaderContainer}
                 />
 

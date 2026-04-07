@@ -4,6 +4,7 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 interface HeaderMenuProps {
     title?: string;
     onBack?: () => void;
+    backButtonDisabled?: boolean;
     rightAction?: React.ReactNode;
     rightIcon?: React.ReactNode;
     onRightPress?: () => void;
@@ -12,6 +13,7 @@ interface HeaderMenuProps {
 export const HeaderMenu: React.FC<HeaderMenuProps> = ({
     title,
     onBack,
+    backButtonDisabled,
     rightAction,
     rightIcon,
     onRightPress,
@@ -25,6 +27,7 @@ export const HeaderMenu: React.FC<HeaderMenuProps> = ({
             rightIcon={rightIcon}
             onRightPress={onRightPress}
             showBackButton={true}
+            backButtonDisabled={backButtonDisabled}
         />
     );
 };
