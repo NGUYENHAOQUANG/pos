@@ -12,7 +12,9 @@ import { Text } from '@/shared/components/typography/Text';
 import ChevronDownIcon from '@/assets/Icon/ChevronDown.svg';
 import ChevronUpIcon from '@/assets/Icon/ChevronUp.svg';
 
-import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
+import { spacing, borderRadius, shadows, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import { RequiredDot } from '@/shared/components/forms/Input';
@@ -48,7 +50,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     value,
     onSelect,
     style,
-    showIcon = true,
+    showIcon = false,
     height = 40,
     borderRadius: customBorderRadius = spacing.sm,
     disabled = false,
@@ -56,6 +58,9 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     label,
     required = false,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value);
     const dropdownButtonRef = useRef<View>(null);
@@ -130,7 +135,12 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                     activeOpacity={disabled ? 1 : 0.7}
                 >
                     {showIcon && (
-                        <IconEnvironment width={18} height={18} style={styles.locationIcon} />
+                        <IconEnvironment
+                            width={18}
+                            height={18}
+                            color={disabled ? theme.textSecondary : theme.text}
+                            style={styles.locationIcon}
+                        />
                     )}
                     <Text
                         style={[
@@ -144,9 +154,9 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                     </Text>
                     {!disabled &&
                         (isDropdownVisible ? (
-                            <ChevronUpIcon width={18} height={18} color={colors.defaultBorder} />
+                            <ChevronUpIcon width={18} height={18} color={theme.textSecondary} />
                         ) : (
-                            <ChevronDownIcon width={18} height={18} color={colors.defaultBorder} />
+                            <ChevronDownIcon width={18} height={18} color={theme.textSecondary} />
                         ))}
                 </TouchableOpacity>
             </View>
@@ -189,83 +199,84 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    labelText: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 20,
-    },
-    locationButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-    },
-    locationIcon: {
-        width: 18,
-        height: 18,
-        marginRight: spacing.xs,
-    },
-    locationText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        marginRight: spacing.xs,
-    },
-    modalOverlay: {
-        flex: 1,
-    },
-    dropdownContainer: {
-        position: 'absolute',
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        ...shadows.md,
-        maxHeight: 220, // Limit height to show approx 5 items
-    },
-    dropdownScrollContent: {
-        paddingVertical: spacing.xs,
-    },
-    dropdownItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: spacing.sm + 2,
-        paddingHorizontal: spacing.md,
-        marginHorizontal: spacing.xs,
-        borderRadius: borderRadius.sm,
-    },
-    dropdownItemSelected: {
-        backgroundColor: colors.gray[200],
-    },
-    dropdownItemTextContainer: {
-        flex: 1,
-        marginRight: spacing.xs,
-    },
-    dropdownItemText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    dropdownItemTextSelected: {
-        fontWeight: '500',
-        color: colors.text,
-    },
-    disabledButton: {
-        backgroundColor: colors.gray[100],
-        borderColor: colors.gray[200],
-    },
-    disabledText: {
-        color: colors.textSecondary,
-    },
-    placeholderText: {
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        labelText: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        locationButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: theme.background,
+            paddingHorizontal: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        locationIcon: {
+            width: 18,
+            height: 18,
+            marginRight: spacing.xs,
+        },
+        locationText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            marginRight: spacing.xs,
+        },
+        modalOverlay: {
+            flex: 1,
+        },
+        dropdownContainer: {
+            position: 'absolute',
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            ...shadows.md,
+            maxHeight: 220, // Limit height to show approx 5 items
+        },
+        dropdownScrollContent: {
+            paddingVertical: spacing.xs,
+        },
+        dropdownItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: spacing.sm + 2,
+            paddingHorizontal: spacing.md,
+            marginHorizontal: spacing.xs,
+            borderRadius: borderRadius.sm,
+        },
+        dropdownItemSelected: {
+            backgroundColor: theme.isDark ? theme.defaultBorder : theme.borderDark,
+        },
+        dropdownItemTextContainer: {
+            flex: 1,
+            marginRight: spacing.xs,
+        },
+        dropdownItemText: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        dropdownItemTextSelected: {
+            fontWeight: '500',
+            color: theme.text,
+        },
+        disabledButton: {
+            backgroundColor: theme.backgroundSecondary,
+            borderColor: theme.borderDark,
+        },
+        disabledText: {
+            color: theme.textSecondary,
+        },
+        placeholderText: {
+            color: theme.text,
+        },
+    });

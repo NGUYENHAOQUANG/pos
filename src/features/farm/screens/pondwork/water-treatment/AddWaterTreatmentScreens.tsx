@@ -7,7 +7,8 @@ import {
     showAddJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
 import { handleError } from '@/shared/utils/errorHandler';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
@@ -33,6 +34,8 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pond } = route.params || {};
     const pondId = pond?.id;
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     // Mutation
     const createMutation = useCreateWaterTreatment();
     // Fetch warehouse materials
@@ -133,7 +136,11 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                         secondaryTitle="Huỷ"
                         onPrimaryPress={handleSave}
                         onSecondaryPress={handleBack}
-                        style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                        style={{
+                            borderTopWidth: 1,
+                            borderTopColor: theme.defaultBorder,
+                            backgroundColor: theme.background,
+                        }}
                     />
                 </>
             )}
@@ -143,12 +150,13 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+        },
+    });

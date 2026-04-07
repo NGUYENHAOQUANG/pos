@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
@@ -13,7 +14,7 @@ import {
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import type { DropdownOption } from '@/features/material/components/DropdownMaterial';
+import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import type { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export interface StockTransferFormProps {
@@ -21,7 +22,7 @@ export interface StockTransferFormProps {
     totalShrimpCount: number;
     actualStockingQuantity?: number;
     latestShrimpSize?: string;
-    pondOptions: DropdownOption[];
+    pondOptions: DropDownItem[];
     isSubmitting: boolean;
     onBack: () => void;
     onSubmit: (data: StockTransferFormData) => void;
@@ -45,6 +46,8 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     onBack,
     onSubmit,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [notes, setNotes] = useState<string>('');
     const [shrimpSize, setShrimpSize] = useState<string>(latestShrimpSize || '0');
@@ -116,12 +119,6 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
         prevLatestSizeRef.current = latestShrimpSize;
     }, [latestShrimpSize]);
 
-    const handleDropdownOpen = useCallback(() => {
-        setTimeout(() => {
-            (scrollRef.current as any)?.scrollToPosition?.(0, transferInfoY.current, true);
-        }, 100);
-    }, []);
-
     const handleSavePress = useCallback(() => {
         setIsConfirmationModalVisible(true);
     }, []);
@@ -181,7 +178,6 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                         onReceivingPondPress={_id => {}}
                         totalEstimatedShrimp={totalShrimpCount}
                         pondOptions={pondOptions}
-                        onDropdownOpen={handleDropdownOpen}
                     />
                 </View>
 
@@ -215,18 +211,19 @@ Bạn có chắc muốn sang ao không?`}
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollContent: {
-        padding: 0,
-        paddingBottom: 150,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollContent: {
+            padding: 0,
+            paddingBottom: 150,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+    });
