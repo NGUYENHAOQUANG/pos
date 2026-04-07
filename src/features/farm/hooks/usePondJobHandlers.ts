@@ -58,8 +58,8 @@ export const usePondJobNavigateHandlers = ({
             },
 
             [JOB_TYPES.WATER_TREATMENT]: () => {
-                if (!pond) return;
-                navigation.navigate('AddWaterTreatmentScreen', { pond });
+                if (!pond?.id) return;
+                navigation.navigate('WaterTreatmentScreen', { pondId: pond.id });
             },
 
             [JOB_TYPES.WATER_CHANGE]: () => {
@@ -154,12 +154,9 @@ export const usePondJobEditHandlers = ({
 
             [JOB_TYPES.WATER_TREATMENT]: item => {
                 if (!pond?.id) return;
-                navigation.navigate('EditWaterTreatmentScreens', {
+                navigation.navigate('WaterTreatmentScreen', {
                     pondId: pond.id,
                     jobId: item.id,
-                    pond,
-                    item,
-                    itemToEdit: item,
                 });
             },
 

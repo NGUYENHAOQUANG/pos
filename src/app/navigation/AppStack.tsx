@@ -36,9 +36,8 @@ import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/H
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
 import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feedlog/FeedingLogScreens';
 import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
-import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
-import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
-import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
+import { WaterTreatmentScreen } from '@/features/farm/screens/pondwork/water-treatment-form/WaterTreatmentScreen';
+import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment-log/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
 import CountingShrimpScreen from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/ai-measure-shrimp-size/MeasureShrimpSizeAIScreen';
@@ -163,13 +162,9 @@ export type AppStackParamList = {
     };
     AddSiphonScreen: { pond: PondData; siphonId?: string };
     SiphonLog: { pond: PondData };
-    AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
-    EditWaterTreatmentScreens: {
+    WaterTreatmentScreen: {
         pondId: string;
-        jobId: string;
-        pond?: PondData;
-        item?: JobExecution;
-        itemToEdit?: JobExecution;
+        jobId?: string;
     };
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
     WaterSupply: { pond?: PondData; item?: JobExecution };
@@ -321,8 +316,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
             <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
             <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
-            <Stack.Screen name="AddWaterTreatmentScreen" component={AddWaterTreatmentScreens} />
-            <Stack.Screen name="EditWaterTreatmentScreens" component={EditWaterTreatmentScreens} />
+            <Stack.Screen name="WaterTreatmentScreen" component={WaterTreatmentScreen} />
             <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
             <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
             <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
