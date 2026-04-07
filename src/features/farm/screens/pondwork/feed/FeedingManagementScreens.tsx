@@ -11,6 +11,7 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { Loading } from '@/shared/components/ui/Loading';
 
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -311,7 +312,9 @@ export const FeedingManagementScreens = () => {
 
             <Loading isLoading={isLoading}>
                 <View style={styles.contentContainer}>
-                    {isDetailLoading && isEditMode ? null : (
+                    {isDetailLoading && isEditMode ? (
+                        <EnvSkeleton />
+                    ) : (
                         <SafeInputLayout contentContainerStyle={styles.scrollContent}>
                             <FeedingForm
                                 ref={formRef}

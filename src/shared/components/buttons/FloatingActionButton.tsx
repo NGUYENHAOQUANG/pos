@@ -3,7 +3,8 @@ import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export interface FABMenuItem {
     icon: string;
@@ -21,9 +22,13 @@ interface FloatingActionButtonProps {
 
 export function FloatingActionButton({
     menuItems,
-    mainButtonColor = colors.primary,
+    mainButtonColor,
     mainButtonIcon = 'add',
 }: FloatingActionButtonProps) {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    const resolvedMainButtonColor = mainButtonColor || theme.primary;
+
     const [isOpen, setIsOpen] = useState(false);
     const animation = useRef(new Animated.Value(0)).current;
     const rotation = useRef(new Animated.Value(0)).current;
@@ -107,14 +112,14 @@ export function FloatingActionButton({
                                         styles.iconContainer,
                                         {
                                             backgroundColor:
-                                                item.backgroundColor || colors.primary + '20',
+                                                item.backgroundColor || theme.primary + '20',
                                         },
                                     ]}
                                 >
                                     <Icon
                                         name={item.icon}
                                         size={24}
-                                        color={item.iconColor || colors.primary}
+                                        color={item.iconColor || theme.primary}
                                     />
                                 </View>
                                 <Text style={styles.menuLabel}>{item.label}</Text>
@@ -128,7 +133,7 @@ export function FloatingActionButton({
             <TouchableOpacity
                 style={[
                     styles.fab,
-                    { backgroundColor: mainButtonColor, bottom: FAB_BOTTOM_OFFSET },
+                    { backgroundColor: resolvedMainButtonColor, bottom: FAB_BOTTOM_OFFSET },
                 ]}
                 onPress={toggleMenu}
                 activeOpacity={0.9}
@@ -138,75 +143,76 @@ export function FloatingActionButton({
                         transform: [{ rotate: rotateInterpolate }],
                     }}
                 >
-                    <Icon name={mainButtonIcon} size={32} color={colors.white} />
+                    <Icon name={mainButtonIcon} size={32} color={theme.textInverse} />
                 </Animated.View>
             </TouchableOpacity>
         </>
     );
 }
 
-const styles = StyleSheet.create({
-    menuContainer: {
-        position: 'absolute',
-        // bottom set dynamically
-        right: 20,
-        alignItems: 'flex-end',
-        zIndex: 999,
-    },
-    menuItemWrapper: {
-        alignItems: 'flex-end',
-    },
-    menuItemPill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        padding: 8,
-        borderRadius: 30, // Pill shape
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        menuContainer: {
+            position: 'absolute',
+            // bottom set dynamically
+            right: 20,
+            alignItems: 'flex-end',
+            zIndex: 999,
         },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-        elevation: 5,
-        minWidth: 160,
-    },
-    iconContainer: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    menuLabel: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-        marginRight: 16,
-        flex: 1,
-    },
-    fab: {
-        position: 'absolute',
-        // bottom set dynamically
-        right: 20,
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#007AFF',
-        shadowOffset: {
-            width: 0,
-            height: 8,
+        menuItemWrapper: {
+            alignItems: 'flex-end',
         },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
-        elevation: 10,
-        zIndex: 1000,
-    },
-    menuItemMargin: {
-        marginBottom: 16,
-    },
-});
+        menuItemPill: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            padding: 8,
+            borderRadius: 30, // Pill shape
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 5,
+            minWidth: 160,
+        },
+        iconContainer: {
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+        },
+        menuLabel: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: theme.text,
+            marginRight: 16,
+            flex: 1,
+        },
+        fab: {
+            position: 'absolute',
+            // bottom set dynamically
+            right: 20,
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            shadowColor: '#007AFF',
+            shadowOffset: {
+                width: 0,
+                height: 8,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            elevation: 10,
+            zIndex: 1000,
+        },
+        menuItemMargin: {
+            marginBottom: 16,
+        },
+    });

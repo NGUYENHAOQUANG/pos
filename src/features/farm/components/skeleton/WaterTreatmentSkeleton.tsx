@@ -1,18 +1,24 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { spacing, colors } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 // Wrapper to render a card section with a skeleton header and divider
-const CardSkeleton: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <View style={styles.card}>
-        <View style={styles.cardHeader}>
-            <Skeleton width={150} height={16} borderRadius={4} />
+const CardSkeleton: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    return (
+        <View style={styles.card}>
+            <View style={styles.cardHeader}>
+                <Skeleton width={150} height={16} borderRadius={4} />
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.cardContent}>{children}</View>
         </View>
-        <View style={styles.divider} />
-        <View style={styles.cardContent}>{children}</View>
-    </View>
-);
+    );
+};
 
 // Single full-width input skeleton with label placeholder
 const InputSkeleton: React.FC = () => (
@@ -23,15 +29,19 @@ const InputSkeleton: React.FC = () => (
 );
 
 // Material item skeleton row
-const MaterialItemSkeleton: React.FC = () => (
-    <View style={styles.materialItem}>
-        <View style={styles.materialInfo}>
-            <Skeleton width={120} height={14} borderRadius={4} />
-            <Skeleton width={80} height={12} borderRadius={4} />
+const MaterialItemSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    return (
+        <View style={styles.materialItem}>
+            <View style={styles.materialInfo}>
+                <Skeleton width={120} height={14} borderRadius={4} />
+                <Skeleton width={80} height={12} borderRadius={4} />
+            </View>
+            <Skeleton width={60} height={14} borderRadius={4} />
         </View>
-        <Skeleton width={60} height={14} borderRadius={4} />
-    </View>
-);
+    );
+};
 
 /**
  * Skeleton loading placeholder for Water Treatment screens
@@ -41,6 +51,8 @@ const MaterialItemSkeleton: React.FC = () => (
  * 3. SelectionNotesBox (notes textarea)
  */
 export const WaterTreatmentSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.container}>
             {/* Card: Thông tin chung (Date + Activity type) */}
@@ -87,43 +99,45 @@ export const WaterTreatmentSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    card: {
-        backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        marginTop: 8,
-        marginHorizontal: 16,
-        borderRadius: 8,
-    },
-    cardHeader: {
-        marginBottom: 12,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginBottom: 12,
-        marginHorizontal: -spacing.md,
-    },
-    cardContent: {
-        gap: spacing.md,
-    },
-    materialItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-    },
-    materialInfo: {
-        gap: 6,
-    },
-    footer: {
-        flexDirection: 'row',
-        marginTop: spacing.sm,
-        paddingBottom: spacing.xl,
-        paddingHorizontal: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        card: {
+            backgroundColor: theme.background,
+            paddingHorizontal: spacing.md,
+            paddingVertical: 12,
+            marginTop: 8,
+            marginHorizontal: 16,
+            borderRadius: 8,
+        },
+        cardHeader: {
+            marginBottom: 12,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+            marginBottom: 12,
+            marginHorizontal: -spacing.md,
+        },
+        cardContent: {
+            gap: spacing.md,
+        },
+        materialItem: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 8,
+        },
+        materialInfo: {
+            gap: 6,
+        },
+        footer: {
+            flexDirection: 'row',
+            marginTop: spacing.sm,
+            paddingBottom: spacing.xl,
+            paddingHorizontal: spacing.md,
+        },
+    });

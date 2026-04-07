@@ -199,11 +199,11 @@ const getStyles = (theme: Colors) =>
             alignItems: 'center',
             justifyContent: 'space-between',
             borderWidth: 1,
-            borderColor: theme.defaultBorder,
+            borderColor: theme.border,
             borderRadius: 12,
             paddingVertical: spacing.sm,
             paddingHorizontal: spacing.md,
-            backgroundColor: theme.background,
+            backgroundColor: theme.backgroundSecondary,
         },
         materialCardsContainer: {
             gap: 8,
@@ -222,7 +222,7 @@ const getStyles = (theme: Colors) =>
         quantityBox: {
             flexDirection: 'row',
             borderWidth: 1,
-            borderColor: theme.defaultBorder,
+            borderColor: theme.border,
             borderRadius: 12,
             paddingHorizontal: spacing.sm,
             height: 40,
@@ -249,12 +249,13 @@ const getStyles = (theme: Colors) =>
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 1,
-            borderColor: theme.defaultBorder,
+            borderColor: theme.border,
             borderRadius: borderRadius.full,
             backgroundColor: theme.background,
         },
         addButton: {
-            borderColor: theme.defaultBorder,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
         },
         addButtonText: {
             color: theme.text,
