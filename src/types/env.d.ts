@@ -11,4 +11,5 @@ declare module '@env' {
     export const AZURE_BLOB_SAS_KEY: string;
     export const NODE_ENV: string;
     export const API_TIMEOUT: string;
+    export const WEATHER_API_KEY: string;
 }
