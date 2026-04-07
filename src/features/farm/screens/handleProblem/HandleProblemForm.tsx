@@ -13,7 +13,7 @@ import { SpecificType } from '@/features/material/types/warehouse.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { Loading } from '@/shared/components/ui/Loading';
+
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
@@ -105,97 +105,98 @@ export const HandleProblemForm = ({
     };
 
     return (
-        <Loading isLoading={isSaving}>
-            <View style={styles.container}>
-                <HeaderSection
-                    title={title}
-                    onBack={onBack}
-                    rightComponent={
-                        isEditMode ? (
-                            <DeleteButton onPress={() => setShowDeleteModal(true)} />
-                        ) : undefined
-                    }
-                />
+        <View style={styles.container}>
+            <HeaderSection
+                title={title}
+                onBack={onBack}
+                backButtonDisabled={isSaving}
+                rightComponent={
+                    isEditMode ? (
+                        <DeleteButton onPress={() => setShowDeleteModal(true)} />
+                    ) : undefined
+                }
+            />
 
-                <SafeInputLayout>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        {/* 1. Thông tin chung */}
-                        <Controller
-                            control={control}
-                            name="selectedDate"
-                            render={({ field: { value, onChange } }) => (
-                                <Controller
-                                    control={control}
-                                    name="imageUris"
-                                    render={({ field: { value: images, onChange: setImages } }) => (
-                                        <GeneralInfoBox
-                                            ref={generalInfoBoxRef}
-                                            type="withImage"
-                                            date={value}
-                                            onDateChange={onChange}
-                                            imageUris={images || []}
-                                            onImagesChange={setImages}
-                                            disabledDate={true}
-                                            documentIds={initialData.documentIds}
-                                        />
-                                    )}
-                                />
-                            )}
-                        />
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* 1. Thông tin chung */}
+                    <Controller
+                        control={control}
+                        name="selectedDate"
+                        render={({ field: { value, onChange } }) => (
+                            <Controller
+                                control={control}
+                                name="imageUris"
+                                render={({ field: { value: images, onChange: setImages } }) => (
+                                    <GeneralInfoBox
+                                        ref={generalInfoBoxRef}
+                                        type="withImage"
+                                        date={value}
+                                        onDateChange={onChange}
+                                        imageUris={images || []}
+                                        onImagesChange={setImages}
+                                        disabledDate={true}
+                                        documentIds={initialData.documentIds}
+                                    />
+                                )}
+                            />
+                        )}
+                    />
 
-                        {/* 2. Chọn vật tư */}
-                        <Controller
-                            control={control}
-                            name="selectedMaterials"
-                            render={({ field: { value, onChange } }) => (
-                                <MaterialSelectionBox
-                                    selectedMaterials={value}
-                                    onMaterialsChange={onChange}
-                                    specificType={SpecificType.Normal}
-                                    isRequired={isMaterialRequired}
-                                />
-                            )}
-                        />
+                    {/* 2. Chọn vật tư */}
+                    <Controller
+                        control={control}
+                        name="selectedMaterials"
+                        render={({ field: { value, onChange } }) => (
+                            <MaterialSelectionBox
+                                selectedMaterials={value}
+                                onMaterialsChange={onChange}
+                                specificType={SpecificType.Normal}
+                                isRequired={isMaterialRequired}
+                            />
+                        )}
+                    />
 
-                        {/* 3. Ghi chú (Mô tả sự cố) */}
-                        <Controller
-                            control={control}
-                            name="note"
-                            render={({ field: { value, onChange } }) => (
-                                <SelectionNotesBox notes={value || ''} onNotesChange={onChange} />
-                            )}
-                        />
+                    {/* 3. Ghi chú (Mô tả sự cố) */}
+                    <Controller
+                        control={control}
+                        name="note"
+                        render={({ field: { value, onChange } }) => (
+                            <SelectionNotesBox notes={value || ''} onNotesChange={onChange} />
+                        )}
+                    />
 
-                        <View style={styles.spacer} />
-                    </ScrollView>
-                </SafeInputLayout>
+                    <View style={styles.spacer} />
+                </ScrollView>
+            </SafeInputLayout>
 
-                <ButtonBarFarm
-                    primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSubmit(handleFormSubmit)}
-                    onSecondaryPress={onBack}
-                    style={{
-                        borderTopWidth: 1,
-                        borderTopColor: theme.defaultBorder,
-                        backgroundColor: theme.background,
-                    }}
-                    primaryDisabled={isEditMode && !hasChanges}
-                />
+            <ButtonBarFarm
+                primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                secondaryTitle="Huỷ"
+                onPrimaryPress={handleSubmit(handleFormSubmit)}
+                onSecondaryPress={onBack}
+                isLoading={isSaving}
+                secondaryDisabled={isSaving}
+                primaryDisabled={isSaving || (isEditMode && !hasChanges)}
+                style={{
+                    borderTopWidth: 1,
+                    borderTopColor: theme.defaultBorder,
+                    backgroundColor: theme.background,
+                }}
+            />
 
-                <ConfirmationModalUI
-                    visible={showDeleteModal}
-                    onConfirm={handleConfirmDelete}
-                    onCancel={() => setShowDeleteModal(false)}
-                />
-                {UnsavedChangesModal}
-            </View>
-        </Loading>
+            <ConfirmationModalUI
+                visible={showDeleteModal}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setShowDeleteModal(false)}
+            />
+            {UnsavedChangesModal}
+        </View>
     );
 };
 

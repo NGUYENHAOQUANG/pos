@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import {
     showMaterialQuantityZeroToast,
@@ -15,7 +15,7 @@ import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatm
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
-import { WaterTreatmentSkeleton } from '@/features/farm/components/skeleton/WaterTreatmentSkeleton';
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 import { useCreateWaterTreatment } from '@/features/farm/hooks/useWaterTreatmentRecords';
@@ -103,16 +103,19 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     };
 
     return (
-        <>
+        <View style={styles.container}>
             {/* Header */}
-            <HeaderSection title="Xử lý nước" onBack={handleBack} />
+            <HeaderSection
+                title="Xử lý nước"
+                onBack={handleBack}
+                backButtonDisabled={createMutation.isPending}
+            />
 
-            {isLoading ? (
-                <WaterTreatmentSkeleton />
-            ) : (
-                <>
+            <View style={{ flex: 1 }}>
+                {isLoading ? (
+                    <EnvSkeleton />
+                ) : (
                     <SafeInputLayout
-                        style={styles.container}
                         contentContainerStyle={styles.scrollContent}
                         extraScrollHeight={150}
                     >
@@ -129,24 +132,27 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                             disabledDate={true}
                         />
                     </SafeInputLayout>
+                )}
+            </View>
 
-                    {/* Footer Buttons */}
-                    <ButtonBarFarm
-                        primaryTitle="Lưu thông tin"
-                        secondaryTitle="Huỷ"
-                        onPrimaryPress={handleSave}
-                        onSecondaryPress={handleBack}
-                        style={{
-                            borderTopWidth: 1,
-                            borderTopColor: theme.defaultBorder,
-                            backgroundColor: theme.background,
-                        }}
-                    />
-                </>
-            )}
+            {/* Footer Buttons */}
+            <ButtonBarFarm
+                primaryTitle="Lưu thông tin"
+                secondaryTitle="Huỷ"
+                onPrimaryPress={handleSave}
+                onSecondaryPress={handleBack}
+                isLoading={createMutation.isPending}
+                secondaryDisabled={createMutation.isPending}
+                primaryDisabled={createMutation.isPending}
+                style={{
+                    borderTopWidth: 1,
+                    borderTopColor: theme.defaultBorder,
+                    backgroundColor: theme.background,
+                }}
+            />
 
             {UnsavedChangesModal}
-        </>
+        </View>
     );
 };
 

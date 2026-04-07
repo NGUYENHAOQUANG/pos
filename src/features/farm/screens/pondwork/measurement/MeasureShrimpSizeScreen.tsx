@@ -108,6 +108,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             <HeaderSection
                 title="Đo kích thước tôm"
                 onBack={navigation.goBack}
+                backButtonDisabled={isSubmitting}
                 rightComponent={
                     itemToEdit ? (
                         <DeleteButton onPress={() => setIsDeleteModalVisible(true)} />
@@ -152,7 +153,8 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onPrimaryPress={onSavePress}
                     onSecondaryPress={navigation.goBack}
                     isLoading={isSubmitting}
-                    primaryDisabled={!!itemToEdit && !hasChanges}
+                    secondaryDisabled={isSubmitting}
+                    primaryDisabled={isSubmitting || (!!itemToEdit && !hasChanges)}
                 />
             </View>
 

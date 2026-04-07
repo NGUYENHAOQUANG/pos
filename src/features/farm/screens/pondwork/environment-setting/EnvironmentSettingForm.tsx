@@ -43,7 +43,11 @@ export const SettingEnvironmentForm: React.FC<SettingEnvironmentFormProps> = ({
     const styles = getStyles(theme);
     return (
         <View style={styles.container}>
-            <HeaderMenu title="Thiết lập thông số môi trường" onBack={onBack} />
+            <HeaderMenu
+                title="Thiết lập thông số môi trường"
+                onBack={onBack}
+                backButtonDisabled={isSaving}
+            />
 
             {isLoading ? (
                 <SettingEnvSkeleton />
@@ -79,6 +83,8 @@ export const SettingEnvironmentForm: React.FC<SettingEnvironmentFormProps> = ({
                 onPrimaryPress={onSave}
                 onSecondaryPress={onReset}
                 primaryButtonDisabled={!isDirty || isSaving}
+                secondaryButtonDisabled={isSaving}
+                primaryButtonLoading={isSaving}
                 secondaryButtonStyle={{ flex: 1, minWidth: 0 }}
             />
             {UnsavedChangesModal}

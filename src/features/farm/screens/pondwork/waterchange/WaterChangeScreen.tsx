@@ -9,6 +9,7 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -63,6 +64,9 @@ export const WaterSupplyScreen = () => {
     const updateMutation = useUpdateWaterSupplyRecord();
     const deleteMutation = useDeleteWaterSupplyRecord();
 
+    const isSavingActively =
+        createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
     // Initial Data
     const meta = useMemo(() => (item?.meta as WaterSupplyMeta) || {}, [item?.meta]);
@@ -86,6 +90,7 @@ export const WaterSupplyScreen = () => {
 
     const [documentIds, setDocumentIds] = useState<string[]>([]);
     const [detailData, setDetailData] = useState<IWaterSupplyRecord | null>(null);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     // Modal Delete
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -102,6 +107,7 @@ export const WaterSupplyScreen = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             if (pond?.id && item?.id) {
+                setIsLoadingDetail(true);
                 try {
                     const result = await waterSupplyApi.getDetail(pond.id, item.id);
                     const detail = result?.data ?? result;
@@ -110,6 +116,8 @@ export const WaterSupplyScreen = () => {
                     }
                 } catch (e) {
                     console.error('Fetch detail error:', e);
+                } finally {
+                    setIsLoadingDetail(false);
                 }
             }
         };
@@ -386,52 +394,57 @@ export const WaterSupplyScreen = () => {
             <HeaderSection
                 title="Thay/Cấp nước"
                 onBack={handleBack}
+                backButtonDisabled={isSavingActively}
                 rightComponent={item ? <DeleteButton onPress={handleDelete} /> : undefined}
             />
 
             <View style={styles.contentContainer}>
-                <SafeInputLayout
-                    contentContainerStyle={styles.scrollContent}
-                    extraScrollHeight={100}
-                >
-                    {/* 1. Thông tin chung */}
-                    <GeneralInfoBox
-                        ref={generalInfoBoxRef}
-                        type="withImage"
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        imageUris={imageUris}
-                        onImagesChange={setImageUris}
-                        documentIds={documentIds}
-                        disabledDate={true}
-                    />
+                {isLoadingDetail ? (
+                    <EnvSkeleton />
+                ) : (
+                    <SafeInputLayout
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={100}
+                    >
+                        {/* 1. Thông tin chung */}
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            type="withImage"
+                            date={selectedDate}
+                            onDateChange={setSelectedDate}
+                            imageUris={imageUris}
+                            onImagesChange={setImageUris}
+                            documentIds={documentIds}
+                            disabledDate={true}
+                        />
 
-                    {/* 2. Mực nước & Thể tích */}
-                    <WaterSupplyInfoBox
-                        targetLevel={targetLevel}
-                        onTargetLevelChange={setTargetLevel}
-                        supplyLevel={supplyLevel}
-                        onSupplyLevelChange={setSupplyLevel}
-                        // Truyền các giá trị đã tính toán
-                        drainLevel={calculateInfo.drainLevel}
-                        volumeAfterDrain={calculateInfo.volumeAfterDrain}
-                        volumeSupply={calculateInfo.volumeSupply}
-                        volumeAfterSupply={calculateInfo.volumeAfterSupply}
-                    />
+                        {/* 2. Mực nước & Thể tích */}
+                        <WaterSupplyInfoBox
+                            targetLevel={targetLevel}
+                            onTargetLevelChange={setTargetLevel}
+                            supplyLevel={supplyLevel}
+                            onSupplyLevelChange={setSupplyLevel}
+                            // Truyền các giá trị đã tính toán
+                            drainLevel={calculateInfo.drainLevel}
+                            volumeAfterDrain={calculateInfo.volumeAfterDrain}
+                            volumeSupply={calculateInfo.volumeSupply}
+                            volumeAfterSupply={calculateInfo.volumeAfterSupply}
+                        />
 
-                    {/* 3. Chọn vật tư */}
-                    <MaterialSelectionBox
-                        selectedMaterials={selectedMaterials}
-                        onMaterialsChange={setSelectedMaterials}
-                        specificType={SpecificType.Normal}
-                        isRequired={false}
-                    />
+                        {/* 3. Chọn vật tư */}
+                        <MaterialSelectionBox
+                            selectedMaterials={selectedMaterials}
+                            onMaterialsChange={setSelectedMaterials}
+                            specificType={SpecificType.Normal}
+                            isRequired={false}
+                        />
 
-                    {/* 4. Ghi chú */}
-                    <SelectionNotesBox notes={note} onNotesChange={setNote} />
+                        {/* 4. Ghi chú */}
+                        <SelectionNotesBox notes={note} onNotesChange={setNote} />
 
-                    <View style={styles.spacer} />
-                </SafeInputLayout>
+                        <View style={styles.spacer} />
+                    </SafeInputLayout>
+                )}
             </View>
 
             {/* Footer */}
@@ -440,7 +453,9 @@ export const WaterSupplyScreen = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
-                primaryDisabled={!!item && !hasChanges}
+                isLoading={isSavingActively}
+                secondaryDisabled={isSavingActively}
+                primaryDisabled={isSavingActively || (!!item && !hasChanges)}
                 style={{
                     borderTopWidth: 1,
                     borderTopColor: theme.defaultBorder,

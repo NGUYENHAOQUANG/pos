@@ -178,7 +178,7 @@ const getStyles = (theme: Colors) =>
         },
         label: {
             fontSize: 14,
-            color: theme.gray[500],
+            color: theme.textSecondary,
             flexShrink: 1,
         },
         valueWrapper: {

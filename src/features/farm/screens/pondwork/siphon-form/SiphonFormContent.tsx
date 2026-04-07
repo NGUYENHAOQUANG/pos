@@ -11,7 +11,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import {
     showAddJobSuccessToast,
@@ -25,6 +25,7 @@ import { SiphonFormInformation } from '@/features/farm/components/pondwork/xypho
 interface SiphonFormContentProps {
     isEditing: boolean;
     isLoadingDetail: boolean;
+    isSaving: boolean;
     initialValues: SiphonFormValues;
     initialSnapshot: string | null;
     selectedDate: Date;
@@ -37,6 +38,7 @@ interface SiphonFormContentProps {
 export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
     isEditing,
     isLoadingDetail,
+    isSaving,
     initialValues,
     initialSnapshot,
     selectedDate,
@@ -158,13 +160,14 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
             <HeaderSection
                 title="Xi-phông"
                 onBack={onBack}
+                backButtonDisabled={isSaving}
                 rightComponent={
                     isEditing ? <DeleteButton onPress={handleDeletePress} /> : undefined
                 }
             />
 
             {isLoadingDetail ? (
-                <PondJobSkeleton />
+                <EnvSkeleton />
             ) : (
                 <SiphonFormInformation
                     generalInfoBoxRef={generalInfoBoxRef}
@@ -188,7 +191,9 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSubmit(onSubmit)}
                     onSecondaryPress={handleCancel}
-                    primaryDisabled={isButtonDisabled}
+                    isLoading={isSaving}
+                    secondaryDisabled={isSaving}
+                    primaryDisabled={isSaving || isButtonDisabled}
                 />
             </View>
 

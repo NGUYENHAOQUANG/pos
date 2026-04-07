@@ -9,7 +9,6 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { Loading } from '@/shared/components/ui/Loading';
 
 import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -137,12 +136,13 @@ export const FeedingManagementScreens = () => {
         fetchDeviceSchedules();
     }, [feederDevice]);
 
-    const isLoading =
+    const isSavingActively =
         createMutation.isPending ||
         updateMutation.isPending ||
         deleteMutation.isPending ||
-        isSubmittingControl ||
-        (isDetailLoading && isEditMode);
+        isSubmittingControl;
+
+    const isLoadingDetailAndEdit = isDetailLoading && isEditMode;
 
     const initialData = useMemo(() => {
         if (!isEditMode) {
@@ -308,38 +308,34 @@ export const FeedingManagementScreens = () => {
                 title={isEditMode ? 'Cho ăn' : 'Cho ăn'}
                 onBack={() => navigation.goBack()}
                 rightAction={renderHeaderRight()}
+                backButtonDisabled={isSavingActively}
             />
 
-            <Loading isLoading={isLoading}>
-                <View style={styles.contentContainer}>
-                    {isDetailLoading && isEditMode ? (
-                        <EnvSkeleton />
-                    ) : (
-                        <SafeInputLayout contentContainerStyle={styles.scrollContent}>
-                            <FeedingForm
-                                ref={formRef}
-                                isEditMode={isEditMode}
-                                isLoadingDetail={isDetailLoading && isEditMode}
-                                isSubmitting={isLoading}
-                                initialData={initialData}
-                                onSubmit={handleSubmit}
-                                onHasChangesChange={setFormHasChanges}
-                            />
-                        </SafeInputLayout>
-                    )}
-                </View>
-            </Loading>
+            <View style={styles.contentContainer}>
+                {isLoadingDetailAndEdit ? (
+                    <EnvSkeleton />
+                ) : (
+                    <SafeInputLayout contentContainerStyle={styles.scrollContent}>
+                        <FeedingForm
+                            ref={formRef}
+                            isEditMode={isEditMode}
+                            isLoadingDetail={isLoadingDetailAndEdit}
+                            isSubmitting={isSavingActively}
+                            initialData={initialData}
+                            onSubmit={handleSubmit}
+                            onHasChangesChange={setFormHasChanges}
+                        />
+                    </SafeInputLayout>
+                )}
+            </View>
             <ButtonBarFarm
                 primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handlePrimaryPress}
                 onSecondaryPress={() => navigation.goBack()}
-                isLoading={createMutation.isPending || updateMutation.isPending}
-                primaryDisabled={
-                    createMutation.isPending ||
-                    updateMutation.isPending ||
-                    (isEditMode && !formHasChanges)
-                }
+                isLoading={isSavingActively}
+                secondaryDisabled={isSavingActively}
+                primaryDisabled={isSavingActively || (isEditMode && !formHasChanges)}
                 style={{ borderTopWidth: 1, borderTopColor: theme.defaultBorder }}
             />
             {isEditMode && (
