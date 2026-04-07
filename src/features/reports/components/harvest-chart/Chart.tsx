@@ -3,10 +3,8 @@ import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
 import { colors, typography } from '@/styles';
-export interface HarvestChartData {
-    pond: string;
-    yield: number;
-}
+import { HarvestChartData } from '@/features/reports/types/harvest-stats';
+export type { HarvestChartData };
 
 interface ChartProps {
     data: HarvestChartData[];

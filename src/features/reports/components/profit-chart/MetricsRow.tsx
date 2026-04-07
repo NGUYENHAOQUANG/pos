@@ -102,10 +102,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: spacing.md,
+        zIndex: 2,
     },
     metricsBottomRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        zIndex: 1,
     },
     metricItem: {
         flex: 1,

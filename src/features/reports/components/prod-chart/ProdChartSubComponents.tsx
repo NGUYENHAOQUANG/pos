@@ -160,9 +160,7 @@ export const BarGroup = React.memo(
                                             style={[
                                                 barStyles.tooltipLabel,
                                                 {
-                                                    color: theme.isDark
-                                                        ? theme.textSecondary
-                                                        : '#8E9199',
+                                                    color: colors.white,
                                                 },
                                             ]}
                                         >
@@ -445,7 +443,7 @@ const barStyles = StyleSheet.create({
     },
     tooltipContainer: {
         position: 'absolute',
-        backgroundColor: colors.primary,
+        backgroundColor: '#0B1117',
         borderRadius: 8,
         padding: 8,
         gap: 4,
@@ -479,7 +477,7 @@ const barStyles = StyleSheet.create({
         marginRight: 6,
     },
     tooltipLabel: {
-        color: '#8E9199',
+        color: colors.white,
         fontSize: 12,
     },
     tooltipValueContainer: {
@@ -492,7 +490,7 @@ const barStyles = StyleSheet.create({
         fontWeight: '600',
     },
     tooltipUnit: {
-        color: colors.gray[400],
+        color: colors.textSecondary,
         fontSize: 12,
         marginLeft: 2,
     },

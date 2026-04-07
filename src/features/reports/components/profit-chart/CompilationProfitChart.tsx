@@ -19,10 +19,7 @@ import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import { useAppTheme } from '@/styles/themeContext';
 import ProfitChartIcon from '@/assets/Icon/IconReport/ProfitChartIcon.svg';
 
-interface CompilationProfitChartProps {
-    zoneId: string;
-    pondId?: string;
-}
+import { CompilationProfitChartProps } from '@/features/reports/types/profit-stats';
 
 const truncateToDecimals = (value: number, decimals: number) => {
     const multiplier = Math.pow(10, decimals);
@@ -53,6 +50,7 @@ const LEGEND_ITEMS = [
 export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
     zoneId,
     pondId,
+    seasonId,
 }) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
@@ -60,7 +58,8 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
 
     const { data: response, isLoading: queryLoading } = useProfitStats({
         ZoneId: zoneId,
-        Id: pondId,
+        PondIds: pondId ? [pondId] : undefined,
+        SeasonId: seasonId,
     });
     const isLoading = isExpanded && queryLoading;
 
@@ -104,7 +103,9 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                 rawTotalCost={statsData?.kpis?.totalMaterialCost}
                                 rawEstimatedProfit={statsData?.kpis?.totalEstimatedProfit}
                             />
-                            <Text style={styles.chartTitle}>Lợi nhuận (Tỉ đồng)</Text>
+                            <Text style={[styles.chartTitle, { color: theme.textSecondary }]}>
+                                Lợi nhuận (Tỉ đồng)
+                            </Text>
                             <Chart
                                 chartWidth={chartWidth}
                                 chartHeight={chartHeight}

@@ -12,6 +12,8 @@ interface MetricsRowProps {
     cardVariant?: 'default' | 'prodSummary';
     activeFilters?: Record<string, boolean>;
     onToggleFilter?: (id: string) => void;
+    tooltipProduction?: string;
+    tooltipConsumed?: string;
 }
 
 const METRIC_ITEMS = (
@@ -40,9 +42,17 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     cardVariant = 'default',
     activeFilters,
     onToggleFilter,
+    tooltipProduction,
+    tooltipConsumed,
 }) => {
     const theme = useAppTheme();
     const items = METRIC_ITEMS(production, consumed, fcr, forecast, theme);
+
+    const getTooltipValue = (id: string): string | undefined => {
+        if (id === 'production') return tooltipProduction;
+        if (id === 'consumed') return tooltipConsumed;
+        return undefined;
+    };
 
     return (
         <ScrollView
@@ -58,6 +68,7 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
                     variant={cardVariant}
                     onPress={onToggleFilter ? () => onToggleFilter(item.id) : undefined}
                     isActive={activeFilters ? activeFilters[item.id] !== false : true}
+                    tooltipValue={getTooltipValue(item.id)}
                 />
             ))}
         </ScrollView>
@@ -67,6 +78,8 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
 const styles = StyleSheet.create({
     container: {
         flexGrow: 0,
+        overflow: 'visible',
+        zIndex: 10,
     },
     scrollContent: {
         flexDirection: 'row',

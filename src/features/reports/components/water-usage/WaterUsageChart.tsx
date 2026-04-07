@@ -20,12 +20,9 @@ const PADDING_TOP = 20;
 const PADDING_BOTTOM = 40;
 const DRAW_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
-interface WaterUsageChartProps {
-    zoneId?: string;
-    pondIds?: string[];
-}
+import { WaterUsageChartProps } from '@/features/reports/types/water-usage';
 
-const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) => {
+const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seasonId }) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -37,6 +34,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds }) =>
     } = useWaterUsageStats({
         zoneId: zoneId || '',
         pondIds,
+        seasonId,
         enabled: isExpanded,
     });
 

@@ -12,6 +12,8 @@ import { APP_CONFIG } from '@/shared/constants/config';
 interface UseInfiniteHarvestStatsParams {
     ZoneId: string;
     Id?: string;
+    PondIds?: string[];
+    SeasonId?: string;
     CycleId?: string;
     enabled?: boolean;
 }
@@ -33,18 +35,31 @@ const formatHarvestDate = (dateStr: string): string => {
 export const useInfiniteHarvestStatsTable = ({
     ZoneId,
     Id,
+    PondIds,
+    SeasonId,
     CycleId,
     enabled = true,
 }: UseInfiniteHarvestStatsParams) => {
     const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
 
     const query = useInfiniteQuery({
-        queryKey: ['report', 'harvest-stats-table', 'infinite', ZoneId, Id, CycleId],
+        queryKey: [
+            'report',
+            'harvest-stats-table',
+            'infinite',
+            ZoneId,
+            Id,
+            PondIds,
+            SeasonId,
+            CycleId,
+        ],
         queryFn: async ({ pageParam = 1 }) => {
             if (!ZoneId) throw new Error('ZoneId is required');
             return reportApi.getHarvestStatsTable({
                 ZoneId,
                 Id,
+                PondIds,
+                SeasonId,
                 CycleId,
                 Page: pageParam,
                 PageSize: pageSize,

@@ -162,7 +162,7 @@ export const TOAST_MESSAGES_CONFIG = {
             text1: 'Cập nhật cấu hình thành công',
         },
         PARTIAL_FAIL: {
-            type: 'info',
+            type: 'success',
             text1: 'Lưu lịch trình một phần',
         },
         SAVE_FAILED: {

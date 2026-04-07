@@ -21,4 +21,21 @@ export interface FeedProdData {
     chartData: FeedProdChartDataPoint[];
 }
 
+export interface FeedProdParams {
+    ZoneId: string;
+    Id?: string;
+    PondIds?: string[];
+    PondCategoryIds?: string[];
+    SeasonId?: string;
+    CreatedAtFrom?: string;
+    CreatedAtTo?: string;
+}
+
 export type FeedProdResponse = IApiResponse<FeedProdData>;
+
+// ===== Component Props =====
+export interface CompilationFeedProdProps {
+    zoneId: string;
+    pondId?: string;
+    seasonId?: string;
+}

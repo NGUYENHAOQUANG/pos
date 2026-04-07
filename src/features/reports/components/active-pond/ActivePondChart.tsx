@@ -55,11 +55,9 @@ const FILTER_COLORS: Record<PondFilterType, FilterColorConfig> = {
     },
 };
 
-interface ActivePondChartProps {
-    zoneId: string;
-}
+import { ActivePondChartProps } from '@/features/reports/types/pond-status-distribution';
 
-export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
+export const ActivePondChart = ({ zoneId, seasonId }: ActivePondChartProps) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [expanded, setExpanded] = useState(false);
@@ -71,7 +69,10 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
         setContainerWidth(event.nativeEvent.layout.width);
     };
 
-    const { data: response, isLoading: isApiLoading } = usePondStatusDistribution({ zoneId });
+    const { data: response, isLoading: isApiLoading } = usePondStatusDistribution({
+        ZoneId: zoneId,
+        SeasonId: seasonId,
+    });
 
     const handleToggle = () => setExpanded(prev => !prev);
 

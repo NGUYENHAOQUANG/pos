@@ -4,6 +4,8 @@ import { reportApi } from '../api/reportApi';
 export const useFeedingProduction = (params: {
     ZoneId: string | null | undefined;
     Id?: string | null | undefined; // SeasonId or PondId
+    PondIds?: string[];
+    SeasonId?: string;
     CreatedAtFrom?: string;
     CreatedAtTo?: string;
 }) => {
@@ -13,6 +15,8 @@ export const useFeedingProduction = (params: {
             'feeding-production',
             params.ZoneId,
             params.Id,
+            params.PondIds,
+            params.SeasonId,
             params.CreatedAtFrom,
             params.CreatedAtTo,
         ],
@@ -21,6 +25,8 @@ export const useFeedingProduction = (params: {
             return reportApi.getFeedingProduction({
                 ZoneId: params.ZoneId,
                 Id: params.Id || undefined,
+                PondIds: params.PondIds,
+                SeasonId: params.SeasonId,
                 CreatedAtFrom: params.CreatedAtFrom,
                 CreatedAtTo: params.CreatedAtTo,
             });

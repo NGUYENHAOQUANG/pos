@@ -77,10 +77,10 @@ export interface ProdVisualChartProps {
 /** View mode for production chart: doc = by DOC age, area = by zone/area */
 export type ProdChartViewMode = 'doc' | 'area';
 
-/** Props for the ProdChart main component */
 export interface ProdChartProps {
     zoneId: string;
     pondId?: string;
+    seasonId?: string;
 }
 
 /** Hook return type for production chart data */
