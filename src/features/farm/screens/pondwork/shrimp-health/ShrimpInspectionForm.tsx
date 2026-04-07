@@ -19,6 +19,7 @@ import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ShrimpInspectionMeta, JobExecution } from '@/features/farm/types/farm.types';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { ShrimpInspectionFormValues } from '@/features/farm/schemas/shrimpInspectionSchema';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
@@ -86,7 +87,9 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
                     containerStyle={styles.headerContainer}
                 />
 
-                {isLoadingDetail ? null : (
+                {isLoadingDetail ? (
+                    <EnvSkeleton />
+                ) : (
                     <SafeInputLayout
                         contentContainerStyle={styles.scrollContent}
                         extraScrollHeight={100}

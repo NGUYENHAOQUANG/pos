@@ -11,8 +11,8 @@ import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 // Hooks
 import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterChangeRecords';
 import { ActivityIndicator, View } from 'react-native';
-import { colors } from '@/styles';
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
+import { useAppTheme } from '@/styles/themeContext';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupplyLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -24,6 +24,7 @@ export const WaterSupplyLogScreen = () => {
 
     const pondId = pond?.id || '';
 
+    const theme = useAppTheme();
     const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     // Fetch data using the hook with date params
@@ -66,7 +67,7 @@ export const WaterSupplyLogScreen = () => {
     if (isLoading && !jobs.length) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }

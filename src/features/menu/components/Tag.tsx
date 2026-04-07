@@ -94,7 +94,7 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
                 return {
                     label: getLabel(),
                     color: theme.text,
-                    backgroundColor: theme.gray[100],
+                    backgroundColor: theme.isDark ? theme.backgroundButtonActive : theme.gray[100],
                     borderColor: theme.borderDark,
                 };
             case 'installed':

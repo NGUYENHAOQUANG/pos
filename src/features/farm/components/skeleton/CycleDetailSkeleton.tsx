@@ -1,9 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export const CycleDetailSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const renderDetailRow = (key: number) => (
         <View key={key} style={styles.detailRow}>
             <Skeleton width={120} height={16} borderRadius={4} />
@@ -48,49 +53,50 @@ export const CycleDetailSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    content: {
-        paddingTop: spacing.md,
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        marginHorizontal: spacing.md,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        borderTopLeftRadius: 12,
-        borderTopRightRadius: 12,
-    },
-    cardHeaderSmall: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-        borderTopLeftRadius: 12,
-        borderTopRightRadius: 12,
-    },
-    infoContainer: {
-        paddingBottom: 16,
-        paddingHorizontal: spacing.md,
-        gap: 12,
-    },
-    detailRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: 24,
-    },
-    line: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginVertical: 4,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        content: {
+            paddingTop: spacing.md,
+        },
+        card: {
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: 12,
+            marginHorizontal: spacing.md,
+        },
+        cardHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+        },
+        cardHeaderSmall: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+        },
+        infoContainer: {
+            paddingBottom: 16,
+            paddingHorizontal: spacing.md,
+            gap: 12,
+        },
+        detailRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: 24,
+        },
+        line: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+            marginVertical: 4,
+        },
+    });

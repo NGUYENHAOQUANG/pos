@@ -14,7 +14,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, colors, spacing, typography } from '@/styles';
+import { borderRadius, spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { IMaterial } from '@/features/material/types/material.types';
 import { Input, InputFormat, RequiredDot } from '@/shared/components/forms/Input';
 import { Button } from '@/shared/components/buttons/Button';
@@ -51,6 +53,9 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     searchText = '',
     onSearchChange,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const [selectedMaterial, setSelectedMaterial] = useState<IMaterial | undefined>();
     const [quantity, setQuantity] = useState('');
@@ -130,7 +135,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
 
     // Render the material form content
     const renderFormContent = () => (
-        <>
+        <View style={styles.formContainer}>
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.titleWrapper}>
@@ -171,7 +176,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                         <Ionicons
                             name="chevron-down-outline"
                             size={18}
-                            color={colors.textSecondary}
+                            color={theme.textSecondary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -217,7 +222,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     style={styles.footerButton}
                 />
             </View>
-        </>
+        </View>
     );
 
     // Render product selection list
@@ -272,7 +277,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                 ListEmptyComponent={
                     isLoading ? (
                         <View style={styles.emptyContainer}>
-                            <ActivityIndicator size="small" color={colors.primaryOrange} />
+                            <ActivityIndicator size="small" color={theme.primaryOrange} />
                         </View>
                     ) : (
                         <View style={styles.emptyContainer}>
@@ -284,7 +289,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                 ListFooterComponent={
                     isFetchingNextPage ? (
                         <View style={styles.loadingFooter}>
-                            <ActivityIndicator size="small" color={colors.primaryOrange} />
+                            <ActivityIndicator size="small" color={theme.primaryOrange} />
                         </View>
                     ) : null
                 }
@@ -340,157 +345,161 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    container: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.md,
-    },
-    containerProduct: {
-        flex: 0.7,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: spacing.md,
-    },
-    titleWrapper: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: '700',
-        color: colors.text,
-        flex: 1,
-    },
-    closeButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    content: {
-        gap: spacing.md,
-        marginBottom: spacing.lg,
-    },
-    fieldGroup: {
-        gap: spacing.xs,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 2,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 20,
-    },
-    productSelector: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 12,
-        height: 40,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    productSelectorText: {
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-    },
-    placeholderText: {
-        color: colors.textTertiary,
-    },
-    footer: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: spacing.md,
-    },
-    footerButton: {
-        flex: 1,
-    },
-    cancelButtonOverride: {
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    cancelButtonTextOverride: {
-        color: colors.text,
-        fontSize: 14,
-    },
-    // Product selection styles
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        height: 40,
-        backgroundColor: colors.white,
-        marginBottom: spacing.md,
-    },
-    searchIcon: {
-        marginRight: spacing.sm,
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 14,
-        color: colors.text,
-        padding: 0,
-        height: 40,
-    },
-    list: {
-        flex: 1,
-    },
-    itemRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 14,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: colors.border,
-    },
-    itemName: {
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-        fontWeight: '500',
-        marginRight: spacing.sm,
-    },
-    itemStock: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '500',
-    },
-    emptyContainer: {
-        padding: spacing.xl,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    emptyText: {
-        marginTop: spacing.sm,
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    loadingFooter: {
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
+const getStyles = (colors: Colors) =>
+    StyleSheet.create({
+        formContainer: {
+            backgroundColor: colors.background,
+        },
+        overlay: {
+            flex: 1,
+            backgroundColor: colors.overlay,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+        },
+        container: {
+            width: '100%',
+            backgroundColor: colors.background,
+            borderTopLeftRadius: borderRadius.md,
+            borderTopRightRadius: borderRadius.md,
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.lg,
+            paddingBottom: spacing.md,
+        },
+        containerProduct: {
+            flex: 0.7,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: spacing.md,
+        },
+        titleWrapper: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        title: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: '700',
+            color: colors.text,
+            flex: 1,
+        },
+        closeButton: {
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        content: {
+            gap: spacing.md,
+            marginBottom: spacing.lg,
+        },
+        fieldGroup: {
+            gap: spacing.xs,
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 2,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: colors.text,
+            lineHeight: 20,
+        },
+        productSelector: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 12,
+            height: 40,
+            backgroundColor: colors.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        productSelectorText: {
+            fontSize: 14,
+            color: colors.text,
+            flex: 1,
+        },
+        placeholderText: {
+            color: colors.textTertiary,
+        },
+        footer: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: spacing.md,
+        },
+        footerButton: {
+            flex: 1,
+        },
+        cancelButtonOverride: {
+            borderColor: colors.border,
+            backgroundColor: colors.background,
+        },
+        cancelButtonTextOverride: {
+            color: colors.text,
+            fontSize: 14,
+        },
+        // Product selection styles
+        searchContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            paddingHorizontal: 12,
+            height: 40,
+            backgroundColor: colors.background,
+            marginBottom: spacing.md,
+        },
+        searchIcon: {
+            marginRight: spacing.sm,
+        },
+        searchInput: {
+            flex: 1,
+            fontSize: 14,
+            color: colors.text,
+            padding: 0,
+            height: 40,
+        },
+        list: {
+            flex: 1,
+        },
+        itemRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 14,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: colors.border,
+        },
+        itemName: {
+            fontSize: 14,
+            color: colors.text,
+            flex: 1,
+            fontWeight: '500',
+            marginRight: spacing.sm,
+        },
+        itemStock: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            fontWeight: '500',
+        },
+        emptyContainer: {
+            padding: spacing.xl,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        emptyText: {
+            marginTop: spacing.sm,
+            fontSize: 14,
+            color: colors.textSecondary,
+        },
+        loadingFooter: {
+            paddingVertical: spacing.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+    });

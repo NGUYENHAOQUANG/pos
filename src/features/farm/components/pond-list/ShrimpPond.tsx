@@ -24,6 +24,8 @@ import { IShrimpSeed } from '@/features/material/types/warehouse.types';
 import { useLatestPondActivity } from '@/features/farm/hooks/usePondRecords';
 import { pondRecordService } from '@/features/farm/services/pond-record.service';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
+import { createMMKV } from 'react-native-mmkv';
+import { NativeModules } from 'react-native';
 
 import { ShrimpPondHeader } from './ShrimpPondHeader';
 import { ShrimpPondInfo } from './ShrimpPondInfo';
@@ -104,6 +106,30 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
     const { data: latestRecordData } = useLatestPondActivity(pondId || '');
     const latestRecord = latestRecordData?.data?.items?.[0];
+
+    React.useEffect(() => {
+        if (latestRecord && name) {
+            try {
+                const widgetStorage = createMMKV({
+                    id: 'widget-storage',
+                });
+
+                const widgetData = {
+                    id: latestRecord.id,
+                    operationType: latestRecord.operationType,
+                    createdAt: latestRecord.createdAt,
+                    pondName: name,
+                };
+
+                widgetStorage.set('latestPondRecord', JSON.stringify(widgetData));
+                if (NativeModules.WidgetCenter) {
+                    NativeModules.WidgetCenter.reloadAllTimelines();
+                }
+            } catch (error) {
+                console.log('Sync widget failed', error);
+            }
+        }
+    }, [latestRecord, name]);
 
     const displayLastUpdate = useMemo(() => {
         if (latestRecord && latestRecord.createdAt) {
