@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Rect, Path, Text as SvgText } from 'react-native-svg';
@@ -36,6 +37,7 @@ const formatTooltipValue = (value: number) => {
 
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {
     const [selectedBarIndex, setSelectedBarIndex] = useState<number | null>(null);
+    const theme = useAppTheme();
 
     const handleBarPress = useCallback((index: number) => {
         setSelectedBarIndex(prev => (prev === index ? null : index));
@@ -190,7 +192,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                         y1={y}
                                         x2={svgWidth}
                                         y2={y}
-                                        stroke={colors.gray[200]}
+                                        stroke={theme.isDark ? theme.border : colors.gray[200]}
                                         strokeWidth={1}
                                     />
                                 );
@@ -275,7 +277,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                         y1={axisY}
                                         x2={x}
                                         y2={axisY + 8}
-                                        stroke="black"
+                                        stroke={theme.textSecondary}
                                         strokeOpacity={0.25}
                                         strokeWidth={0.5}
                                     />
@@ -292,7 +294,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                         key={`x-label-${day}-${index}`}
                                         x={x}
                                         y={y}
-                                        fill={colors.textSecondary}
+                                        fill={theme.textSecondary}
                                         fontSize={10}
                                         textAnchor="middle"
                                     >
@@ -308,7 +310,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                     y1={PADDING_TOP}
                                     x2={tooltipX}
                                     y2={PADDING_TOP + chartHeight}
-                                    stroke={colors.gray[400]}
+                                    stroke={theme.isDark ? theme.text : colors.gray[400]}
                                     strokeWidth={1}
                                     strokeDasharray="4,3"
                                 />
@@ -332,6 +334,11 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                     <View
                                         style={[
                                             styles.barTooltip,
+                                            {
+                                                backgroundColor: theme.backgroundButton,
+                                                borderColor: theme.border,
+                                                borderWidth: 1,
+                                            },
                                             showOnRight
                                                 ? { left: tooltipX + 8, top: PADDING_TOP + 4 }
                                                 : {
@@ -340,7 +347,9 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                                   },
                                         ]}
                                     >
-                                        <Text style={styles.barTooltipTitle}>
+                                        <Text
+                                            style={[styles.barTooltipTitle, { color: theme.text }]}
+                                        >
                                             {selectedTooltipData.date}
                                         </Text>
                                         <View style={styles.barTooltipRow}>
@@ -350,8 +359,20 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                                     { backgroundColor: BAR_COLORS.harvested },
                                                 ]}
                                             />
-                                            <Text style={styles.barTooltipLabel}>Thu hoạch:</Text>
-                                            <Text style={styles.barTooltipValue}>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipLabel,
+                                                    { color: theme.textSecondary },
+                                                ]}
+                                            >
+                                                Thu hoạch:
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipValue,
+                                                    { color: theme.text },
+                                                ]}
+                                            >
                                                 {formatTooltipValue(selectedTooltipData.harvested)}
                                             </Text>
                                         </View>
@@ -362,8 +383,20 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                                     { backgroundColor: BAR_COLORS.unharvested },
                                                 ]}
                                             />
-                                            <Text style={styles.barTooltipLabel}>Chưa thu:</Text>
-                                            <Text style={styles.barTooltipValue}>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipLabel,
+                                                    { color: theme.textSecondary },
+                                                ]}
+                                            >
+                                                Chưa thu:
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipValue,
+                                                    { color: theme.text },
+                                                ]}
+                                            >
                                                 {formatTooltipValue(
                                                     selectedTooltipData.unharvested
                                                 )}
@@ -376,8 +409,20 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                                     { backgroundColor: BAR_COLORS.cost },
                                                 ]}
                                             />
-                                            <Text style={styles.barTooltipLabel}>Chi phí:</Text>
-                                            <Text style={styles.barTooltipValue}>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipLabel,
+                                                    { color: theme.textSecondary },
+                                                ]}
+                                            >
+                                                Chi phí:
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipValue,
+                                                    { color: theme.text },
+                                                ]}
+                                            >
                                                 {formatTooltipValue(selectedTooltipData.cost)}
                                             </Text>
                                         </View>
@@ -388,8 +433,20 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                                     { backgroundColor: PROFIT_LINE_COLOR },
                                                 ]}
                                             />
-                                            <Text style={styles.barTooltipLabel}>Lợi nhuận:</Text>
-                                            <Text style={styles.barTooltipValue}>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipLabel,
+                                                    { color: theme.textSecondary },
+                                                ]}
+                                            >
+                                                Lợi nhuận:
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.barTooltipValue,
+                                                    { color: theme.text },
+                                                ]}
+                                            >
                                                 {formatTooltipValue(selectedTooltipData.profit)}
                                             </Text>
                                         </View>
@@ -408,7 +465,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                     top: 0,
                     width: PADDING_LEFT,
                     height: dynamicHeight,
-                    backgroundColor: colors.white,
+
                     zIndex: 10,
                 }}
                 pointerEvents="none"
@@ -421,7 +478,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                 key={`y-overlay-${value}`}
                                 x={16}
                                 y={y + 4}
-                                fill={colors.textSecondary}
+                                fill={theme.textSecondary}
                                 fontSize={12}
                                 textAnchor="start"
                             >
@@ -437,12 +494,11 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
 const styles = StyleSheet.create({
     chartContainer: {
-        backgroundColor: colors.white,
         position: 'relative',
     },
     barTooltip: {
         position: 'absolute',
-        backgroundColor: colors.white,
+
         borderRadius: 8,
         paddingHorizontal: 10,
         paddingVertical: 8,
@@ -457,7 +513,7 @@ const styles = StyleSheet.create({
     barTooltipTitle: {
         fontSize: 12,
         fontWeight: '600',
-        color: colors.text,
+
         marginBottom: 6,
     },
     barTooltipRow: {
@@ -473,13 +529,13 @@ const styles = StyleSheet.create({
     },
     barTooltipLabel: {
         fontSize: 11,
-        color: colors.textSecondary,
+
         marginRight: 4,
     },
     barTooltipValue: {
         fontSize: 11,
         fontWeight: '500',
-        color: colors.text,
+
         flexShrink: 1,
     },
 });

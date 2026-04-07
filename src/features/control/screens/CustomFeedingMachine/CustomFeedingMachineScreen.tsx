@@ -3,7 +3,7 @@ import { View, StyleSheet, BackHandler } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
 import { useNavigation } from '@react-navigation/native';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import {
     useDevices,
     useUpdateDeviceMode,
@@ -44,6 +44,8 @@ interface CustomFeedingMachineProps {
 }
 
 export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const navigation = useNavigation();
     const route = useRoute<RouteProp<ControlStackParamList, 'CustomFeedingMachine'>>();
 
@@ -475,7 +477,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={themedStyles.container}>
             <HeaderDevices title={getHeaderTitle()} onBackPress={handleCancel} />
 
             <ConfirmationModalUI
@@ -518,9 +520,9 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                     }
                 >
                     {/* 1. CHẾ ĐỘ HOẠT ĐỘNG */}
-                    <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
-                        <Text style={styles.sectionSubtitle}>Chọn loại hoạt động</Text>
+                    <View style={themedStyles.card}>
+                        <Text style={themedStyles.sectionTitle}>Chế độ hoạt động</Text>
+                        <Text style={themedStyles.sectionSubtitle}>Chọn loại hoạt động</Text>
 
                         <RadioButton
                             options={[
@@ -538,14 +540,14 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
                     {/* 2. CẤU HÌNH MÁY - Only show in schedule mode */}
                     {mode === 'schedule' && (
-                        <View style={styles.card}>
-                            <Text style={styles.sectionTitle}>Cấu hình máy</Text>
+                        <View style={themedStyles.card}>
+                            <Text style={themedStyles.sectionTitle}>Cấu hình máy</Text>
 
                             <Input
                                 label="Chạy (giây)"
                                 required
                                 placeholder="Nhập số giây"
-                                placeholderTextColor={colors.gray[400]}
+                                placeholderTextColor={theme.gray[400]}
                                 keyboardType="numeric"
                                 value={runDuration}
                                 onChangeText={text => {
@@ -560,7 +562,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 label="Dừng (phút)"
                                 required
                                 placeholder="Nhập số phút"
-                                placeholderTextColor={colors.gray[400]}
+                                placeholderTextColor={theme.gray[400]}
                                 keyboardType="numeric"
                                 value={stopDuration}
                                 onChangeText={text => {
@@ -604,10 +606,6 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
     flex1: {
         flex: 1,
     },
@@ -616,50 +614,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingBottom: 100,
     },
-    card: {
-        backgroundColor: colors.white,
-        padding: 16,
-        marginBottom: 8,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-        marginBottom: 16,
-    },
-    sectionSubtitle: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: 16,
-    },
-    rowInputs: {
-        flexDirection: 'row',
-        gap: 16,
-    },
-    inputWrapper: {
-        flex: 1,
-    },
-    inputLabel: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: 8,
-    },
-    textInput: {
-        height: 40,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        fontSize: 14,
-        color: colors.text,
-    },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
 });
+
+const getStyles = (theme: ReturnType<typeof import('@/styles/themeContext').useAppTheme>) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        card: {
+            backgroundColor: theme.background,
+            padding: 16,
+            marginBottom: 8,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+            marginBottom: 16,
+        },
+        sectionSubtitle: {
+            fontSize: 14,
+            color: theme.text,
+            marginBottom: 16,
+        },
+    });

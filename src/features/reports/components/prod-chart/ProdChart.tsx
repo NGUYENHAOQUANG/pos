@@ -1,15 +1,15 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import ProdChartIcon from '@/assets/Icon/IconReport/ProdChartIcon.svg';
 import { useProdChartData } from '../../hooks/useProductionDistribution';
 import { ProdChartProps, ProdChartViewMode } from '../../types/production-distribution';
+import { useAppTheme } from '@/styles/themeContext';
 import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 import { SummaryCard, VisualChart, DEFAULT_BAR_WIDTH } from './ProdChartSubComponents';
 
@@ -27,6 +27,8 @@ const VIEW_MODE_TABS: HeadingBarItem[] = [
 // ----------------------------------------------------------------------
 
 export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
     const [viewMode, setViewMode] = useState<ProdChartViewMode>('area');
 
@@ -85,7 +87,9 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
 
                             {/* Chart Section */}
                             <View style={styles.chartSection}>
-                                <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
+                                <Text style={[styles.chartTitle, { color: theme.textSecondary }]}>
+                                    Khối lượng (Tấn)
+                                </Text>
                                 <VisualChart
                                     key={viewMode}
                                     data={activeData}
@@ -113,7 +117,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: colors.white,
     },
     tabContainer: {
         marginHorizontal: -12,
@@ -136,7 +139,6 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
         fontSize: 12,
         fontWeight: '500',
-        color: colors.textSecondary,
     },
     loadingContainer: {
         minHeight: 300,

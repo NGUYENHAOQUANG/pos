@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
 
@@ -16,6 +18,8 @@ interface CameraCardProps {
 }
 
 export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const isOnline = camera.status === 'Online';
 
     return (
@@ -26,11 +30,12 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             style={styles.container}
         >
             {/* Placeholder background with VideoPlayer SVG */}
-            <View style={styles.placeholderBg}>
+            <View style={themedStyles.placeholderBg}>
                 <VideoPlayerBg
                     width={CARD_WIDTH}
                     height={CARD_HEIGHT}
                     preserveAspectRatio="xMidYMid slice"
+                    color={theme.isDark ? theme.border : theme.borderMedium}
                 />
                 {/* Camera code + camera name badges */}
                 <View style={styles.placeholderBadgesRow}>
@@ -44,14 +49,20 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             </View>
 
             {/* Online/Offline indicator */}
-            <View style={[styles.statusBadge, isOnline ? styles.onlineBadge : styles.offlineBadge]}>
-                <View style={[styles.statusDot, isOnline ? styles.onlineDot : styles.offlineDot]} />
+            <View style={[styles.statusBadge, styles.overlayBadge]}>
+                <View
+                    style={[
+                        styles.statusDot,
+                        isOnline ? themedStyles.onlineDot : themedStyles.offlineDot,
+                    ]}
+                />
                 <Text style={styles.statusText}>{isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}</Text>
             </View>
         </TouchableOpacity>
     );
 };
 
+// Static styles
 const styles = StyleSheet.create({
     container: {
         width: CARD_WIDTH,
@@ -60,12 +71,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginBottom: spacing.sm,
         alignSelf: 'center',
-    },
-    placeholderBg: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: colors.gray[200],
-        overflow: 'hidden',
     },
     placeholderBadgesRow: {
         position: 'absolute',
@@ -81,7 +86,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     placeholderBadgeText: {
-        color: colors.white,
+        color: '#FFFFFF',
         fontSize: 12,
         fontWeight: '500',
     },
@@ -96,26 +101,34 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.full,
         gap: 5,
     },
-    onlineBadge: {
-        backgroundColor: colors.overlayBadge,
-    },
-    offlineBadge: {
-        backgroundColor: colors.overlayBadge,
+    overlayBadge: {
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
     },
     statusDot: {
         width: 7,
         height: 7,
         borderRadius: 4,
     },
-    onlineDot: {
-        backgroundColor: colors.green[500],
-    },
-    offlineDot: {
-        backgroundColor: colors.red[500],
-    },
     statusText: {
-        color: colors.white,
+        color: '#FFFFFF',
         fontSize: 12,
         fontWeight: '500',
     },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        placeholderBg: {
+            width: '100%',
+            height: '100%',
+            backgroundColor: theme.backgroundSecondary,
+            overflow: 'hidden',
+        },
+        onlineDot: {
+            backgroundColor: theme.green[500],
+        },
+        offlineDot: {
+            backgroundColor: theme.red[500],
+        },
+    });

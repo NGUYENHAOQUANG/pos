@@ -1,34 +1,37 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 type IndicatorStatus = 'active' | 'idle' | 'warning' | 'success' | 'default';
 
 interface IndicatorProps {
-  status?: IndicatorStatus;
-  style?: StyleProp<ViewStyle>;
+    status?: IndicatorStatus;
+    style?: StyleProp<ViewStyle>;
 }
 
-// Color mapping for different statuses
-const STATUS_COLORS: Record<IndicatorStatus, string> = {
-  active: colors.primary,
-  idle: colors.schedule.remote,
-  warning: colors.schedule.schedule,
-  success: colors.schedule.local,
-  default: colors.gray[200],
-};
-
 export const Indicator: React.FC<IndicatorProps> = ({ status = 'active', style }) => {
-  const backgroundColor = STATUS_COLORS[status] || STATUS_COLORS.default;
+    const theme = useAppTheme();
 
-  return <View style={[styles.container, { backgroundColor }, style]} />;
+    // Color mapping for different statuses
+    const STATUS_COLORS: Record<IndicatorStatus, string> = {
+        active: theme.primary,
+        idle: theme.schedule.remote,
+        warning: theme.schedule.schedule,
+        success: theme.schedule.local,
+        default: theme.gray[200],
+    };
+
+    const backgroundColor = STATUS_COLORS[status] || STATUS_COLORS.default;
+
+    return <View style={[styles.container, { backgroundColor }, style]} />;
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: 4,
-    height: '100%',
-    borderRadius: borderRadius.sm,
-    minHeight: 40,
-  },
+    container: {
+        width: 4,
+        height: '100%',
+        borderRadius: borderRadius.sm,
+        minHeight: 40,
+    },
 });

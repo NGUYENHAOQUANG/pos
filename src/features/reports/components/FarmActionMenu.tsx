@@ -1,7 +1,8 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { spacing, borderRadius, shadows } from '@/styles';
 
 interface FarmActionMenuProps {
     visible: boolean;
@@ -16,6 +17,7 @@ export const FarmActionMenu: React.FC<FarmActionMenuProps> = ({
     onFarmInfo,
     position = { top: 60, right: 16 },
 }) => {
+    const theme = useAppTheme();
     return (
         <Modal
             visible={visible}
@@ -26,9 +28,22 @@ export const FarmActionMenu: React.FC<FarmActionMenuProps> = ({
         >
             <TouchableWithoutFeedback onPress={onClose}>
                 <View style={styles.overlay}>
-                    <View style={[styles.menu, { top: position.top, right: position.right }]}>
+                    <View
+                        style={[
+                            styles.menu,
+                            {
+                                top: position.top,
+                                right: position.right,
+                                backgroundColor: theme.backgroundButton,
+                                borderColor: theme.border,
+                                borderWidth: 1,
+                            },
+                        ]}
+                    >
                         <TouchableOpacity style={styles.menuItem} onPress={onFarmInfo}>
-                            <Text style={styles.menuText}>Thông tin trại</Text>
+                            <Text style={[styles.menuText, { color: theme.text }]}>
+                                Thông tin trại
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -45,7 +60,7 @@ const styles = StyleSheet.create({
     menu: {
         position: 'absolute',
         width: 200,
-        backgroundColor: colors.white,
+
         borderRadius: borderRadius.md,
         ...shadows.md,
         paddingVertical: spacing.xs,
@@ -57,6 +72,5 @@ const styles = StyleSheet.create({
     },
     menuText: {
         fontSize: 14,
-        color: colors.text,
     },
 });

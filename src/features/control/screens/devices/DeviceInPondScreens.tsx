@@ -14,7 +14,9 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { ButtonHistory } from '@/features/control/components/devices/ButtonHistory';
 import { DevicesCard } from '@/features/control/components/devices/DevicesCard';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { EControlMode } from '@/features/control/types/control.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -31,6 +33,8 @@ interface DevicesInPondScreensProps {}
 
 export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
     const { pondName = 'Ao 1', isMock = false } = route.params || {};
 
@@ -354,86 +358,87 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    historySection: {
-        marginBottom: spacing.md,
-        paddingTop: 16,
-    },
-    historyButton: {
-        borderRadius: 0,
-        borderBottomWidth: 0,
-    },
-    headingBar: {
-        marginBottom: 16,
-    },
-    sectionCard: {
-        marginBottom: 20,
-    },
-    mockSection: {
-        marginBottom: 24,
-    },
-    mockSectionTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 12,
-    },
-    mockDeviceCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        gap: 12,
-    },
-    mockIconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    mockDeviceInfo: {
-        flex: 1,
-    },
-    mockDeviceName: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    mockDeviceType: {
-        fontSize: 13,
-        color: colors.gray[500],
-        marginTop: 2,
-    },
-    mockInfoBox: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 20,
-        gap: 10,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    mockInfoText: {
-        flex: 1,
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 20,
-        fontWeight: 400,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            padding: spacing.md,
+        },
+        historySection: {
+            marginBottom: spacing.md,
+            paddingTop: 16,
+        },
+        historyButton: {
+            borderRadius: 0,
+            borderBottomWidth: 0,
+        },
+        headingBar: {
+            marginBottom: 16,
+        },
+        sectionCard: {
+            marginBottom: 20,
+        },
+        mockSection: {
+            marginBottom: 24,
+        },
+        mockSectionTitle: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 12,
+        },
+        mockDeviceCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+            gap: 12,
+        },
+        mockIconContainer: {
+            width: 48,
+            height: 48,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: theme.border,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        mockDeviceInfo: {
+            flex: 1,
+        },
+        mockDeviceName: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        mockDeviceType: {
+            fontSize: 13,
+            color: theme.textSecondary,
+            marginTop: 2,
+        },
+        mockInfoBox: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            padding: 14,
+            marginBottom: 20,
+            gap: 10,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        mockInfoText: {
+            flex: 1,
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 20,
+            fontWeight: '400',
+        },
+    });

@@ -2,16 +2,19 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { mockFoodChartData } from './foodData';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 
 const BAR_MAX_HEIGHT = 200;
 
 export const FoodChart: React.FC = () => {
+    const chartStyles = useChartStyles();
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const theme = useAppTheme();
     const [isLoading, setIsLoading] = useState(false);
 
     React.useEffect(() => {
@@ -99,28 +102,51 @@ export const FoodChart: React.FC = () => {
                     ) : (
                         <>
                             <View style={styles.summaryContainer}>
-                                <Text style={styles.summaryLabel}>Tổng lượng thức ăn (kg)</Text>
-                                <Text style={styles.summaryValue}>{totalFood}</Text>
+                                <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+                                    Tổng lượng thức ăn (kg)
+                                </Text>
+                                <Text style={[styles.summaryValue, { color: theme.text }]}>
+                                    {totalFood}
+                                </Text>
                             </View>
 
                             <View style={styles.chartAreaWrapper}>
                                 <View style={styles.yAxisLabels}>
                                     {yAxisConfig.labels.map(val => (
                                         <View key={val} style={styles.yLabelWrapper}>
-                                            <Text style={styles.yLabelText}>{val}</Text>
+                                            <Text
+                                                style={[
+                                                    styles.yLabelText,
+                                                    { color: theme.textSecondary },
+                                                ]}
+                                            >
+                                                {val}
+                                            </Text>
                                         </View>
                                     ))}
-                                    <Text style={styles.unitText}>kg</Text>
+                                    <Text style={[styles.unitText, { color: theme.textSecondary }]}>
+                                        kg
+                                    </Text>
                                 </View>
 
-                                <View style={styles.chartContent}>
+                                <View
+                                    style={[
+                                        styles.chartContent,
+                                        { borderColor: theme.borderLight },
+                                    ]}
+                                >
                                     <View style={styles.gridContainer}>
                                         {[0, 1, 2, 3, 4].map(i => (
                                             <View
                                                 key={i}
                                                 style={[
                                                     styles.gridLine,
-                                                    { top: i * (BAR_MAX_HEIGHT / 4) },
+                                                    {
+                                                        top: i * (BAR_MAX_HEIGHT / 4),
+                                                        backgroundColor: theme.isDark
+                                                            ? theme.border
+                                                            : colors.border,
+                                                    },
                                                 ]}
                                             />
                                         ))}
@@ -133,11 +159,21 @@ export const FoodChart: React.FC = () => {
                                                     <View
                                                         style={[
                                                             styles.bar,
-                                                            { height: getBarHeight(item.value) },
+                                                            {
+                                                                height: getBarHeight(item.value),
+                                                                backgroundColor: theme.isDark
+                                                                    ? colors.orange[500]
+                                                                    : colors.orange[700],
+                                                            },
                                                         ]}
                                                     />
                                                     <View style={styles.labelContainer}>
-                                                        <Text style={styles.bottomLabelText}>
+                                                        <Text
+                                                            style={[
+                                                                styles.bottomLabelText,
+                                                                { color: theme.textSecondary },
+                                                            ]}
+                                                        >
                                                             {item.label}
                                                         </Text>
                                                     </View>
@@ -148,7 +184,6 @@ export const FoodChart: React.FC = () => {
                                                 style={{
                                                     marginTop: 80,
                                                     fontSize: 12,
-                                                    color: colors.textSecondary,
                                                 }}
                                             >
                                                 Không có dữ liệu
@@ -176,9 +211,8 @@ const styles = StyleSheet.create({
     },
     body: {
         padding: spacing.md,
-        backgroundColor: colors.white,
+
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     headerButton: {
         height: 50,
@@ -189,7 +223,7 @@ const styles = StyleSheet.create({
     },
     customDateFontSize: {
         fontSize: typography.fontSize.sm,
-        color: colors.text,
+
         fontWeight: typography.fontWeight.regular,
     },
     absDatePicker: {
@@ -203,7 +237,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.bold,
-        color: colors.text,
+
         textTransform: 'uppercase',
     },
     datePicker: {
@@ -219,13 +253,12 @@ const styles = StyleSheet.create({
     },
     summaryLabel: {
         fontSize: 10,
-        color: colors.text,
+
         marginTop: 4,
     },
     summaryValue: {
         fontSize: typography.fontSize.base,
         fontWeight: typography.fontWeight.bold,
-        color: colors.text,
     },
     chartAreaWrapper: {
         flexDirection: 'row',
@@ -240,7 +273,7 @@ const styles = StyleSheet.create({
     },
     yLabelText: {
         fontSize: 8,
-        color: colors.text,
+
         textAlign: 'right',
         width: 20,
     },
@@ -250,7 +283,7 @@ const styles = StyleSheet.create({
     },
     unitText: {
         fontSize: 10,
-        color: colors.text,
+
         position: 'absolute',
         left: -5,
         top: '50%',
@@ -301,7 +334,7 @@ const styles = StyleSheet.create({
     },
     bottomLabelText: {
         fontSize: 8,
-        color: colors.text,
+
         transform: [{ rotate: '-45deg' }],
         textAlign: 'center',
     },

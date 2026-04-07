@@ -6,7 +6,9 @@ import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { HistoryActivitie } from '../../components/schedule/HistoryActivitie';
 import FilterDate from '../../components/schedule/FilterDate';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import SensorStatisticsScreen from '../SensorStatisticsScreen/SensorStatisticsScreen';
 import { Loading } from '@/shared/components/ui/Loading';
 import {
@@ -26,6 +28,8 @@ interface HistoryActivitieScreensProps {
 
 export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = ({ onBack }) => {
     const route = useRoute<RouteProp<ControlStackParamList, 'History'>>();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     // Get pondName from route params, default to 'Ao 1' if missing (though it should be there)
     const { pondName = 'Ao 1' } = route.params || {};
 
@@ -141,26 +145,27 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-        paddingBottom: 0,
-    },
-    headingBar: {
-        marginTop: spacing.sm,
-    },
-    rightComponentContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    rightText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+            paddingBottom: 0,
+        },
+        headingBar: {
+            marginTop: spacing.sm,
+        },
+        rightComponentContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+        },
+        rightText: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+    });

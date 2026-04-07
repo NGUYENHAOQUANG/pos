@@ -157,7 +157,10 @@ export const SettingsScreen: React.FC = () => {
     const toggleTabSlide = useSettingsStore(s => s.toggleTabSlide);
     const toggleTabSwipe = useSettingsStore(s => s.toggleTabSwipe);
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
-
+    const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
+    const toggleWeather = useSettingsStore(s => s.toggleWeather);
+    const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
+    const toggleChatbot = useSettingsStore(s => s.toggleChatbot);
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
     const setThemeMode = useSettingsStore(s => s.setThemeMode);
@@ -266,6 +269,27 @@ export const SettingsScreen: React.FC = () => {
                                 subtitle="Dùng logo MebiEco làm hiệu ứng tải thay cho Loading mặc định"
                                 value={logoLoadingEnabled}
                                 onValueChange={handleToggleLogoLoading}
+                            />
+                        </View>
+                    </View>
+
+                    {/* Feature Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Tính năng</Text>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Dự báo thời tiết"
+                                subtitle="Hiển thị tính năng dự báo thời tiết trong mục Vận hành trại nuôi"
+                                value={weatherEnabled}
+                                onValueChange={toggleWeather}
+                            />
+                        </View>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Trợ lý AI Chatbot"
+                                subtitle="Hiển thị tính năng AI Chatbot trong mục Tài khoản"
+                                value={chatbotEnabled}
+                                onValueChange={toggleChatbot}
                             />
                         </View>
                     </View>

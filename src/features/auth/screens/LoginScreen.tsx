@@ -7,7 +7,7 @@ import PhoneInput from '@/features/auth/components/PhoneInput';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
 import { useAuthStore } from '@/features/auth/store/authStore';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Platform,
     ScrollView,
@@ -19,12 +19,16 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export default function LoginScreen() {
     // --- 1. Hooks & Store ---
     const navigation = useNavigation<AuthStackNavigationProp>();
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     // const login = useAuthStore(state => state.login); // Removed unused hook assignment
 
@@ -58,7 +62,10 @@ export default function LoginScreen() {
             style={styles.container}
             edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
         >
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+            <StatusBar
+                barStyle={theme.isDark ? 'light-content' : 'dark-content'}
+                backgroundColor={theme.background}
+            />
 
             {Platform.OS === 'android' && (
                 <View style={[styles.androidStatusBar, { height: insets.top }]} />
@@ -153,65 +160,66 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.lg,
-    },
-    headerContainer: {
-        marginBottom: spacing['3xl'],
-        marginHorizontal: -spacing.lg,
-    },
-    headerContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 16,
-        position: 'relative',
-    },
-    leftButton: {
-        position: 'absolute',
-        left: spacing.lg,
-        zIndex: 1,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
-        width: '100%',
-    },
-    content: {
-        flex: 1,
-        marginBottom: spacing['2xl'],
-    },
-    footerText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        textAlign: 'center',
-        marginTop: spacing.md,
-    },
-    linkText: {
-        color: colors.primary,
-        fontWeight: typography.fontWeight.semibold,
-    },
-    forgotPassword: {
-        textAlign: 'right',
-        color: colors.text,
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        marginBottom: spacing.lg,
-    },
-    androidStatusBar: {
-        backgroundColor: colors.white,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        keyboardView: {
+            flex: 1,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: spacing.lg,
+            paddingBottom: spacing.lg,
+        },
+        headerContainer: {
+            marginBottom: spacing['3xl'],
+            marginHorizontal: -spacing.lg,
+        },
+        headerContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: 16,
+            position: 'relative',
+        },
+        leftButton: {
+            position: 'absolute',
+            left: spacing.lg,
+            zIndex: 1,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.border,
+            width: '100%',
+        },
+        content: {
+            flex: 1,
+            marginBottom: spacing['2xl'],
+        },
+        footerText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            marginTop: spacing.md,
+        },
+        linkText: {
+            color: theme.primary,
+            fontWeight: typography.fontWeight.semibold,
+        },
+        forgotPassword: {
+            textAlign: 'right',
+            color: theme.text,
+            fontSize: typography.fontSize.sm,
+            fontWeight: typography.fontWeight.medium,
+            marginBottom: spacing.lg,
+        },
+        androidStatusBar: {
+            backgroundColor: theme.background,
+        },
+    });

@@ -10,6 +10,7 @@ import { View, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-nativ
 import { Text } from '@/shared/components/typography/Text';
 import CaretDownIcon from '@/assets/Icon/IconReport/CaretDown.svg';
 import { colors, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import ArrowIcon from '@/assets/Icon/IconReport/Arrow.svg';
 import { TransferData } from '@/features/reports/types/stock-transfer-stats';
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const TransferItemCard = ({ item }: Props) => {
+    const theme = useAppTheme();
     const [expanded, setExpanded] = useState(false);
 
     const toggleExpand = () => {
@@ -27,38 +29,56 @@ export const TransferItemCard = ({ item }: Props) => {
 
     const renderRow = (label: string, value: string, unit?: string) => (
         <View style={styles.row}>
-            <Text style={styles.label}>{label}:</Text>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{label}:</Text>
             <View style={styles.valueContainer}>
-                <Text style={styles.value}>{value}</Text>
-                {unit ? <Text style={styles.valueUnit}>{unit}</Text> : null}
+                <Text style={[styles.value, { color: theme.text }]}>{value}</Text>
+                {unit ? (
+                    <Text style={[styles.valueUnit, { color: theme.textSecondary }]}>{unit}</Text>
+                ) : null}
             </View>
         </View>
     );
 
     return (
-        <View style={styles.card}>
+        <View
+            style={[styles.card, { backgroundColor: theme.background, borderColor: theme.border }]}
+        >
             {/* Top summary row */}
             <View style={styles.topRow}>
-                <Text style={styles.pondCode} numberOfLines={2}>
+                <Text style={[styles.pondCode, { color: theme.text }]} numberOfLines={2}>
                     {item.sourcePond}
                 </Text>
                 <View style={styles.centerInfo}>
-                    <Text style={styles.centerLineText} numberOfLines={1}>
+                    <Text
+                        style={[styles.centerLineText, { color: theme.textSecondary }]}
+                        numberOfLines={1}
+                    >
                         Ngày sang: {item.transferDate}
                     </Text>
                     <View style={styles.centerDivider}>
-                        <ArrowIcon width={'100%'} height={4} preserveAspectRatio="none" />
+                        <ArrowIcon
+                            width={'100%'}
+                            height={4}
+                            preserveAspectRatio="none"
+                            color={theme.textSecondary}
+                        />
                     </View>
-                    <Text style={styles.centerLineText} numberOfLines={1}>
+                    <Text
+                        style={[styles.centerLineText, { color: theme.textSecondary }]}
+                        numberOfLines={1}
+                    >
                         Ngày nuôi (DOC): {item.doc}
                     </Text>
                 </View>
-                <Text style={[styles.pondCode, styles.targetPondCode]} numberOfLines={2}>
+                <Text
+                    style={[styles.pondCode, styles.targetPondCode, { color: theme.text }]}
+                    numberOfLines={2}
+                >
                     {item.targetPond}
                 </Text>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.borderLight }]} />
 
             {/* Main content */}
             <View style={styles.content}>
@@ -75,7 +95,14 @@ export const TransferItemCard = ({ item }: Props) => {
             </View>
 
             <TouchableOpacity onPress={toggleExpand} style={styles.expandBtn} activeOpacity={0.7}>
-                <Text style={styles.expandText}>{expanded ? 'Thu gọn' : 'Xem thêm'}</Text>
+                <Text
+                    style={[
+                        styles.expandText,
+                        { color: theme.isDark ? '#fb923c' : colors.orange[600] },
+                    ]}
+                >
+                    {expanded ? 'Thu gọn' : 'Xem thêm'}
+                </Text>
                 <CaretDownIcon
                     width={14}
                     height={14}
@@ -88,13 +115,11 @@ export const TransferItemCard = ({ item }: Props) => {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.white,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingTop: 12,
         paddingBottom: 10,
         borderWidth: 1,
-        borderColor: colors.borderLight,
     },
     topRow: {
         flexDirection: 'row',
@@ -105,7 +130,6 @@ const styles = StyleSheet.create({
     pondCode: {
         fontSize: 16,
         fontWeight: '600',
-        color: colors.text,
         flex: 1,
     },
     targetPondCode: {
@@ -121,7 +145,6 @@ const styles = StyleSheet.create({
 
     centerLineText: {
         fontSize: 14,
-        color: colors.textSecondary,
         fontWeight: typography.fontWeight.regular,
         textAlign: 'center',
     },
@@ -132,7 +155,6 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: colors.borderLight,
         marginBottom: 12,
         marginHorizontal: 2,
     },
@@ -156,7 +178,6 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.text,
     },
     value: {
         fontSize: 14,
@@ -165,7 +186,6 @@ const styles = StyleSheet.create({
     },
     valueUnit: {
         fontSize: 12,
-        color: colors.textSecondary,
     },
     expandBtn: {
         flexDirection: 'row',
@@ -176,7 +196,6 @@ const styles = StyleSheet.create({
     },
     expandText: {
         fontSize: 14,
-        color: colors.orange[600],
         fontWeight: '500',
     },
 });

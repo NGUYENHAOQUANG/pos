@@ -4,11 +4,14 @@ import { Text } from '@/shared/components/typography/Text';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import ArrowRightIcon from '@/assets/Icon/ArrowRight.svg';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
-// removed LayoutChangeEvent
-import { borderRadius, colors } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import CalenderIcon from '@/assets/Icon/Calender.svg';
 
 export default function FilterDate() {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isModalVisible, setModalVisible] = useState(false);
 
@@ -33,23 +36,22 @@ export default function FilterDate() {
 
     return (
         <View style={styles.container}>
-            {/* Nút lùi ngày */}
-            <TouchableOpacity style={styles.navButton} onPress={() => handleChangeDay(-1)}>
-                <ArrowLeftIcon width={20} height={20} />
+            <TouchableOpacity style={themedStyles.navButton} onPress={() => handleChangeDay(-1)}>
+                <ArrowLeftIcon width={20} height={20} color={theme.text} />
             </TouchableOpacity>
 
-            {/* Hiển thị ngày đã chọn */}
-            <TouchableOpacity style={styles.dateDisplay} onPress={() => setModalVisible(true)}>
-                <Text style={styles.dateText} numberOfLines={1}>
+            <TouchableOpacity
+                style={themedStyles.dateDisplay}
+                onPress={() => setModalVisible(true)}
+            >
+                <Text style={themedStyles.dateText} numberOfLines={1}>
                     {formatDate(selectedDate)}
                 </Text>
-
-                <CalenderIcon width={16} height={16} style={styles.icon} />
+                <CalenderIcon width={16} height={16} style={styles.icon} color={theme.text} />
             </TouchableOpacity>
 
-            {/* Nút tiến ngày */}
-            <TouchableOpacity style={styles.navButton} onPress={() => handleChangeDay(1)}>
-                <ArrowRightIcon width={20} height={20} />
+            <TouchableOpacity style={themedStyles.navButton} onPress={() => handleChangeDay(1)}>
+                <ArrowRightIcon width={20} height={20} color={theme.text} />
             </TouchableOpacity>
 
             <DatePickerModal
@@ -65,6 +67,7 @@ export default function FilterDate() {
     );
 }
 
+// Static styles
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
@@ -74,38 +77,43 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 16,
     },
-    navButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    dateDisplay: {
-        flex: 1,
-        height: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        paddingLeft: 16,
-        paddingRight: 10,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    dateText: {
-        fontSize: 16,
-        color: colors.text,
-        fontWeight: '500',
-        flexShrink: 1,
-        textAlign: 'left',
-    },
     icon: {
         position: 'absolute',
         right: 12,
     },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        navButton: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+        },
+        dateDisplay: {
+            flex: 1,
+            height: 40,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            paddingLeft: 16,
+            paddingRight: 10,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+        },
+        dateText: {
+            fontSize: 16,
+            color: theme.text,
+            fontWeight: '500',
+            flexShrink: 1,
+            textAlign: 'left',
+        },
+    });

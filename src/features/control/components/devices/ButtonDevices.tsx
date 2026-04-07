@@ -8,7 +8,7 @@ import {
     Animated,
     Easing,
 } from 'react-native';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { haptics } from '@/shared/utils/haptics';
 
 interface ButtonDevicesProps {
@@ -20,13 +20,9 @@ interface ButtonDevicesProps {
 }
 
 export const ButtonDevices: React.FC<ButtonDevicesProps> = React.memo(
-    ({
-        value,
-        onValueChange,
-        trackColor = colors.primary, // Default Blue from colors
-        style,
-        disabled = false,
-    }) => {
+    ({ value, onValueChange, trackColor, style, disabled = false }) => {
+        const theme = useAppTheme();
+        const effectiveTrackColor = trackColor || theme.primary;
         const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
         useEffect(() => {
@@ -34,17 +30,17 @@ export const ButtonDevices: React.FC<ButtonDevicesProps> = React.memo(
                 toValue: value ? 1 : 0,
                 duration: 200,
                 easing: Easing.inOut(Easing.ease),
-                useNativeDriver: true, // Only animating transform, so native driver is safe
+                useNativeDriver: true,
             }).start();
         }, [value, animatedValue]);
 
         const translateX = animatedValue.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 20], // 0 (start at padding) -> 20 (travel distance: 44 - 4 - 20)
+            outputRange: [0, 20],
         });
 
         // Set backgroundColor directly instead of animating it (backgroundColor can't use native driver)
-        const currentTrackColor = value ? trackColor : colors.gray[400];
+        const currentTrackColor = value ? effectiveTrackColor : theme.gray[400];
 
         return (
             <TouchableOpacity
@@ -62,6 +58,7 @@ export const ButtonDevices: React.FC<ButtonDevicesProps> = React.memo(
                             styles.thumb,
                             {
                                 transform: [{ translateX }],
+                                backgroundColor: theme.white,
                             },
                         ]}
                     />
@@ -77,12 +74,11 @@ const styles = StyleSheet.create({
         height: 24,
         borderRadius: 12,
         justifyContent: 'center',
-        padding: 2, // gap between thumb and track border
+        padding: 2,
     },
     thumb: {
         width: 20,
         height: 20,
         borderRadius: 10,
-        backgroundColor: colors.white,
     },
 });

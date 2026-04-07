@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { BackButton } from '@/shared/components/buttons/BackButton';
@@ -8,7 +8,9 @@ import { Logo } from '@/shared/components/brand/Logo';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export default function CreatePasswordScreen() {
     const navigation = useNavigation<AuthStackNavigationProp>();
@@ -17,6 +19,8 @@ export default function CreatePasswordScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     const handleCreatePassword = () => {
         navigation.navigate('Register-Success');
@@ -105,67 +109,68 @@ export default function CreatePasswordScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.lg,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingTop: spacing.md,
-        paddingBottom: spacing.xl,
-        position: 'relative',
-        minHeight: 45,
-        paddingHorizontal: spacing.lg,
-    },
-    logoContainer: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: -1,
-        pointerEvents: 'none',
-    },
-    spacer: {
-        height: 80,
-    },
-    content: {
-        paddingTop: spacing.lg,
-    },
-    title: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginBottom: spacing.xs,
-    },
-    subtitle: {
-        fontSize: typography.fontSize.base,
-        color: colors.textSecondary,
-        marginBottom: spacing.xl,
-        lineHeight: spacing.lg,
-    },
-    buttonContainer: {
-        marginTop: spacing.md,
-        marginBottom: spacing.lg,
-    },
-    androidStatusBar: {
-        backgroundColor: colors.white,
-    },
-    passwordInput: {
-        marginBottom: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        keyboardView: {
+            flex: 1,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: spacing.lg,
+            paddingBottom: spacing.lg,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingTop: spacing.md,
+            paddingBottom: spacing.xl,
+            position: 'relative',
+            minHeight: 45,
+            paddingHorizontal: spacing.lg,
+        },
+        logoContainer: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: spacing.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: -1,
+            pointerEvents: 'none',
+        },
+        spacer: {
+            height: 80,
+        },
+        content: {
+            paddingTop: spacing.lg,
+        },
+        title: {
+            fontSize: typography.fontSize['2xl'],
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+            marginBottom: spacing.xs,
+        },
+        subtitle: {
+            fontSize: typography.fontSize.base,
+            color: theme.textSecondary,
+            marginBottom: spacing.xl,
+            lineHeight: spacing.lg,
+        },
+        buttonContainer: {
+            marginTop: spacing.md,
+            marginBottom: spacing.lg,
+        },
+        androidStatusBar: {
+            backgroundColor: theme.background,
+        },
+        passwordInput: {
+            marginBottom: spacing.md,
+        },
+    });

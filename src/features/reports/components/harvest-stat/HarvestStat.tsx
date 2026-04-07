@@ -7,10 +7,11 @@ import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-nat
 import { Text } from '@/shared/components/typography/Text';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { HarvestItemCard } from './HarvestItemCard';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatistics.svg';
 import { useInfiniteHarvestStatsTable } from '@/features/reports/hooks/useHarvestStatsTable';
 import { HarvestStatProps } from '@/features/reports/types/harvest-stats-table';
@@ -19,6 +20,8 @@ import { HarvestStatProps } from '@/features/reports/types/harvest-stats-table';
 const MemoizedHarvestItemCard = React.memo(HarvestItemCard);
 
 export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleId }) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [isSectionOpen, setIsSectionOpen] = React.useState(false);
 
     const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
@@ -44,14 +47,21 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
             <BasicDropDownButton
                 prefixIcon={<HarvestStatIcon width={20} height={20} />}
                 label="Thống kê thu hoạch"
-                style={styles.sectionHeader}
+                style={[
+                    styles.sectionHeader,
+                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
+                ]}
                 onPress={toggleSection}
                 isExpanded={isSectionOpen}
             />
 
             {isSectionOpen && (
                 <View
-                    style={[styles.listContainer, isLoading ? styles.loadingContainer : undefined]}
+                    style={[
+                        styles.listContainer,
+                        { backgroundColor: theme.background },
+                        isLoading ? styles.loadingContainer : undefined,
+                    ]}
                 >
                     {isLoading ? (
                         <Loading />
@@ -70,7 +80,9 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
                             {/* Load more button */}
                             {isFetchingNextPage && (
                                 <View style={styles.footerLoader}>
-                                    <ActivityIndicator color={colors.primary} />
+                                    <ActivityIndicator
+                                        color={theme.isDark ? '#fb923c' : colors.primary}
+                                    />
                                 </View>
                             )}
 
@@ -80,7 +92,14 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
                                     onPress={handleLoadMore}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={styles.loadMoreText}>Tải thêm</Text>
+                                    <Text
+                                        style={[
+                                            styles.loadMoreText,
+                                            { color: theme.isDark ? '#fb923c' : colors.primary },
+                                        ]}
+                                    >
+                                        Tải thêm
+                                    </Text>
                                 </TouchableOpacity>
                             )}
                         </>
@@ -94,8 +113,6 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
 const styles = StyleSheet.create({
     sectionHeader: {
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     listContainer: {
         paddingTop: 8,
@@ -118,13 +135,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[200],
         borderRadius: 10,
-        backgroundColor: colors.white,
+
         alignItems: 'center',
         justifyContent: 'center',
     },
     loadMoreText: {
         fontSize: 14,
-        color: colors.textSecondary,
+
         fontWeight: '500',
     },
 });

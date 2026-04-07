@@ -155,7 +155,7 @@ const StockingInfoSection: React.FC<Props> = ({
                     title="Kiểm đếm tôm giống bằng AI"
                     variant="outline"
                     onPress={onPressCountingShrimp || (() => {})}
-                    renderLeftIcon={<IconAICheck width={20} height={20} fill={theme.text} />}
+                    renderLeftIcon={<IconAICheck width={20} height={20} color={theme.text} />}
                     fullWidth
                 />
             </View>

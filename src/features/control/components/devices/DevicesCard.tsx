@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { DeviceCard } from '@/features/control/components/devices/Devices';
 import { DeviceData } from '@/features/control/types/control.types';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 interface DevicesCardProps {
     title: string;
@@ -22,11 +22,13 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
     onSettingsPress,
     loadingIds = {},
 }) => {
+    const theme = useAppTheme();
+
     return (
         <View style={[styles.container, style]}>
             {/* Section Header */}
             <View style={styles.header}>
-                <Text style={styles.title}>{title}</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
             </View>
 
             {/* Device List */}
@@ -58,7 +60,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: '700',
-        color: colors.text,
     },
     listContainer: {
         gap: 10,

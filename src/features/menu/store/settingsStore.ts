@@ -19,6 +19,8 @@ interface SettingsState {
     tabSwipeEnabled: boolean;
     logoLoadingEnabled: boolean;
     liquidGlassEnabled: boolean;
+    weatherEnabled: boolean;
+    chatbotEnabled: boolean;
     lockMethod: LockMethod;
     autoLockTimeout: AutoLockTimeout;
     pinHash: string | null;
@@ -35,6 +37,8 @@ interface SettingsActions {
     setTabSwipe: (enabled: boolean) => void;
     toggleLogoLoading: () => void;
     toggleLiquidGlass: () => void;
+    toggleWeather: () => void;
+    toggleChatbot: () => void;
     setLockMethod: (method: LockMethod) => void;
     setAutoLockTimeout: (timeout: AutoLockTimeout) => void;
     setPinHash: (hash: string | null) => void;
@@ -55,6 +59,8 @@ export const useSettingsStore = create<SettingsStore>()(
             tabSwipeEnabled: true,
             logoLoadingEnabled: true,
             liquidGlassEnabled: true,
+            weatherEnabled: true,
+            chatbotEnabled: false,
             lockMethod: 'none' as LockMethod,
             autoLockTimeout: 0 as AutoLockTimeout,
             pinHash: null,
@@ -103,6 +109,16 @@ export const useSettingsStore = create<SettingsStore>()(
             toggleLiquidGlass: () =>
                 set(state => {
                     state.liquidGlassEnabled = !state.liquidGlassEnabled;
+                }),
+
+            toggleWeather: () =>
+                set(state => {
+                    state.weatherEnabled = !state.weatherEnabled;
+                }),
+
+            toggleChatbot: () =>
+                set(state => {
+                    state.chatbotEnabled = !state.chatbotEnabled;
                 }),
 
             setLockMethod: (method: LockMethod) =>

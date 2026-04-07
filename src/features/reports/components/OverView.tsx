@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
@@ -20,13 +21,20 @@ const DATA: MetricItem[] = [
 ];
 
 export const OverView = () => {
+    const theme = useAppTheme();
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             <Text style={styles.title}>TỔNG QUAN</Text>
 
             <View style={styles.grid}>
                 {DATA.map((item, index) => (
-                    <View key={index} style={styles.card}>
+                    <View
+                        key={index}
+                        style={[
+                            styles.card,
+                            { backgroundColor: theme.background, borderColor: theme.border },
+                        ]}
+                    >
                         <Text style={styles.label}>{item.label}</Text>
                         <Text
                             style={[
@@ -45,7 +53,6 @@ export const OverView = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
         padding: spacing.md,
         borderRadius: 8,
         marginBottom: 8,
@@ -53,7 +60,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.bold,
-        color: colors.text,
+
         textTransform: 'uppercase',
         marginBottom: spacing.md,
     },
@@ -65,9 +72,8 @@ const styles = StyleSheet.create({
     },
     card: {
         width: '31%', // 3 columns with gap
-        backgroundColor: colors.white,
+
         borderWidth: 1,
-        borderColor: colors.borderLight,
         borderRadius: 8,
         paddingVertical: 12,
         paddingHorizontal: 4,
@@ -76,14 +82,14 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 11,
-        color: colors.text,
+
         marginBottom: 4,
         textAlign: 'center',
     },
     value: {
         fontSize: 16,
         fontWeight: typography.fontWeight.bold,
-        color: colors.text,
+
         textAlign: 'center',
     },
 });

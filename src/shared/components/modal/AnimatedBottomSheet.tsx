@@ -9,7 +9,7 @@ import {
     StyleProp,
     ViewStyle,
 } from 'react-native';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -50,6 +50,8 @@ interface AnimatedBottomSheetProps {
     containerStyle?: StyleProp<ViewStyle>;
     /** Slide-down animation duration in ms. Default: 200 */
     closeDuration?: number;
+    /** Whether the modal should render behind the status bar (Android). Default: false */
+    statusBarTranslucent?: boolean;
 }
 
 export const AnimatedBottomSheet: React.FC<AnimatedBottomSheetProps> = ({
@@ -59,7 +61,10 @@ export const AnimatedBottomSheet: React.FC<AnimatedBottomSheetProps> = ({
     overlayStyle,
     containerStyle,
     closeDuration = 200,
+    statusBarTranslucent = false,
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
     React.useEffect(() => {
@@ -82,12 +87,18 @@ export const AnimatedBottomSheet: React.FC<AnimatedBottomSheetProps> = ({
     }, [visible, slideAnim, closeDuration]);
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="fade"
+            statusBarTranslucent={statusBarTranslucent}
+            onRequestClose={onClose}
+        >
             <Pressable onPress={onClose} style={{ flex: 1 }}>
-                <View style={[styles.overlay, overlayStyle]}>
+                <View style={[themedStyles.overlay, overlayStyle]}>
                     <Animated.View
                         style={[
-                            styles.container,
+                            themedStyles.container,
                             containerStyle,
                             { transform: [{ translateY: slideAnim }] },
                         ]}
@@ -101,14 +112,15 @@ export const AnimatedBottomSheet: React.FC<AnimatedBottomSheetProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-    },
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: 24,
-    },
-});
+const getStyles = (theme: ReturnType<typeof useAppTheme>) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+        },
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: 24,
+        },
+    });

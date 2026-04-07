@@ -210,6 +210,43 @@ export const colors = {
         85: 'rgba(255, 255, 255, 0.85)',
         95: 'rgba(255, 255, 255, 0.95)',
     },
+    weather: {
+        gradients: {
+            clear: ['#1B6CB0', '#3A8FD6', '#73BAE8'],
+            cloudy: ['#4A6D8C', '#6E8FAB', '#8BAEC5'],
+            rainy: ['#3A4F63', '#506A7E', '#6B8599'],
+            storm: ['#2C3E50', '#34495E', '#4A6274'],
+            night: ['#0F2027', '#203A43', '#2C5364'],
+        },
+        alert: {
+            dangerBg: 'rgba(255, 80, 80, 0.25)',
+            dangerText: '#FFB3B3',
+            warningBg: 'rgba(255, 180, 50, 0.25)',
+            warningText: '#FFE0A0',
+            infoBg: 'rgba(100, 220, 120, 0.25)',
+            infoText: '#B0F0C0',
+        },
+        text: {
+            light: 'rgba(255, 255, 255, 0.9)',
+            medium: 'rgba(255, 255, 255, 0.8)',
+            dim: 'rgba(255, 255, 255, 0.7)',
+            dimmer: 'rgba(255, 255, 255, 0.6)',
+            faint: 'rgba(255, 255, 255, 0.5)',
+        },
+        border: {
+            light: 'rgba(255, 255, 255, 0.2)',
+        },
+        bg: {
+            light: 'rgba(255, 255, 255, 0.15)',
+            page: ['#000000', '#000000', '#000000'],
+        },
+        rain: 'rgba(120, 200, 255, 0.9)',
+        chart: {
+            lineWarm: '#FFB347',
+            lineMid: '#FFCC33',
+            lineCool: '#66BB6A',
+        },
+    },
 };
 
 export type Colors = typeof colors;
@@ -236,7 +273,7 @@ export const darkTheme: Colors = {
 
     // Border colors
     defaultBorder: '#262626',
-    border: '#1F2937',
+    border: '#262626',
     borderMedium: '#374151',
     borderLight: '#262626',
     borderDark: '#4B5563',
@@ -249,6 +286,15 @@ export const darkTheme: Colors = {
     error: '#FF453A',
     errorBackground: '#3E1416',
     info: '#0A84FF',
+
+    // Red palette - dark mode overrides
+    red: {
+        ...colors.red,
+        25: '#2A1215',
+        50: '#3E1416',
+        200: '#5C1D20',
+        500: '#FF6B6B',
+    },
 
     // Status colors
     status: {
@@ -270,5 +316,16 @@ export const darkTheme: Colors = {
         remote: '#0D2A60',
         schedule: '#423300',
         local: '#10391A',
+    },
+
+    fade: {
+        ...colors.fade,
+        0: 'rgba(10, 10, 10, 0)',
+        8: 'rgba(10, 10, 10, 0.08)',
+        20: 'rgba(10, 10, 10, 0.2)',
+        40: 'rgba(10, 10, 10, 0.4)',
+        65: 'rgba(10, 10, 10, 0.65)',
+        85: 'rgba(10, 10, 10, 0.85)',
+        95: 'rgba(10, 10, 10, 0.95)',
     },
 };

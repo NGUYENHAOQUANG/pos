@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_HORIZONTAL_PADDING = spacing.md * 2;
@@ -14,6 +15,8 @@ const SKELETON_COUNT = 3;
  * Shows a 16:9 card with 2 badge skeletons at bottom-left.
  */
 const CameraCardSkeletonItem = () => {
+    const theme = useAppTheme();
+
     return (
         <View style={styles.card}>
             {/* Thumbnail area */}
@@ -25,13 +28,13 @@ const CameraCardSkeletonItem = () => {
                     width={70}
                     height={28}
                     borderRadius={20}
-                    backgroundColor={colors.gray[300]}
+                    backgroundColor={theme.gray[300]}
                 />
                 <Skeleton
                     width={90}
                     height={28}
                     borderRadius={20}
-                    backgroundColor={colors.gray[300]}
+                    backgroundColor={theme.gray[300]}
                 />
             </View>
         </View>
@@ -50,6 +53,7 @@ export const CameraSkeleton: React.FC = () => {
         </View>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: spacing.md,

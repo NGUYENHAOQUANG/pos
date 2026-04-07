@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Path, Line, Circle } from 'react-native-svg';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 import * as shape from 'd3-shape';
-import { colors } from '@/styles/colors';
+
 import { typography } from '@/styles/typography';
 import { TooltipEnvChart } from './TooltipEnvChart';
 import { EnvChartSeries, EnvChartMetadata } from '@/features/reports/types/env-measurement-chart';
@@ -70,10 +71,13 @@ const GRAPH_HEIGHT = 380;
 
 // Helper for Static Label
 const AnimatedLabel = ({ date, baseX }: { date: Date; baseX: number }) => {
+    const theme = useAppTheme();
     return (
         <View style={{ position: 'absolute', left: baseX, bottom: 0 }}>
             <View style={{ width: 60, marginLeft: -30 }}>
-                <Text style={styles.axisLabelCenter}>{formatDate(date)}</Text>
+                <Text style={[styles.axisLabelCenter, { color: theme.textSecondary }]}>
+                    {formatDate(date)}
+                </Text>
             </View>
         </View>
     );
@@ -86,6 +90,7 @@ export default function EnvChar({
     pondColors,
     showSinglePointDots = true,
 }: EnvCharProps) {
+    const theme = useAppTheme();
     // --- Data Preparation ---
     // Convert API series to chart format
     const seriesData: SeriesEntry[] = useMemo(() => {
@@ -301,13 +306,23 @@ export default function EnvChar({
         selectedIndex !== null && selectedIndex < xTicks.length ? xTicks[selectedIndex] : null;
 
     return (
-        <GestureHandlerRootView style={styles.container} onLayout={onLayout}>
+        <GestureHandlerRootView
+            style={[styles.container, { backgroundColor: theme.background }]}
+            onLayout={onLayout}
+        >
             {/* Y Axis Labels (Absolute overlay) */}
             <View style={styles.yAxisOverlay} pointerEvents="none">
                 {yTicks.map((val, i) => (
                     <Text
                         key={i}
-                        style={[styles.axisLabel, { position: 'absolute', top: scaleY(val) - 10 }]}
+                        style={[
+                            styles.axisLabel,
+                            {
+                                color: theme.textSecondary,
+                                position: 'absolute',
+                                top: scaleY(val) - 10,
+                            },
+                        ]}
                     >
                         {Number.isInteger(val) ? val : val.toFixed(1)}
                     </Text>
@@ -328,7 +343,7 @@ export default function EnvChar({
                                             y1={scaleY(v)}
                                             x2={contentWidth}
                                             y2={scaleY(v)}
-                                            stroke={colors.borderDark}
+                                            stroke={theme.border}
                                             strokeWidth={0.5}
                                         />
                                     ))}
@@ -413,7 +428,6 @@ const styles = StyleSheet.create({
     container: {
         height: 400,
         flexDirection: 'row',
-        backgroundColor: colors.white,
     },
     yAxisOverlay: {
         position: 'absolute',
@@ -422,7 +436,6 @@ const styles = StyleSheet.create({
         width: 30,
         height: '100%',
         zIndex: 10,
-        backgroundColor: colors.white,
     },
     chartArea: {
         flex: 1,
@@ -434,7 +447,7 @@ const styles = StyleSheet.create({
     axisLabel: {
         fontFamily: typography.fontFamily.regular,
         fontSize: 12,
-        color: colors.textSecondary,
+
         textAlign: 'left',
         width: '100%',
         paddingLeft: 0,
@@ -442,7 +455,7 @@ const styles = StyleSheet.create({
     axisLabelCenter: {
         fontFamily: typography.fontFamily.regular,
         fontSize: 12,
-        color: colors.textSecondary,
+
         textAlign: 'center',
         width: '100%',
     },

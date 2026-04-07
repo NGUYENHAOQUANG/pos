@@ -9,7 +9,7 @@ import Animated, {
     Easing,
     withDelay,
 } from 'react-native-reanimated';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -89,22 +89,28 @@ interface FloatingBubblesBackgroundProps {
 }
 
 export const FloatingBubblesBackground: React.FC<FloatingBubblesBackgroundProps> = ({
-    bubbleColor = colors.primary + '10', // Default color: Primary with very low opacity
+    bubbleColor,
 }) => {
+    const theme = useAppTheme();
+
+    // Light mode: subtle blue tint | Dark mode: faint white glow
+    const resolvedColor =
+        bubbleColor ?? (theme.isDark ? 'rgba(255, 255, 255, 0.06)' : theme.primary + '10');
+
     return (
         <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
             <FloatingBubble
                 initialX={-50}
                 initialY={height * 0.1}
                 size={200}
-                color={bubbleColor}
+                color={resolvedColor}
                 duration={5000}
             />
             <FloatingBubble
                 initialX={width * 0.8}
                 initialY={-40}
                 size={180}
-                color={bubbleColor}
+                color={resolvedColor}
                 delay={500}
                 duration={6500}
             />
@@ -112,7 +118,7 @@ export const FloatingBubblesBackground: React.FC<FloatingBubblesBackgroundProps>
                 initialX={width * 0.6}
                 initialY={height * 0.4}
                 size={150}
-                color={bubbleColor}
+                color={resolvedColor}
                 delay={1000}
                 duration={6000}
             />
@@ -120,7 +126,7 @@ export const FloatingBubblesBackground: React.FC<FloatingBubblesBackgroundProps>
                 initialX={width * 0.1}
                 initialY={height * 0.7}
                 size={250}
-                color={bubbleColor}
+                color={resolvedColor}
                 delay={2000}
                 duration={7000}
             />
@@ -128,7 +134,7 @@ export const FloatingBubblesBackground: React.FC<FloatingBubblesBackgroundProps>
                 initialX={width * 0.7}
                 initialY={height * 0.85}
                 size={120}
-                color={bubbleColor}
+                color={resolvedColor}
                 delay={1500}
                 duration={5500}
             />

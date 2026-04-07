@@ -59,7 +59,7 @@ export const AIImageProcessingSection: React.FC<Props> = ({
                 title="Chụp hoặc chọn ảnh"
                 variant="outline"
                 onPress={onOpenPickerSheet ?? openPicker}
-                renderLeftIcon={<IconCamera width={20} height={20} fill={theme.textSecondary} />}
+                renderLeftIcon={<IconCamera width={20} height={20} color={theme.text} />}
                 style={styles.emptyStateButton}
                 textStyle={styles.emptyStateButtonText}
             />
