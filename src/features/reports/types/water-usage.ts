@@ -28,4 +28,26 @@ export interface WaterUsageData {
     days: DailyWaterStat[];
 }
 
+export interface WaterUsageParams {
+    zoneId: string;
+    pondIds?: string[];
+    seasonId?: string;
+    startDate?: string;
+    endDate?: string;
+}
+
 export type WaterUsageResponse = IApiResponse<WaterUsageData>;
+
+// ===== Component Props =====
+export interface WaterUsageChartProps {
+    zoneId: string;
+    pondIds?: string[];
+    seasonId?: string;
+}
+
+// ===== Chart Internal Types =====
+export interface DailyBar {
+    dateLabel: string;
+    value: number;
+    dayIndex: number;
+}

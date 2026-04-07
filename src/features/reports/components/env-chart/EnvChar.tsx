@@ -9,7 +9,12 @@ import * as shape from 'd3-shape';
 
 import { typography } from '@/styles/typography';
 import { TooltipEnvChart } from './TooltipEnvChart';
-import { EnvChartSeries, EnvChartMetadata } from '@/features/reports/types/env-measurement-chart';
+import {
+    EnvChartSeries,
+    EnvChartMetadata,
+    EnvChartDataPointLocal,
+    EnvChartSeriesEntry,
+} from '@/features/reports/types/env-measurement-chart';
 
 // --- Utils: Robust Manual Scales ---
 const scaleLinear = ({ domain, range }: { domain: number[]; range: number[] }) => {
@@ -43,16 +48,7 @@ const formatDate = (date: Date) => {
 };
 
 // --- Types ---
-interface DataPoint {
-    date: Date;
-    value: number;
-    pond: string;
-}
-
-interface SeriesEntry {
-    pond: string;
-    data: DataPoint[];
-}
+// Imported from types/env-measurement-chart.ts
 
 interface EnvCharProps {
     /** Series data from API, mapped to chart format */
@@ -93,7 +89,7 @@ export default function EnvChar({
     const theme = useAppTheme();
     // --- Data Preparation ---
     // Convert API series to chart format
-    const seriesData: SeriesEntry[] = useMemo(() => {
+    const seriesData: EnvChartSeriesEntry[] = useMemo(() => {
         return series.map(s => ({
             pond: s.pondId,
             data: s.data
@@ -107,7 +103,10 @@ export default function EnvChar({
     }, [series]);
 
     // Flatten for scales
-    const allPoints = seriesData.reduce<DataPoint[]>((acc, s) => acc.concat(s.data), []);
+    const allPoints = seriesData.reduce<EnvChartDataPointLocal[]>(
+        (acc, s) => acc.concat(s.data),
+        []
+    );
 
     const [layout, setLayout] = useState({ width: 0, height: 0 });
 
@@ -248,12 +247,12 @@ export default function EnvChar({
         color,
         strokeWidth = 1,
     }: {
-        data: DataPoint[];
+        data: EnvChartDataPointLocal[];
         color: string;
         strokeWidth?: number;
     }) => {
         const lineGen = shape
-            .line<DataPoint>()
+            .line<EnvChartDataPointLocal>()
             .x(d => scaleX(d.date))
             .y(d => scaleY(d.value))
             .curve(shape.curveLinear);

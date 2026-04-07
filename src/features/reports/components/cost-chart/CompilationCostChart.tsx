@@ -32,10 +32,7 @@ const formatWeight = (value: number, unit: string): string => {
     return `${truncateToDecimals(value, 2).toLocaleString('vi-VN')} ${unit}`;
 };
 
-interface CompilationCostChartProps {
-    zoneId: string;
-    pondId?: string;
-}
+import { CompilationCostChartProps } from '@/features/reports/types/cost-donut';
 
 const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => {
     const chartStyles = useChartStyles();

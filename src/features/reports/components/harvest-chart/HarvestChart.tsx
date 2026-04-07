@@ -7,19 +7,17 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
-import { Chart, HarvestChartData } from './Chart';
+import { Chart } from './Chart';
+import { HarvestChartData } from '@/features/reports/types/harvest-stats';
 import { useHarvestStats } from '@/features/reports/hooks/useHarvestStats';
 import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import HarvestChartIcon from '@/assets/Icon/IconReport/HarvestChartIcon.svg';
 
 const CHART_CONTENT_HEIGHT = 350; // Set to fit with padding
 
-interface Props {
-    zoneId: string;
-    pondId?: string;
-}
+import { HarvestChartProps } from '@/features/reports/types/harvest-stats';
 
-export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
+export const HarvestChart: React.FC<HarvestChartProps> = ({ zoneId, pondId, seasonId }) => {
     const chartStyles = useChartStyles();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const theme = useAppTheme();
@@ -27,6 +25,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
     const { data: response, isLoading: queryLoading } = useHarvestStats({
         ZoneId: zoneId,
         PondIds: pondId ? [pondId] : undefined,
+        SeasonId: seasonId,
     });
     const isLoading = !isCollapsed && queryLoading;
 

@@ -26,7 +26,7 @@ const VIEW_MODE_TABS: HeadingBarItem[] = [
 // MAIN COMPONENT
 // ----------------------------------------------------------------------
 
-export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
+export const ProdChart = ({ zoneId, pondId, seasonId }: ProdChartProps) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -36,7 +36,8 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
         zoneId,
         pondId,
         isExpanded,
-        viewMode
+        viewMode,
+        seasonId
     );
 
     const handleToggle = useCallback(() => {

@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 import { WaterUsageResponse } from '../../types/water-usage';
+import { DailyBar } from '@/features/reports/types/water-usage';
+export type { DailyBar };
 
 export const scaleLinear = (value: number, domain: [number, number], range: [number, number]) => {
     const [d0, d1] = domain;
@@ -23,13 +25,6 @@ export const formatNumberVietnamese = (value: number, abbreviate: boolean = true
     normalStr = normalStr.replace(/,/g, 'T').replace(/\./g, ',').replace(/T/g, '.');
     return normalStr;
 };
-
-/** A single bar in the chart — one per day */
-export interface DailyBar {
-    dateLabel: string;
-    value: number;
-    dayIndex: number;
-}
 
 export const parseWaterUsageData = (statsData?: WaterUsageResponse) => {
     if (!statsData?.data) {

@@ -21,4 +21,19 @@ export interface ProfitStatsData {
     byDate: ProfitStatsByDate[];
 }
 
+export interface ProfitStatsParams {
+    ZoneId: string;
+    PondIds?: string[];
+    PondCategoryIds?: string[];
+    SeasonId?: string;
+    Id?: string;
+}
+
 export type ProfitStatsResponse = IApiResponse<ProfitStatsData>;
+
+// ===== Component Props =====
+export interface CompilationProfitChartProps {
+    zoneId: string;
+    pondId?: string;
+    seasonId?: string;
+}

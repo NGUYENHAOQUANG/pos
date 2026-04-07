@@ -8,6 +8,7 @@ export const useEnvMeasurementChart = (params: {
     PondCategoryIds?: string[];
     PondIds?: string[];
     CycleId?: string | null;
+    SeasonId?: string | null;
     FromDate?: string;
     ToDate?: string;
 }) => {
@@ -19,6 +20,7 @@ export const useEnvMeasurementChart = (params: {
             params.MetricId,
             params.PondIds,
             params.CycleId,
+            params.SeasonId,
             params.FromDate,
             params.ToDate,
         ],
@@ -29,6 +31,7 @@ export const useEnvMeasurementChart = (params: {
                 MetricId: params.MetricId || undefined,
                 PondIds: params.PondIds,
                 CycleId: params.CycleId || undefined,
+                SeasonId: params.SeasonId || undefined,
                 FromDate: params.FromDate,
                 ToDate: params.ToDate,
             };

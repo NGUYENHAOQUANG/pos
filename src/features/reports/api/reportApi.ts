@@ -1,18 +1,18 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { FeedProdResponse } from '../types/feeding-production';
-import { HarvestStatsResponse } from '../types/harvest-stats';
+import { FeedProdParams, FeedProdResponse } from '../types/feeding-production';
+import { HarvestStatsParams, HarvestStatsResponse } from '../types/harvest-stats';
 import { HarvestStatsTableParams, HarvestStatsTableResponse } from '../types/harvest-stats-table';
 import {
     PondStatusDistributionParams,
     PondStatusDistributionResponse,
 } from '../types/pond-status-distribution';
-import { ProfitStatsResponse } from '../types/profit-stats';
+import { ProfitStatsParams, ProfitStatsResponse } from '../types/profit-stats';
 import {
     StockTransferStatsParams,
     StockTransferStatsResponse,
 } from '../types/stock-transfer-stats';
-import { WaterUsageResponse } from '../types/water-usage';
+import { WaterUsageParams, WaterUsageResponse } from '../types/water-usage';
 import {
     ProductionDistributionParams,
     ProductionDistributionResponse,
@@ -24,25 +24,29 @@ import {
 } from '../types/env-measurement-chart';
 
 export const reportApi = {
-    getFeedingProduction: async (params: {
-        ZoneId: string;
-        Id?: string;
-        CreatedAtFrom?: string;
-        CreatedAtTo?: string;
-    }): Promise<FeedProdResponse> => {
+    getFeedingProduction: async (params: FeedProdParams): Promise<FeedProdResponse> => {
         const { data } = await apiClient.get<FeedProdResponse>(
             API_ENDPOINTS.REPORT.FEEDING_PRODUCTION,
             {
                 params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
             }
         );
         return data;
     },
-    getHarvestStats: async (params: {
-        ZoneId: string;
-        Id?: string;
-        PondIds?: string[];
-    }): Promise<HarvestStatsResponse> => {
+    getHarvestStats: async (params: HarvestStatsParams): Promise<HarvestStatsResponse> => {
         const { data } = await apiClient.get<HarvestStatsResponse>(
             API_ENDPOINTS.REPORT.HARVEST_STATS,
             {
@@ -69,7 +73,22 @@ export const reportApi = {
     ): Promise<HarvestStatsTableResponse> => {
         const response = await apiClient.get<HarvestStatsTableResponse>(
             API_ENDPOINTS.REPORT.HARVEST_STATS_TABLE,
-            { params }
+            {
+                params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
+            }
         );
         return response.data;
     },
@@ -82,14 +101,24 @@ export const reportApi = {
         );
         return response.data;
     },
-    getProfitStats: async (params: {
-        ZoneId: string;
-        Id?: string;
-    }): Promise<ProfitStatsResponse> => {
+    getProfitStats: async (params: ProfitStatsParams): Promise<ProfitStatsResponse> => {
         const { data } = await apiClient.get<ProfitStatsResponse>(
             API_ENDPOINTS.REPORT.PROFIT_STATS,
             {
                 params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
             }
         );
         return data;
@@ -99,7 +128,22 @@ export const reportApi = {
     ): Promise<StockTransferStatsResponse> => {
         const { data } = await apiClient.get<StockTransferStatsResponse>(
             API_ENDPOINTS.REPORT.STOCK_TRANSFER_STATS,
-            { params }
+            {
+                params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
+            }
         );
         return data;
     },
@@ -108,18 +152,14 @@ export const reportApi = {
      * @param params
      * @returns
      */
-    getDailyWaterStats: async (params: {
-        zoneId: string;
-        pondIds?: string[];
-        startDate?: string;
-        endDate?: string;
-    }): Promise<WaterUsageResponse> => {
+    getDailyWaterStats: async (params: WaterUsageParams): Promise<WaterUsageResponse> => {
         const queryParams: Record<string, any> = {
             ZoneId: params.zoneId,
         };
         if (params.startDate) queryParams.StartDate = params.startDate;
         if (params.endDate) queryParams.EndDate = params.endDate;
         if (params.pondIds?.length) queryParams.PondIds = params.pondIds;
+        if (params.seasonId) queryParams.SeasonId = params.seasonId;
 
         const { data } = await apiClient.get<WaterUsageResponse>(
             API_ENDPOINTS.REPORT.DAILY_WATER_STATS,
@@ -149,6 +189,19 @@ export const reportApi = {
             API_ENDPOINTS.REPORT.PRODUCTION_DISTRIBUTION,
             {
                 params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
             }
         );
         return data;
@@ -158,13 +211,39 @@ export const reportApi = {
     ): Promise<EnvMeasurementChartResponse> => {
         const { data } = await apiClient.get<EnvMeasurementChartResponse>(
             API_ENDPOINTS.REPORT.ENV_MEASUREMENT_CHART,
-            { params }
+            {
+                params,
+                paramsSerializer: p => {
+                    const parts: string[] = [];
+                    Object.entries(p).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            value.forEach((v: string) =>
+                                parts.push(`${key}=${encodeURIComponent(v)}`)
+                            );
+                        } else if (value !== undefined && value !== null) {
+                            parts.push(`${key}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    return parts.join('&');
+                },
+            }
         );
         return data;
     },
     getCostDonut: async (params: CostDonutParams): Promise<CostDonutResponse> => {
         const { data } = await apiClient.get<CostDonutResponse>(API_ENDPOINTS.REPORT.COST_DONUT, {
             params,
+            paramsSerializer: p => {
+                const parts: string[] = [];
+                Object.entries(p).forEach(([key, value]) => {
+                    if (Array.isArray(value)) {
+                        value.forEach((v: string) => parts.push(`${key}=${encodeURIComponent(v)}`));
+                    } else if (value !== undefined && value !== null) {
+                        parts.push(`${key}=${encodeURIComponent(value)}`);
+                    }
+                });
+                return parts.join('&');
+            },
         });
         return data;
     },

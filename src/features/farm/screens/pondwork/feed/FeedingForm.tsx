@@ -11,6 +11,7 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
+import { SpecificType } from '@/features/material/types/warehouse.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -160,6 +161,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                                 selectedMaterials={selectedItems}
                                 onMaterialsChange={handleMaterialsChange}
                                 groupTypes={[MaterialGroupType.FARMING, MaterialGroupType.FEED]}
+                                specificType={SpecificType.ShrimpFeed}
                             />
                         );
                     }}

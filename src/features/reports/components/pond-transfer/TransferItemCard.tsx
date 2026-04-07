@@ -106,6 +106,7 @@ export const TransferItemCard = ({ item }: Props) => {
                 <CaretDownIcon
                     width={14}
                     height={14}
+                    color={theme.isDark ? '##FD6900' : colors.orange[600]}
                     style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}
                 />
             </TouchableOpacity>

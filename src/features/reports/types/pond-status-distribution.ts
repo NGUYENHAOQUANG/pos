@@ -37,8 +37,15 @@ export interface PondStatusDistributionData {
 
 export interface PondStatusDistributionParams {
     zoneId?: string;
+    seasonId?: string;
     startDate?: string;
     endDate?: string;
 }
 
 export type PondStatusDistributionResponse = IApiResponse<PondStatusDistributionData>;
+
+// ===== Component Props =====
+export interface ActivePondChartProps {
+    zoneId: string;
+    seasonId?: string;
+}

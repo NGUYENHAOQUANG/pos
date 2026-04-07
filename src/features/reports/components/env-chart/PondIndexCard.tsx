@@ -97,15 +97,13 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({
 
             {/* Tooltip overlay */}
             {showTooltip && tooltipValue ? (
-                <Pressable
-                    style={[
-                        styles.tooltipOverlay,
-                        { backgroundColor: theme.isDark ? '#2D3748' : '#FFFFFF' },
-                    ]}
-                    onPress={() => setShowTooltip(false)}
-                >
-                    <Text style={[styles.tooltipText, { color: theme.text }]}>{tooltipValue}</Text>
-                </Pressable>
+                <View style={styles.tooltipWrapper}>
+                    {/* Caret arrow */}
+                    <View style={styles.tooltipCaret} />
+                    <Pressable style={styles.tooltipOverlay} onPress={() => setShowTooltip(false)}>
+                        <Text style={styles.tooltipText}>{tooltipValue}</Text>
+                    </Pressable>
+                </View>
             ) : null}
         </View>
     );
@@ -183,27 +181,42 @@ const styles = StyleSheet.create({
     valueUnitProd: {
         fontSize: 14,
     },
-    tooltipOverlay: {
+    tooltipWrapper: {
         position: 'absolute',
-        bottom: '100%',
-        left: 0,
-        right: 0,
-
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
-        elevation: 6,
-        borderRadius: 6,
-        paddingHorizontal: 8,
-        paddingVertical: 6,
-        marginBottom: 10,
+        top: '100%',
+        left: -4,
+        right: -4,
+        marginTop: 18,
         zIndex: 100,
         alignItems: 'center',
     },
+    tooltipCaret: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 8,
+        borderRightWidth: 8,
+        borderBottomWidth: 8,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: '#1C2632',
+        marginBottom: -1,
+        zIndex: 101,
+    },
+    tooltipOverlay: {
+        backgroundColor: '#0B1117',
+        borderRadius: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 8,
+    },
     tooltipText: {
         fontSize: 14,
-
+        color: '#FFFFFF',
         fontWeight: '500',
         textAlign: 'center',
     },
