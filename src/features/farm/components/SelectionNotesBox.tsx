@@ -1,11 +1,10 @@
 import React, { useRef } from 'react';
-import { StyleSheet, TextInput as RNTextInput } from 'react-native';
+import { View, StyleSheet, TextInput as RNTextInput } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 interface SelectionNotesBoxProps {
     notes: string;
@@ -28,7 +27,7 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
     };
 
     return (
-        <SafeInputLayout extraScrollHeight={150}>
+        <View style={styles.container}>
             <SelectionInfoBox title="Ghi chú">
                 <TextInput
                     ref={inputRef}
@@ -42,7 +41,7 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
                     maxLength={2000}
                 />
             </SelectionInfoBox>
-        </SafeInputLayout>
+        </View>
     );
 };
 

@@ -102,7 +102,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                 rawTotalCost={statsData?.kpis?.totalMaterialCost}
                                 rawEstimatedProfit={statsData?.kpis?.totalEstimatedProfit}
                             />
-                            <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
+                            <Text style={styles.chartTitle}>Lợi nhuận (Tỉ đồng)</Text>
                             <Chart
                                 chartWidth={chartWidth}
                                 chartHeight={chartHeight}

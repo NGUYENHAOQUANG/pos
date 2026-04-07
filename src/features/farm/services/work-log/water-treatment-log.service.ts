@@ -84,6 +84,16 @@ export const waterTreatmentLogService: IBaseLogService<IWaterTreatmentRecord> = 
         ref: IPondRecordReferenceData | Record<string, unknown>
     ): ActivityData[] => {
         const data: ActivityData[] = [];
+
+        // Hiển thị loại hoạt động (treatmentType)
+        const treatmentType = (ref as any).treatmentType as string | undefined;
+        if (treatmentType) {
+            const label =
+                TREATMENT_TYPE_LABELS[treatmentType as keyof typeof TREATMENT_TYPE_LABELS] ||
+                treatmentType;
+            data.push({ label: 'Loại hoạt động', value: label });
+        }
+
         pushMaterialRows(data, (ref as any).materials);
         return data;
     },
