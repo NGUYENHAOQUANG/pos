@@ -8,7 +8,9 @@ import {
     Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -25,6 +27,9 @@ interface HelpOptionsModalProps {
 
 export const HelpOptionsModal = forwardRef<HelpOptionsModalRef, HelpOptionsModalProps>(
     ({ onPressUserManual, onPressDeviceExplanation }, ref) => {
+        const theme = useAppTheme();
+        const themedStyles = getStyles(theme);
+
         const [isOpen, setIsOpen] = useState(false);
         const [buttonPosition, setButtonPosition] = useState<{
             x: number;
@@ -62,7 +67,7 @@ export const HelpOptionsModal = forwardRef<HelpOptionsModalRef, HelpOptionsModal
                     <View style={styles.overlay}>
                         <View
                             style={[
-                                styles.menuContainer,
+                                themedStyles.menuContainer,
                                 {
                                     top: menuTop,
                                     right: menuRight,
@@ -80,14 +85,14 @@ export const HelpOptionsModal = forwardRef<HelpOptionsModalRef, HelpOptionsModal
                                         <Ionicons
                                             name="book-outline"
                                             size={20}
-                                            color={colors.text}
+                                            color={theme.text}
                                         />
                                     }
                                     style={styles.customButton}
                                     textStyle={styles.customButtonText}
                                 />
 
-                                <View style={styles.divider} />
+                                <View style={themedStyles.divider} />
 
                                 <ButtonMaterialList
                                     title="Giải thích các thiết bị"
@@ -99,7 +104,7 @@ export const HelpOptionsModal = forwardRef<HelpOptionsModalRef, HelpOptionsModal
                                         <Ionicons
                                             name="hardware-chip-outline"
                                             size={20}
-                                            color={colors.text}
+                                            color={theme.text}
                                         />
                                     }
                                     style={styles.customButton}
@@ -114,35 +119,16 @@ export const HelpOptionsModal = forwardRef<HelpOptionsModalRef, HelpOptionsModal
     }
 );
 
+// Static styles that don't depend on theme
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'transparent',
     },
-    menuContainer: {
-        position: 'absolute',
-        backgroundColor: colors.white,
-        borderRadius: 16, // Kept 16 from previous design
-        paddingVertical: spacing.xs,
-        minWidth: 250, // Kept 250 from previous design
-        zIndex: 1001,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.15,
-                shadowRadius: 12,
-            },
-            android: {
-                elevation: 8,
-            },
-        }),
-    },
     content: {
         overflow: 'hidden',
         borderRadius: 16,
     },
-    // Override ButtonMaterialList styles
     customButton: {
         borderWidth: 0,
         backgroundColor: 'transparent',
@@ -155,9 +141,33 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 22,
     },
-    divider: {
-        height: 1,
-        backgroundColor: colors.gray[100],
-        marginHorizontal: spacing.md,
-    },
 });
+
+// Dynamic styles that depend on theme
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        menuContainer: {
+            position: 'absolute',
+            backgroundColor: theme.background,
+            borderRadius: 16,
+            paddingVertical: spacing.xs,
+            minWidth: 250,
+            zIndex: 1001,
+            ...Platform.select({
+                ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 12,
+                },
+                android: {
+                    elevation: 8,
+                },
+            }),
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: spacing.md,
+        },
+    });

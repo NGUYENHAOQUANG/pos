@@ -9,7 +9,9 @@ import {
     Dimensions,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import ModalAddTurn from './ModalAddTurn';
@@ -25,12 +27,13 @@ interface AddTurnModalUIProps {
 }
 
 export function AddTurnModalUI({ visible, onClose, onConfirm, turnIndex }: AddTurnModalUIProps) {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
     const [tempStartTime, setTempStartTime] = useState<Date | null>(null);
     const [tempEndTime, setTempEndTime] = useState<Date | null>(null);
 
-    // Reset temp values when modal opens
     useEffect(() => {
         if (visible) {
             setTempStartTime(null);
@@ -63,38 +66,32 @@ export function AddTurnModalUI({ visible, onClose, onConfirm, turnIndex }: AddTu
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <TouchableWithoutFeedback onPress={onClose}>
-                <View style={styles.overlay}>
+                <View style={themedStyles.overlay}>
                     <TouchableWithoutFeedback>
                         <Animated.View
                             style={[
-                                styles.container,
+                                themedStyles.container,
                                 {
                                     transform: [{ translateY: slideAnim }],
                                 },
                             ]}
                         >
-                            {/* Header row: title + X close button */}
-                            <View style={styles.header}>
-                                <Text style={styles.title}>Thêm lượt - Lần {turnIndex}</Text>
+                            <View style={staticStyles.header}>
+                                <Text style={themedStyles.title}>Thêm lượt - Lần {turnIndex}</Text>
                                 <TouchableOpacity
                                     onPress={onClose}
-                                    style={styles.closeButton}
+                                    style={staticStyles.closeButton}
                                     activeOpacity={0.7}
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                                 >
-                                    <CloseIcon
-                                        width={16}
-                                        height={16}
-                                        color={colors.textSecondary}
-                                    />
+                                    <CloseIcon width={16} height={16} color={theme.textSecondary} />
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Body Modal */}
-                            <View style={styles.body}>
-                                <View style={styles.inputGroup}>
-                                    <View style={styles.labelWrapper}>
-                                        <Text style={styles.inputLabel}>Bắt đầu</Text>
+                            <View style={staticStyles.body}>
+                                <View style={staticStyles.inputGroup}>
+                                    <View style={staticStyles.labelWrapper}>
+                                        <Text style={themedStyles.inputLabel}>Bắt đầu</Text>
                                         <RequiredDot />
                                     </View>
                                     <ModalAddTurn
@@ -104,9 +101,9 @@ export function AddTurnModalUI({ visible, onClose, onConfirm, turnIndex }: AddTu
                                     />
                                 </View>
 
-                                <View style={styles.inputGroup}>
-                                    <View style={styles.labelWrapper}>
-                                        <Text style={styles.inputLabel}>Kết thúc</Text>
+                                <View style={staticStyles.inputGroup}>
+                                    <View style={staticStyles.labelWrapper}>
+                                        <Text style={themedStyles.inputLabel}>Kết thúc</Text>
                                         <RequiredDot />
                                     </View>
                                     <ModalAddTurn
@@ -117,20 +114,19 @@ export function AddTurnModalUI({ visible, onClose, onConfirm, turnIndex }: AddTu
                                 </View>
                             </View>
 
-                            {/* Footer buttons */}
-                            <View style={styles.footer}>
+                            <View style={staticStyles.footer}>
                                 <Button
                                     title="Không"
                                     onPress={onClose}
                                     variant="outline"
-                                    style={[styles.cancelButton, styles.cancelButtonOverride]}
-                                    textStyle={styles.cancelButtonTextOverride}
+                                    style={[staticStyles.cancelButton]}
+                                    textStyle={themedStyles.cancelButtonTextOverride}
                                 />
                                 <Button
                                     title="Thêm lượt"
                                     onPress={handleConfirm}
                                     variant="primary"
-                                    style={styles.confirmButton}
+                                    style={staticStyles.confirmButton}
                                 />
                             </View>
                         </Animated.View>
@@ -141,32 +137,13 @@ export function AddTurnModalUI({ visible, onClose, onConfirm, turnIndex }: AddTu
     );
 }
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingBottom: 40,
-    },
-    container: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        padding: spacing.lg,
-    },
+// Static styles
+const staticStyles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: spacing.lg,
-    },
-    title: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: '700',
-        color: colors.text,
-        flex: 1,
     },
     closeButton: {
         marginLeft: spacing.sm,
@@ -182,11 +159,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    inputLabel: {
-        fontSize: typography.fontSize.base,
-        color: colors.text,
-        fontWeight: '400',
-    },
     footer: {
         flexDirection: 'row',
         gap: spacing.sm,
@@ -194,13 +166,40 @@ const styles = StyleSheet.create({
     cancelButton: {
         flex: 1,
     },
-    cancelButtonOverride: {
-        borderColor: colors.gray[300],
-    },
-    cancelButtonTextOverride: {
-        color: colors.text,
-    },
     confirmButton: {
         flex: 1,
     },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingBottom: 40,
+        },
+        container: {
+            width: '100%',
+            backgroundColor: theme.background,
+            borderRadius: 24,
+            padding: spacing.lg,
+        },
+        title: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: '700',
+            color: theme.text,
+            flex: 1,
+        },
+        inputLabel: {
+            fontSize: typography.fontSize.base,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        cancelButtonTextOverride: {
+            color: theme.text,
+        },
+    });

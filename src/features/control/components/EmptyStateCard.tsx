@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 interface EmptyStateCardProps {
@@ -24,16 +26,19 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     variant = 'default',
     buttonSize,
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const isFlat = variant === 'flat';
+
     return (
-        <View style={[styles.container, isFlat && styles.flatContainer, style]}>
+        <View style={[themedStyles.container, isFlat && styles.flatContainer, style]}>
             <EmptyStateIcon
                 width={isFlat ? 80 : 100}
                 height={isFlat ? 80 : 64}
                 style={[styles.image, isFlat && styles.flatImage]}
             />
-            <Text style={styles.message}>{message}</Text>
-            {description && <Text style={styles.description}>{description}</Text>}
+            <Text style={themedStyles.message}>{message}</Text>
+            {description && <Text style={themedStyles.description}>{description}</Text>}
             {buttonTitle && onPress && (
                 <Button
                     title={buttonTitle}
@@ -66,7 +71,6 @@ interface EmptyDeviceStateProps {
     onAddDevice?: () => void;
 }
 
-// ...
 export const EmptyDeviceState: React.FC<EmptyDeviceStateProps> = ({ onAddDevice }) => (
     <EmptyStateCard
         message="Chưa có thiết bị nào được thêm."
@@ -78,15 +82,8 @@ export const EmptyDeviceState: React.FC<EmptyDeviceStateProps> = ({ onAddDevice 
     />
 );
 
+// Static styles
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        padding: spacing.xl,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: spacing.md,
-    },
     flatContainer: {
         backgroundColor: 'transparent',
         borderRadius: 0,
@@ -104,28 +101,9 @@ const styles = StyleSheet.create({
         height: 80,
         marginBottom: spacing.sm,
     },
-    message: {
-        fontSize: 16,
-        color: colors.text, // Removed fontWeight: '500'
-        textAlign: 'center',
-        marginBottom: spacing.xs,
-    },
-    description: {
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'center',
-        marginTop: spacing.xs,
-        marginBottom: spacing.md,
-        maxWidth: '90%',
-    },
     button: {
         marginTop: spacing.md,
         minWidth: 160,
-    },
-    pondCycleEmptyState: {
-        marginBottom: spacing.sm,
-        marginTop: spacing.sm,
-        borderRadius: 0,
     },
     emptyPondState: {
         height: '30%',
@@ -134,6 +112,33 @@ const styles = StyleSheet.create({
     emptyDeviceContainer: {
         paddingTop: 0,
         paddingBottom: 24,
-        paddingHorizontal: 0, // Ensure no extra horizontal padding if container already has it
+        paddingHorizontal: 0,
     },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            padding: spacing.xl,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: spacing.md,
+        },
+        message: {
+            fontSize: 16,
+            color: theme.text,
+            textAlign: 'center',
+            marginBottom: spacing.xs,
+        },
+        description: {
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'center',
+            marginTop: spacing.xs,
+            marginBottom: spacing.md,
+            maxWidth: '90%',
+        },
+    });

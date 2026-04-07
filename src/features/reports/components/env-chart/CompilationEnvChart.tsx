@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { HeadingEnvChart } from './HeadingEnvChart';
@@ -9,7 +10,7 @@ import { PondIndex } from './PondIndex';
 import EnvChar from './EnvChar';
 import { Loading } from '@/shared/components/ui/Loading';
 import Peformance from '@/assets/Icon/IconReport/Peformance.svg';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import { useEnvMeasurementChart } from '@/features/reports/hooks/useEnvMeasurementChart';
 import { useMetrics } from '@/features/farm/hooks/metric/useMetric';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
@@ -40,6 +41,8 @@ interface CompilationEnvChartProps {
 }
 
 const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartProps) => {
+    const chartStyles = useChartStyles();
+    const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(true);
 
     // Fetch available metrics from API
@@ -176,7 +179,9 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
                             />
 
                             {selectedMetricName ? (
-                                <Text style={styles.chartTitle}>{selectedMetricName}</Text>
+                                <Text style={[styles.chartTitle, { color: theme.textSecondary }]}>
+                                    {selectedMetricName}
+                                </Text>
                             ) : null}
                             <View style={styles.chartContainer}>
                                 <EnvChar
@@ -201,10 +206,8 @@ const styles = StyleSheet.create({
     header: {
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     content: {
-        backgroundColor: colors.white,
         paddingHorizontal: 16,
         borderBottomLeftRadius: borderRadius.sm,
         borderBottomRightRadius: borderRadius.sm,
@@ -214,7 +217,6 @@ const styles = StyleSheet.create({
     },
     chartTitle: {
         fontSize: 12,
-        color: colors.text,
         paddingLeft: 0,
         marginTop: 12,
         marginBottom: 8,

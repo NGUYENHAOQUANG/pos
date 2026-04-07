@@ -2,14 +2,14 @@
  * @file PhoneInput.tsx
  * @description Phone input component matching the Mebione design
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import DangerIcon from '@/assets/Icon/Danger.svg';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
-// Giả định bạn đã có các biến này trong project, nếu chưa hãy thay bằng mã màu cứng
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface PhoneInputProps {
     label?: string;
@@ -35,6 +35,8 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     required,
 }) => {
     const [isFocused, setIsFocused] = useState(false);
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     // Hàm format số điện thoại: 0908123456 -> 0908 123 456
     const formatAndSetPhone = (text: string) => {
@@ -81,7 +83,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
                     value={getDisplayValue()}
                     onChangeText={formatAndSetPhone}
                     placeholder={placeholder}
-                    placeholderTextColor={colors.gray[300]}
+                    placeholderTextColor={theme.textTertiary}
                     keyboardType="number-pad"
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
@@ -101,64 +103,66 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {},
-    labelContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-        gap: 4,
-    },
-    label: {
-        fontSize: typography.fontSize.base,
-        color: colors.text,
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    requiredDot: {
-        color: colors.error,
-        fontSize: typography.fontSize.base,
-        fontWeight: '700',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        backgroundColor: colors.white,
-        height: 50,
-        paddingHorizontal: spacing.md,
-    },
-    inputContainerFocused: {
-        boxShadow: `0px 0px 4px ${colors.primaryLight}`,
-    },
-    inputContainerError: {
-        borderColor: colors.error, // Viền đỏ khi lỗi
-    },
-    input: {
-        flex: 1,
-        fontSize: typography.fontSize.lg,
-        color: colors.text,
-        height: '100%',
-    },
-    errorIcon: {
-        paddingLeft: spacing.xs,
-    },
-    errorContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginTop: 4,
-        gap: 6,
-    },
-    errorIconWrapper: {
-        marginTop: 2, // Đưa icon xuống một chút để thẳng hàng với dòng đầu tiên của text
-    },
-    errorText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.error,
-        lineHeight: 20,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {},
+        labelContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: spacing.sm,
+            gap: 4,
+        },
+        label: {
+            fontSize: typography.fontSize.base,
+            color: theme.text,
+            fontWeight: '500',
+            lineHeight: 20,
+        },
+        requiredDot: {
+            color: theme.error,
+            fontSize: typography.fontSize.base,
+            fontWeight: '700',
+        },
+        inputContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.background,
+            height: 50,
+            paddingHorizontal: spacing.md,
+        },
+        inputContainerFocused: {
+            borderColor: theme.primary,
+            boxShadow: `0px 0px 4px ${theme.primary}40`,
+        },
+        inputContainerError: {
+            borderColor: theme.error, // Viền đỏ khi lỗi
+        },
+        input: {
+            flex: 1,
+            fontSize: typography.fontSize.lg,
+            color: theme.text,
+            height: '100%',
+        },
+        errorIcon: {
+            paddingLeft: spacing.xs,
+        },
+        errorContainer: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            marginTop: 4,
+            gap: 6,
+        },
+        errorIconWrapper: {
+            marginTop: 2, // Đưa icon xuống một chút để thẳng hàng với dòng đầu tiên của text
+        },
+        errorText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.error,
+            lineHeight: 20,
+        },
+    });
 
 export default PhoneInput;

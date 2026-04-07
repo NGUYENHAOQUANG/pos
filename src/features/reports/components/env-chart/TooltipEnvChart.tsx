@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
 import { typography } from '@/styles/typography';
 
 interface TooltipItem {
@@ -30,6 +31,7 @@ export const TooltipEnvChart = ({
     chartWidth,
     chartHeight,
 }: TooltipEnvChartProps) => {
+    const theme = useAppTheme();
     if (!visible) return null;
 
     // --- Formatters (use UTC to match backend date convention) ---
@@ -63,22 +65,29 @@ export const TooltipEnvChart = ({
     }
 
     return (
-        <View style={[styles.tooltipContainer, { left, top }]}>
-            <View style={styles.tooltipHeader}>
-                <Text style={styles.tooltipDate}>{formatDate(date)}</Text>
+        <View
+            style={[
+                styles.tooltipContainer,
+                { left, top, backgroundColor: theme.background, borderColor: theme.border },
+            ]}
+        >
+            <View style={[styles.tooltipHeader, { borderBottomColor: theme.borderLight }]}>
+                <Text style={[styles.tooltipDate, { color: theme.text }]}>{formatDate(date)}</Text>
                 <TouchableOpacity
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     onPress={onClose}
                 >
-                    <Text style={styles.tooltipClose}>×</Text>
+                    <Text style={[styles.tooltipClose, { color: theme.textSecondary }]}>×</Text>
                 </TouchableOpacity>
             </View>
             <View>
                 {data.map(item => (
                     <View key={item.pond} style={styles.tooltipRow}>
                         <View style={[styles.dot, { backgroundColor: item.color }]} />
-                        <Text style={styles.tooltipLabel}>
-                            <Text style={{ fontWeight: 'bold' }}>{item.pond}: </Text>
+                        <Text style={[styles.tooltipLabel, { color: theme.text }]}>
+                            <Text style={{ color: theme.text, fontWeight: 'bold' }}>
+                                {item.pond}:{' '}
+                            </Text>
                             {item.value.toFixed(2).replace('.', ',')} {item.unit}
                         </Text>
                     </View>
@@ -91,11 +100,11 @@ export const TooltipEnvChart = ({
 const styles = StyleSheet.create({
     tooltipContainer: {
         position: 'absolute',
-        backgroundColor: colors.white,
+
         borderRadius: 8,
         padding: 8,
+
         borderWidth: 1,
-        borderColor: colors.border,
         shadowColor: colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
@@ -110,18 +119,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 6,
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
         paddingBottom: 4,
     },
     tooltipDate: {
         fontFamily: typography.fontFamily.bold,
         fontSize: 12,
-        color: colors.text,
     },
     tooltipClose: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: colors.textSecondary,
+
         marginTop: -4,
         lineHeight: 18,
     },
@@ -133,7 +140,6 @@ const styles = StyleSheet.create({
     tooltipLabel: {
         fontFamily: typography.fontFamily.regular,
         fontSize: 11,
-        color: colors.text,
     },
     dot: {
         width: 8,

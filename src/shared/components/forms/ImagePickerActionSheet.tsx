@@ -8,6 +8,7 @@ import {
     Asset,
 } from 'react-native-image-picker';
 import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 import { Button } from '@/shared/components/buttons/Button';
@@ -30,6 +31,9 @@ export function ImagePickerActionSheet({
     onChooseFromLibrary,
     onImageSelected,
 }: ImagePickerActionSheetProps) {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
     const handleResponse = (response: ImagePickerResponse) => {
         if (response.didCancel) {
             // User cancelled image picker
@@ -90,104 +94,106 @@ export function ImagePickerActionSheet({
         <AnimatedBottomSheet
             visible={visible}
             onClose={onClose}
-            containerStyle={styles.sheetContainer}
+            containerStyle={themedStyles.sheetContainer}
         >
             {/* Indicator */}
-            <View style={styles.indicator} />
+            <View style={themedStyles.indicator} />
 
             {/* Title */}
-            <Text style={styles.title}>Chụp hoặc chọn ảnh thiết bị</Text>
+            <Text style={themedStyles.title}>Chụp hoặc chọn ảnh thiết bị</Text>
 
             {/* Options */}
-            <View style={styles.content}>
+            <View style={themedStyles.content}>
                 <TouchableOpacity
-                    style={styles.optionButton}
+                    style={themedStyles.optionButton}
                     onPress={handleTakePhoto}
                     activeOpacity={0.7}
                 >
-                    <View style={styles.iconContainer}>
-                        <Ionicons name="camera" size={22} color={colors.text} />
+                    <View style={themedStyles.iconContainer}>
+                        <Ionicons name="camera" size={22} color={theme.text} />
                     </View>
-                    <Text style={styles.optionText}>Chụp ảnh mới</Text>
-                    <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+                    <Text style={themedStyles.optionText}>Chụp ảnh mới</Text>
+                    <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
                 </TouchableOpacity>
 
-                <View style={styles.divider} />
+                <View style={themedStyles.divider} />
 
                 <TouchableOpacity
-                    style={styles.optionButton}
+                    style={themedStyles.optionButton}
                     onPress={handleChooseLibrary}
                     activeOpacity={0.7}
                 >
-                    <View style={styles.iconContainer}>
-                        <Ionicons name="images" size={22} color={colors.text} />
+                    <View style={themedStyles.iconContainer}>
+                        <Ionicons name="images" size={22} color={theme.text} />
                     </View>
-                    <Text style={styles.optionText}>Chọn từ thư viện</Text>
-                    <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+                    <Text style={themedStyles.optionText}>Chọn từ thư viện</Text>
+                    <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
                 </TouchableOpacity>
             </View>
 
             {/* Close button */}
-            <View style={styles.footer}>
+            <View style={themedStyles.footer}>
                 <Button title="Đóng" variant="outline" onPress={onClose} />
             </View>
         </AnimatedBottomSheet>
     );
 }
 
-const styles = StyleSheet.create({
-    sheetContainer: {
-        borderRadius: 24,
-        margin: 16,
-        paddingBottom: 24,
-        padding: spacing.md,
-    },
-    indicator: {
-        width: 40,
-        height: 4,
-        backgroundColor: colors.gray[300],
-        borderRadius: 2,
-        alignSelf: 'center',
-        marginTop: spacing.sm,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-        textAlign: 'center',
-        paddingVertical: spacing.md,
-    },
-    content: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-    },
-    optionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: spacing.md,
-    },
-    iconContainer: {
-        width: 44,
-        height: 44,
-        borderRadius: borderRadius.full,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.md,
-        backgroundColor: colors.gray[100],
-    },
-    optionText: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.gray[100],
-    },
-    footer: {
-        paddingTop: spacing.md,
-    },
-});
+const getStyles = (theme: ReturnType<typeof useAppTheme>) =>
+    StyleSheet.create({
+        sheetContainer: {
+            borderRadius: 24,
+            margin: 16,
+            paddingBottom: 24,
+            padding: spacing.md,
+            backgroundColor: theme.background,
+        },
+        indicator: {
+            width: 40,
+            height: 4,
+            backgroundColor: theme.isDark ? theme.border : colors.gray[300],
+            borderRadius: 2,
+            alignSelf: 'center',
+            marginTop: spacing.sm,
+        },
+        title: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.text,
+            textAlign: 'center',
+            paddingVertical: spacing.md,
+        },
+        content: {
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: borderRadius.md,
+            paddingHorizontal: spacing.md,
+        },
+        optionButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: spacing.md,
+        },
+        iconContainer: {
+            width: 44,
+            height: 44,
+            borderRadius: borderRadius.full,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.md,
+            backgroundColor: theme.backgroundSecondary,
+        },
+        optionText: {
+            flex: 1,
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.border,
+        },
+        footer: {
+            paddingTop: spacing.md,
+        },
+    });

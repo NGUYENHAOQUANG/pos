@@ -9,7 +9,8 @@ import {
     ImageSourcePropType,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 import DeviceActiveIcon from '@/assets/Icon/IconDevices/DeviceActive.svg';
 import DeviceErrorIcon from '@/assets/Icon/IconDevices/DeviceError.svg';
@@ -36,37 +37,43 @@ export const DevicesItem: React.FC<DevicesItemProps> = ({
     style,
     compact = false,
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const totalCount = activeCount + warningCount + inactiveCount;
 
     // Compact mode: single row with icon, label, total count
     if (compact) {
         return (
             <TouchableOpacity
-                style={[styles.container, styles.compactContainer, style]}
+                style={[themedStyles.container, styles.compactContainer, style]}
                 onPress={onPress}
                 activeOpacity={0.7}
             >
-                <View style={styles.iconContainer}>
+                <View style={themedStyles.iconContainer}>
                     <Image source={icon} style={{ width: 32, height: 32 }} resizeMode="contain" />
                 </View>
-                <Text style={styles.label} numberOfLines={1}>
+                <Text style={themedStyles.label} numberOfLines={1}>
                     {label}
                 </Text>
-                <Text style={styles.compactCount}>
-                    {totalCount} <Text style={styles.compactUnit}>máy</Text>
+                <Text style={themedStyles.compactCount}>
+                    {totalCount} <Text style={themedStyles.compactUnit}>máy</Text>
                 </Text>
             </TouchableOpacity>
         );
     }
 
     return (
-        <TouchableOpacity style={[styles.container, style]} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity
+            style={[themedStyles.container, style]}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
             {/* Header: Icon + Label */}
             <View style={styles.header}>
-                <View style={styles.iconContainer}>
+                <View style={themedStyles.iconContainer}>
                     <Image source={icon} style={{ width: 32, height: 32 }} resizeMode="contain" />
                 </View>
-                <Text style={styles.label} numberOfLines={1}>
+                <Text style={themedStyles.label} numberOfLines={1}>
                     {label}
                 </Text>
             </View>
@@ -75,54 +82,33 @@ export const DevicesItem: React.FC<DevicesItemProps> = ({
             <View style={styles.statsContainer}>
                 <View style={styles.statRow}>
                     <DeviceActiveIcon width={14} height={14} />
-                    <Text style={styles.statLabel}>Đang hoạt động</Text>
-                    <Text style={styles.statValue}>{activeCount}</Text>
+                    <Text style={themedStyles.statLabel}>Đang hoạt động</Text>
+                    <Text style={themedStyles.statValue}>{activeCount}</Text>
                 </View>
 
                 <View style={styles.statRow}>
                     <DeviceErrorIcon width={14} height={14} />
-                    <Text style={[styles.statLabel, styles.errorLabel]}>Lỗi</Text>
-                    <Text style={[styles.statValue, styles.errorValue]}>{warningCount}</Text>
+                    <Text style={themedStyles.statLabel}>Lỗi</Text>
+                    <Text style={themedStyles.statValue}>{warningCount}</Text>
                 </View>
 
                 <View style={styles.statRow}>
                     <DeviceOffIcon width={14} height={14} />
-                    <Text style={[styles.statLabel, styles.inactiveLabel]}>Bảo trì</Text>
-                    <Text style={[styles.statValue, styles.inactiveValue]}>{inactiveCount}</Text>
+                    <Text style={themedStyles.statLabel}>Bảo trì</Text>
+                    <Text style={themedStyles.statValue}>{inactiveCount}</Text>
                 </View>
             </View>
         </TouchableOpacity>
     );
 };
 
+// Static styles
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 12,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
         gap: 8,
-    },
-    iconContainer: {
-        width: 36,
-        height: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        flex: 1,
     },
     statsContainer: {
         gap: 6,
@@ -132,41 +118,56 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 6,
     },
-    statLabel: {
-        fontSize: 13,
-        color: colors.gray[600],
-        flex: 1,
-    },
-    statValue: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.gray[800],
-        textAlign: 'right',
-        minWidth: 20,
-    },
-    errorLabel: {
-        color: colors.gray[600],
-    },
-    errorValue: {
-        color: colors.gray[800],
-    },
-    inactiveLabel: {
-        color: colors.gray[600],
-    },
-    inactiveValue: {
-        color: colors.gray[800],
-    },
     compactContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
     },
-    compactCount: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    compactUnit: {
-        color: colors.textSecondary,
-    },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            padding: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        iconContainer: {
+            width: 36,
+            height: 36,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            flex: 1,
+        },
+        statLabel: {
+            fontSize: 13,
+            color: theme.textSecondary,
+            flex: 1,
+        },
+        statValue: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: theme.text,
+            textAlign: 'right',
+            minWidth: 20,
+        },
+        compactCount: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        compactUnit: {
+            color: theme.textSecondary,
+        },
+    });

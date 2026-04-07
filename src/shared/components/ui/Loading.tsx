@@ -14,6 +14,7 @@ import Animated, {
 import { colors } from '@/styles';
 import { AnimatedLogoLoading } from '@/shared/components/brand/AnimatedLogoLoading';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
+import { useAppTheme } from '@/styles/themeContext';
 
 const DOT_COUNT = 6;
 const CYCLE_DURATION = 2400;
@@ -105,14 +106,15 @@ interface LoadingProps {
 
 export const Loading: React.FC<LoadingProps> = ({
     size = 'large',
-    color = colors.primary,
+    color,
     children,
     isLoading = true,
     animateExit = true,
     transparent = true,
 }) => {
+    const theme = useAppTheme();
     const sizeNum = getNumericSize(size);
-    const mainColor = color as string;
+    const mainColor = color ? (color as string) : theme.primary;
     const logoLoadingEnabled = useSettingsStore(s => s.logoLoadingEnabled);
 
     const rotation = useSharedValue(0);
@@ -222,7 +224,7 @@ export const Loading: React.FC<LoadingProps> = ({
                             style={[
                                 styles.overlay,
                                 overlayAnimatedStyle,
-                                !transparent && { backgroundColor: colors.white },
+                                !transparent && { backgroundColor: theme.background },
                             ]}
                         >
                             {Spinner}
@@ -233,11 +235,11 @@ export const Loading: React.FC<LoadingProps> = ({
         );
     }
 
-    // Standalone mode: FadeOut exiting handles unmount
+    const shouldAnimateExit = animateExit && !logoLoadingEnabled;
     return (
         <Animated.View
-            style={styles.container}
-            exiting={animateExit ? FadeOut.duration(800) : undefined}
+            style={[styles.container]}
+            exiting={shouldAnimateExit ? FadeOut.duration(800) : undefined}
         >
             {Spinner}
         </Animated.View>
@@ -258,7 +260,5 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlayLoading,
         zIndex: 9999,
     },
-    dot: {
-        // Base position center, animated via transform
-    },
+    dot: {},
 });

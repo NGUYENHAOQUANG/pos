@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, Image, ImageSourcePropType } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 const FanIcon = require('@/assets/Icon/IconDevices/Fan.png');
 const FeederIcon = require('@/assets/Icon/IconDevices/Feeder.png');
@@ -31,13 +33,6 @@ const DEVICE_ICONS: Record<DeviceType, ImageSourcePropType> = {
     syphon: SyphonIcon as ImageSourcePropType,
 };
 
-// Status color mapping
-const STATUS_COLORS: Record<DeviceStatus, string> = {
-    default: colors.text,
-    active: colors.primary,
-    warning: colors.error,
-};
-
 // Generate default time slots from 00:00 to 24:00 with 15 min intervals
 const generateDefaultTimeSlots = (): string[] => {
     const slots: string[] = [];
@@ -63,23 +58,33 @@ export const Column: React.FC<ColumnProps> = ({
     devices = DEFAULT_DEVICES,
     timeSlots = DEFAULT_TIME_SLOTS,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
+    // Status color mapping
+    const STATUS_COLORS: Record<DeviceStatus, string> = {
+        default: theme.text,
+        active: theme.primary,
+        warning: theme.error,
+    };
+
     return (
         <View style={styles.container}>
             {/* Header with device icons */}
             <View style={styles.header}>
-                <View style={styles.timeColumnHeader} />
+                <View style={staticStyles.timeColumnHeader} />
                 {devices.map((device, index) => {
                     const status = device.status || 'default';
                     const iconColor = STATUS_COLORS[status];
                     const iconSource = DEVICE_ICONS[device.type];
                     return (
-                        <View key={index} style={styles.deviceColumn}>
+                        <View key={index} style={staticStyles.deviceColumn}>
                             <Image
                                 source={iconSource}
                                 style={{ width: 24, height: 24 }}
                                 resizeMode="contain"
                             />
-                            <Text style={[styles.deviceCount, { color: iconColor }]}>
+                            <Text style={[staticStyles.deviceCount, { color: iconColor }]}>
                                 {device.count}
                             </Text>
                         </View>
@@ -88,9 +93,8 @@ export const Column: React.FC<ColumnProps> = ({
             </View>
 
             {/* Time slots */}
-            <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+            <ScrollView style={staticStyles.scrollContainer} showsVerticalScrollIndicator={false}>
                 {timeSlots.map((time, index) => {
-                    // Bold style for full hours (00, 01, 02, ...)
                     const isFullHour = time.endsWith(':00');
                     return (
                         <View key={index} style={styles.timeRow}>
@@ -99,7 +103,6 @@ export const Column: React.FC<ColumnProps> = ({
                             </Text>
                             {devices.map((_, deviceIndex) => (
                                 <View key={deviceIndex} style={styles.scheduleCell}>
-                                    {/* Inner dashed line */}
                                     <View style={styles.dashedLine} />
                                 </View>
                             ))}
@@ -111,21 +114,8 @@ export const Column: React.FC<ColumnProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderColor: colors.border,
-        padding: spacing.sm,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingBottom: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
+// Static styles
+const staticStyles = StyleSheet.create({
     timeColumnHeader: {
         width: 50,
         marginRight: 30,
@@ -135,11 +125,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    deviceIcon: {
-        width: 24,
-        height: 24,
-        marginBottom: 4,
-    },
     deviceCount: {
         fontSize: 12,
         fontWeight: '400',
@@ -147,41 +132,60 @@ const styles = StyleSheet.create({
     scrollContainer: {
         flex: 1,
     },
-    timeRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 24,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[100],
-        borderStyle: 'solid',
-    },
-    timeText: {
-        width: 50,
-        marginRight: 30,
-        fontSize: 12,
-        color: colors.textSecondary,
-        paddingLeft: 4,
-    },
-    timeTextBold: {
-        fontWeight: '600',
-        color: colors.text,
-    },
-    scheduleCell: {
-        flex: 1,
-        height: '100%',
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[200],
-        borderStyle: 'solid',
-        position: 'relative',
-    },
-    dashedLine: {
-        position: 'absolute',
-        left: '50%',
-        top: 0,
-        bottom: 0,
-        width: 1,
-        borderLeftWidth: 1,
-        borderLeftColor: colors.gray[200],
-        borderStyle: 'dashed',
-    },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderColor: theme.border,
+            padding: spacing.sm,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingBottom: spacing.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        timeRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: 24,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.gray[100],
+            borderStyle: 'solid',
+        },
+        timeText: {
+            width: 50,
+            marginRight: 30,
+            fontSize: 12,
+            color: theme.textSecondary,
+            paddingLeft: 4,
+        },
+        timeTextBold: {
+            fontWeight: '600',
+            color: theme.text,
+        },
+        scheduleCell: {
+            flex: 1,
+            height: '100%',
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[200],
+            borderStyle: 'solid',
+            position: 'relative',
+        },
+        dashedLine: {
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            bottom: 0,
+            width: 1,
+            borderLeftWidth: 1,
+            borderLeftColor: theme.gray[200],
+            borderStyle: 'dashed',
+        },
+    });

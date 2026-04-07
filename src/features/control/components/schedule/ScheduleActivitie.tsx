@@ -6,13 +6,14 @@ import {
     ScrollView,
     Image,
     ImageSourcePropType,
-    ActivityIndicator,
     Dimensions,
     NativeSyntheticEvent,
     NativeScrollEvent,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ScheduleDescriptionTab } from '@/features/control/components/schedule/ScheduleDescriptionTab';
 import { ScheduleActivityPill } from '@/features/control/components/schedule/ScheduleActivityPill';
 import { useDevices } from '@/features/control/hooks/useDevices';
@@ -121,22 +122,23 @@ const buildDeviceColumns = (devices: DeviceData[]): DeviceColumnData[] => {
     });
 };
 
-const getDeviceColor = (type: DeviceType, index: number): string => {
+const getDeviceColor = (type: DeviceType, index: number, theme: Colors): string => {
     const colorMap: Record<DeviceType, string[]> = {
-        feeder: [colors.primary],
-        oxy: [colors.primary],
-        fan: [colors.primary],
-        syphon: [colors.primary],
-        pump: [colors.primary],
+        feeder: [theme.primary],
+        oxy: [theme.primary],
+        fan: [theme.primary],
+        syphon: [theme.primary],
+        pump: [theme.primary],
     };
-    const typeColors = colorMap[type] || [colors.primary];
+    const typeColors = colorMap[type] || [theme.primary];
     return typeColors[(index - 1) % typeColors.length];
 };
 
 export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName = 'Ao 1' }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [now, setNow] = React.useState(new Date());
     const [deviceSchedules, setDeviceSchedules] = React.useState<DeviceScheduleData[]>([]);
-    const [isLoadingSchedules, setIsLoadingSchedules] = React.useState(true);
 
     // Refs for syncing vertical scroll
     const timeScrollRef = React.useRef<ScrollView>(null);
@@ -165,10 +167,8 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
     // Fetch schedules for all devices — refetch on every screen focus
     const fetchAllSchedules = React.useCallback(async () => {
         if (devices.length === 0) {
-            setIsLoadingSchedules(false);
             return;
         }
-        setIsLoadingSchedules(true);
         try {
             const results = await Promise.all(
                 devices.map(async device => {
@@ -184,8 +184,6 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
             setDeviceSchedules(results);
         } catch {
             // silently fail
-        } finally {
-            setIsLoadingSchedules(false);
         }
     }, [devices]);
 
@@ -229,15 +227,6 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
         });
     }, []);
 
-    if (isLoadingSchedules && devices.length > 0) {
-        return (
-            <View style={[styles.container, styles.loadingContainer]}>
-                <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>Đang tải lịch trình...</Text>
-            </View>
-        );
-    }
-
     return (
         <View style={styles.container}>
             <ScheduleDescriptionTab type="schedule" />
@@ -279,7 +268,11 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
                             {/* Device icons header */}
                             <View style={styles.deviceHeader}>
                                 {deviceColumns.map((device, colIndex) => {
-                                    const iconColor = getDeviceColor(device.type, device.index);
+                                    const iconColor = getDeviceColor(
+                                        device.type,
+                                        device.index,
+                                        theme
+                                    );
                                     const iconSource = DEVICE_ICONS[device.type];
                                     return (
                                         <View
@@ -332,7 +325,8 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
                                                 );
                                                 const deviceColor = getDeviceColor(
                                                     device.type,
-                                                    device.index
+                                                    device.index,
+                                                    theme
                                                 );
 
                                                 const prevTime =
@@ -391,132 +385,116 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.white,
-        marginTop: spacing.md,
-        marginHorizontal: spacing.md,
-        marginBottom: spacing.md,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
-        paddingTop: spacing.md,
-        gap: spacing.md,
-    },
-    loadingContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    loadingText: {
-        marginTop: spacing.sm,
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+            marginTop: spacing.md,
+            marginHorizontal: spacing.md,
+            marginBottom: spacing.md,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.border,
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.md,
+            paddingTop: spacing.md,
+            gap: spacing.md,
+        },
 
-    // Table layout: 2 columns side by side
-    tableContainer: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-
-    // Left: time column
-    timeColumnContainer: {
-        width: TIME_COLUMN_WIDTH,
-    },
-    timeColumnHeader: {
-        height: 52,
-    },
-    timeRow: {
-        height: ROW_HEIGHT,
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-        paddingRight: 6,
-        position: 'relative',
-    },
-    timeText: {
-        fontSize: 11,
-        color: colors.textSecondary,
-    },
-    timeTextBold: {
-        fontWeight: '600',
-        color: colors.text,
-    },
-    timeTick: {
-        position: 'absolute',
-        right: 0,
-        top: '50%',
-        width: 6,
-        height: 1,
-        backgroundColor: colors.gray[400],
-    },
-
-    // Right: device area
-    deviceAreaContainer: {
-        flex: 1,
-        borderLeftWidth: 1,
-        borderLeftColor: colors.gray[400],
-    },
-    deviceHeader: {
-        flexDirection: 'row',
-        height: 52,
-    },
-    deviceColumn: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingBottom: spacing.xs,
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[400],
-    },
-    deviceIcon: {
-        width: 30,
-        height: 30,
-    },
-    deviceCount: {
-        fontSize: 12,
-        fontWeight: '500',
-    },
-
-    // Device grid rows
-    deviceRow: {
-        flexDirection: 'row',
-        height: ROW_HEIGHT,
-        position: 'relative',
-    },
-    gridCell: {
-        height: '100%',
-        position: 'relative',
-        borderRightWidth: 1,
-        borderRightColor: colors.gray[400],
-    },
-    gridHLine: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: '50%',
-        height: 1,
-        backgroundColor: colors.gray[400],
-    },
-    gridVLine: {
-        position: 'absolute',
-        left: '50%',
-        top: 0,
-        bottom: 0,
-        width: 1,
-        borderLeftWidth: 1,
-        borderLeftColor: colors.gray[300],
-        borderStyle: 'dashed',
-        zIndex: -1,
-    },
-
-    currentTimeLine: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        height: 2,
-        backgroundColor: colors.error,
-        zIndex: 10,
-    },
-});
+        tableContainer: {
+            flex: 1,
+            flexDirection: 'row',
+        },
+        timeColumnContainer: {
+            width: TIME_COLUMN_WIDTH,
+        },
+        timeColumnHeader: {
+            height: 52,
+        },
+        timeRow: {
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            paddingRight: 6,
+            position: 'relative',
+        },
+        timeText: {
+            fontSize: 11,
+            color: theme.textSecondary,
+        },
+        timeTextBold: {
+            fontWeight: '600',
+            color: theme.text,
+        },
+        timeTick: {
+            position: 'absolute',
+            right: 0,
+            top: '50%',
+            width: 6,
+            height: 1,
+            backgroundColor: theme.gray[400],
+        },
+        deviceAreaContainer: {
+            flex: 1,
+            borderLeftWidth: 1,
+            borderLeftColor: theme.gray[400],
+        },
+        deviceHeader: {
+            flexDirection: 'row',
+            height: 52,
+        },
+        deviceColumn: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingBottom: spacing.xs,
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[400],
+        },
+        deviceIcon: {
+            width: 30,
+            height: 30,
+        },
+        deviceCount: {
+            fontSize: 12,
+            fontWeight: '500',
+        },
+        deviceRow: {
+            flexDirection: 'row',
+            height: ROW_HEIGHT,
+            position: 'relative',
+        },
+        gridCell: {
+            height: '100%',
+            position: 'relative',
+            borderRightWidth: 1,
+            borderRightColor: theme.gray[400],
+        },
+        gridHLine: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: '50%',
+            height: 1,
+            backgroundColor: theme.gray[400],
+        },
+        gridVLine: {
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            bottom: 0,
+            width: 1,
+            borderLeftWidth: 1,
+            borderLeftColor: theme.gray[300],
+            borderStyle: 'dashed',
+            zIndex: -1,
+        },
+        currentTimeLine: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            height: 2,
+            backgroundColor: theme.error,
+            zIndex: 10,
+        },
+    });

@@ -1,17 +1,18 @@
 import React, { useMemo } from 'react';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Path, Rect, Text as SvgText } from 'react-native-svg';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
 import { Text } from '@/shared/components/typography/Text';
 
-const CHART_THEME = {
-    bg: colors.white,
-    grid: colors.gray[200],
-    text: colors.textSecondary,
+const getChartTheme = (theme: any) => ({
+    bg: theme.background,
+    grid: theme.borderLight,
+    text: theme.textSecondary,
     green: '#22c55e',
     orange: '#f97316',
     forecast: '#F59E0B',
-};
+});
 import { CHART_HEIGHT, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
 import { FeedProdChartDataPoint } from '../../types/feeding-production';
 
@@ -28,6 +29,8 @@ export const Chart: React.FC<ChartProps> = ({
     data = [],
     hiddenSeries,
 }) => {
+    const theme = useAppTheme();
+    const CHART_THEME = getChartTheme(theme);
     const PIXELS_PER_DAY = 50;
     const totalDays =
         data.length > 0
@@ -275,8 +278,8 @@ export const Chart: React.FC<ChartProps> = ({
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Khối lượng (Tấn)</Text>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <Text style={[styles.title, { color: theme.textSecondary }]}>Khối lượng (Tấn)</Text>
             <View style={{ position: 'relative' }}>
                 {/* Sticky Y-Axis Overlay: padding 12 trái, nhãn trục Y + title dọc để không bị khuất */}
                 <View
@@ -287,7 +290,7 @@ export const Chart: React.FC<ChartProps> = ({
                         height: CHART_HEIGHT,
                         width: PADDING_LEFT,
                         zIndex: 10,
-                        backgroundColor: colors.white,
+                        backgroundColor: theme.background, // Thêm nền để che nội dung khi scroll
                     }}
                     pointerEvents="none"
                 >
@@ -440,6 +443,5 @@ const styles = StyleSheet.create({
         marginTop: 12,
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.regular,
-        color: colors.text,
     },
 });

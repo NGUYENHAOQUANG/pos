@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop, G } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Stop, G, Mask, Rect } from 'react-native-svg';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -109,18 +109,22 @@ export const AnimatedLogoLoading: React.FC<AnimatedLogoLoadingProps> = ({ size =
                             <Stop offset="0.5" stopColor="#FF647E" />
                             <Stop offset="1" stopColor="#006AFF" />
                         </LinearGradient>
+                        <Mask id="textMask">
+                            <Rect x="-8" y="-8" width="80" height="80" fill="white" />
+                            <Path d="M-2 -2 H37 V16 H31 V32 H-2 Z" fill="black" />
+                        </Mask>
                     </Defs>
-                    <Path d={ARC_INNER} fill="url(#loadingArcGradient)" />
-                    <Path d={ARC_MIDDLE} fill="url(#loadingArcGradient)" />
-                    <Path d={ARC_OUTER} fill="url(#loadingArcGradient)" />
+                    <G mask="url(#textMask)">
+                        <Path d={ARC_INNER} fill="url(#loadingArcGradient)" />
+                        <Path d={ARC_MIDDLE} fill="url(#loadingArcGradient)" />
+                        <Path d={ARC_OUTER} fill="url(#loadingArcGradient)" />
+                    </G>
                 </Svg>
             </Animated.View>
 
-            {/* Static text layer (top — covers arcs behind text) */}
+            {/* Static text layer (top) */}
             <View style={StyleSheet.absoluteFill}>
                 <Svg width={size} height={size} viewBox="-8 -8 65 65" fill="none">
-                    {/* Stepped white mask: wider for MEBI, narrower for ECO — inner arc visible on right */}
-                    <Path d="M-2 -2 H37 V16 H31 V32 H-2 Z" fill="white" />
                     {/* MEBI text (orange) */}
                     <G>
                         {MEBI_PATHS.map((d, i) => (

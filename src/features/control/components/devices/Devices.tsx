@@ -16,7 +16,8 @@ import { DevicesStatusColor } from '@/features/control/components/devices/Device
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import Toast from 'react-native-toast-message';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { getDeviceIcon } from '@/features/control/utils/deviceUtils';
 import { borderRadius } from '@/styles';
 import { deviceApi } from '@/features/control/api/deviceApi';
@@ -65,6 +66,9 @@ const getModeLabel = (mode: EControlMode): string => {
 
 export const DeviceCard = React.memo<DeviceCardProps>(
     ({ data, onToggle, onSettingsPress, style, isLoading }) => {
+        const theme = useAppTheme();
+        const themedStyles = getStyles(theme);
+
         const [showLocalModal, setShowLocalModal] = useState(false);
         const [actualMode, setActualMode] = useState<EControlMode>(EControlMode.MANUAL);
 
@@ -88,8 +92,8 @@ export const DeviceCard = React.memo<DeviceCardProps>(
         const effectiveMode = isOxy ? EControlMode.LOCAL : actualMode;
         const switchTrackColor =
             !data.isOn && effectiveMode !== EControlMode.LOCAL
-                ? colors.gray[200]
-                : colors.primaryOrange;
+                ? theme.gray[200]
+                : theme.primaryOrange;
 
         const Icon = getDeviceIcon(data.type);
         if (!Icon) return null;
@@ -99,18 +103,18 @@ export const DeviceCard = React.memo<DeviceCardProps>(
         return (
             <View
                 style={[
-                    styles.cardContainer,
-                    hasError && { borderColor: colors.red[500], backgroundColor: colors.red[25] },
+                    themedStyles.cardContainer,
+                    hasError && { borderColor: theme.red[500], backgroundColor: theme.red[25] },
                     style,
                 ]}
             >
                 <View
-                    style={[styles.innerContent, isLoading && { opacity: 0.3 }]}
+                    style={[staticStyles.innerContent, isLoading && { opacity: 0.3 }]}
                     collapsable={false}
                     renderToHardwareTextureAndroid={true}
                 >
                     {/* Left: Device Icon */}
-                    <View style={styles.iconContainer}>
+                    <View style={themedStyles.iconContainer}>
                         <DevicesStatusColor
                             icon={Icon}
                             isOn={effectiveMode === EControlMode.LOCAL ? true : data.isOn}
@@ -120,17 +124,17 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                     </View>
 
                     {/* Middle: Type Label, Device Name, Mode Badge */}
-                    <View style={styles.infoContainer}>
-                        <Text style={styles.deviceName} numberOfLines={1}>
+                    <View style={staticStyles.infoContainer}>
+                        <Text style={themedStyles.deviceName} numberOfLines={1}>
                             {getDeviceTypeLabel(data.type)}
                         </Text>
-                        <Text style={styles.modelName} numberOfLines={1}>
+                        <Text style={themedStyles.modelName} numberOfLines={1}>
                             {data.name}
                         </Text>
                         {/* Mode tag - tappable only for LOCAL mode */}
                         <TouchableOpacity
                             style={[
-                                styles.modeBadge,
+                                themedStyles.modeBadge,
                                 getModeLabel(effectiveMode) ? { gap: 2 } : { gap: 0 },
                             ]}
                             activeOpacity={effectiveMode === EControlMode.LOCAL ? 0.7 : 1}
@@ -141,29 +145,31 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                             }
                         >
                             {getModeLabel(effectiveMode) ? (
-                                <Text style={styles.modeText}>{getModeLabel(effectiveMode)}</Text>
+                                <Text style={themedStyles.modeText}>
+                                    {getModeLabel(effectiveMode)}
+                                </Text>
                             ) : null}
-                            <InfoIcon width={14} height={14} />
+                            <InfoIcon width={14} height={14} color={theme.text} />
                         </TouchableOpacity>
 
                         {/* Error message */}
                         {hasError && (
-                            <View style={styles.errorRow}>
-                                <WarningCircleIcon width={16} height={16} />
-                                <Text style={styles.errorText}>{data.errorMessage}</Text>
+                            <View style={staticStyles.errorRow}>
+                                <WarningCircleIcon width={16} height={16} color={theme.red[500]} />
+                                <Text style={themedStyles.errorText}>{data.errorMessage}</Text>
                             </View>
                         )}
                     </View>
 
                     {/* Right: Settings + Toggle */}
-                    <View style={styles.rightContainer}>
+                    <View style={staticStyles.rightContainer}>
                         <TouchableOpacity
-                            style={styles.settingsButton}
+                            style={themedStyles.settingsButton}
                             onPress={() => onSettingsPress?.(data.id)}
                             activeOpacity={0.7}
                             disabled={isLoading}
                         >
-                            <IconSetting width={16} height={16} />
+                            <IconSetting width={16} height={16} color={theme.text} />
                         </TouchableOpacity>
                         <ButtonDevices
                             value={effectiveMode === EControlMode.LOCAL ? true : data.isOn}
@@ -185,8 +191,8 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                 </View>
 
                 {isLoading && (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="small" color={colors.primary} />
+                    <View style={staticStyles.loadingContainer}>
+                        <ActivityIndicator size="small" color={theme.primary} />
                     </View>
                 )}
 
@@ -207,73 +213,21 @@ export const DeviceCard = React.memo<DeviceCardProps>(
     }
 );
 
-const styles = StyleSheet.create({
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-        width: '100%',
-    },
+// Static styles that don't depend on theme
+const staticStyles = StyleSheet.create({
     innerContent: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-    },
-    iconContainer: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginRight: 12,
     },
     infoContainer: {
         flex: 1,
         justifyContent: 'center',
         gap: 4,
     },
-    deviceName: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    modelName: {
-        fontSize: 13,
-        color: colors.gray[500],
-        fontWeight: '400',
-    },
-    modeBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    modeText: {
-        fontSize: 12,
-        color: colors.text,
-        fontWeight: '400',
-    },
     rightContainer: {
         alignItems: 'flex-end',
         gap: 8,
         marginLeft: 8,
-    },
-    settingsButton: {
-        width: 36,
-        height: 36,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
     },
     loadingContainer: {
         ...StyleSheet.absoluteFillObject,
@@ -288,9 +242,67 @@ const styles = StyleSheet.create({
         gap: 4,
         marginTop: 2,
     },
-    errorText: {
-        fontSize: 12,
-        color: colors.red[500],
-        fontWeight: '400',
-    },
 });
+
+// Dynamic styles based on theme
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        cardContainer: {
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            padding: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+            width: '100%',
+        },
+        iconContainer: {
+            width: 44,
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+            marginRight: 12,
+        },
+        deviceName: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        modelName: {
+            fontSize: 13,
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+        modeBadge: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignSelf: 'flex-start',
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+        },
+        modeText: {
+            fontSize: 12,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        settingsButton: {
+            width: 36,
+            height: 36,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        errorText: {
+            fontSize: 12,
+            color: theme.red[500],
+            fontWeight: '400',
+        },
+    });

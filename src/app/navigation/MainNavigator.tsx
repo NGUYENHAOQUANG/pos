@@ -237,6 +237,7 @@ interface AnimatedTabItemProps {
 }
 
 const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocused, onPress }) => {
+    const theme = useAppTheme();
     const indicatorScale = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -252,8 +253,10 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
     }, [isFocused, indicatorScale]);
 
     const IconComponent = isFocused ? item.IconActive : item.Icon;
-    const iconFill = isFocused ? colors.white : colors.gray[600];
-    const iconColor = isFocused ? colors.white : colors.gray[600];
+    // Active: white icon on orange pill; Inactive: theme-aware gray
+    const inactiveColor = theme.isDark ? theme.gray[100] : theme.gray[600];
+    const iconFill = isFocused ? colors.white : inactiveColor;
+    const iconColor = isFocused ? colors.white : inactiveColor;
 
     return (
         <TouchableOpacity
@@ -270,7 +273,11 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     minimumFontScale={0.8}
-                    style={[styles.tabLabel, isFocused && styles.tabLabelActive]}
+                    style={[
+                        styles.tabLabel,
+                        { color: inactiveColor },
+                        isFocused && styles.tabLabelActive,
+                    ]}
                 >
                     {item.label}
                 </Text>
@@ -288,6 +295,7 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTabBar = ({ state, navigation }: { state: any; navigation: any }) => {
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
     const [barWidth, setBarWidth] = useState(0);
     const slideAnim = useRef(new Animated.Value(state.index)).current;
     const { onBarLayout } = useContext(BottomBarContext);
@@ -363,17 +371,21 @@ const CustomTabBar = ({ state, navigation }: { state: any; navigation: any }) =>
         </>
     );
 
+    // Theme-aware tab bar background
+    const tabBarBg = theme.isDark ? theme.backgroundTertiary : colors.white;
+    const tabBarBorderColor = theme.isDark ? theme.border : colors.border;
+
     return (
         <View style={styles.tabBarWrapper} pointerEvents="box-none">
             <LinearGradient
                 colors={[
-                    colors.fade[0],
-                    colors.fade[8],
-                    colors.fade[20],
-                    colors.fade[40],
-                    colors.fade[65],
-                    colors.fade[85],
-                    colors.fade[95],
+                    theme.fade[0],
+                    theme.fade[8],
+                    theme.fade[20],
+                    theme.fade[40],
+                    theme.fade[65],
+                    theme.fade[85],
+                    theme.fade[95],
                 ]}
                 locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
                 style={styles.fadeGradient}
@@ -387,6 +399,8 @@ const CustomTabBar = ({ state, navigation }: { state: any; navigation: any }) =>
                 style={[
                     styles.fallbackContainer,
                     {
+                        backgroundColor: tabBarBg,
+                        borderColor: tabBarBorderColor,
                         marginBottom: insets.bottom + 4,
                     },
                 ]}
@@ -469,14 +483,11 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
     },
 
     fallbackContainer: {
         flexDirection: 'row',
-        backgroundColor: colors.white,
         borderRadius: borderRadius.full,
-        borderColor: colors.border,
         borderWidth: 1,
         marginHorizontal: 16,
         padding: 4,
@@ -546,7 +557,6 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontSize: 12,
-        color: colors.gray[600],
         fontWeight: '400',
     },
     tabLabelActive: {

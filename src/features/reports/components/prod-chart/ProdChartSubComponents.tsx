@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
@@ -46,22 +47,30 @@ interface SummaryCardProps {
 }
 
 export const SummaryCard = React.memo(({ card }: SummaryCardProps) => {
+    const theme = useAppTheme();
     const formattedValue = useMemo(() => formatSummary(card.value), [card.value]);
 
     return (
-        <View style={summaryStyles.card}>
+        <View
+            style={[
+                summaryStyles.card,
+                { backgroundColor: theme.background, borderColor: theme.border },
+            ]}
+        >
             <View style={[summaryStyles.dot, { backgroundColor: card.color }]} />
-            <Text style={summaryStyles.title}>{card.title}</Text>
+            <Text style={[summaryStyles.title, { color: theme.textSecondary }]}>{card.title}</Text>
             <View style={summaryStyles.valueRow}>
                 <Text
-                    style={summaryStyles.valueNumber}
+                    style={[summaryStyles.valueNumber, { color: theme.text }]}
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     minimumFontScale={0.5}
                 >
                     {formattedValue}
                 </Text>
-                <Text style={summaryStyles.valueUnit}>{card.unit}</Text>
+                <Text style={[summaryStyles.valueUnit, { color: theme.textSecondary }]}>
+                    {card.unit}
+                </Text>
             </View>
         </View>
     );
@@ -97,6 +106,7 @@ export const BarGroup = React.memo(
         onPress,
         isLast,
     }: BarGroupProps) => {
+        const theme = useAppTheme();
         const maxItemValue = Math.max(0, ...group.items.map(item => item?.value || 0));
         const highestBarPx = Math.max(
             2,
@@ -115,7 +125,14 @@ export const BarGroup = React.memo(
                 style={[
                     barStyles.column,
                     { minWidth: columnWidth, flex: 1 },
-                    isSelected && barStyles.columnSelected,
+                    isSelected && [
+                        barStyles.columnSelected,
+                        {
+                            backgroundColor: theme.isDark
+                                ? 'rgba(255, 255, 255, 0.1)'
+                                : 'rgba(243, 244, 246, 0.5)',
+                        },
+                    ],
                 ]}
             >
                 {isSelected && (
@@ -126,7 +143,9 @@ export const BarGroup = React.memo(
                             { bottom: tooltipBottomPosition },
                         ]}
                     >
-                        <Text style={barStyles.tooltipTitle}>{group.label}</Text>
+                        <Text style={[barStyles.tooltipTitle, { color: colors.white }]}>
+                            {group.label}
+                        </Text>
                         <View style={barStyles.tooltipItems}>
                             {group.items.filter(Boolean).map((item, idx) => (
                                 <View key={idx} style={barStyles.tooltipRow}>
@@ -137,7 +156,18 @@ export const BarGroup = React.memo(
                                                 { backgroundColor: item!.color },
                                             ]}
                                         />
-                                        <Text style={barStyles.tooltipLabel}>{item!.label}</Text>
+                                        <Text
+                                            style={[
+                                                barStyles.tooltipLabel,
+                                                {
+                                                    color: theme.isDark
+                                                        ? theme.textSecondary
+                                                        : '#8E9199',
+                                                },
+                                            ]}
+                                        >
+                                            {item!.label}
+                                        </Text>
                                     </View>
                                     <View style={barStyles.tooltipValueContainer}>
                                         <Text style={barStyles.tooltipValue}>
@@ -208,6 +238,7 @@ export const VisualChart = React.memo(
         barWidth = DEFAULT_BAR_WIDTH,
         viewMode = 'area',
     }: ProdVisualChartProps) => {
+        const theme = useAppTheme();
         const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
         const columnWidth = useMemo(() => {
@@ -229,10 +260,19 @@ export const VisualChart = React.memo(
                 yLabels.map((_, index) => {
                     const topPos = index * (height / (yLabels.length - 1));
                     return (
-                        <View key={index} style={[chartInnerStyles.gridLine, { top: topPos }]} />
+                        <View
+                            key={index}
+                            style={[
+                                chartInnerStyles.gridLine,
+                                {
+                                    top: topPos,
+                                    backgroundColor: theme.isDark ? theme.border : '#E5E7EB33',
+                                },
+                            ]}
+                        />
                     );
                 }),
-            [yLabels, height]
+            [yLabels, height, theme.border, theme.isDark]
         );
 
         const yAxisElements = useMemo(
@@ -241,11 +281,18 @@ export const VisualChart = React.memo(
                     const topPos = index * (height / (yLabels.length - 1));
                     return (
                         <View key={index} style={[chartInnerStyles.yLabelWrapper, { top: topPos }]}>
-                            <Text style={chartInnerStyles.yAxisLabel}>{label}</Text>
+                            <Text
+                                style={[
+                                    chartInnerStyles.yAxisLabel,
+                                    { color: theme.textSecondary },
+                                ]}
+                            >
+                                {label}
+                            </Text>
                         </View>
                     );
                 }),
-            [yLabels, height]
+            [yLabels, height, theme.textSecondary]
         );
 
         return (
@@ -303,7 +350,13 @@ export const VisualChart = React.memo(
                                         },
                                     ]}
                                 >
-                                    <Text style={chartInnerStyles.xAxisLabel} numberOfLines={1}>
+                                    <Text
+                                        style={[
+                                            chartInnerStyles.xAxisLabel,
+                                            { color: theme.textSecondary },
+                                        ]}
+                                        numberOfLines={1}
+                                    >
                                         {group.label}
                                     </Text>
                                 </View>
@@ -327,10 +380,9 @@ const summaryStyles = StyleSheet.create({
         flex: 1,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.gray[200],
+
         padding: 8,
         gap: 2,
-        backgroundColor: colors.white,
     },
     dot: {
         width: 12,
@@ -339,7 +391,7 @@ const summaryStyles = StyleSheet.create({
     },
     title: {
         fontSize: 12,
-        color: colors.textSecondary,
+
         fontWeight: '400',
         lineHeight: 20,
     },
@@ -349,14 +401,14 @@ const summaryStyles = StyleSheet.create({
     },
     valueNumber: {
         fontSize: 18,
-        color: colors.gray[950],
+
         fontWeight: '700',
         lineHeight: 24,
         flexShrink: 1,
     },
     valueUnit: {
         fontSize: 14,
-        color: colors.textSecondary,
+
         fontWeight: '400',
         lineHeight: 20,
         marginLeft: 4,
@@ -393,7 +445,7 @@ const barStyles = StyleSheet.create({
     },
     tooltipContainer: {
         position: 'absolute',
-        backgroundColor: colors.gray[950],
+        backgroundColor: colors.primary,
         borderRadius: 8,
         padding: 8,
         gap: 4,
@@ -427,7 +479,7 @@ const barStyles = StyleSheet.create({
         marginRight: 6,
     },
     tooltipLabel: {
-        color: colors.gray[400],
+        color: '#8E9199',
         fontSize: 12,
     },
     tooltipValueContainer: {
@@ -469,7 +521,7 @@ const chartInnerStyles = StyleSheet.create({
     },
     yAxisLabel: {
         fontSize: 12,
-        color: colors.gray[500],
+        color: '#8E9199',
         fontWeight: '400',
         textAlign: 'left',
     },
@@ -485,7 +537,7 @@ const chartInnerStyles = StyleSheet.create({
     gridLine: {
         position: 'absolute',
         height: 1,
-        backgroundColor: colors.gray[100],
+        backgroundColor: '#E5E7EB33',
         left: 0,
         right: 0,
     },
@@ -502,7 +554,7 @@ const chartInnerStyles = StyleSheet.create({
     },
     xAxisLabel: {
         fontSize: 12,
-        color: colors.gray[600],
+        color: '#8E9199',
         textAlign: 'center',
         fontWeight: '400',
     },

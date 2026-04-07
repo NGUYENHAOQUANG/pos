@@ -6,7 +6,8 @@ import DeleteIcon from '@/assets/Icon/Delete.svg';
 import ModalAddTurn from '@/features/control/components/CustomFeedingMachine/ModalAddTurn';
 import { AddTurnModalUI } from '@/features/control/components/CustomFeedingMachine/AddTurnModalUI';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components/buttons/Button';
 import { deviceApi } from '@/features/control/api/deviceApi';
 import {
@@ -37,6 +38,8 @@ export default function ActivitySchedule({
     style,
     titleStyle,
 }: ActivityScheduleProps) {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
     const [isModalVisible, setModalVisible] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<ScheduleItem | null>(null);
 
@@ -59,16 +62,13 @@ export default function ActivitySchedule({
         closeAddModal();
     };
 
-    // Show confirmation modal before deleting
     const handleDeletePress = useCallback((item: ScheduleItem) => {
         setDeleteTarget(item);
     }, []);
 
-    // Confirm delete — call API for existing schedules, remove from list
     const handleConfirmDelete = useCallback(async () => {
         if (!deleteTarget) return;
 
-        // Only call API for schedules that exist on server (not new ones)
         if (!deleteTarget.isNew) {
             try {
                 await deviceApi.deleteSchedule(deleteTarget.id);
@@ -85,10 +85,8 @@ export default function ActivitySchedule({
         setDeleteTarget(null);
     }, [deleteTarget, schedules, onUpdateSchedules]);
 
-    // Edit time directly on the list
     const handleTimeChange = (id: string, type: 'start' | 'end', newDate: Date) => {
         const target = schedules.find(item => item.id === id);
-        // Block editing schedules that are active or already completed
         if (target && !target.isNew && target.endTime && target.endTime <= new Date()) {
             showScheduleCannotEditToast();
             return;
@@ -108,41 +106,41 @@ export default function ActivitySchedule({
     const isMaxReached = schedules.length >= MAX_TURNS;
 
     return (
-        <View style={[styles.container, style]}>
-            <View style={styles.card}>
-                <View style={styles.headerRow}>
-                    <Text style={[styles.headerTitle, titleStyle]}>Lịch hoạt động</Text>
-                    <Text style={styles.turnCount}>
+        <View style={[themedStyles.container, style]}>
+            <View style={themedStyles.card}>
+                <View style={staticStyles.headerRow}>
+                    <Text style={[themedStyles.headerTitle, titleStyle]}>Lịch hoạt động</Text>
+                    <Text style={themedStyles.turnCount}>
                         ({schedules.length}/{MAX_TURNS})
                     </Text>
                 </View>
 
                 {schedules.map((item, index) => (
-                    <View key={item.id} style={styles.rowItem}>
-                        <Text style={styles.labelTurn}>Lần {index + 1}</Text>
+                    <View key={item.id} style={staticStyles.rowItem}>
+                        <Text style={themedStyles.labelTurn}>Lần {index + 1}</Text>
 
-                        <View style={styles.timeInputsWrapper}>
+                        <View style={staticStyles.timeInputsWrapper}>
                             <ModalAddTurn
                                 value={item.startTime}
                                 onChange={date => handleTimeChange(item.id, 'start', date)}
-                                style={styles.timeInput}
+                                style={staticStyles.timeInput}
                                 placeholder="00:00:00"
                             />
-                            <Text style={styles.dashSeparator}>-</Text>
+                            <Text style={themedStyles.dashSeparator}>-</Text>
                             <ModalAddTurn
                                 value={item.endTime}
                                 onChange={date => handleTimeChange(item.id, 'end', date)}
-                                style={styles.timeInput}
+                                style={staticStyles.timeInput}
                                 placeholder="00:00:00"
                             />
                         </View>
 
                         <TouchableOpacity
-                            style={styles.deleteButton}
+                            style={themedStyles.deleteButton}
                             onPress={() => handleDeletePress(item)}
                             activeOpacity={0.7}
                         >
-                            <DeleteIcon width={20} height={20} color={colors.text} />
+                            <DeleteIcon width={20} height={20} color={theme.text} />
                         </TouchableOpacity>
                     </View>
                 ))}
@@ -152,13 +150,12 @@ export default function ActivitySchedule({
                         title="Thêm lượt"
                         variant="outline"
                         onPress={openAddModal}
-                        renderLeftIcon={<IconAdd name="add" size={20} color={colors.text} />}
-                        style={styles.addBtn}
+                        renderLeftIcon={<IconAdd name="add" size={20} color={theme.text} />}
+                        style={themedStyles.addBtn}
                     />
                 )}
             </View>
 
-            {/* Add turn modal */}
             <AddTurnModalUI
                 visible={isModalVisible}
                 onClose={closeAddModal}
@@ -166,7 +163,6 @@ export default function ActivitySchedule({
                 turnIndex={schedules.length + 1}
             />
 
-            {/* Delete confirmation modal */}
             <ConfirmationModalUI
                 visible={!!deleteTarget}
                 title="Xóa lịch trình"
@@ -181,45 +177,19 @@ export default function ActivitySchedule({
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 16,
-    },
+// Static styles
+const staticStyles = StyleSheet.create({
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
         gap: 6,
     },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    turnCount: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.textSecondary,
-    },
-    card: {
-        backgroundColor: colors.white,
-        padding: 16,
-        borderRadius: 16,
-    },
     rowItem: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 16,
         justifyContent: 'space-between',
-    },
-    labelTurn: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-        width: 45,
     },
     timeInputsWrapper: {
         flex: 1,
@@ -230,23 +200,55 @@ const styles = StyleSheet.create({
     timeInput: {
         flex: 1,
     },
-    dashSeparator: {
-        marginHorizontal: 8,
-        color: colors.text,
-        fontWeight: '500',
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    addBtn: {
-        marginTop: 4,
-        borderColor: colors.border,
-    },
 });
+
+// Dynamic styles
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: 16,
+        },
+        card: {
+            backgroundColor: theme.background,
+            padding: 16,
+            borderRadius: 16,
+        },
+        headerTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        turnCount: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.textSecondary,
+        },
+        labelTurn: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+            width: 45,
+        },
+        dashSeparator: {
+            marginHorizontal: 8,
+            color: theme.text,
+            fontWeight: '500',
+        },
+        deleteButton: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+        },
+        addBtn: {
+            marginTop: 4,
+            borderColor: theme.border,
+        },
+    });

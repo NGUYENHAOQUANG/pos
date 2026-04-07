@@ -1,6 +1,7 @@
+import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 
 interface MetricsRowProps {
@@ -17,12 +18,18 @@ const METRIC_ITEMS = (
     production: string,
     consumed: string,
     fcr: string,
-    forecast: string
+    forecast: string,
+    theme: any
 ): { id: string; name: string; value: string; color: string; unit?: string }[] => [
-    { id: 'production', name: 'Sản lượng', value: production, color: '#f97316' },
+    {
+        id: 'production',
+        name: 'Sản lượng',
+        value: production,
+        color: theme.isDark ? '#fb923c' : '#f97316',
+    },
     { id: 'consumed', name: 'Đã ăn', value: consumed, color: '#22c55e' },
     { id: 'forecast', name: 'Dự báo', value: forecast, color: '#F59E0B', unit: 'tấn' },
-    { id: 'fcr', name: 'FCR', value: fcr, color: '#E6E8EC' },
+    { id: 'fcr', name: 'FCR', value: fcr, color: theme.isDark ? theme.border : '#E6E8EC' },
 ];
 
 export const MetricsRow: React.FC<MetricsRowProps> = ({
@@ -34,14 +41,15 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     activeFilters,
     onToggleFilter,
 }) => {
-    const items = METRIC_ITEMS(production, consumed, fcr, forecast);
+    const theme = useAppTheme();
+    const items = METRIC_ITEMS(production, consumed, fcr, forecast, theme);
 
     return (
         <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
-            style={styles.container}
+            style={[styles.container, { backgroundColor: theme.background }]}
         >
             {items.map(item => (
                 <PondIndexCard
@@ -59,7 +67,6 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
 const styles = StyleSheet.create({
     container: {
         flexGrow: 0,
-        backgroundColor: colors.white,
     },
     scrollContent: {
         flexDirection: 'row',

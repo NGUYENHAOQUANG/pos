@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Polygon } from 'react-native-svg';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 interface FeedingTooltipProps {
     x: number;
@@ -13,6 +13,8 @@ interface FeedingTooltipProps {
 }
 
 export const FeedingTooltip = ({ x, y, time, weight, visible }: FeedingTooltipProps) => {
+    const theme = useAppTheme();
+
     if (!visible) return null;
 
     const tooltipWidth = 120;
@@ -20,24 +22,30 @@ export const FeedingTooltip = ({ x, y, time, weight, visible }: FeedingTooltipPr
     const arrowHeight = 8;
     const arrowWidth = 12;
 
-    // Tính toán vị trí để tooltip nằm ngay trên điểm chạm, căn giữa
     const leftPos = x - tooltipWidth / 2;
-    const topPos = y - tooltipHeight - arrowHeight - 5; // Cách điểm chạm 5px
+    const topPos = y - tooltipHeight - arrowHeight - 5;
 
     return (
         <View style={[styles.container, { left: leftPos, top: topPos }]}>
-            {/* Phần hộp đen */}
-            <View style={[styles.box, { width: tooltipWidth, height: tooltipHeight }]}>
-                <Text style={styles.timeText}>{time}</Text>
+            <View
+                style={[
+                    styles.box,
+                    {
+                        width: tooltipWidth,
+                        height: tooltipHeight,
+                        backgroundColor: theme.gray[900],
+                    },
+                ]}
+            >
+                <Text style={[styles.timeText, { color: theme.gray[400] }]}>{time}</Text>
                 <Text style={styles.valueText}>Loadcell: {weight} kg</Text>
             </View>
 
-            {/* Phần mũi tên */}
             <View style={styles.arrowContainer}>
                 <Svg width={arrowWidth} height={arrowHeight}>
                     <Polygon
                         points={`0,0 ${arrowWidth},0 ${arrowWidth / 2},${arrowHeight}`}
-                        fill={colors.gray[900]}
+                        fill={theme.gray[900]}
                     />
                 </Svg>
             </View>
@@ -52,7 +60,6 @@ const styles = StyleSheet.create({
         zIndex: 100,
     },
     box: {
-        backgroundColor: colors.gray[900],
         borderRadius: 8,
         padding: 8,
         justifyContent: 'center',
@@ -61,12 +68,11 @@ const styles = StyleSheet.create({
         marginTop: -1,
     },
     timeText: {
-        color: colors.gray[400],
         fontSize: 12,
         marginBottom: 2,
     },
     valueText: {
-        color: colors.white,
+        color: '#FFFFFF',
         fontWeight: '600',
         fontSize: 13,
     },

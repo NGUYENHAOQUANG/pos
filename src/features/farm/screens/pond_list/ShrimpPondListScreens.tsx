@@ -13,6 +13,9 @@ import { pondListService } from '@/features/farm/services/pond-list.service';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { APP_CONFIG } from '@/shared/constants/config';
 import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpPondListContent';
+import { useWeatherForecast } from '@/features/weather/hooks/useWeatherForecast';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
+import { useWeatherStore } from '@/features/weather/store/weatherStore';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -21,6 +24,9 @@ export const ShrimpPondListScreens: React.FC = () => {
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
     const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
+    const weatherEnabled = useSettingsStore(state => state.weatherEnabled);
+    const selectedLocation = useWeatherStore(state => state.selectedLocation);
+    const { data: weatherData } = useWeatherForecast(selectedLocation, { enableNotify: true });
 
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
     const zones = useMemo(() => zonesData || [], [zonesData]);
@@ -121,6 +127,10 @@ export const ShrimpPondListScreens: React.FC = () => {
         [navigation]
     );
 
+    const handleWeatherPress = useCallback(() => {
+        navigation.navigate('WeatherScreen' as never);
+    }, [navigation]);
+
     const handlePondInfoPress = useCallback(
         (pond: PondData) => {
             navigation.navigate('PondInfo', { pond });
@@ -201,6 +211,9 @@ export const ShrimpPondListScreens: React.FC = () => {
             onLoadMore={handleLoadMore}
             onRefresh={handleRefresh}
             warehouseId={warehouseId}
+            weatherEnabled={weatherEnabled}
+            currentWeather={weatherData?.current}
+            onWeatherPress={handleWeatherPress}
         />
     );
 };

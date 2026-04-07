@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ScrollView, StyleProp, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
 export interface TabItem {
@@ -39,16 +41,19 @@ export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
     includeSafeArea = true,
     style,
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
     const renderTabs = () => {
         if (tabs && tabs.length > 0) {
             return (
-                <View style={styles.tabsContainer}>
+                <View style={themedStyles.tabsContainer}>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollContentContainer}
+                        contentContainerStyle={themedStyles.scrollContentContainer}
                     >
-                        <View style={styles.tabsContent}>
+                        <View style={themedStyles.tabsContent}>
                             {tabs.map((tab, index) => {
                                 const isSelected = selectedTab === tab.key;
                                 const isLast = index === tabs.length - 1;
@@ -56,8 +61,8 @@ export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
                                     <TouchableOpacity
                                         key={tab.key}
                                         style={[
-                                            styles.tab,
-                                            isSelected && styles.activeTab,
+                                            themedStyles.tab,
+                                            isSelected && themedStyles.activeTab,
                                             isLast && { marginRight: 0 },
                                         ]}
                                         onPress={() => onTabSelect && onTabSelect(tab.key)}
@@ -65,8 +70,8 @@ export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
                                     >
                                         <Text
                                             style={[
-                                                styles.tabText,
-                                                isSelected && styles.activeTabText,
+                                                themedStyles.tabText,
+                                                isSelected && themedStyles.activeTabText,
                                             ]}
                                         >
                                             {tab.label}
@@ -87,7 +92,7 @@ export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
     const rightNode = rightComponent ? (
         rightComponent
     ) : rightLabel ? (
-        <Text style={styles.rightLabel}>{rightLabel}</Text>
+        <Text style={themedStyles.rightLabel}>{rightLabel}</Text>
     ) : undefined;
 
     return (
@@ -103,44 +108,44 @@ export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    rightLabel: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    // Tab styles
-    tabsContainer: {
-        flexDirection: 'row',
-        width: '100%',
-    },
-    scrollContentContainer: {
-        flexGrow: 1,
-        justifyContent: 'center',
-    },
-    tabsContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    tab: {
-        paddingVertical: spacing.xs + 4,
-        marginRight: 16, // Exact 16px gap
-        marginLeft: 0,
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    activeTab: {
-        borderBottomColor: colors.primary,
-    },
-    tabText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    activeTabText: {
-        color: colors.primary,
-        fontWeight: '700',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        rightLabel: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        tabsContainer: {
+            flexDirection: 'row',
+            width: '100%',
+        },
+        scrollContentContainer: {
+            flexGrow: 1,
+            justifyContent: 'center',
+        },
+        tabsContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        tab: {
+            paddingVertical: spacing.xs + 4,
+            marginRight: 16,
+            marginLeft: 0,
+            borderBottomWidth: 2,
+            borderBottomColor: 'transparent',
+        },
+        activeTab: {
+            borderBottomColor: theme.primary,
+        },
+        tabText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            fontWeight: '400',
+        },
+        activeTabText: {
+            color: theme.primary,
+            fontWeight: '700',
+        },
+    });

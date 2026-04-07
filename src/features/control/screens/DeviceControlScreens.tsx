@@ -18,7 +18,9 @@ import {
     HelpOptionsModal,
     HelpOptionsModalRef,
 } from '@/features/control/components/HelpOptionsModal';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
@@ -40,6 +42,8 @@ const keyExtractor = (item: any) => item.id.toString();
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // React Query Hooks (replacing farmStore fetchers)
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
@@ -254,7 +258,14 @@ export const DeviceControlScreens = () => {
                 <View style={styles.spacer} />
             </>
         );
-    }, [showStats, filteredPonds.length, totalStats.active, totalStats.warning, totalStats.other]);
+    }, [
+        showStats,
+        filteredPonds.length,
+        totalStats.active,
+        totalStats.warning,
+        totalStats.other,
+        styles.spacer,
+    ]);
 
     return (
         <View style={styles.container}>
@@ -388,45 +399,46 @@ export const DeviceControlScreens = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    headerContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-        backgroundColor: 'transparent',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    headingBarContainer: {
-        marginBottom: 16,
-    },
-    filterRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        marginBottom: 16,
-        gap: 12, // React Native >= 0.71 supports gap
-    },
-    dropdownStyle: {
-        flex: 1,
-    },
-    content: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-        flexGrow: 1,
-    },
-    scrollContentPadding: {
-        paddingTop: 0,
-    },
-    spacer: {
-        height: 16,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        headerContainer: {
+            paddingHorizontal: 16,
+            paddingBottom: 16,
+            backgroundColor: 'transparent',
+        },
+        headerTitle: {
+            fontSize: 20,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        headingBarContainer: {
+            marginBottom: 16,
+        },
+        filterRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            marginBottom: 16,
+            gap: 12,
+        },
+        dropdownStyle: {
+            flex: 1,
+        },
+        content: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+            flexGrow: 1,
+        },
+        scrollContentPadding: {
+            paddingTop: 0,
+        },
+        spacer: {
+            height: 16,
+        },
+    });

@@ -1,0 +1,11 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark storm cloud -->
+  <path d="M6 11a4 4 0 0 1-.37-7.98A5.5 5.5 0 0 1 18.1 5.5 3.5 3.5 0 0 1 19 12.5H6z" fill="#607D8B"/>
+  <!-- Cloud highlight -->
+  <ellipse cx="10.5" cy="5.5" rx="3" ry="1.5" fill="#78909C" opacity="0.5"/>
+  <!-- Lightning bolt -->
+  <path d="M13 13l-2.5 4h4l-2.5 5" stroke="#FFC107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Rain drops -->
+  <line x1="7" y1="15" x2="6.5" y2="17.5" stroke="#42A5F5" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17" y1="15" x2="16.5" y2="17.5" stroke="#42A5F5" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

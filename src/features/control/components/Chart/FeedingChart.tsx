@@ -11,7 +11,7 @@ import {
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Path, Circle, Rect, G, Text as SvgText } from 'react-native-svg';
 import { FeedingTooltip } from './FeedingTooltip';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { ISensorStatistic } from '@/features/control/data/devicesData';
 
 const AnimatedG = Animated.createAnimatedComponent(G) as any;
@@ -36,6 +36,7 @@ interface FeedingChartProps {
 }
 
 export default function FeedingChart({ data = [] }: FeedingChartProps) {
+    const theme = useAppTheme();
     const [selectedPoint, setSelectedPoint] = useState<any>(null);
 
     const cursorAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
@@ -230,9 +231,18 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
     ];
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Khối Lượng Thức Ăn Thả Thực Tế</Text>
-            <Text style={styles.subtitle}>Đo bằng cảm biến cân nặng (Loadcell)</Text>
+        <View
+            style={[
+                styles.container,
+                { backgroundColor: theme.background, borderColor: theme.border },
+            ]}
+        >
+            <Text style={[styles.title, { color: theme.text }]}>
+                Khối Lượng Thức Ăn Thả Thực Tế
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                Đo bằng cảm biến cân nặng (Loadcell)
+            </Text>
 
             <View style={styles.chartWrapperRow}>
                 {/* Fixed Y-Axis */}
@@ -243,7 +253,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                 <SvgText
                                     x={Y_AXIS_WIDTH - 5}
                                     y={getY(val) + 3}
-                                    fill={colors.text}
+                                    fill={theme.text}
                                     fontSize="10"
                                     textAnchor="end"
                                 >
@@ -257,7 +267,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                             y1={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
                             x2={Y_AXIS_WIDTH}
                             y2={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
-                            stroke={colors.gray[300]}
+                            stroke={theme.gray[300]}
                             strokeWidth={1}
                         />
                     </Svg>
@@ -280,7 +290,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                     x2={contentWidth}
                                     y2={getY(val)}
                                     // Make stroke dashed or lighter
-                                    stroke={colors.gray[100]}
+                                    stroke={theme.gray[100]}
                                     strokeWidth={1}
                                 />
                             ))}
@@ -291,7 +301,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                 y1={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
                                 x2={contentWidth}
                                 y2={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
-                                stroke={colors.gray[300]}
+                                stroke={theme.gray[300]}
                                 strokeWidth={1}
                             />
 
@@ -313,7 +323,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                             x1={xPos}
                                             y1={PADDING_TOP}
                                             y2={chartBottom}
-                                            stroke={colors.gray[100]}
+                                            stroke={theme.gray[100]}
                                             strokeDasharray="4 4"
                                         />
                                         <Line
@@ -321,13 +331,13 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                             y1={axisY - tickHalf}
                                             x2={xPos}
                                             y2={axisY + tickHalf}
-                                            stroke={colors.gray[400]}
+                                            stroke={theme.gray[400]}
                                             strokeWidth={1.5}
                                         />
                                         <SvgText
                                             x={xPos}
                                             y={axisY + tickHalf + textMargin}
-                                            fill={colors.textSecondary}
+                                            fill={theme.textSecondary}
                                             fontSize="10"
                                             textAnchor="middle"
                                         >
@@ -350,7 +360,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                         y={y}
                                         width={barWidth}
                                         height={Math.max(barHeight, 0)}
-                                        fill={colors.primary}
+                                        fill={theme.primary}
                                         rx={2}
                                     />
                                 );
@@ -360,7 +370,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                             <Path
                                 d={createStepPath()}
                                 fill="none"
-                                stroke={colors.orange[600]}
+                                stroke={theme.orange[600]}
                                 strokeWidth="2"
                             />
 
@@ -371,8 +381,8 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                     cx={getX(point.hourValue)}
                                     cy={getY(point.feedAmount)}
                                     r={3}
-                                    fill={colors.orange[600]}
-                                    stroke={colors.white}
+                                    fill={theme.orange[600]}
+                                    stroke={theme.background}
                                     strokeWidth={1}
                                 />
                             ))}
@@ -384,7 +394,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                     y1={PADDING_TOP}
                                     x2={0}
                                     y2={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
-                                    stroke={colors.gray[600]}
+                                    stroke={theme.gray[600]}
                                     strokeWidth={1}
                                 />
                             </AnimatedG>
@@ -395,7 +405,7 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                     y1={0}
                                     x2={contentWidth}
                                     y2={0}
-                                    stroke={colors.gray[600]}
+                                    stroke={theme.gray[600]}
                                     strokeWidth={1}
                                 />
                             </AnimatedG>
@@ -405,8 +415,8 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                     cx={0}
                                     cy={0}
                                     r={4}
-                                    fill={colors.orange[600]}
-                                    stroke={colors.white}
+                                    fill={theme.orange[600]}
+                                    stroke={theme.background}
                                     strokeWidth={2}
                                 />
                             </AnimatedG>
@@ -430,12 +440,18 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
 
             <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
-                    <View style={styles.legendDashActual} />
-                    <Text style={styles.legendText}>Đo thực tế</Text>
+                    <View
+                        style={[styles.legendDashActual, { backgroundColor: theme.orange[600] }]}
+                    />
+                    <Text style={[styles.legendText, { color: theme.textSecondary }]}>
+                        Đo thực tế
+                    </Text>
                 </View>
                 <View style={styles.legendItem}>
-                    <View style={styles.legendCirclePlan} />
-                    <Text style={styles.legendText}>Theo kế hoạch</Text>
+                    <View style={[styles.legendCirclePlan, { backgroundColor: theme.primary }]} />
+                    <Text style={[styles.legendText, { color: theme.textSecondary }]}>
+                        Theo kế hoạch
+                    </Text>
                 </View>
             </View>
         </View>
@@ -444,22 +460,20 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
+        backgroundColor: 'transparent',
         padding: 16,
         marginHorizontal: 16,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: 'transparent',
     },
     title: {
         fontSize: 16,
         fontWeight: '700',
-        color: colors.text,
         textAlign: 'center',
     },
     subtitle: {
         fontSize: 12,
-        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: 16,
     },
@@ -489,16 +503,13 @@ const styles = StyleSheet.create({
     legendDashActual: {
         width: 16,
         height: 2,
-        backgroundColor: colors.orange[600],
     },
     legendCirclePlan: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: colors.primary,
     },
     legendText: {
         fontSize: 12,
-        color: colors.textSecondary,
     },
 });

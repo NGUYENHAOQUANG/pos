@@ -1,0 +1,16 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sun -->
+  <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <!-- Sun rays -->
+  <line x1="12" y1="2" x2="12" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="12" y1="16" x2="12" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17.66" y1="4.93" x2="16.24" y2="6.34" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="4" y1="10" x2="6" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="18" y1="10" x2="20" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Cloud -->
+  <path d="M8 18.5C6.067 18.5 4.5 17.21 4.5 15.625C4.5 14.29 5.65 13.165 7.158 12.82C7.394 11.21 8.867 10 10.625 10C11.672 10 12.607 10.45 13.238 11.158C13.583 11.052 13.95 11 14.333 11C16.266 11 17.833 12.29 17.833 13.875C17.833 14.014 17.823 14.15 17.804 14.284C18.807 14.62 19.5 15.434 19.5 16.375C19.5 17.55 18.433 18.5 17.125 18.5H8Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <!-- Rain drops -->
+  <line x1="9" y1="20" x2="8.5" y2="22" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="13" y1="20" x2="12.5" y2="22" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

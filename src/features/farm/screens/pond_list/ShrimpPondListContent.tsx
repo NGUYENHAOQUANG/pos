@@ -9,6 +9,9 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondListSkeleton } from '@/features/farm/components/skeleton/PondListSkeleton';
 import { PondData } from '@/features/farm/types/farm.types';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { ICurrentWeather } from '@/features/weather/types/weather.types';
+import WeatherWidget from '@/features/weather/components/WeatherWidget';
+import { spacing } from '@/styles';
 
 export interface ShrimpPondListContentProps {
     farmOptions: DropDownItem[];
@@ -28,6 +31,9 @@ export interface ShrimpPondListContentProps {
     onLoadMore: () => void;
     onRefresh: () => void;
     warehouseId?: string;
+    weatherEnabled?: boolean;
+    currentWeather?: ICurrentWeather;
+    onWeatherPress?: () => void;
 }
 
 export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
@@ -48,6 +54,9 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
     onLoadMore,
     onRefresh,
     warehouseId,
+    weatherEnabled,
+    currentWeather,
+    onWeatherPress,
 }) => {
     const flatListRef = useRef<FlatList<PondData>>(null);
     useScrollToTop(flatListRef as any);
@@ -71,7 +80,13 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
                 value={selectedFarm}
                 onSelect={onSelectFarm}
                 onMenuPress={onFarmInfoPress}
+                rightTopComponent={
+                    weatherEnabled && currentWeather ? (
+                        <WeatherWidget current={currentWeather} onPress={onWeatherPress} />
+                    ) : undefined
+                }
             />
+
             <HeadingFarm
                 selectedTab={selectedTab}
                 onTabSelect={onTabSelect}
@@ -109,5 +124,9 @@ const getStyles = (theme: Colors) =>
             paddingVertical: 20,
             alignItems: 'center',
             justifyContent: 'center',
+        },
+        weatherWrapper: {
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.xs,
         },
     });

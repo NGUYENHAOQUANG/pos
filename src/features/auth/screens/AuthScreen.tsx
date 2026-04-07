@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Platform,
     ScrollView,
@@ -13,7 +13,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import PhoneInput from '@/features/auth/components/PhoneInput';
 import DangerIcon from '@/assets/Icon/Danger.svg';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useLoginFlow } from '@/features/auth/hooks/useLoginFlow';
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 import { useKeyboard } from '@/shared/hooks/useKeyboard';
@@ -33,6 +35,9 @@ export default function AuthScreen() {
         handleClearError,
         handlePhoneChange,
     } = useLoginFlow();
+
+    const theme = useAppTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     return (
         <ErrorBoundary>
@@ -140,82 +145,83 @@ export default function AuthScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    androidStatusBar: {
-        backgroundColor: colors.backgroundPrimary,
-    },
-    keyboardInner: {
-        flex: 1,
-    },
-    mainContentContainer: {
-        flex: 1,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    formCard: {
-        paddingVertical: 0,
-    },
-    logoSection: {
-        height: 64,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    screenTitle: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: '600',
-        color: '#0B1117',
-        textAlign: 'left',
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    formContent: {
-        marginTop: spacing.sm,
-        paddingHorizontal: spacing.md,
-    },
-    /** Giữ chiều cao cố định cho vùng lỗi để nút không bị đẩy lên khi hiện/ẩn error. */
-    errorBlockReserved: {
-        minHeight: 56,
-    },
-    unregisteredErrorContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginTop: 4,
-        gap: 6,
-    },
-    errorIconWrapper: {
-        marginTop: 2,
-    },
-    unregisteredErrorText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.error,
-        lineHeight: 22,
-        fontWeight: typography.fontWeight.regular,
-    },
-    unregisteredLinkText: {
-        color: colors.primary,
-        textDecorationLine: 'underline',
-    },
-    loginButton: {
-        backgroundColor: colors.primary,
-        borderRadius: 25,
-        height: 40,
-    },
-    footer: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.xl + spacing.sm + 12,
-        paddingTop: spacing.xs,
-    },
-    footerKeyboardOpen: {
-        paddingBottom: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        androidStatusBar: {
+            backgroundColor: theme.backgroundPrimary,
+        },
+        keyboardInner: {
+            flex: 1,
+        },
+        mainContentContainer: {
+            flex: 1,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+        },
+        formCard: {
+            paddingVertical: 0,
+        },
+        logoSection: {
+            height: 64,
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        screenTitle: {
+            fontSize: typography.fontSize['2xl'],
+            fontWeight: '600',
+            color: theme.text,
+            textAlign: 'left',
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        formContent: {
+            marginTop: spacing.sm,
+            paddingHorizontal: spacing.md,
+        },
+        /** Giữ chiều cao cố định cho vùng lỗi để nút không bị đẩy lên khi hiện/ẩn error. */
+        errorBlockReserved: {
+            minHeight: 56,
+        },
+        unregisteredErrorContainer: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            marginTop: 4,
+            gap: 6,
+        },
+        errorIconWrapper: {
+            marginTop: 2,
+        },
+        unregisteredErrorText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.error,
+            lineHeight: 22,
+            fontWeight: typography.fontWeight.regular,
+        },
+        unregisteredLinkText: {
+            color: theme.primary,
+            textDecorationLine: 'underline',
+        },
+        loginButton: {
+            backgroundColor: theme.primary,
+            borderRadius: 25,
+            height: 40,
+        },
+        footer: {
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.xl + spacing.sm + 12,
+            paddingTop: spacing.xs,
+        },
+        footerKeyboardOpen: {
+            paddingBottom: spacing.md,
+        },
+    });

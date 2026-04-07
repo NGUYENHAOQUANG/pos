@@ -1,8 +1,3 @@
-/**
- * App Entry Point
- * @format
- */
-
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
@@ -17,13 +12,7 @@ import { UpdateModal } from '@/features/app-update';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 import { AppThemeContext } from '@/styles/themeContext';
 import { colors, darkTheme } from '@/styles/colors';
-// import {
-//   requestNotificationPermission,
-//   getFCMToken,
-//   onForegroundMessage,
-// } from './src/services/notificationService';
 
-// Tắt *mọi* cảnh báo
 LogBox.ignoreAllLogs();
 
 function App(): React.JSX.Element {
@@ -34,6 +23,7 @@ function App(): React.JSX.Element {
         logout();
     };
 
+    // Request notification permission via notifee
     useEffect(() => {
         const checkPermission = async () => {
             await notifee.requestPermission();
@@ -42,6 +32,7 @@ function App(): React.JSX.Element {
         checkPermission();
     }, []);
 
+    // Theme setup
     const themeMode = useSettingsStore(s => s.themeMode);
     const activeScheme = themeMode;
     const theme = activeScheme === 'dark' ? darkTheme : colors;
@@ -51,38 +42,6 @@ function App(): React.JSX.Element {
             Appearance.setColorScheme(activeScheme);
         }
     }, [activeScheme]);
-
-    //   useEffect(() => {
-    //     const setupNotifications = async () => {
-    //       // Request permission
-    //       const hasPermission = await requestNotificationPermission();
-    //       if (hasPermission) {
-    //         // Get FCM token
-    //         const token = await getFCMToken();
-    //         if (token) {
-    //           console.log('FCM Token ready:', token);
-    //           // TODO: Send token to your backend server
-    //         }
-    //       }
-    //     };
-
-    //     setupNotifications();
-
-    //     // Listen for foreground messages
-    //     const unsubscribe = onForegroundMessage(remoteMessage => {
-    //       console.log('Foreground notification:', remoteMessage);
-    //       // Show toast when notification received in foreground
-    //       Toast.show({
-    //         type: 'info',
-    //         text1: remoteMessage.notification?.title || 'Thông báo mới',
-    //         text2: remoteMessage.notification?.body || '',
-    //         position: 'top',
-    //         visibilityTime: 4000,
-    //       });
-    //     });
-
-    //     return () => unsubscribe();
-    //   }, []);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>

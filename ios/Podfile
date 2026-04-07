@@ -22,6 +22,7 @@ target 'MebiOne' do
   pod 'GoogleUtilities', :modular_headers => true
   pod 'FirebaseCore', :modular_headers => true
   pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'FirebaseMessaging', :modular_headers => true
   pod 'GoogleDataTransport', :modular_headers => true
 
   use_react_native!(

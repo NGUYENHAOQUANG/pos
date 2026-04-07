@@ -1,13 +1,13 @@
-import { borderRadius } from '@/styles/borderRadius';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
 
-const chartStyles = {
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
+export const useChartStyles = () => {
+    const theme = useAppTheme();
+    return {
+        container: {
+            backgroundColor: theme.backgroundButton,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+    };
 };
-
-export default chartStyles;

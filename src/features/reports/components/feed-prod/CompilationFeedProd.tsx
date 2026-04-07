@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
 import { Chart } from '@/features/reports/components/feed-prod/Chart';
@@ -16,7 +17,7 @@ import {
 
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
-import chartStyles from '@/features/reports/styles/chart.styles';
+import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import FeedChart from '@/assets/Icon/IconReport/FeedChart.svg';
 import { useFeedingProduction } from '@/features/reports/hooks/useFeedingProduction';
 
@@ -26,7 +27,9 @@ interface Props {
 }
 
 export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
+    const chartStyles = useChartStyles();
     const [isExpanded, setIsExpanded] = useState(false);
+    const theme = useAppTheme();
 
     const { data: response, isLoading: queryLoading } = useFeedingProduction({
         ZoneId: zoneId,
@@ -97,7 +100,13 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
             />
 
             {isExpanded && (
-                <View style={[styles.content, isLoading && styles.loadingContainer]}>
+                <View
+                    style={[
+                        styles.content,
+                        { backgroundColor: theme.background },
+                        isLoading && styles.loadingContainer,
+                    ]}
+                >
                     {isLoading ? (
                         <Loading />
                     ) : chartDataList.length === 0 ? (
@@ -133,17 +142,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        backgroundColor: colors.white,
     },
     headerCollapsed: {
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
     },
     content: {
-        backgroundColor: colors.white,
         borderBottomLeftRadius: borderRadius.sm,
         borderBottomRightRadius: borderRadius.sm,
     },
