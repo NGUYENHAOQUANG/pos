@@ -78,7 +78,14 @@ export const Skeleton: React.FC<SkeletonProps> = ({
                 ]}
             >
                 <LinearGradient
-                    colors={['transparent', 'rgba(255, 255, 255, 0.2)', 'transparent']}
+                    colors={[
+                        'transparent',
+                        theme.skeleton?.shimmer ||
+                            (theme.isDark
+                                ? 'rgba(255, 255, 255, 0.05)'
+                                : 'rgba(255, 255, 255, 0.4)'),
+                        'transparent',
+                    ]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={StyleSheet.absoluteFill}
@@ -91,7 +98,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
         skeletonBase: {
-            backgroundColor: theme.borderLight,
+            backgroundColor: theme.skeleton?.base || theme.borderLight,
             borderRadius: borderRadius.sm,
             overflow: 'hidden',
         },

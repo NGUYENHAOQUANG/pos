@@ -25,6 +25,7 @@ interface PondDetailProps {
     selectedTab: string;
     setSelectedTab: (tab: string) => void;
     isLoading: boolean;
+    isLoadingCycle: boolean;
     isRefetchingCycles: boolean;
     refreshing: boolean;
     onRefresh: () => void;
@@ -54,6 +55,7 @@ export const PondDetail: React.FC<PondDetailProps> = ({
     selectedTab,
     setSelectedTab,
     isLoading,
+    isLoadingCycle,
     isRefetchingCycles,
     refreshing,
     onRefresh,
@@ -163,6 +165,8 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                 )}
             </View>
             {selectedTab === 'work' &&
+                !isLoading &&
+                !isLoadingCycle &&
                 !currentCycle &&
                 (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) ===
                     POND_TYPES.NURSERY && (

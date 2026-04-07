@@ -9,7 +9,7 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { Loading } from '@/shared/components/ui/Loading';
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -309,23 +309,23 @@ export const FeedingManagementScreens = () => {
                 rightAction={renderHeaderRight()}
             />
 
-            <Loading isLoading={isLoading}>
-                <View style={styles.contentContainer}>
-                    {isDetailLoading && isEditMode ? null : (
-                        <SafeInputLayout contentContainerStyle={styles.scrollContent}>
-                            <FeedingForm
-                                ref={formRef}
-                                isEditMode={isEditMode}
-                                isLoadingDetail={isDetailLoading && isEditMode}
-                                isSubmitting={isLoading}
-                                initialData={initialData}
-                                onSubmit={handleSubmit}
-                                onHasChangesChange={setFormHasChanges}
-                            />
-                        </SafeInputLayout>
-                    )}
-                </View>
-            </Loading>
+            <View style={styles.contentContainer}>
+                {isDetailLoading && isEditMode ? (
+                    <EnvSkeleton />
+                ) : (
+                    <SafeInputLayout contentContainerStyle={styles.scrollContent}>
+                        <FeedingForm
+                            ref={formRef}
+                            isEditMode={isEditMode}
+                            isLoadingDetail={isDetailLoading && isEditMode}
+                            isSubmitting={isLoading}
+                            initialData={initialData}
+                            onSubmit={handleSubmit}
+                            onHasChangesChange={setFormHasChanges}
+                        />
+                    </SafeInputLayout>
+                )}
+            </View>
             <ButtonBarFarm
                 primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                 secondaryTitle="Huỷ"

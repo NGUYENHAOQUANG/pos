@@ -9,8 +9,8 @@ import { convertWaterTreatmentJobToActivityData } from '@/features/farm/utils/me
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { useWaterTreatmentRecordsAsJobs } from '@/features/farm/hooks/useWaterTreatmentRecords';
-import { colors } from '@/styles';
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
+import { useAppTheme } from '@/styles/themeContext';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterTreatmentLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -21,6 +21,7 @@ export const WaterTreatmentLogScreens = () => {
     const { pondId, pond } = route.params || {};
     const targetPondId = pondId || pond?.id || '';
 
+    const theme = useAppTheme();
     const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     // Fetch data from API with date params
@@ -68,7 +69,7 @@ export const WaterTreatmentLogScreens = () => {
     if (isLoading && !jobs.length) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }

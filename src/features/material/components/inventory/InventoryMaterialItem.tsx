@@ -82,12 +82,9 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                                 required
                                 value={item.newStock}
                                 onChangeText={val => onUpdateItem(item.id, 'newStock', val)}
-                                keyboardType="numeric"
                                 inputFormat={InputFormat.DECIMAL}
-                                maxDecimalPlaces={5}
                                 containerStyle={styles.noMarginBottom}
                                 suffix={item.unit}
-                                maxLength={20}
                             />
                         </View>
 

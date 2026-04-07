@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList, TextInput, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { Colors, spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { IWeatherLocation } from '@/features/weather/types/weather.types';
 import { WEATHER_LOCATIONS } from '@/features/weather/utils/weatherLocations';
 import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
@@ -25,6 +26,8 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
     onClose,
 }) => {
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [searchText, setSearchText] = useState('');
 
     const filteredLocations = useMemo(() => {
@@ -60,7 +63,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                         {item.latitude.toFixed(2)}°N, {item.longitude.toFixed(2)}°E
                     </Text>
                 </View>
-                {isSelected && <AntDesign name="check" size={18} color={colors.blue[600]} />}
+                {isSelected && <AntDesign name="check" size={18} color={theme.info} />}
             </TouchableOpacity>
         );
     };
@@ -85,7 +88,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
             <View style={styles.sheetHeader}>
                 <Text style={styles.sheetTitle}>Chọn vùng nuôi</Text>
                 <TouchableOpacity onPress={handleClose}>
-                    <AntDesign name="close" size={22} color={colors.textSecondary} />
+                    <AntDesign name="close" size={22} color={theme.textSecondary} />
                 </TouchableOpacity>
             </View>
 
@@ -94,13 +97,13 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                 <AntDesign
                     name="search1"
                     size={16}
-                    color={colors.textTertiary}
+                    color={theme.textSecondary}
                     style={styles.searchIcon}
                 />
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Tìm tên thành phố/tỉnh"
-                    placeholderTextColor={colors.textTertiary}
+                    placeholderTextColor={theme.textSecondary}
                     value={searchText}
                     onChangeText={setSearchText}
                     autoCapitalize="none"
@@ -108,7 +111,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                 />
                 {searchText.length > 0 && (
                     <TouchableOpacity onPress={() => setSearchText('')}>
-                        <AntDesign name="closecircle" size={16} color={colors.textTertiary} />
+                        <AntDesign name="closecircle" size={16} color={theme.textSecondary} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -136,106 +139,107 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
 export default LocationPickerModal;
 
 /* ===== STYLES ===== */
-const styles = StyleSheet.create({
-    sheet: {
-        backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        sheet: {
+            backgroundColor: theme.background,
+            paddingHorizontal: spacing.md,
+        },
 
-    handleBar: {
-        width: 36,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: colors.gray[300],
-        alignSelf: 'center',
-        marginTop: spacing.sm,
-        marginBottom: spacing.md,
-    },
+        handleBar: {
+            width: 36,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: theme.borderDark,
+            alignSelf: 'center',
+            marginTop: spacing.sm,
+            marginBottom: spacing.md,
+        },
 
-    sheetHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: spacing.md,
-    },
+        sheetHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: spacing.md,
+        },
 
-    sheetTitle: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.text,
-    },
+        sheetTitle: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: typography.fontWeight.semibold,
+            color: theme.text,
+        },
 
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.gray[100],
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.sm,
-        height: 40,
-        marginBottom: spacing.sm,
-    },
+        searchContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.backgroundPrimary,
+            borderRadius: borderRadius.md,
+            paddingHorizontal: spacing.sm,
+            height: 40,
+            marginBottom: spacing.sm,
+        },
 
-    searchIcon: {
-        marginRight: spacing.xs,
-    },
+        searchIcon: {
+            marginRight: spacing.xs,
+        },
 
-    searchInput: {
-        flex: 1,
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        padding: 0,
-    },
+        searchInput: {
+            flex: 1,
+            fontSize: typography.fontSize.sm,
+            color: theme.text,
+            padding: 0,
+        },
 
-    list: {
-        flex: 1,
-    },
+        list: {
+            flex: 1,
+        },
 
-    listContent: {
-        paddingBottom: spacing.md,
-    },
+        listContent: {
+            paddingBottom: spacing.md,
+        },
 
-    locationItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.sm,
-        borderRadius: borderRadius.sm,
-        marginBottom: 2,
-    },
+        locationItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.sm,
+            borderRadius: borderRadius.sm,
+            marginBottom: 2,
+        },
 
-    locationItemSelected: {
-        backgroundColor: colors.blue[50],
-    },
+        locationItemSelected: {
+            backgroundColor: theme.isDark ? 'rgba(10, 132, 255, 0.15)' : '#E6F4FF',
+        },
 
-    locationInfo: {
-        flex: 1,
-    },
+        locationInfo: {
+            flex: 1,
+        },
 
-    locationName: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text,
-    },
+        locationName: {
+            fontSize: typography.fontSize.base,
+            fontWeight: typography.fontWeight.medium,
+            color: theme.text,
+        },
 
-    locationNameSelected: {
-        color: colors.blue[600],
-        fontWeight: typography.fontWeight.semibold,
-    },
+        locationNameSelected: {
+            color: theme.info,
+            fontWeight: typography.fontWeight.semibold,
+        },
 
-    locationCoords: {
-        fontSize: typography.fontSize.xs,
-        color: colors.textTertiary,
-        marginTop: 2,
-    },
+        locationCoords: {
+            fontSize: typography.fontSize.xs,
+            color: theme.textSecondary,
+            marginTop: 2,
+        },
 
-    emptyContainer: {
-        paddingVertical: spacing.xl,
-        alignItems: 'center',
-    },
+        emptyContainer: {
+            paddingVertical: spacing.xl,
+            alignItems: 'center',
+        },
 
-    emptyText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-    },
-});
+        emptyText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+        },
+    });
