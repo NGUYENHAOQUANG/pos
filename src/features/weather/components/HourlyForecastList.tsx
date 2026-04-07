@@ -65,11 +65,14 @@ const formatHourLabel = (timeStr: string, index: number): string => {
     });
 };
 
-const formatRain = (rainAmount: number): string => {
-    // Basic approximation assuming max rain ~ 10mm/h representing 100% chance for visual sake.
-    // Replace with precipitationProbability if available on hourly structure.
-    if (rainAmount <= 0) return '0%';
-    const pct = Math.min(Math.round(rainAmount * 10), 100);
+const formatRain = (item: IHourlyForecast): string => {
+    // Use real chance_of_rain from WeatherAPI if available
+    if (item.chanceOfRain !== undefined) {
+        return `${item.chanceOfRain}%`;
+    }
+    // Fallback: approximate from rain amount
+    if (item.rain <= 0) return '0%';
+    const pct = Math.min(Math.round(item.rain * 10), 100);
     return `${pct}%`;
 };
 
@@ -190,7 +193,7 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
                                         size={10}
                                         color="rgba(255,255,255,0.7)"
                                     />
-                                    <Text style={styles.rainText}>{formatRain(item.rain)}</Text>
+                                    <Text style={styles.rainText}>{formatRain(item)}</Text>
                                 </View>
                             ))}
                         </View>

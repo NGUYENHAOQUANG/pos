@@ -184,10 +184,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             placeholder="Nhập số lượng"
                                             value={item.quantity}
                                             onChangeText={val => handleQuantityChange(item.id, val)}
-                                            keyboardType="numeric"
                                             inputFormat={InputFormat.DECIMAL}
-                                            maxDecimalPlaces={5}
-                                            maxLength={20}
                                             containerStyle={styles.noMarginBottom}
                                             suffix={item.unit}
                                             hint={
