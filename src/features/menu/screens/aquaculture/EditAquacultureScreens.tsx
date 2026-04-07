@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
@@ -40,6 +41,8 @@ export const EditAquacultureScreens: React.FC = () => {
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [closeModalVisible, setCloseModalVisible] = useState(false);
     const [formHasChanges, setFormHasChanges] = useState(false);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // ================================================================
     // Data Fetching (TanStack Query)
@@ -199,7 +202,7 @@ export const EditAquacultureScreens: React.FC = () => {
                 <HeaderMenu
                     title="Chỉnh sửa vụ nuôi"
                     onBack={handleGoBack}
-                    rightIcon={<DeleteIcon width={20} height={20} color={colors.text} />}
+                    rightIcon={<DeleteIcon width={20} height={20} color={theme.text} />}
                     onRightPress={handleDelete}
                 />
 
@@ -258,12 +261,13 @@ export const EditAquacultureScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+    });

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import WarningCircle from '@/assets/Icon/IconMenu/WarningCircle.svg';
@@ -27,6 +28,9 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     onUpperLimitChange,
     onAlertToggle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Parameter Name */}
@@ -69,7 +73,7 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                         <WarningCircle
                             width={20}
                             height={20}
-                            color={colors.primaryOrange}
+                            color={theme.primaryOrange}
                             style={{ marginBottom: 8 }}
                         />
                         <Text style={styles.alertTitle}>Bật cảnh báo</Text>
@@ -82,7 +86,7 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                         <ButtonDevices
                             value={isAlertEnabled}
                             onValueChange={onAlertToggle}
-                            trackColor={colors.primaryOrange}
+                            trackColor={theme.primaryOrange}
                         />
                     </View>
                 </View>
@@ -91,48 +95,49 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        padding: 16,
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        gap: 16,
-    },
-    inputGroup: {
-        marginBottom: 0,
-    },
-    // Alert styles
-    alertCard: {
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: 8,
-        padding: 16,
-    },
-    alertContentRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    alertTextContent: {
-        flex: 1,
-        marginRight: 16,
-    },
-    alertTitle: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.gray[950],
-        marginBottom: 4,
-        lineHeight: 20,
-    },
-    alertDescription: {
-        fontSize: 14,
-        color: colors.gray[600],
-        lineHeight: 20,
-        fontWeight: '400',
-    },
-    alertAction: {
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            padding: 16,
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.borderLight,
+            gap: 16,
+        },
+        inputGroup: {
+            marginBottom: 0,
+        },
+        // Alert styles
+        alertCard: {
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 8,
+            padding: 16,
+        },
+        alertContentRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        alertTextContent: {
+            flex: 1,
+            marginRight: 16,
+        },
+        alertTitle: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+            marginBottom: 4,
+            lineHeight: 20,
+        },
+        alertDescription: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            lineHeight: 20,
+            fontWeight: '400',
+        },
+        alertAction: {
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+        },
+    });

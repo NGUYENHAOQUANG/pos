@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export type TagStatus =
     | 'pending'
@@ -23,6 +25,8 @@ interface TagProps {
 }
 
 export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const getStatusConfig = () => {
         // Define label mappings for different contexts
         const labelMappings: Record<TagType, Partial<Record<TagStatus, string>>> = {
@@ -61,65 +65,65 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
             case 'pending':
                 return {
                     label: getLabel(),
-                    color: colors.orange[500],
-                    backgroundColor: colors.yellow[50],
-                    borderColor: colors.yellow[300],
+                    color: theme.orange[500],
+                    backgroundColor: theme.yellow[50],
+                    borderColor: theme.yellow[300],
                 };
             case 'active':
                 return {
                     label: getLabel(),
-                    color: colors.green[600],
-                    backgroundColor: colors.green[50],
-                    borderColor: colors.green[300],
+                    color: theme.green[600],
+                    backgroundColor: theme.green[50],
+                    borderColor: theme.green[300],
                 };
             case 'preparing':
                 return {
                     label: getLabel(),
-                    color: colors.yellow[600],
-                    backgroundColor: colors.yellow[50],
-                    borderColor: colors.yellow[600],
+                    color: theme.yellow[600],
+                    backgroundColor: theme.yellow[50],
+                    borderColor: theme.yellow[600],
                 };
             case 'paused':
                 return {
                     label: getLabel(),
-                    color: colors.text,
-                    backgroundColor: colors.gray[100],
-                    borderColor: colors.borderDark,
+                    color: theme.text,
+                    backgroundColor: theme.gray[100],
+                    borderColor: theme.borderDark,
                 };
             case 'ended':
                 return {
                     label: getLabel(),
-                    color: colors.text,
-                    backgroundColor: colors.gray[100],
-                    borderColor: colors.borderDark,
+                    color: theme.text,
+                    backgroundColor: theme.gray[100],
+                    borderColor: theme.borderDark,
                 };
             case 'installed':
                 return {
                     label: getLabel(),
-                    color: colors.green[600],
-                    backgroundColor: colors.green[25],
-                    borderColor: colors.green[300],
+                    color: theme.green[600],
+                    backgroundColor: theme.green[25],
+                    borderColor: theme.green[300],
                 };
             case 'warehouse':
                 return {
                     label: getLabel(),
-                    color: colors.text,
-                    backgroundColor: colors.gray[100],
-                    borderColor: colors.border,
+                    color: theme.text,
+                    backgroundColor: theme.gray[100],
+                    borderColor: theme.border,
                 };
             case 'maintenance':
                 return {
                     label: getLabel(),
-                    color: colors.orange[600],
-                    backgroundColor: colors.yellow[25],
-                    borderColor: colors.yellow[200],
+                    color: theme.orange[600],
+                    backgroundColor: theme.yellow[25],
+                    borderColor: theme.yellow[200],
                 };
             default:
                 return {
                     label: '',
-                    color: colors.text,
-                    backgroundColor: colors.gray[100],
-                    borderColor: colors.border,
+                    color: theme.text,
+                    backgroundColor: theme.gray[100],
+                    borderColor: theme.border,
                 };
         }
     };
@@ -133,26 +137,27 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        height: 32,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs,
-        alignSelf: 'flex-start',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.white,
-    },
-    green: {
-        backgroundColor: colors.green[600],
-    },
-    orange: {
-        backgroundColor: colors.orange[500],
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            height: 32,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.xs,
+            alignSelf: 'flex-start',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        text: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.white,
+        },
+        green: {
+            backgroundColor: theme.green[600],
+        },
+        orange: {
+            backgroundColor: theme.orange[500],
+        },
+    });

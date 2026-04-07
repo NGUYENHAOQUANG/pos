@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import { DropdownWarehouseItem } from './DropdownWarehouseItem';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
@@ -22,6 +23,8 @@ interface InventoryMaterialItemProps {
 
 export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React.memo(
     ({ item, index, warehouseId, usedMaterialIds, onUpdateItem, onRemoveItem }) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
         const roundTo5 = (n: number) => parseFloat(n.toFixed(5));
         const oldStock = roundTo5(item.oldStock);
         const diff = roundTo5(
@@ -47,7 +50,7 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                             onPress={() => onRemoveItem(item.id)}
                             style={styles.trashButton}
                         >
-                            <TrashIcon width={16} height={16} color={colors.text} />
+                            <TrashIcon width={16} height={16} color={theme.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -102,64 +105,65 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
     }
 );
 
-const styles = StyleSheet.create({
-    materialWrapper: {
-        marginBottom: spacing.md,
-    },
-    materialCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-    },
-    materialHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[240],
-        backgroundColor: colors.backgroundPrimary,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-    },
-    materialHeaderTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    trashButton: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        backgroundColor: colors.white,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    inputGroup: {
-        marginBottom: 12,
-    },
-    stockRow: {
-        marginBottom: 12,
-    },
-    footer: {
-        marginTop: 12,
-    },
-    diffNegative: {
-        color: colors.red[900],
-        fontWeight: '600',
-    },
-    diffPositive: {
-        color: colors.success,
-        fontWeight: '600',
-    },
-    noMarginBottom: {
-        marginBottom: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        materialWrapper: {
+            marginBottom: spacing.md,
+        },
+        materialCard: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        materialHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+            backgroundColor: theme.backgroundPrimary,
+            borderTopLeftRadius: borderRadius.md,
+            borderTopRightRadius: borderRadius.md,
+        },
+        materialHeaderTitle: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        trashButton: {
+            width: 32,
+            height: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+        },
+        content: {
+            padding: spacing.md,
+        },
+        inputGroup: {
+            marginBottom: 12,
+        },
+        stockRow: {
+            marginBottom: 12,
+        },
+        footer: {
+            marginTop: 12,
+        },
+        diffNegative: {
+            color: theme.error,
+            fontWeight: '600',
+        },
+        diffPositive: {
+            color: theme.success,
+            fontWeight: '600',
+        },
+        noMarginBottom: {
+            marginBottom: 0,
+        },
+    });

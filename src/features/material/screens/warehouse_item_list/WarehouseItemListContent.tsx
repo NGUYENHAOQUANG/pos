@@ -2,8 +2,9 @@ import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
 import { WarehouseMaterialItem } from '@/features/material/components/warehouse/WarehouseMaterialItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material_list/MaterialListSkeleton';
-import { colors } from '@/styles';
-import { materialListStyles } from '@/features/material/styles/materialListStyles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles';
+import { StyleSheet } from 'react-native';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
@@ -39,6 +40,9 @@ export const WarehouseItemListContent: React.FC<WarehouseItemListContentProps> =
         alwaysExpanded,
         showStatus,
     }) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         const handleLoadMore = React.useCallback(() => {
             if (hasNextPage && !isFetchingNextPage && onLoadMore) {
                 onLoadMore();
@@ -66,12 +70,12 @@ export const WarehouseItemListContent: React.FC<WarehouseItemListContentProps> =
 
         if (isLoading) {
             return (
-                <View style={materialListStyles.container}>
+                <View style={styles.container}>
                     <FlatList
                         data={[1, 2, 3, 4, 5]}
                         renderItem={renderSkeleton}
                         keyExtractor={skeletonKeyExtractor}
-                        contentContainerStyle={materialListStyles.listContent}
+                        contentContainerStyle={styles.listContent}
                         showsVerticalScrollIndicator={false}
                     />
                 </View>
@@ -79,14 +83,14 @@ export const WarehouseItemListContent: React.FC<WarehouseItemListContentProps> =
         }
 
         return (
-            <View style={materialListStyles.container}>
+            <View style={styles.container}>
                 <FlatList
                     data={materials}
                     keyExtractor={keyExtractor}
                     renderItem={renderItem}
                     contentContainerStyle={[
-                        materialListStyles.listContent,
-                        materials.length === 0 && materialListStyles.emptyContent,
+                        styles.listContent,
+                        materials.length === 0 && styles.emptyContent,
                     ]}
                     showsVerticalScrollIndicator={false}
                     refreshing={refreshing}
@@ -95,8 +99,8 @@ export const WarehouseItemListContent: React.FC<WarehouseItemListContentProps> =
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={
                         isFetchingNextPage ? (
-                            <View style={materialListStyles.loaderFooter}>
-                                <ActivityIndicator color={colors.primary} />
+                            <View style={styles.loaderFooter}>
+                                <ActivityIndicator color={theme.primary} />
                             </View>
                         ) : null
                     }
@@ -112,3 +116,22 @@ export const WarehouseItemListContent: React.FC<WarehouseItemListContentProps> =
         );
     }
 );
+
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        listContent: {
+            paddingBottom: 100,
+            flexGrow: 1,
+        },
+        emptyContent: {
+            flex: 1,
+        },
+        loaderFooter: {
+            paddingVertical: 16,
+            alignItems: 'center',
+        },
+    });

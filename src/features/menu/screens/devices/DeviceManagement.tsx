@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -30,6 +32,8 @@ export const DeviceManagement = () => {
     const navigation = useNavigation();
     const { devices, deleteDevice } = useMenuContext();
     const [selectedTab, setSelectedTab] = useState('all');
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // States for filter
     const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
@@ -115,7 +119,7 @@ export const DeviceManagement = () => {
             style={styles.addButton}
             onPress={() => navigation.navigate('AddDevice' as never)}
         >
-            <Ionicons name="add" size={24} color={colors.black} />
+            <Ionicons name="add" size={24} color={theme.text} />
         </TouchableOpacity>
     );
 
@@ -133,7 +137,7 @@ export const DeviceManagement = () => {
                 tabs={tabs}
                 containerStyle={{
                     paddingTop: spacing.md,
-                    backgroundColor: colors.transparent,
+                    backgroundColor: 'transparent',
                 }}
             />
 
@@ -277,46 +281,47 @@ export const DeviceManagement = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    addButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-    },
-    filterContainer: {
-        flexDirection: 'row',
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
-        backgroundColor: colors.transparent,
-        zIndex: 10,
-    },
-    filterItem: {
-        flex: 1,
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        paddingTop: spacing.sm,
-        backgroundColor: colors.transparent,
-    },
-    emptyStateButton: {
-        backgroundColor: colors.primary,
-        borderRadius: borderRadius.md,
-        width: '100%',
-        maxWidth: 200,
-    },
-    scrollContent: {
-        paddingHorizontal: 16,
-        paddingBottom: spacing.xl,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        addButton: {
+            width: 40,
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+        },
+        filterContainer: {
+            flexDirection: 'row',
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.md,
+            paddingBottom: spacing.sm,
+            backgroundColor: 'transparent',
+            zIndex: 10,
+        },
+        filterItem: {
+            flex: 1,
+        },
+        content: {
+            flex: 1,
+            justifyContent: 'flex-start',
+            paddingTop: spacing.sm,
+            backgroundColor: 'transparent',
+        },
+        emptyStateButton: {
+            backgroundColor: theme.primary,
+            borderRadius: borderRadius.md,
+            width: '100%',
+            maxWidth: 200,
+        },
+        scrollContent: {
+            paddingHorizontal: 16,
+            paddingBottom: spacing.xl,
+        },
+    });

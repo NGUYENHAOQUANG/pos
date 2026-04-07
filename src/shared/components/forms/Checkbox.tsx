@@ -2,7 +2,8 @@ import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 type CheckboxSize = 'sm' | 'md' | 'lg';
 
@@ -29,7 +30,7 @@ interface CheckboxProps {
     disabled?: boolean;
     /** Size preset: 'sm' (16px), 'md' (20px), 'lg' (24px) */
     size?: CheckboxSize;
-    /** Custom active/checked color (default: colors.primary) */
+    /** Custom active/checked color (default: theme.primary) */
     activeColor?: string;
     /** Custom container styles */
     style?: ViewStyle;
@@ -53,10 +54,13 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     label,
     disabled = false,
     size = 'md',
-    activeColor = colors.primaryOrange,
+    activeColor,
     style,
     labelStyle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const sizeConfig = CHECKBOX_SIZES[size];
 
     const handlePress = () => {
@@ -80,17 +84,16 @@ export const Checkbox: React.FC<CheckboxProps> = ({
                         borderRadius: sizeConfig.radius,
                     },
                     checked
-                        ? { backgroundColor: activeColor, borderColor: activeColor }
+                        ? {
+                              backgroundColor: activeColor || theme.primary,
+                              borderColor: activeColor || theme.primary,
+                          }
                         : styles.boxUnchecked,
                     disabled && styles.boxDisabled,
                 ]}
             >
                 {checked && (
-                    <Ionicons
-                        name="checkmark-sharp"
-                        size={sizeConfig.iconSize}
-                        color={colors.white}
-                    />
+                    <Ionicons name="checkmark-sharp" size={sizeConfig.iconSize} color="#FFFFFF" />
                 )}
             </View>
             {label ? (
@@ -102,35 +105,36 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    disabled: {
-        opacity: 0.5,
-    },
-    box: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'transparent',
-    },
-    boxUnchecked: {
-        backgroundColor: 'transparent',
-        borderColor: colors.gray[300],
-    },
-    boxDisabled: {
-        borderColor: colors.gray[200],
-    },
-    label: {
-        marginLeft: 8,
-        fontSize: 14,
-        fontWeight: '400',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    labelDisabled: {
-        color: colors.gray[400],
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        disabled: {
+            opacity: 0.5,
+        },
+        box: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1.5,
+            borderColor: 'transparent',
+        },
+        boxUnchecked: {
+            backgroundColor: 'transparent',
+            borderColor: theme.defaultBorder,
+        },
+        boxDisabled: {
+            borderColor: theme.borderLight,
+        },
+        label: {
+            marginLeft: 8,
+            fontSize: 14,
+            fontWeight: '400',
+            lineHeight: 20,
+            color: theme.text,
+        },
+        labelDisabled: {
+            color: theme.textTertiary,
+        },
+    });

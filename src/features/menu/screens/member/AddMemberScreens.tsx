@@ -4,7 +4,9 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { useMenuContext } from '@/features/menu/store/menuStore';
@@ -23,6 +25,9 @@ const FARM_DATA = unitsData.filter(u => u.type === 'Trại');
 const POND_DATA = unitsData.filter(u => u.type === 'Ao');
 
 export const AddMemberScreens: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<NativeStackNavigationProp<MenuStackParamList>>();
     const route = useRoute<any>();
     const { setTabBarVisible } = useTabBarVisibility();
@@ -203,7 +208,7 @@ export const AddMemberScreens: React.FC = () => {
                 onBack={handleBack}
                 rightIcon={
                     isEditMode && isPending ? (
-                        <DeleteIcon width={20} height={20} color={colors.text} />
+                        <DeleteIcon width={20} height={20} color={theme.text} />
                     ) : undefined
                 }
                 onRightPress={
@@ -335,46 +340,47 @@ export const AddMemberScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: 16,
-        gap: spacing.sm,
-        paddingBottom: 100,
-    },
-    contentEdit: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: 16,
-        gap: spacing.sm,
-        paddingBottom: 120,
-    },
-    footer: {
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    footerEdit: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            paddingVertical: spacing.sm,
+            paddingHorizontal: 16,
+            gap: spacing.sm,
+            paddingBottom: 100,
+        },
+        contentEdit: {
+            paddingVertical: spacing.sm,
+            paddingHorizontal: 16,
+            gap: spacing.sm,
+            paddingBottom: 120,
+        },
+        footer: {
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+        },
+        footerEdit: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+        },
 
-    actionContainer: {
-        paddingHorizontal: 0,
-        marginTop: spacing.sm,
-    },
-    actionButton: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    actionButtonText: {
-        color: colors.text,
-    },
-});
+        actionContainer: {
+            paddingHorizontal: 0,
+            marginTop: spacing.sm,
+        },
+        actionButton: {
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.white,
+        },
+        actionButtonText: {
+            color: theme.text,
+        },
+    });

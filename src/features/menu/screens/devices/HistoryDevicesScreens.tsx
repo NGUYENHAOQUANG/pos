@@ -4,7 +4,9 @@ import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
@@ -22,6 +24,9 @@ import { formatDate } from '@/features/farm/utils/dateUtils';
 import { INSTALLATION_HISTORY, MAINTENANCE_HISTORY } from '@/features/control/data/devicesData';
 
 export const HistoryDevicesScreens = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<HistoryDevicesScreenNavigationProp>();
     const route = useRoute<HistoryDevicesScreenRouteProp>();
     const { deviceId } = route.params || {};
@@ -218,10 +223,7 @@ export const HistoryDevicesScreens = () => {
 
     return (
         <View style={styles.container}>
-            <HeaderMenu
-                title="Lịch sử thiết bị"
-                onBack={() => navigation.navigate('DeviceManagement')}
-            />
+            <HeaderMenu title="Lịch sử thiết bị" onBack={() => navigation.goBack()} />
 
             <HeadingBar
                 selectedTab={selectedTab}
@@ -264,23 +266,24 @@ export const HistoryDevicesScreens = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    filterContainer: {
-        padding: spacing.md,
-    },
-    content: {
-        flexGrow: 1,
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.md,
-    },
-    trackingCard: {
-        marginBottom: spacing.sm,
-    },
-    emptyContainer: {
-        paddingHorizontal: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        filterContainer: {
+            padding: spacing.md,
+        },
+        content: {
+            flexGrow: 1,
+            paddingTop: spacing.sm,
+            paddingBottom: spacing.md,
+        },
+        trackingCard: {
+            marginBottom: spacing.sm,
+        },
+        emptyContainer: {
+            paddingHorizontal: spacing.md,
+        },
+    });

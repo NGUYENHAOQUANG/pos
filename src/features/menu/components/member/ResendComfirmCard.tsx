@@ -2,7 +2,9 @@ import React from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface ResendComfirmCardProps {
     visible: boolean;
@@ -23,6 +25,9 @@ export const ResendComfirmCard: React.FC<ResendComfirmCardProps> = ({
     confirmText = 'Gửi lại',
     cancelText = 'Không',
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <TouchableWithoutFeedback onPress={onClose}>
@@ -36,7 +41,7 @@ export const ResendComfirmCard: React.FC<ResendComfirmCardProps> = ({
                                     onPress={onClose}
                                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                 >
-                                    <Ionicons name="close" size={20} color={colors.textSecondary} />
+                                    <Ionicons name="close" size={20} color={theme.textSecondary} />
                                 </TouchableOpacity>
                             </View>
 
@@ -68,77 +73,78 @@ export const ResendComfirmCard: React.FC<ResendComfirmCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: spacing.md,
-    },
-    container: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
-        width: '100%',
-    },
-    content: {
-        padding: spacing.md,
-    },
-    message: {
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 20,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: spacing.sm,
-        padding: spacing.md,
-    },
-    cancelButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-        minWidth: 80,
-        alignItems: 'center',
-    },
-    cancelButtonText: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    confirmButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.primary,
-        minWidth: 80,
-        alignItems: 'center',
-    },
-    confirmButtonText: {
-        fontSize: 14,
-        color: colors.white,
-        fontWeight: '500',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: spacing.md,
+        },
+        container: {
+            width: '100%',
+            backgroundColor: theme.white,
+            borderRadius: borderRadius.md,
+            overflow: 'hidden',
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: spacing.md,
+            paddingBottom: spacing.sm,
+        },
+        title: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.border,
+            width: '100%',
+        },
+        content: {
+            padding: spacing.md,
+        },
+        message: {
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 20,
+        },
+        footer: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            gap: spacing.sm,
+            padding: spacing.md,
+        },
+        cancelButton: {
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.white,
+            minWidth: 80,
+            alignItems: 'center',
+        },
+        cancelButtonText: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        confirmButton: {
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: borderRadius.sm,
+            backgroundColor: theme.primary,
+            minWidth: 80,
+            alignItems: 'center',
+        },
+        confirmButtonText: {
+            fontSize: 14,
+            color: theme.white,
+            fontWeight: '500',
+        },
+    });

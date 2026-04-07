@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
 import PencilSimpleLine from '@/assets/Icon/IconMenu/PencilSimpleLine.svg';
 
@@ -31,6 +32,9 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
     onToggleParameter,
     onEdit,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.outerCard}>
             {/* Section Header */}
@@ -48,7 +52,7 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
                             checked={param.isChecked}
                             onToggle={() => onToggleParameter(param.id)}
                             size="md"
-                            activeColor={colors.primaryOrange}
+                            activeColor={theme.primaryOrange}
                         />
                         {/* Column with title and subtitle */}
                         <View style={styles.childColumn}>
@@ -65,7 +69,7 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
                             activeOpacity={0.7}
                             onPress={() => onEdit && onEdit(param)}
                         >
-                            <PencilSimpleLine width={16} height={16} color={colors.textSecondary} />
+                            <PencilSimpleLine width={16} height={16} color={theme.textSecondary} />
                         </TouchableOpacity>
                     </View>
                 ))}
@@ -74,76 +78,78 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
     );
 };
 
-const styles = StyleSheet.create({
-    outerCard: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        padding: 12,
-        gap: 16,
-    },
-    headerWrapper: {
-        gap: 4,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.gray[950],
-        lineHeight: 20,
-    },
-    sectionSubtitle: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.gray[500],
-        lineHeight: 20,
-    },
-    itemsList: {
-        gap: 8,
-    },
-    itemCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-    },
-    childColumn: {
-        flex: 1,
-    },
-    childTitle: {
-        fontWeight: '500',
-        fontSize: 14,
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    subtitleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    subtitleLabel: {
-        fontWeight: '400',
-        fontSize: 14,
-        lineHeight: 20,
-        color: colors.gray[500],
-    },
-    childSubtitle: {
-        fontWeight: '400',
-        fontSize: 14,
-        lineHeight: 20,
-        color: colors.gray[500],
-    },
-    editButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        outerCard: {
+            backgroundColor: theme.background,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            padding: 12,
+            gap: 16,
+        },
+        headerWrapper: {
+            gap: 4,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        sectionSubtitle: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            lineHeight: 20,
+        },
+        itemsList: {
+            gap: 8,
+        },
+        itemCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+        },
+        childColumn: {
+            flex: 1,
+        },
+        childTitle: {
+            fontWeight: '500',
+            fontSize: 14,
+            lineHeight: 20,
+            color: theme.text,
+        },
+        subtitleRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        subtitleLabel: {
+            fontWeight: '400',
+            fontSize: 14,
+            lineHeight: 20,
+            color: theme.textSecondary,
+        },
+        childSubtitle: {
+            fontWeight: '400',
+            fontSize: 14,
+            lineHeight: 20,
+            color: theme.textSecondary,
+        },
+        editButton: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+    });

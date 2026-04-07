@@ -8,25 +8,21 @@ import {
     FlatList,
     Modal,
     ActivityIndicator,
-    Dimensions,
     Keyboard,
 } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { spacing, borderRadius, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import { RequiredDot } from '@/shared/components/forms/Input';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import type { InfiniteDropdownItem } from '@/shared/hooks/useInfiniteDropdown';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// Fixed list height = modal maxHeight minus header/search/padding
-const LIST_HEIGHT = SCREEN_HEIGHT * 0.8 - 160;
 
 // ────────────────────────────── Types ──────────────────────────────
 
@@ -97,6 +93,9 @@ export interface InfiniteScrollDropdownProps<T extends InfiniteDropdownItem> {
 function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
     props: InfiniteScrollDropdownProps<T>
 ) {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const {
         value,
         displayValue,
@@ -177,17 +176,17 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                 </TouchableOpacity>
             );
         },
-        [value, handleSelect, renderItemContent]
+        [value, handleSelect, renderItemContent, styles.itemRow, styles.itemName]
     );
 
     const renderFooter = useCallback(() => {
         if (!isFetchingNextPage) return null;
         return (
             <View style={styles.loadingFooter}>
-                <ActivityIndicator size="small" color={colors.primaryOrange} />
+                <ActivityIndicator size="small" color={theme.primary} />
             </View>
         );
-    }, [isFetchingNextPage]);
+    }, [isFetchingNextPage, styles.loadingFooter, theme.primary]);
 
     const renderEmpty = useCallback(() => {
         if (isLoading) {
@@ -211,7 +210,14 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                 <Text style={styles.emptyText}>{emptyText}</Text>
             </View>
         );
-    }, [isLoading, emptyText]);
+    }, [
+        isLoading,
+        emptyText,
+        styles.skeletonContainer,
+        styles.skeletonRow,
+        styles.emptyContainer,
+        styles.emptyText,
+    ]);
 
     const renderButtonContent = () => {
         if (useAutoScrollProp && currentLabel) {
@@ -260,7 +266,7 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                 disabled={disabled}
             >
                 <View style={styles.buttonContent}>{renderButtonContent()}</View>
-                <Ionicons name="chevron-down" size={20} color={colors.textSecondary || '#999'} />
+                <Ionicons name="chevron-down" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
 
             {/* Bottom Sheet Modal */}
@@ -278,7 +284,7 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                                         activeOpacity={0.7}
                                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                                     >
-                                        <CloseIcon width={20} height={20} />
+                                        <CloseIcon width={20} height={20} color={theme.text} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -287,13 +293,13 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                                     <Ionicons
                                         name="search-outline"
                                         size={18}
-                                        color={colors.textSecondary}
+                                        color={theme.textSecondary}
                                         style={styles.searchIcon}
                                     />
                                     <TextInput
                                         style={styles.searchInput}
                                         placeholder={searchPlaceholder}
-                                        placeholderTextColor={colors.textTertiary}
+                                        placeholderTextColor={theme.textTertiary}
                                         value={searchText}
                                         onChangeText={onSearchChange}
                                     />
@@ -305,7 +311,7 @@ function InfiniteScrollDropdownInner<T extends InfiniteDropdownItem>(
                                             <Ionicons
                                                 name="close-circle"
                                                 size={18}
-                                                color={colors.textSecondary}
+                                                color={theme.textSecondary}
                                             />
                                         </TouchableOpacity>
                                     )}
@@ -350,152 +356,153 @@ export const InfiniteScrollDropdown = React.memo(
 
 // ────────────────────────────── Styles ──────────────────────────────
 
-const styles = StyleSheet.create({
-    container: {
-        zIndex: 10,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 6,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 40,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    buttonContent: {
-        flex: 1,
-        marginRight: spacing.xs,
-        justifyContent: 'center',
-    },
-    text: {
-        flex: 1,
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 40,
-        textAlignVertical: 'center',
-    },
-    placeholderText: {
-        color: colors.textSecondary || '#999',
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            zIndex: 10,
+        },
+        labelContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 6,
+        },
+        label: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+            lineHeight: 20,
+        },
+        button: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: 40,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.sm,
+        },
+        buttonContent: {
+            flex: 1,
+            marginRight: spacing.xs,
+            justifyContent: 'center',
+        },
+        text: {
+            flex: 1,
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 40,
+            textAlignVertical: 'center',
+        },
+        placeholderText: {
+            color: theme.textSecondary,
+        },
 
-    // Modal styles
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    modalContainer: {
-        width: '100%',
-        maxHeight: SCREEN_HEIGHT * 0.8,
-        backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.md,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: spacing.md,
-    },
-    title: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: '700',
-        color: colors.text,
-        flex: 1,
-    },
-    closeButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+        // Modal styles
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+        },
+        modalContainer: {
+            width: '100%',
+            flex: 0.7,
+            backgroundColor: theme.background,
+            borderTopLeftRadius: borderRadius.md,
+            borderTopRightRadius: borderRadius.md,
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.lg,
+            paddingBottom: spacing.md,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: spacing.md,
+        },
+        title: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: '700',
+            color: theme.text,
+            flex: 1,
+        },
+        closeButton: {
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
 
-    // Search
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        height: 40,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: spacing.md,
-    },
-    searchIcon: {
-        marginRight: spacing.sm,
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 14,
-        color: colors.text,
-        padding: 0,
-    },
-    clearButton: {
-        padding: 4,
-    },
+        // Search
+        searchContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+            height: 40,
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            marginBottom: spacing.md,
+        },
+        searchIcon: {
+            marginRight: spacing.sm,
+        },
+        searchInput: {
+            flex: 1,
+            fontSize: 14,
+            color: theme.text,
+            padding: 0,
+        },
+        clearButton: {
+            padding: 4,
+        },
 
-    // List
-    list: {
-        height: LIST_HEIGHT,
-    },
-    listContentEmpty: {
-        flex: 1,
-    },
-    itemRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 14,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: colors.border,
-    },
-    itemName: {
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-        fontWeight: '500',
-        marginRight: spacing.sm,
-    },
-    loadingFooter: {
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    emptyContainer: {
-        padding: spacing.xl,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    emptyText: {
-        marginTop: spacing.sm,
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
+        // List
+        list: {
+            flex: 1,
+        },
+        listContentEmpty: {
+            flex: 1,
+        },
+        itemRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 14,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: theme.borderLight,
+        },
+        itemName: {
+            fontSize: 14,
+            color: theme.text,
+            flex: 1,
+            fontWeight: '500',
+            marginRight: spacing.sm,
+        },
+        loadingFooter: {
+            paddingVertical: spacing.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        emptyContainer: {
+            padding: spacing.xl,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        emptyText: {
+            marginTop: spacing.sm,
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
 
-    // Skeleton
-    skeletonContainer: {
-        paddingVertical: spacing.sm,
-    },
-    skeletonRow: {
-        paddingVertical: 14,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: colors.border,
-    },
-});
+        // Skeleton
+        skeletonContainer: {
+            paddingVertical: spacing.sm,
+        },
+        skeletonRow: {
+            paddingVertical: 14,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: theme.borderLight,
+        },
+    });

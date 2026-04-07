@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
 import { formatCurrencyValue } from '@/shared/utils';
@@ -14,6 +15,9 @@ interface ExportWarehouseReceiptItemsProps {
 export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsProps> = ({
     materials,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <View>
@@ -26,7 +30,7 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
                         <View style={styles.content}>
                             <DetailRow
                                 label={item.materialName || '---'}
-                                value=""
+                                value=" "
                                 labelStyle={styles.materialName}
                                 style={styles.detailRow}
                             />
@@ -55,70 +59,71 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: spacing.md,
-    },
-    materialCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: spacing.md,
-    },
-    materialHeader: {
-        paddingVertical: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.gray[100],
-        borderTopLeftRadius: borderRadius.sm,
-        borderTopRightRadius: borderRadius.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    materialHeaderTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    content: {
-        paddingBottom: spacing.md,
-        paddingTop: 12,
-        gap: spacing.sm,
-    },
-    nameRow: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-    },
-    materialName: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-    },
-    detailsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-    },
-    detailItem: {
-        flex: 1,
-    },
-    footer: {
-        paddingHorizontal: spacing.md,
-    },
-    detailRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginHorizontal: spacing.md,
-    },
-    detailLabel: {
-        fontWeight: '400',
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-    },
-    detailValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            paddingHorizontal: spacing.md,
+        },
+        materialCard: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.border,
+            marginBottom: spacing.md,
+        },
+        materialHeader: {
+            paddingVertical: 12,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.backgroundSecondary,
+            borderTopLeftRadius: borderRadius.sm,
+            borderTopRightRadius: borderRadius.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        materialHeaderTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        content: {
+            paddingBottom: spacing.md,
+            paddingTop: 12,
+            gap: spacing.sm,
+        },
+        nameRow: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+        },
+        materialName: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+        },
+        detailsRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.md,
+        },
+        detailItem: {
+            flex: 1,
+        },
+        footer: {
+            paddingHorizontal: spacing.md,
+        },
+        detailRow: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginHorizontal: spacing.md,
+        },
+        detailLabel: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.text,
+            flex: 1,
+        },
+        detailValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+        },
+    });

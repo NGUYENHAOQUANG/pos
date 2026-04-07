@@ -1,9 +1,13 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing, borderRadius } from '@/styles';
+import { Colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 export const MaterialItemSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Header Row */}
@@ -37,53 +41,54 @@ export const MaterialItemSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    listContainer: {
-        flex: 1,
-    },
-    container: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        marginBottom: spacing.md,
-        padding: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.md,
-    },
-    nameSkeleton: {
-        marginRight: spacing.sm,
-    },
-    groupSkeleton: {
-        // width handled by SkeletonLine prop
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginVertical: spacing.sm,
-    },
-    expandToggle: {
-        alignItems: 'center',
-        marginVertical: spacing.sm,
-    },
-    actionRow: {
-        flexDirection: 'row',
-        marginTop: spacing.md,
-    },
-    buttonSkeleton: {
-        borderRadius: borderRadius.sm,
-    },
-    spacer: {
-        width: spacing.md,
-    },
-    separator: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        listContainer: {
+            flex: 1,
+        },
+        container: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            marginBottom: spacing.md,
+            padding: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: spacing.md,
+        },
+        nameSkeleton: {
+            marginRight: spacing.sm,
+        },
+        groupSkeleton: {
+            // width handled by SkeletonLine prop
+        },
+        infoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginVertical: spacing.sm,
+        },
+        expandToggle: {
+            alignItems: 'center',
+            marginVertical: spacing.sm,
+        },
+        actionRow: {
+            flexDirection: 'row',
+            marginTop: spacing.md,
+        },
+        buttonSkeleton: {
+            borderRadius: borderRadius.sm,
+        },
+        spacer: {
+            width: spacing.md,
+        },
+        separator: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: -spacing.md,
+        },
+    });

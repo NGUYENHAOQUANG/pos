@@ -3,16 +3,18 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 // Components
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 import {
-    DropDownButton,
+    DropDownButtonBasic as DropDownButton,
     DropDownItem,
-} from '@/features/menu/components/aquaculture/DropDownButton';
+} from '@/features/farm/components/DropDownButtonBasic';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { useMenuContext } from '@/features/menu/store/menuStore';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
@@ -21,6 +23,9 @@ import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModal
 import { useRoute } from '@react-navigation/native';
 
 export const MemberManagementScreens: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { setTabBarVisible } = useTabBarVisibility();
@@ -234,62 +239,63 @@ export const MemberManagementScreens: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    toastContainer: {
-        position: 'absolute',
-        top: 60, // Adjust based on header height
-        left: spacing.md,
-        right: spacing.md,
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        borderRadius: borderRadius.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        zIndex: 100, // Ensure it's above other content
-    },
-    toastText: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        toastContainer: {
+            position: 'absolute',
+            top: 60, // Adjust based on header height
+            left: spacing.md,
+            right: spacing.md,
+            backgroundColor: theme.white,
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+            shadowColor: theme.shadow,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+            zIndex: 100, // Ensure it's above other content
+        },
+        toastText: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+        },
 
-    filterContainer: {
-        flexDirection: 'row',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-        gap: spacing.md,
-    },
-    filterWrapper: {
-        flex: 1,
-    },
-    dropdown: {
-        // DropDownButton internal style usually handles width well,
-        // but flex:1 in wrapper ensures they split space
-    },
-    content: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    contentContainer: {
-        paddingTop: 8,
-        paddingBottom: 43,
-    },
-    listContainer: {
-        gap: spacing.sm,
-        backgroundColor: 'transparent',
-    },
-    emptyContainer: {
-        flex: 1,
-        marginTop: spacing.xl,
-    },
-});
+        filterContainer: {
+            flexDirection: 'row',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+            gap: spacing.md,
+        },
+        filterWrapper: {
+            flex: 1,
+        },
+        dropdown: {
+            // DropDownButton internal style usually handles width well,
+            // but flex:1 in wrapper ensures they split space
+        },
+        content: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        contentContainer: {
+            paddingTop: 8,
+            paddingBottom: 43,
+        },
+        listContainer: {
+            gap: spacing.sm,
+            backgroundColor: 'transparent',
+        },
+        emptyContainer: {
+            flex: 1,
+            marginTop: spacing.xl,
+        },
+    });

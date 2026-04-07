@@ -7,7 +7,8 @@ import { InfiniteScrollDropdown } from '@/shared/components/forms/InfiniteScroll
 import { Input } from '@/shared/components/forms/Input';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 
-import { borderRadius, colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, borderRadius, spacing } from '@/styles';
 import { useInfiniteDropdown } from '@/shared/hooks/useInfiniteDropdown';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';
@@ -54,6 +55,8 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     fileUploaderRef,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const zoneDropdown = useInfiniteDropdown();
     const pondDropdown = useInfiniteDropdown();
@@ -156,26 +159,27 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     );
 };
 
-const styles = StyleSheet.create({
-    cardContainer: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        zIndex: 10,
-    },
-    content: {
-        paddingHorizontal: 12,
-        paddingBottom: 12,
-        gap: 12,
-    },
-    noteInputContainer: {
-        height: 100,
-        alignItems: 'flex-start' as const,
-    },
-    noteInput: {
-        textAlignVertical: 'top' as const,
-        paddingTop: 8,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        cardContainer: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            zIndex: 10,
+        },
+        content: {
+            paddingHorizontal: 12,
+            paddingBottom: 12,
+            gap: 12,
+        },
+        noteInputContainer: {
+            height: 100,
+            alignItems: 'flex-start' as const,
+        },
+        noteInput: {
+            textAlignVertical: 'top' as const,
+            paddingTop: 8,
+        },
+    });

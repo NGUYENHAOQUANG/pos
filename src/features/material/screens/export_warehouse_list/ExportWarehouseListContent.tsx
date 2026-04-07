@@ -6,7 +6,8 @@ import { ExportWarehouseReceiptCard } from '../../components/export_warehouse_li
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
-import { materialListStyles } from '@/features/material/styles/materialListStyles';
+import { getMaterialListStyles } from '@/features/material/styles/materialListStyles';
+import { useAppTheme } from '@/styles/themeContext';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -36,6 +37,9 @@ export const ExportWarehouseListContent: React.FC<ExportWarehouseMaterialListPro
         isFetchingNextPage,
         hasNextPage,
     }) => {
+        const theme = useAppTheme();
+        const materialListStyles = getMaterialListStyles(theme);
+
         const handleLoadMore = React.useCallback(() => {
             if (hasNextPage && !isFetchingNextPage && onLoadMore) {
                 onLoadMore();

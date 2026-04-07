@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { spacing, typography, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
 import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
 import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
@@ -40,6 +42,9 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     triggerValidation,
     initialData,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [deviceName, setDeviceName] = useState(initialData?.deviceName || '');
     const [deviceType, setDeviceType] = useState<DropDownItem>(
         initialData?.deviceType || PLACEHOLDER
@@ -183,102 +188,101 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        marginBottom: spacing.sm,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginBottom: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200],
-        marginHorizontal: -spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    formContainer: {
-        //
-    },
-    inputContainer: {
-        marginBottom: spacing.lg,
-    },
-    conditionContainer: {
-        marginBottom: spacing.sm,
-    },
-    label: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: '400',
-        color: colors.text,
-        marginBottom: spacing.sm,
-        lineHeight: 22,
-    },
-    labelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-    },
-    required: {
-        color: colors.error,
-    },
-    requiredDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: colors.error,
-        marginLeft: 4,
-        marginBottom: 2,
-    },
-    dropdown: {
-        width: '100%',
-    },
-    row: {
-        flexDirection: 'row',
-        marginBottom: spacing.lg,
-    },
-    col: {
-        flex: 1,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xl,
-        marginTop: spacing.xs,
-    },
-    radioButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    radioCircle: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.border,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: spacing.sm,
-    },
-    radioCircleSelected: {
-        borderColor: colors.primary,
-    },
-    radioInnerCircle: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primary,
-    },
-    radioLabel: {
-        fontSize: typography.fontSize.base,
-        color: colors.text,
-    },
-    inputGroup: {
-        marginBottom: 0,
-    }, // Removed unused date styles
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            padding: spacing.md,
+            marginBottom: spacing.sm,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+            marginBottom: spacing.md,
+            marginHorizontal: -spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        formContainer: {
+            //
+        },
+        inputContainer: {
+            marginBottom: spacing.lg,
+        },
+        conditionContainer: {
+            marginBottom: spacing.sm,
+        },
+        label: {
+            fontSize: typography.fontSize.sm,
+            fontWeight: '400',
+            color: theme.text,
+            marginBottom: spacing.sm,
+            lineHeight: 22,
+        },
+        labelRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: spacing.sm,
+        },
+        required: {
+            color: theme.error,
+        },
+        requiredDot: {
+            width: 4,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: theme.error,
+            marginLeft: 4,
+            marginBottom: 2,
+        },
+        dropdown: {
+            width: '100%',
+        },
+        row: {
+            flexDirection: 'row',
+            marginBottom: spacing.lg,
+        },
+        col: {
+            flex: 1,
+        },
+        radioGroup: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xl,
+            marginTop: spacing.xs,
+        },
+        radioButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+        },
+        radioCircle: {
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: theme.border,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: spacing.sm,
+        },
+        radioCircleSelected: {
+            borderColor: theme.primary,
+        },
+        radioInnerCircle: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: theme.primary,
+        },
+        radioLabel: {
+            fontSize: typography.fontSize.base,
+            color: theme.text,
+        },
+        inputGroup: {
+            marginBottom: 0,
+        }, // Removed unused date styles
+    });

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { InventoryMaterialItem } from '@/features/material/components/inventory/InventoryMaterialItem';
@@ -38,6 +39,8 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
     warehouseId,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -76,7 +79,7 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                         title="Thêm vật tư​"
                         variant="outline"
                         onPress={onAddItem}
-                        renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
+                        renderLeftIcon={<Ionicons name="add" size={20} color={theme.text} />}
                         fullWidth
                         style={styles.addButton}
                         textStyle={styles.addButtonText}
@@ -87,27 +90,28 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    mainMaterialCard: {
-        backgroundColor: colors.white,
-        marginHorizontal: spacing.md,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        zIndex: 1,
-    },
-    mainContent: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
-        zIndex: 2,
-    },
-    addButton: {
-        borderColor: colors.border,
-        marginTop: spacing.xs,
-    },
-    addButtonText: {
-        fontSize: 15,
-        color: colors.text,
-        fontWeight: '500',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        mainMaterialCard: {
+            backgroundColor: theme.background,
+            marginHorizontal: spacing.md,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            zIndex: 1,
+        },
+        mainContent: {
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.md,
+            zIndex: 2,
+        },
+        addButton: {
+            borderColor: theme.border,
+            marginTop: spacing.xs,
+        },
+        addButtonText: {
+            fontSize: 15,
+            color: theme.text,
+            fontWeight: '500',
+        },
+    });

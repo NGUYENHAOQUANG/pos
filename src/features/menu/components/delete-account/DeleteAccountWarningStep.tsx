@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import DangerIcon from '@/assets/Icon/Danger.svg';
 
 interface Props {
@@ -9,6 +11,8 @@ interface Props {
 }
 
 export const DeleteAccountWarningBox: React.FC<Props> = ({ style }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={[styles.warningBox, style]}>
             <View style={styles.iconContainer}>
@@ -24,27 +28,28 @@ export const DeleteAccountWarningBox: React.FC<Props> = ({ style }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    warningBox: {
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        padding: spacing.md,
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    iconContainer: {
-        marginTop: 2,
-        marginRight: spacing.sm,
-    },
-    textContainer: {
-        flex: 1,
-    },
-    warningText: {
-        fontSize: 14,
-        lineHeight: 22,
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        warningBox: {
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            width: '100%',
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+        },
+        iconContainer: {
+            marginTop: 2,
+            marginRight: spacing.sm,
+        },
+        textContainer: {
+            flex: 1,
+        },
+        warningText: {
+            fontSize: 14,
+            lineHeight: 22,
+            color: theme.text,
+        },
+    });

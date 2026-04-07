@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, UIManager, Platform } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from '@/shared/components/buttons/Button';
 import { DropdownMaterialItem } from '@/features/material/components/DropdownMaterialItem';
@@ -55,6 +56,9 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     warehouseId,
     formType = WarehouseFormType.ImportReceipt,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const handleQuantityChange = React.useCallback(
         (id: string, val: string) => {
             const cleanVal = warehouseFormUtils.sanitizeNumericInput(val, 'quantity');
@@ -128,7 +132,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             onPress={() => onRemoveMaterial(item.id)}
                                             style={styles.trashButton}
                                         >
-                                            <TrashIcon width={16} height={16} color={colors.text} />
+                                            <TrashIcon width={16} height={16} color={theme.text} />
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -248,7 +252,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                     title="Thêm vật tư​"
                     variant="outline"
                     onPress={onAddMaterial}
-                    renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
+                    renderLeftIcon={<Ionicons name="add" size={20} color={theme.text} />}
                     fullWidth
                     style={styles.addButton}
                     textStyle={styles.addButtonText}
@@ -258,93 +262,92 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    mainMaterialCard: {
-        backgroundColor: colors.white,
-        marginHorizontal: spacing.md,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        zIndex: 1,
-    },
-    mainContent: {
-        paddingHorizontal: 12,
-        paddingBottom: 12,
-        zIndex: 2,
-    },
-    materialWrapper: {
-        marginBottom: 12,
-    },
-    materialCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-    },
-    materialHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-        backgroundColor: colors.backgroundPrimary,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-    },
-    materialHeaderTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    trashButton: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        backgroundColor: colors.white,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    inputGroup: {
-        marginBottom: 12,
-        gap: spacing.md,
-    },
-    placeholderText: {
-        fontSize: 15,
-        color: colors.textSecondary,
-        fontWeight: '600',
-    },
-    addButton: {
-        borderColor: colors.border,
-        marginTop: spacing.xs,
-    },
-    addButtonText: {
-        fontSize: 15,
-        color: colors.text,
-        fontWeight: '500',
-    },
-    // Styles for stock info
-    stockInfoRow: {
-        marginTop: 4,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    stockInfoText: {
-        fontSize: 13,
-        color: colors.textSecondary,
-    },
-    stockQuantity: {
-        color: colors.blue[600],
-        fontWeight: '500',
-    },
-    // No margin bottom for inputs
-    noMarginBottom: {
-        marginBottom: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        mainMaterialCard: {
+            backgroundColor: theme.background,
+            marginHorizontal: spacing.md,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            zIndex: 1,
+        },
+        mainContent: {
+            paddingHorizontal: 12,
+            paddingBottom: 12,
+            zIndex: 2,
+        },
+        materialWrapper: {
+            marginBottom: 12,
+        },
+        materialCard: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        materialHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+            backgroundColor: theme.backgroundPrimary,
+            borderTopLeftRadius: borderRadius.md,
+            borderTopRightRadius: borderRadius.md,
+        },
+        materialHeaderTitle: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: theme.text,
+        },
+        trashButton: {
+            width: 32,
+            height: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+        },
+        content: {
+            padding: spacing.md,
+        },
+        inputGroup: {
+            marginBottom: 12,
+            gap: spacing.md,
+        },
+        placeholderText: {
+            fontSize: 15,
+            color: theme.textSecondary,
+            fontWeight: '600',
+        },
+        addButton: {
+            borderColor: theme.border,
+            marginTop: spacing.xs,
+        },
+        addButtonText: {
+            fontSize: 15,
+            color: theme.text,
+            fontWeight: '500',
+        },
+        stockInfoRow: {
+            marginTop: 4,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        stockInfoText: {
+            fontSize: 13,
+            color: theme.textSecondary,
+        },
+        stockQuantity: {
+            color: theme.info,
+            fontWeight: '500',
+        },
+        noMarginBottom: {
+            marginBottom: 0,
+        },
+    });
