@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 interface EmptyStateCardProps {
@@ -20,6 +22,8 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     onPress,
     style,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={[styles.container, style]}>
             <EmptyStateIcon width={100} height={61} style={styles.image} />
@@ -39,44 +43,45 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        padding: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: spacing.md,
-        gap: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-    },
-    image: {},
-    message: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.text,
-        textAlign: 'center',
-        marginBottom: spacing.xs,
-    },
-    description: {
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'center',
-        lineHeight: 22,
-        fontWeight: '400',
-    },
-    button: {
-        marginTop: spacing.md,
-        minWidth: 160,
-    },
-    pondCycleEmptyState: {
-        marginBottom: spacing.sm,
-        marginTop: spacing.sm,
-        padding: spacing.md,
-        borderRadius: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: spacing.md,
+            gap: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        image: {},
+        message: {
+            fontSize: 16,
+            fontWeight: '400',
+            color: theme.text,
+            textAlign: 'center',
+            marginBottom: spacing.xs,
+        },
+        description: {
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'center',
+            lineHeight: 22,
+            fontWeight: '400',
+        },
+        button: {
+            marginTop: spacing.md,
+            minWidth: 160,
+        },
+        pondCycleEmptyState: {
+            marginBottom: spacing.sm,
+            marginTop: spacing.sm,
+            padding: spacing.md,
+            borderRadius: 0,
+        },
+    });
 
 interface PondCycleEmptyStateProps {
     message?: string;
@@ -85,4 +90,8 @@ interface PondCycleEmptyStateProps {
 
 export const PondCycleEmptyState: React.FC<PondCycleEmptyStateProps> = ({
     description = 'Ao chưa có chu kỳ nuôi nào.\nThực hiện các công việc được liệt kê bên dưới để chuẩn bị ao trước khi bắt đầu chu kỳ nuôi.',
-}) => <EmptyStateCard description={description} style={styles.pondCycleEmptyState} />;
+}) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    return <EmptyStateCard description={description} style={styles.pondCycleEmptyState} />;
+};

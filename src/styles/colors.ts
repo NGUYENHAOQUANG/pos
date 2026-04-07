@@ -247,6 +247,10 @@ export const colors = {
             lineCool: '#66BB6A',
         },
     },
+    skeleton: {
+        base: '#F3F4F6',
+        shimmer: 'rgba(255, 255, 255, 0.4)',
+    },
 };
 
 export type Colors = typeof colors;
@@ -327,5 +331,9 @@ export const darkTheme: Colors = {
         65: 'rgba(10, 10, 10, 0.65)',
         85: 'rgba(10, 10, 10, 0.85)',
         95: 'rgba(10, 10, 10, 0.95)',
+    },
+    skeleton: {
+        base: '#262626',
+        shimmer: 'rgba(255, 255, 255, 0.05)',
     },
 };

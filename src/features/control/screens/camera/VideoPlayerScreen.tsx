@@ -1,7 +1,7 @@
-import React, { useRef, useMemo } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import React, { useRef, useMemo, useEffect } from 'react';
+import { View, StyleSheet, Platform, AppState } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { colors } from '@/styles';
@@ -37,12 +37,32 @@ const parseAuthFromUrl = (url: string): ParsedAuthUrl => {
 
 export const VideoPlayerScreen: React.FC = () => {
     const route = useRoute<VideoPlayerRouteProp>();
+    const navigation = useNavigation<any>();
     const { videoUrl, cameraName, pondName } = route.params;
 
     const viewShotRef = useRef<ViewShot>(null);
 
     const { contentAnimatedStyle, handleClose } = useVideoOrientation();
     const { handleSnapshot } = useVideoSnapshot({ cameraName, viewShotRef });
+
+    const appState = useRef(AppState.currentState);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                if (navigation.pop) {
+                    navigation.pop();
+                } else if (navigation.canGoBack()) {
+                    navigation.goBack();
+                }
+            }
+            appState.current = nextAppState;
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [navigation]);
 
     const parsedUrl = useMemo(() => parseAuthFromUrl(videoUrl), [videoUrl]);
 

@@ -6,7 +6,9 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
-import { colors, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface DeleteButtonProps {
     /** Callback when button is pressed */
@@ -25,26 +27,29 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
     iconSize = 20,
     activeOpacity = 0.7,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <TouchableOpacity
             style={[styles.button, style]}
             onPress={onPress}
             activeOpacity={activeOpacity}
         >
-            <DeleteIcon width={iconSize} height={iconSize} />
+            <DeleteIcon width={iconSize} height={iconSize} color={theme.text} />
         </TouchableOpacity>
     );
 };
 
-const styles = StyleSheet.create({
-    button: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        button: {
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.backgroundButton,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+    });

@@ -9,8 +9,8 @@ import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types'
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { useEnvMeasurementsAsJobs } from '@/features/farm/hooks/useEnvMeasurement';
 import { ActivityIndicator, View } from 'react-native';
-import { colors } from '@/styles';
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
+import { useAppTheme } from '@/styles/themeContext';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EnvironmentLogScreen'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -22,6 +22,7 @@ export const EnvironmentLogScreen: React.FC = () => {
 
     const pondId = pond?.id || '';
 
+    const theme = useAppTheme();
     const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     // Fetch data using standardized hook with date params
@@ -67,7 +68,7 @@ export const EnvironmentLogScreen: React.FC = () => {
     if (isLoading && !jobs.length) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }
