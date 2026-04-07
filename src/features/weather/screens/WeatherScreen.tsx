@@ -109,7 +109,17 @@ const WeatherScreen: React.FC = () => {
                     <Text style={styles.errorIcon}>⚠️</Text>
                     <Text style={styles.errorText}>Không thể tải dữ liệu thời tiết</Text>
                     <Text style={styles.errorHint}>Kiểm tra kết nối mạng và thử lại</Text>
+                    <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+                        <Ionicons name="refresh" size={18} color={colors.white} />
+                        <Text style={styles.retryText}>Thử lại</Text>
+                    </TouchableOpacity>
                 </View>
+                <LocationPickerModal
+                    visible={isLocationPickerVisible}
+                    onClose={() => setLocationPickerVisible(false)}
+                    currentLocation={location}
+                    onSelect={newLoc => useWeatherStore.getState().setSelectedLocation(newLoc)}
+                />
             </LinearGradient>
         );
     }
@@ -199,7 +209,7 @@ const WeatherScreen: React.FC = () => {
                     {/* Footer */}
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>
-                            Dữ liệu từ Open-Meteo • Cập nhật lúc {lastUpdatedTime}
+                            Dữ liệu từ WeatherAPI • Cập nhật lúc {lastUpdatedTime}
                         </Text>
                     </View>
                 </View>
@@ -346,5 +356,24 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         color: 'rgba(255,255,255,0.5)',
         textAlign: 'center',
+    },
+
+    retryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginTop: spacing.lg,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.3)',
+    },
+
+    retryText: {
+        fontSize: typography.fontSize.sm,
+        color: colors.white,
+        fontWeight: typography.fontWeight.medium,
     },
 });
