@@ -1,7 +1,9 @@
 import React, { ReactNode, useState } from 'react';
 import { View, StyleSheet, ViewStyle, Pressable, Dimensions, Modal } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
@@ -33,6 +35,9 @@ const ResultValue: React.FC<{
     isOpen: boolean;
     onToggle: () => void;
 }> = ({ value, isOpen, onToggle }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     // Check if value is a number that can be abbreviated
     const numValue =
         typeof value === 'number' ? value : parseFloat(String(value).replace(/,/g, ''));
@@ -48,7 +53,7 @@ const ResultValue: React.FC<{
                         <Text style={styles.resultValue} numberOfLines={1}>
                             {abbreviated}
                         </Text>
-                        <EyeIcon width={16} height={16} />
+                        <EyeIcon width={16} height={16} color={theme.textSecondary} />
                     </Pressable>
                     {isOpen && (
                         <View style={styles.tooltipContainer}>
@@ -81,6 +86,9 @@ export const PondDataBox: React.FC<PondDataBoxProps> = ({
     disclaimerText = 'Kết quả được hệ thống tính tự động từ các số liệu bạn đã nhập',
     containerStyle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     // Only one tooltip open at a time
     const [activeTooltipIndex, setActiveTooltipIndex] = useState<number | null>(null);
 
@@ -150,106 +158,107 @@ export const PondDataBox: React.FC<PondDataBoxProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    infoSectionContainer: {
-        gap: spacing.xs,
-    },
-    resultSectionContainer: {
-        gap: spacing.xs,
-        overflow: 'visible',
-    },
-    resultBox: {
-        backgroundColor: colors.gray[50],
-        borderRadius: 8,
-        padding: 8,
-        gap: 4,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        overflow: 'visible',
-    },
-    resultRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        overflow: 'visible',
-    },
-    resultLabel: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.textTertiary,
-        lineHeight: 22,
-        flexShrink: 0,
-    },
-    resultValue: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
-        lineHeight: 22,
-        textAlign: 'right',
-        flexShrink: 1,
-        minWidth: 60,
-    },
-    disclaimer: {
-        fontSize: 14,
-        fontWeight: '400',
-        fontStyle: 'normal',
-        lineHeight: 20,
-        letterSpacing: 0,
-        color: colors.textMuted,
-    },
-    tooltipContent: {
-        backgroundColor: colors.black,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        alignSelf: 'flex-end',
-    },
-    tooltipText: {
-        color: colors.white,
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    tooltipDetailText: {
-        color: colors.gray[400],
-        fontSize: 13,
-        fontWeight: '400',
-        marginTop: 2,
-    },
-    resultValueTappable: {
-        textDecorationLine: 'underline',
-        textDecorationStyle: 'dotted',
-        color: colors.primary,
-    },
-    abbreviatedRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    tooltipWrapper: {
-        position: 'relative',
-        alignItems: 'flex-end',
-    },
-    tooltipContainer: {
-        position: 'absolute',
-        top: '100%',
-        right: -8,
-        marginTop: 4,
-        zIndex: 999,
-        width: SCREEN_WIDTH - 64,
-    },
-    tooltipArrow: {
-        width: 0,
-        height: 0,
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderBottomWidth: 6,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderBottomColor: colors.black,
-        alignSelf: 'flex-end',
-        marginRight: 12,
-    },
-    dismissOverlay: {
-        flex: 1,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        infoSectionContainer: {
+            gap: spacing.xs,
+        },
+        resultSectionContainer: {
+            gap: spacing.xs,
+            overflow: 'visible',
+        },
+        resultBox: {
+            backgroundColor: theme.isDark ? theme.background : theme.backgroundPrimary,
+            borderRadius: 8,
+            padding: 8,
+            gap: 4,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'visible',
+        },
+        resultRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            overflow: 'visible',
+        },
+        resultLabel: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textTertiary,
+            lineHeight: 22,
+            flexShrink: 0,
+        },
+        resultValue: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: theme.text,
+            lineHeight: 22,
+            textAlign: 'right',
+            flexShrink: 1,
+            minWidth: 60,
+        },
+        disclaimer: {
+            fontSize: 14,
+            fontWeight: '400',
+            fontStyle: 'normal',
+            lineHeight: 20,
+            letterSpacing: 0,
+            color: theme.textMuted,
+        },
+        tooltipContent: {
+            backgroundColor: theme.text,
+            borderRadius: borderRadius.md,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            alignSelf: 'flex-end',
+        },
+        tooltipText: {
+            color: theme.background,
+            fontSize: 14,
+            fontWeight: '600',
+        },
+        tooltipDetailText: {
+            color: theme.textTertiary,
+            fontSize: 13,
+            fontWeight: '400',
+            marginTop: 2,
+        },
+        resultValueTappable: {
+            textDecorationLine: 'underline',
+            textDecorationStyle: 'dotted',
+            color: theme.primary,
+        },
+        abbreviatedRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+        },
+        tooltipWrapper: {
+            position: 'relative',
+            alignItems: 'flex-end',
+        },
+        tooltipContainer: {
+            position: 'absolute',
+            top: '100%',
+            right: -8,
+            marginTop: 4,
+            zIndex: 999,
+            width: SCREEN_WIDTH - 64,
+        },
+        tooltipArrow: {
+            width: 0,
+            height: 0,
+            borderLeftWidth: 6,
+            borderRightWidth: 6,
+            borderBottomWidth: 6,
+            borderLeftColor: 'transparent',
+            borderRightColor: 'transparent',
+            borderBottomColor: theme.text,
+            alignSelf: 'flex-end',
+            marginRight: 12,
+        },
+        dismissOverlay: {
+            flex: 1,
+        },
+    });

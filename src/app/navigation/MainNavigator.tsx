@@ -23,6 +23,7 @@ import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { colors, borderRadius } from '@/styles';
 import { fontFamily } from '@/styles/typography';
 import { SvgProps } from 'react-native-svg';
+import { useAppTheme } from '@/styles/themeContext';
 
 // Main screens only (no nested stacks)
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond_list/ShrimpPondListScreens';
@@ -113,96 +114,113 @@ const navigationItems: NavigationItem[] = [
 // ════════════════════════════════════════════════════════════════════
 const NativeTab = createNativeBottomTabNavigator();
 
-const NativeTabNavigator = () => (
-    <NativeTab.Navigator
-        initialRouteName="Farm"
-        screenOptions={{
-            headerShown: false,
-            tabBarBlurEffect: 'regular',
-            tabBarActiveTintColor: colors.primaryOrange,
-            tabBarLabelStyle: {
-                fontSize: 12,
-                fontWeight: '400',
-                fontFamily: fontFamily.regular,
-            },
-            tabBarStyle: {
-                backgroundColor: colors.white,
-            },
-            lazy: false,
-        }}
-    >
-        <NativeTab.Screen
-            name="Reports"
-            component={ReportsScreen}
-            options={{
-                title: 'Báo cáo',
-                tabBarIcon: ({ focused }: { focused: boolean }) => ({
-                    type: 'image' as const,
-                    source: focused
-                        ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Active.png')
-                        : require('@/assets/Icon/IconMainNavigator/Icon-Report.png'),
-                    tinted: true,
-                }),
+const NativeTabNavigator = () => {
+    const themeColors = useAppTheme();
+
+    return (
+        <NativeTab.Navigator
+            initialRouteName="Farm"
+            screenOptions={{
+                headerShown: false,
+                tabBarBlurEffect: themeColors.isDark
+                    ? 'systemChromeMaterialDark'
+                    : 'systemChromeMaterialLight',
+                tabBarActiveTintColor: themeColors.primaryOrange,
+                tabBarInactiveTintColor: themeColors.textSecondary,
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                    fontWeight: '400',
+                    fontFamily: fontFamily.regular,
+                },
+                tabBarStyle: {
+                    // backgroundColor: themeColors.transparent,
+                },
+                lazy: false,
             }}
-        />
-        <NativeTab.Screen
-            name="Devices"
-            component={ControlStackScreen}
-            options={{
-                title: 'Thiết bị',
-                tabBarIcon: ({ focused }: { focused: boolean }) => ({
-                    type: 'image' as const,
-                    source: focused
-                        ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Active.png')
-                        : require('@/assets/Icon/IconMainNavigator/Icon-Devices.png'),
-                    tinted: true,
-                }),
-            }}
-        />
-        <NativeTab.Screen
-            name="Farm"
-            component={ShrimpPondListScreens}
-            options={{
-                title: 'Trại nuôi',
-                tabBarIcon: ({ focused }: { focused: boolean }) => ({
-                    type: 'image' as const,
-                    source: focused
-                        ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Active.png')
-                        : require('@/assets/Icon/IconMainNavigator/Icon-Farm.png'),
-                    tinted: true,
-                }),
-            }}
-        />
-        <NativeTab.Screen
-            name="Material"
-            component={MaterialScreen}
-            options={{
-                title: 'Vật tư',
-                tabBarIcon: ({ focused }: { focused: boolean }) => ({
-                    type: 'image' as const,
-                    source: focused
-                        ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Active.png')
-                        : require('@/assets/Icon/IconMainNavigator/Icon-Material.png'),
-                    tinted: true,
-                }),
-            }}
-        />
-        <NativeTab.Screen
-            name="Menu"
-            component={MenuScreenWithProvider}
-            options={{
-                title: 'Tài khoản',
-                tabBarIcon: ({ focused }: { focused: boolean }) => ({
-                    type: 'image' as const,
-                    source: focused
-                        ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Active.png')
-                        : require('@/assets/Icon/IconMainNavigator/Icon-Setting.png'),
-                    tinted: true,
-                }),
-            }}
-        />
-    </NativeTab.Navigator>
-);
+        >
+            <NativeTab.Screen
+                name="Reports"
+                component={ReportsScreen}
+                options={{
+                    title: 'Báo cáo',
+                    tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                        type: 'image' as const,
+                        source: focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Active.png')
+                            : themeColors.isDark
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Report-Dark.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Report.png'),
+                        tinted: false,
+                    }),
+                }}
+            />
+            <NativeTab.Screen
+                name="Devices"
+                component={ControlStackScreen}
+                options={{
+                    title: 'Thiết bị',
+                    tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                        type: 'image' as const,
+                        source: focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Active.png')
+                            : themeColors.isDark
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Devices-Dark.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Devices.png'),
+                        tinted: false,
+                    }),
+                }}
+            />
+            <NativeTab.Screen
+                name="Farm"
+                component={ShrimpPondListScreens}
+                options={{
+                    title: 'Trại nuôi',
+                    tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                        type: 'image' as const,
+                        source: focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Active.png')
+                            : themeColors.isDark
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Farm-Dark.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Farm.png'),
+                        tinted: false,
+                    }),
+                }}
+            />
+            <NativeTab.Screen
+                name="Material"
+                component={MaterialScreen}
+                options={{
+                    title: 'Vật tư',
+                    tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                        type: 'image' as const,
+                        source: focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Active.png')
+                            : themeColors.isDark
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Material-Dark.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Material.png'),
+                        tinted: false,
+                    }),
+                }}
+            />
+            <NativeTab.Screen
+                name="Menu"
+                component={MenuScreenWithProvider}
+                options={{
+                    title: 'Tài khoản',
+                    tabBarIcon: ({ focused }: { focused: boolean }) => ({
+                        type: 'image' as const,
+                        source: focused
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Active.png')
+                            : themeColors.isDark
+                            ? require('@/assets/Icon/IconMainNavigator/Icon-Setting-Dark.png')
+                            : require('@/assets/Icon/IconMainNavigator/Icon-Setting.png'),
+                        tinted: false,
+                    }),
+                }}
+            />
+        </NativeTab.Navigator>
+    );
+};
 
 // ════════════════════════════════════════════════════════════════════
 // Android / iOS < 26 : Custom Tab Bar (SVG icons, floating pill,

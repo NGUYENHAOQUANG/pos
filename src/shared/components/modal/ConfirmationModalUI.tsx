@@ -2,7 +2,9 @@ import React from 'react';
 import Toast from 'react-native-toast-message';
 import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { usePreventDoubleTap } from '@/shared/hooks/usePreventDoubleTap';
@@ -53,6 +55,8 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     cancelButtonStyle,
     confirmButtonStyle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [safeConfirm, isConfirming] = usePreventDoubleTap(() => {
         return new Promise<void>(resolve => {
             setTimeout(() => {
@@ -89,7 +93,7 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                    <CloseIcon width={16} height={16} />
+                    <CloseIcon width={16} height={16} color={theme.textSecondary} />
                 </TouchableOpacity>
             </View>
 
@@ -118,64 +122,65 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingBottom: 16,
-    },
-    container: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        padding: spacing.lg,
-    },
-    // Header row: title left, X right
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: spacing.md,
-    },
-    title: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: '700',
-        color: colors.text,
-        flex: 1,
-    },
-    closeButton: {
-        marginLeft: spacing.sm,
-    },
-    // Body message
-    message: {
-        fontSize: typography.fontSize.base,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
-        marginBottom: spacing.lg,
-    },
-    // Button row
-    footer: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: spacing.md,
-    },
-    cancelButton: {
-        flex: 1,
-    },
-    // Override blue outline to gray for cancel button
-    cancelButtonOverride: {
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    cancelButtonTextOverride: {
-        color: colors.text,
-        fontSize: 14,
-    },
-    confirmButton: {
-        flex: 1,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingBottom: 16,
+        },
+        container: {
+            width: '100%',
+            backgroundColor: theme.background,
+            borderRadius: 24,
+            padding: spacing.lg,
+        },
+        // Header row: title left, X right
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: spacing.md,
+        },
+        title: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: '700',
+            color: theme.text,
+            flex: 1,
+        },
+        closeButton: {
+            marginLeft: spacing.sm,
+        },
+        // Body message
+        message: {
+            fontSize: typography.fontSize.base,
+            fontWeight: '400',
+            color: theme.text,
+            lineHeight: 22,
+            marginBottom: spacing.lg,
+        },
+        // Button row
+        footer: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: spacing.md,
+        },
+        cancelButton: {
+            flex: 1,
+        },
+        // Override blue outline to gray for cancel button
+        cancelButtonOverride: {
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
+        },
+        cancelButtonTextOverride: {
+            color: theme.text,
+            fontSize: 14,
+        },
+        confirmButton: {
+            flex: 1,
+        },
+    });

@@ -3,7 +3,9 @@ import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle, Dimensions } from 'react-native';
 
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { CyclePond } from '@/features/farm/types/pond.types';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
@@ -57,6 +59,9 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     cyclePond,
 }) => {
     const typeValue = typeof type === 'string' ? type : type?.name;
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const hasData =
         typeValue === POND_TYPES.CULTIVATION ||
@@ -206,33 +211,34 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        overflow: 'hidden',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-    },
-    footer: {
-        padding: spacing.md,
-    },
-    detailButton: {
-        paddingVertical: 10,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.white,
-    },
-    detailButtonText: {
-        color: colors.text,
-        fontWeight: '500',
-        fontSize: 16,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'hidden',
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+        },
+        footer: {
+            padding: spacing.md,
+        },
+        detailButton: {
+            paddingVertical: 10,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.background,
+        },
+        detailButtonText: {
+            color: theme.text,
+            fontWeight: '500',
+            fontSize: 16,
+        },
+    });
