@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 import Animated from 'react-native-reanimated';
 
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing } from '@/styles';
 
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
 import { showValidationError } from '@/features/material/utils/validationToast';
@@ -68,6 +69,8 @@ const ImportReceiptForm: React.FC<ImportReceiptFormContentProps> = ({
     const fileUploaderRef = useRef<FileUploaderRef>(null);
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // ─── Form ───────────────────────────────────────────────
     const { control, handleSubmit, setValue, getValues, reset } = useForm<WarehouseFormValues>({
@@ -186,7 +189,7 @@ const ImportReceiptForm: React.FC<ImportReceiptFormContentProps> = ({
     if (isLoadingDetail) {
         return (
             <>
-                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
                 <View style={styles.container}>
                     <HeaderMeterial title="Chỉnh Sửa Phiếu Nhập Kho" onBackPress={onBackPress} />
                     <AddMaterialSkeleton />
@@ -198,7 +201,7 @@ const ImportReceiptForm: React.FC<ImportReceiptFormContentProps> = ({
     // ─── Render ─────────────────────────────────────────────
     return (
         <>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+            <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
             <View style={styles.container}>
                 <HeaderMeterial
                     title={isEditMode ? 'Chỉnh Sửa Phiếu Nhập Kho' : 'Tạo Phiếu Nhập Kho'}
@@ -267,18 +270,19 @@ const ImportReceiptForm: React.FC<ImportReceiptFormContentProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-    contentContainer: {
-        paddingBottom: 100,
-        gap: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+        contentContainer: {
+            paddingBottom: 100,
+            gap: spacing.sm,
+        },
+    });
 
 export const ImportReceiptFormContent = React.memo(ImportReceiptForm);

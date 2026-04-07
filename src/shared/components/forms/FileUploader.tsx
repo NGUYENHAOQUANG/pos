@@ -14,7 +14,8 @@ import {
     DocumentPickerResponse,
 } from '@react-native-documents/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import LinkIcon from '@/assets/Icon/Link.svg';
 import UploadIcon from '@/assets/Icon/Upload.svg';
 import { documentApi } from '@/features/material/api/documentApi';
@@ -42,6 +43,9 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
         },
         ref
     ) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         const [uploadingFiles, setUploadingFiles] = React.useState<DocumentPickerResponse[]>([]);
         const [isPicking, setIsPicking] = React.useState(false);
         const [deletingFileIndex, setDeletingFileIndex] = React.useState<number | null>(null);
@@ -241,13 +245,14 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
                                         {isDeleting ? (
                                             <ActivityIndicator
                                                 size="small"
-                                                color={colors.primary}
+                                                color={theme.primary}
                                                 style={styles.fileIcon}
                                             />
                                         ) : (
                                             <LinkIcon
                                                 width={16}
                                                 height={16}
+                                                color={theme.textSecondary}
                                                 style={styles.fileIcon}
                                             />
                                         )}
@@ -255,7 +260,7 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
                                             <Text
                                                 style={[
                                                     styles.fileName,
-                                                    isDeleting && { color: colors.textSecondary },
+                                                    isDeleting && { color: theme.textSecondary },
                                                 ]}
                                                 numberOfLines={1}
                                                 ellipsizeMode="middle"
@@ -274,9 +279,7 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
                                             name="close-circle"
                                             size={16}
                                             color={
-                                                isDeleting
-                                                    ? colors.textTertiary
-                                                    : colors.textTertiary
+                                                isDeleting ? theme.textTertiary : theme.textTertiary
                                             }
                                             style={{ opacity: isDeleting ? 0.5 : 1 }}
                                         />
@@ -292,14 +295,14 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
                                     {/* Loading Spinner or Text */}
                                     <ActivityIndicator
                                         size="small"
-                                        color={colors.primary}
+                                        color={theme.primary}
                                         style={styles.fileIcon}
                                     />
                                     <View style={styles.fileDetails}>
                                         <Text
                                             style={[
                                                 styles.fileName,
-                                                { color: colors.textSecondary },
+                                                { color: theme.textSecondary },
                                             ]}
                                             numberOfLines={1}
                                             ellipsizeMode="middle"
@@ -318,7 +321,12 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
                     onPress={handlePickFiles}
                     disabled={uploadingFiles.length > 0 || isPicking}
                 >
-                    <UploadIcon width={16} height={16} style={styles.uploadIcon} />
+                    <UploadIcon
+                        width={16}
+                        height={16}
+                        color={theme.text}
+                        style={styles.uploadIcon}
+                    />
                     <Text style={styles.uploadButtonText}>
                         {uploadingFiles.length > 0 || isPicking ? 'Đang xử lý...' : 'Tải lên'}
                     </Text>
@@ -328,56 +336,57 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
     }
 );
 
-const styles = StyleSheet.create({
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        marginBottom: 6,
-    },
-    uploadButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
-        alignSelf: 'flex-start',
-    },
-    uploadIcon: {
-        marginRight: 8,
-    },
-    uploadButtonText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    fileList: {
-        marginBottom: 8,
-        gap: 8,
-    },
-    fileItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 4,
-    },
-    fileInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-        marginRight: 12,
-    },
-    fileIcon: {
-        marginRight: 12,
-    },
-    fileDetails: {
-        flex: 1,
-    },
-    fileName: {
-        fontSize: 14,
-        color: colors.blue[600], // Link blue color
-        marginBottom: 2,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            marginBottom: 6,
+        },
+        uploadButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 8,
+            alignSelf: 'flex-start',
+        },
+        uploadIcon: {
+            marginRight: 8,
+        },
+        uploadButtonText: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        fileList: {
+            marginBottom: 8,
+            gap: 8,
+        },
+        fileItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: 4,
+        },
+        fileInfo: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: 1,
+            marginRight: 12,
+        },
+        fileIcon: {
+            marginRight: 12,
+        },
+        fileDetails: {
+            flex: 1,
+        },
+        fileName: {
+            fontSize: 14,
+            color: theme.primary,
+            marginBottom: 2,
+        },
+    });

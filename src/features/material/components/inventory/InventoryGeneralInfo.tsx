@@ -5,7 +5,8 @@ import { DetailRow } from '@/features/material/components/DetailRow';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -31,6 +32,8 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     creatorName = '---',
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -66,7 +69,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                     <TextInput
                         style={styles.textArea}
                         placeholder="Nhập ghi chú"
-                        placeholderTextColor={colors.borderSubtle}
+                        placeholderTextColor={theme.borderSubtle}
                         value={note}
                         onChangeText={onNoteChange}
                         multiline
@@ -79,47 +82,48 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        zIndex: 10,
-        marginBottom: spacing.sm,
-    },
-    body: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
-        gap: spacing.md,
-    },
-    inputContainer: {
-        gap: 6,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        lineHeight: 20,
-    },
-    textArea: {
-        minHeight: 104,
-        maxHeight: 160,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
-        fontSize: 14,
-        fontWeight: '400',
-        lineHeight: 24,
-        color: colors.text,
-        textAlignVertical: 'top',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            zIndex: 10,
+            marginBottom: spacing.sm,
+        },
+        body: {
+            paddingHorizontal: spacing.md,
+            paddingBottom: spacing.md,
+            gap: spacing.md,
+        },
+        inputContainer: {
+            gap: 6,
+        },
+        labelContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        textArea: {
+            minHeight: 104,
+            maxHeight: 160,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: '400',
+            lineHeight: 24,
+            color: theme.text,
+            textAlignVertical: 'top',
+        },
+    });

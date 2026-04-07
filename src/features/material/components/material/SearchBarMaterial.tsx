@@ -8,7 +8,8 @@ import {
     UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { Colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { DropdownMaterial } from '@/features/material/components/DropdownMaterial';
 import { TabType } from '@/features/material/screens/material/MaterialContent';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
@@ -39,6 +40,9 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     currentStatus = '',
     currentFilterValue = '',
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [localSearchText, setLocalSearchText] = useState('');
     const debouncedSearchText = useDebounce(localSearchText, 500);
 
@@ -149,7 +153,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     <Ionicons
                         name="ellipsis-horizontal"
                         size={20}
-                        color={isExpanded ? colors.primary : colors.text}
+                        color={isExpanded ? theme.primary : theme.text}
                     />
                 </TouchableOpacity>
             </View>
@@ -197,49 +201,50 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        padding: spacing.md,
-        backgroundColor: colors.backgroundPrimary,
-        zIndex: 1,
-    },
-    topRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    searchInputWrapper: {
-        flex: 1,
-    },
-    inputContainer: {
-        marginBottom: 0,
-    },
-    inputInnerContainer: {
-        height: 44,
-        borderRadius: 12,
-    },
-    moreButton: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    moreButtonActive: {
-        borderColor: colors.primary,
-        backgroundColor: '#E6F7FF', // Light blue background when active
-    },
-    expandedContent: {
-        marginTop: spacing.md,
-        flexDirection: 'row',
-        gap: spacing.md,
-        zIndex: 100,
-    },
-    dropdownWrapper: {
-        flex: 1,
-        zIndex: 100,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            padding: spacing.md,
+            backgroundColor: theme.backgroundPrimary,
+            zIndex: 1,
+        },
+        topRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+        },
+        searchInputWrapper: {
+            flex: 1,
+        },
+        inputContainer: {
+            marginBottom: 0,
+        },
+        inputInnerContainer: {
+            height: 44,
+            borderRadius: 12,
+        },
+        moreButton: {
+            width: 44,
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.backgroundButton,
+        },
+        moreButtonActive: {
+            borderColor: theme.primary,
+            backgroundColor: theme.isDark ? '#003a5c' : '#E6F7FF', // Light blue background when active
+        },
+        expandedContent: {
+            marginTop: spacing.md,
+            flexDirection: 'row',
+            gap: spacing.md,
+            zIndex: 100,
+        },
+        dropdownWrapper: {
+            flex: 1,
+            zIndex: 100,
+        },
+    });

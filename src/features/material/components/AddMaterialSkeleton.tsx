@@ -1,9 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { useAppTheme } from '@/styles/themeContext';
 
 export const AddMaterialSkeleton = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
@@ -149,90 +153,91 @@ export const AddMaterialSkeleton = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    contentContainer: {
-        paddingVertical: spacing.md,
-        paddingBottom: 100,
-    },
-    section: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        marginBottom: spacing.md,
-    },
-    body: {
-        marginTop: spacing.sm,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 12,
-    },
-    inputGroup: {
-        marginTop: 16,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    itemsSection: {
-        backgroundColor: colors.white,
-    },
-    mainMaterialCardHeader: {
-        padding: spacing.md,
-    },
-    itemCardWrapper: {
-        padding: spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
-    },
-    itemCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        marginBottom: spacing.md,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[240],
-        backgroundColor: colors.backgroundSecondary,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-        alignItems: 'center',
-    },
-    cardBody: {
-        padding: spacing.md,
-    },
-    dividerVertical: {
-        width: 1,
-        height: 40,
-        backgroundColor: colors.gray[100],
-    },
-    cardFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
-        paddingTop: spacing.sm,
-        marginTop: spacing.sm,
-    },
-    footer: {
-        padding: spacing.md,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[200],
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        contentContainer: {
+            paddingVertical: spacing.md,
+            paddingBottom: 100,
+        },
+        section: {
+            backgroundColor: theme.background,
+            padding: spacing.md,
+            marginBottom: spacing.md,
+        },
+        body: {
+            marginTop: spacing.sm,
+        },
+        infoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 12,
+        },
+        inputGroup: {
+            marginTop: 16,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        itemsSection: {
+            backgroundColor: theme.background,
+        },
+        mainMaterialCardHeader: {
+            padding: spacing.md,
+        },
+        itemCardWrapper: {
+            padding: spacing.md,
+            borderTopWidth: 1,
+            borderTopColor: theme.borderLight,
+        },
+        itemCard: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            marginBottom: spacing.md,
+        },
+        cardHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+            backgroundColor: theme.backgroundSecondary,
+            borderTopLeftRadius: borderRadius.md,
+            borderTopRightRadius: borderRadius.md,
+            alignItems: 'center',
+        },
+        cardBody: {
+            padding: spacing.md,
+        },
+        dividerVertical: {
+            width: 1,
+            height: 40,
+            backgroundColor: theme.borderLight,
+        },
+        cardFooter: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderTopWidth: 1,
+            borderTopColor: theme.borderLight,
+            paddingTop: spacing.sm,
+            marginTop: spacing.sm,
+        },
+        footer: {
+            padding: spacing.md,
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+        },
+    });

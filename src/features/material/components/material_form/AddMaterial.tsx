@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import { getMaterialTypeOptions } from '@/features/material/utils/dropdownOptions';
@@ -60,6 +61,8 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const typeOptions = useMemo(() => {
         if (!group) return [];
@@ -99,7 +102,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                         label="Tên vật tư​"
                         required
                         placeholder="Nhập tên vật tư​"
-                        placeholderTextColor={colors.textSecondary}
+                        placeholderTextColor={theme.textSecondary}
                         value={name}
                         onChangeText={onNameChange}
                         maxLength={255}
@@ -201,7 +204,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                     <Input
                         label="Nhãn hiệu"
                         placeholder="Nhập nhãn hiệu"
-                        placeholderTextColor={colors.textSecondary}
+                        placeholderTextColor={theme.textSecondary}
                         value={manufacturer}
                         onChangeText={onManufacturerChange}
                         required
@@ -213,77 +216,78 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        gap: spacing.sm,
-    },
-    sectionContainer: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        zIndex: 10,
-    },
-    content: {
-        paddingHorizontal: 12,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-        marginBottom: spacing.xs,
-    },
-    required: {
-        fontSize: 14,
-        color: colors.error,
-    },
-    input: {
-        height: 44,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        fontSize: 15,
-        color: colors.text,
-        marginBottom: 12,
-    },
-    textArea: {
-        height: 80,
-        paddingVertical: spacing.sm,
-    },
-    row: {
-        flexDirection: 'row',
-        gap: spacing.md,
-        zIndex: 10,
-    },
-    halfWidth: {
-        flex: 1,
-    },
-    sectionContainerZ10: {
-        zIndex: 10,
-        marginBottom: 130,
-    },
-    dropdownNegativeMargin: {
-        marginTop: spacing.xs,
-    },
-    rowZ30: {
-        zIndex: 30,
-    },
-    rowZ20: {
-        zIndex: 20,
-    },
-    rowMarginTop: {
-        marginVertical: 12,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginBottom: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            gap: spacing.sm,
+        },
+        sectionContainer: {
+            marginHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.border,
+            zIndex: 10,
+        },
+        content: {
+            paddingHorizontal: 12,
+        },
+        labelContainer: {
+            flexDirection: 'row',
+            marginBottom: spacing.xs,
+        },
+        label: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+            marginBottom: spacing.xs,
+        },
+        required: {
+            fontSize: 14,
+            color: theme.error,
+        },
+        input: {
+            height: 44,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: borderRadius.sm,
+            fontSize: 15,
+            color: theme.text,
+            marginBottom: 12,
+        },
+        textArea: {
+            height: 80,
+            paddingVertical: spacing.sm,
+        },
+        row: {
+            flexDirection: 'row',
+            gap: spacing.md,
+            zIndex: 10,
+        },
+        halfWidth: {
+            flex: 1,
+        },
+        sectionContainerZ10: {
+            zIndex: 10,
+            marginBottom: 130,
+        },
+        dropdownNegativeMargin: {
+            marginTop: spacing.xs,
+        },
+        rowZ30: {
+            zIndex: 30,
+        },
+        rowZ20: {
+            zIndex: 20,
+        },
+        rowMarginTop: {
+            marginVertical: 12,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginBottom: spacing.md,
+        },
+    });

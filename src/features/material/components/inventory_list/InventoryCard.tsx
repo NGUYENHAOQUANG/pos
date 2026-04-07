@@ -13,7 +13,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors, spacing, borderRadius } from '@/styles';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import {
     IInventoryCheck,
@@ -40,6 +41,9 @@ interface InventoryCardProps {
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     // Fetch items only if expanded and no items in props
     const shouldFetch = isExpanded && (!data.items || data.items.length === 0);
@@ -100,7 +104,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
             {isExpanded && (
                 <View style={styles.expandedContainer}>
                     {isFetchingItems ? (
-                        <ActivityIndicator size="small" color={colors.primary} />
+                        <ActivityIndicator size="small" color={theme.primary} />
                     ) : items.length > 0 ? (
                         items.map((item: any) => (
                             <View
@@ -130,7 +134,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                         <Text
                             style={{
                                 textAlign: 'center',
-                                color: colors.textSecondary,
+                                color: theme.textSecondary,
                                 marginBottom: spacing.sm,
                             }}
                         >
@@ -149,147 +153,148 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 <Ionicons
                     name={isExpanded ? 'chevron-up' : 'chevron-down'}
                     size={16}
-                    color={colors.primary}
+                    color={theme.primary}
                 />
             </TouchableOpacity>
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        padding: spacing.md,
-        marginHorizontal: spacing.md,
-        marginBottom: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: spacing.xs,
-        alignItems: 'center',
-    },
-    col: {
-        paddingBottom: 0,
-        gap: 12,
-    },
-    alignRight: {
-        alignItems: 'flex-end',
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    value: {
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'right',
-    },
-    noteRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.xs,
-    },
-    noteColumn: {
-        marginBottom: spacing.xs,
-    },
-    noteTextInline: {
-        maxWidth: '70%',
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'right',
-        flexWrap: 'wrap',
-    },
-    noteTextBlock: {
-        marginTop: 4,
-        fontSize: 14,
-        color: colors.text,
-        flexWrap: 'wrap',
-        width: '100%',
-    },
-    materialHeader: {
-        paddingVertical: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.gray[100],
-        borderTopLeftRadius: borderRadius.sm,
-        borderTopRightRadius: borderRadius.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    noteTextMeasure: {
-        position: 'absolute',
-        opacity: 0,
-        zIndex: -1,
-        fontSize: 14,
-        width: '70%',
-    },
-    separator: {
-        marginTop: spacing.sm,
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
-    colWithMargin: {
-        marginTop: spacing.sm,
-    },
-    editButton: {
-        marginTop: 12,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        alignSelf: 'stretch',
-    },
-    editButtonText: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    toggleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingTop: spacing.sm,
-        gap: 4,
-        marginTop: spacing.xs,
-    },
-    toggleText: {
-        fontSize: 14,
-        color: colors.primary,
-        fontWeight: '500',
-    },
-    expandedContainer: {
-        marginTop: spacing.sm,
-        borderTopWidth: 0,
-        paddingTop: spacing.xs,
-    },
-    detailItemContainer: {
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        marginBottom: spacing.md,
-    },
-    materialName: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    detailView: {
-        padding: 12,
-        gap: 8,
-    },
-    detailLabel: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    detailValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            marginHorizontal: spacing.md,
+            marginBottom: spacing.sm,
+            borderWidth: 1,
+            borderColor: theme.border,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: spacing.xs,
+            alignItems: 'center',
+        },
+        col: {
+            paddingBottom: 0,
+            gap: 12,
+        },
+        alignRight: {
+            alignItems: 'flex-end',
+        },
+        label: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '600',
+        },
+        value: {
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'right',
+        },
+        noteRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: spacing.xs,
+        },
+        noteColumn: {
+            marginBottom: spacing.xs,
+        },
+        noteTextInline: {
+            maxWidth: '70%',
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'right',
+            flexWrap: 'wrap',
+        },
+        noteTextBlock: {
+            marginTop: 4,
+            fontSize: 14,
+            color: theme.text,
+            flexWrap: 'wrap',
+            width: '100%',
+        },
+        materialHeader: {
+            paddingVertical: 12,
+            paddingHorizontal: spacing.md,
+            backgroundColor: theme.backgroundSecondary,
+            borderTopLeftRadius: borderRadius.sm,
+            borderTopRightRadius: borderRadius.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        noteTextMeasure: {
+            position: 'absolute',
+            opacity: 0,
+            zIndex: -1,
+            fontSize: 14,
+            width: '70%',
+        },
+        separator: {
+            marginTop: spacing.sm,
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: -spacing.md,
+        },
+        colWithMargin: {
+            marginTop: spacing.sm,
+        },
+        editButton: {
+            marginTop: 12,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: spacing.lg,
+            alignSelf: 'stretch',
+        },
+        editButtonText: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        toggleButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingTop: spacing.sm,
+            gap: 4,
+            marginTop: spacing.xs,
+        },
+        toggleText: {
+            fontSize: 14,
+            color: theme.primary,
+            fontWeight: '500',
+        },
+        expandedContainer: {
+            marginTop: spacing.sm,
+            borderTopWidth: 0,
+            paddingTop: spacing.xs,
+        },
+        detailItemContainer: {
+            borderRadius: borderRadius.sm,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            marginBottom: spacing.md,
+        },
+        materialName: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '600',
+        },
+        detailView: {
+            padding: 12,
+            gap: 8,
+        },
+        detailLabel: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        detailValue: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '500',
+        },
+    });
