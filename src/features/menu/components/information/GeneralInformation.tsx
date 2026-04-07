@@ -1,6 +1,7 @@
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import AvatarIcon from '@/assets/Icon/IconMenu/AvatarNew.svg';
 
 interface GeneralInformationProps {
@@ -21,6 +22,9 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     avatarUri,
     onChangePhoto,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>Thông tin chung</Text>
@@ -81,99 +85,105 @@ const InputField: React.FC<{
     value: string;
     required?: boolean;
     placeholder?: string;
-}> = ({ label, value, required, placeholder }) => (
-    <View style={styles.inputWrapper}>
-        <View style={styles.labelWrapper}>
-            <Text style={styles.inputLabel}>{label}</Text>
-            {required && <Text style={styles.requiredAsterisk}>*</Text>}
-        </View>
-        <View style={styles.inputBox}>
-            <Text style={[styles.inputValue, !value && styles.placeholderValue]}>
-                {value || placeholder}
-            </Text>
-        </View>
-    </View>
-);
+}> = ({ label, value, required, placeholder }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
-const styles = StyleSheet.create({
-    container: {
-        gap: 12,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        lineHeight: 20,
-        fontWeight: '600',
-        color: colors.gray[950],
-    },
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        padding: 12,
-        gap: 24,
-    },
-    avatarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: colors.gray[100],
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    avatarImage: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-    },
-    changePhotoText: {
-        color: colors.blue[600],
-        fontSize: 14,
-        fontWeight: '500',
-        textDecorationLine: 'underline',
-    },
-    formFieldsWrapper: {
-        gap: 16,
-    },
-    inputWrapper: {
-        gap: 6,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    inputLabel: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.gray[950],
-    },
-    requiredAsterisk: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.volcano[600],
-    },
-    inputBox: {
-        height: 44,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        justifyContent: 'center',
-    },
-    inputValue: {
-        fontSize: 14,
-        color: colors.gray[950],
-    },
-    placeholderValue: {
-        color: colors.gray[400],
-    },
-});
+    return (
+        <View style={styles.inputWrapper}>
+            <View style={styles.labelWrapper}>
+                <Text style={styles.inputLabel}>{label}</Text>
+                {required && <Text style={styles.requiredAsterisk}>*</Text>}
+            </View>
+            <View style={styles.inputBox}>
+                <Text style={[styles.inputValue, !value && styles.placeholderValue]}>
+                    {value || placeholder}
+                </Text>
+            </View>
+        </View>
+    );
+};
+
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            gap: 12,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            lineHeight: 20,
+            fontWeight: '600',
+            color: theme.gray[950],
+        },
+        cardContainer: {
+            backgroundColor: theme.white,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.gray[200],
+            padding: 12,
+            gap: 24,
+        },
+        avatarContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 16,
+        },
+        avatar: {
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: theme.gray[100],
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+        },
+        avatarImage: {
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+        },
+        changePhotoText: {
+            color: theme.blue[600],
+            fontSize: 14,
+            fontWeight: '500',
+            textDecorationLine: 'underline',
+        },
+        formFieldsWrapper: {
+            gap: 16,
+        },
+        inputWrapper: {
+            gap: 6,
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+        },
+        inputLabel: {
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.gray[950],
+        },
+        requiredAsterisk: {
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.volcano[600],
+        },
+        inputBox: {
+            height: 44,
+            borderWidth: 1,
+            borderColor: theme.gray[200],
+            borderRadius: 8,
+            paddingHorizontal: 16,
+            justifyContent: 'center',
+        },
+        inputValue: {
+            fontSize: 14,
+            color: theme.gray[950],
+        },
+        placeholderValue: {
+            color: theme.gray[400],
+        },
+    });

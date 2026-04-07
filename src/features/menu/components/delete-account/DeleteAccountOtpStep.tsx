@@ -11,7 +11,9 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import OTPIcon from '@/assets/Icon/OTP.svg';
@@ -31,6 +33,9 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
     onResend,
     error,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
     const [countdown, setCountdown] = useState(59);
     const [errorMessage, setErrorMessage] = useState('');
@@ -156,82 +161,83 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    innerContainer: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingTop: spacing.md,
-        paddingHorizontal: spacing.md,
-        paddingBottom: 100,
-    },
-    // Removed card style as elements use "nền chính"
-    logoSection: {
-        marginTop: spacing.sm,
-        marginBottom: spacing.md,
-        alignItems: 'flex-start',
-    },
-    title: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: '600',
-        color: '#0B1117',
-        marginBottom: spacing.sm,
-    },
-    subtitle: {
-        fontSize: typography.fontSize.lg,
-        color: colors.gray[500],
-        lineHeight: 24,
-        marginBottom: spacing.lg,
-    },
-    phoneText: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-        lineHeight: 28,
-    },
-    otpContainer: {
-        width: '100%',
-        alignItems: 'center',
-        marginBottom: spacing.xs,
-    },
-    errorContainer: {
-        height: 20,
-        marginBottom: 0,
-        justifyContent: 'center',
-    },
-    errorText: {
-        color: colors.red[600],
-        fontSize: 13,
-        textAlign: 'left',
-    },
-    errorPlaceholder: {
-        height: 1,
-    },
-    resendContainer: {
-        flexDirection: 'row',
-        marginTop: spacing.xs,
-        alignItems: 'center',
-    },
-    resendLabel: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    timerText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    disabledLink: {
-        textDecorationLine: 'underline',
-        color: colors.textTertiary,
-    },
-    activeLink: {
-        fontSize: 14,
-        color: colors.primary,
-        fontWeight: '500',
-        textDecorationLine: 'underline',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        innerContainer: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingTop: spacing.md,
+            paddingHorizontal: spacing.md,
+            paddingBottom: 100,
+        },
+        // Removed card style as elements use "nền chính"
+        logoSection: {
+            marginTop: spacing.sm,
+            marginBottom: spacing.md,
+            alignItems: 'flex-start',
+        },
+        title: {
+            fontSize: typography.fontSize['2xl'],
+            fontWeight: '600',
+            color: '#0B1117',
+            marginBottom: spacing.sm,
+        },
+        subtitle: {
+            fontSize: typography.fontSize.lg,
+            color: theme.gray[500],
+            lineHeight: 24,
+            marginBottom: spacing.lg,
+        },
+        phoneText: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.text,
+            lineHeight: 28,
+        },
+        otpContainer: {
+            width: '100%',
+            alignItems: 'center',
+            marginBottom: spacing.xs,
+        },
+        errorContainer: {
+            height: 20,
+            marginBottom: 0,
+            justifyContent: 'center',
+        },
+        errorText: {
+            color: theme.red[600],
+            fontSize: 13,
+            textAlign: 'left',
+        },
+        errorPlaceholder: {
+            height: 1,
+        },
+        resendContainer: {
+            flexDirection: 'row',
+            marginTop: spacing.xs,
+            alignItems: 'center',
+        },
+        resendLabel: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        timerText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        disabledLink: {
+            textDecorationLine: 'underline',
+            color: theme.textTertiary,
+        },
+        activeLink: {
+            fontSize: 14,
+            color: theme.primary,
+            fontWeight: '500',
+            textDecorationLine: 'underline',
+        },
+    });

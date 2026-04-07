@@ -2,7 +2,9 @@ import React, { useState, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Avatar from '@/assets/Icon/IconMenu/Avatar.svg';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Tag, TagStatus } from '../Tag';
 import { ActionMenu, getMenuPosition } from '@/shared/components/buttons/ActionMenuButton';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
@@ -30,6 +32,9 @@ export const MemberItem: React.FC<MemberItemProps> = ({
     onActivate,
     onResendInvite,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuPosition, setMenuPosition] = useState<any>({ top: 0, right: 0 });
     const buttonRef = useRef<View>(null);
@@ -119,7 +124,7 @@ export const MemberItem: React.FC<MemberItemProps> = ({
             </View>
 
             <View ref={buttonRef} collapsable={false}>
-                <MoreButton onPress={handlePressOption} color={colors.textSecondary} />
+                <MoreButton onPress={handlePressOption} color={theme.textSecondary} />
             </View>
 
             <ActionMenu
@@ -132,44 +137,45 @@ export const MemberItem: React.FC<MemberItemProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: spacing.md,
-        marginHorizontal: spacing.md,
-        borderRadius: borderRadius.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    leftContent: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        flex: 1,
-        gap: spacing.md,
-    },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        overflow: 'hidden',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    info: {
-        flex: 1,
-        gap: 8,
-    },
-    name: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    details: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: spacing.md,
+            marginHorizontal: spacing.md,
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        leftContent: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            flex: 1,
+            gap: spacing.md,
+        },
+        avatar: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            overflow: 'hidden',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        info: {
+            flex: 1,
+            gap: 8,
+        },
+        name: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+        },
+        details: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: '400',
+        },
+    });

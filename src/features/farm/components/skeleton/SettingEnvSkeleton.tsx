@@ -1,23 +1,32 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { spacing, colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { spacing } from '@/styles';
 
-const SettingItemSkeleton = () => (
-    <View style={styles.itemRow}>
-        {/* Checkbox */}
-        <Skeleton width={24} height={24} borderRadius={4} style={{ marginRight: 12 }} />
-        {/* Text Content */}
-        <View style={{ flex: 1 }}>
-            <Skeleton width={100} height={16} borderRadius={4} style={{ marginBottom: 4 }} />
-            <Skeleton width={150} height={12} borderRadius={4} />
+const SettingItemSkeleton = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+    return (
+        <View style={styles.itemRow}>
+            {/* Checkbox */}
+            <Skeleton width={24} height={24} borderRadius={4} style={{ marginRight: 12 }} />
+            {/* Text Content */}
+            <View style={{ flex: 1 }}>
+                <Skeleton width={100} height={16} borderRadius={4} style={{ marginBottom: 4 }} />
+                <Skeleton width={150} height={12} borderRadius={4} />
+            </View>
+            {/* Edit Button */}
+            <Skeleton width={36} height={36} borderRadius={8} />
         </View>
-        {/* Edit Button */}
-        <Skeleton width={36} height={36} borderRadius={8} />
-    </View>
-);
+    );
+};
 
 export const SettingEnvSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Dropdown / Farm Name */}
@@ -61,28 +70,29 @@ export const SettingEnvSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: spacing.md,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    section: {
-        marginBottom: 24,
-    },
-    groupHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    itemRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-        padding: 12,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.md,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        section: {
+            marginBottom: 24,
+        },
+        groupHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        itemRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 12,
+            padding: 12,
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+    });

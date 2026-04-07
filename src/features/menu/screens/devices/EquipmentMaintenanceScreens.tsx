@@ -3,7 +3,9 @@ import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EquipmentMaintenance } from '@/features/menu/components/devices/EquipmentMaintenance';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
@@ -12,6 +14,9 @@ import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 type EquipmentMaintenanceScreenRouteProp = RouteProp<MenuStackParamList, 'EquipmentMaintenance'>;
 
 export const EquipmentMaintenanceScreens = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation();
     const route = useRoute<EquipmentMaintenanceScreenRouteProp>();
     const { deviceId } = route.params || {};
@@ -75,23 +80,24 @@ export const EquipmentMaintenanceScreens = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            paddingTop: spacing.sm,
+            paddingBottom: spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+        },
+    });

@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
 import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
@@ -24,6 +26,9 @@ export const EquipmentMaintenance: React.FC<EquipmentMaintenanceProps> = ({
     resetTime,
     onResetTimeChange,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             <DateInputButton label="Thời gian thực hiện" date={date} onDateChange={onDateChange} />
@@ -37,7 +42,7 @@ export const EquipmentMaintenance: React.FC<EquipmentMaintenanceProps> = ({
                 <TextInput
                     style={styles.textArea}
                     placeholder="Nhập mô tả"
-                    placeholderTextColor={colors.textTertiary}
+                    placeholderTextColor={theme.textTertiary}
                     multiline
                     textAlignVertical="top"
                     value={description}
@@ -83,48 +88,49 @@ export const EquipmentMaintenance: React.FC<EquipmentMaintenanceProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        gap: spacing.md,
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    inputGroup: {
-        gap: spacing.sm,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-    },
-    required: {
-        color: colors.error,
-    },
-    textArea: {
-        height: 80,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        padding: spacing.sm,
-        paddingTop: spacing.sm, // Ensure text starts at top
-        backgroundColor: colors.white,
-        color: colors.text,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        gap: spacing.xl,
-        marginTop: spacing.xs,
-    },
-    radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    radioLabel: {
-        fontSize: 14,
-        color: colors.text,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            gap: spacing.md,
+            backgroundColor: theme.background,
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        inputGroup: {
+            gap: spacing.sm,
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.text,
+        },
+        required: {
+            color: theme.error,
+        },
+        textArea: {
+            height: 80,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.sm,
+            padding: spacing.sm,
+            paddingTop: spacing.sm, // Ensure text starts at top
+            backgroundColor: theme.background,
+            color: theme.text,
+        },
+        radioGroup: {
+            flexDirection: 'row',
+            gap: spacing.xl,
+            marginTop: spacing.xs,
+        },
+        radioItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs,
+        },
+        radioLabel: {
+            fontSize: 14,
+            color: theme.text,
+        },
+    });

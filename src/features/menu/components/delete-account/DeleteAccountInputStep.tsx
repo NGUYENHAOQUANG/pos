@@ -13,7 +13,9 @@ import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { DeleteAccountWarningBox } from '@/features/menu/components/delete-account/DeleteAccountWarningStep';
 import { RequiredDot } from '@/shared/components/forms/Input';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
@@ -34,6 +36,8 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     onNext,
     currentUserPhone,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const {
         control,
         handleSubmit,
@@ -141,7 +145,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                                             errors.phoneNumber ? styles.inputError : null,
                                         ]}
                                         placeholder="Nhập số điện thoại"
-                                        placeholderTextColor={colors.textTertiary}
+                                        placeholderTextColor={theme.textTertiary}
                                         value={value}
                                         maxLength={10}
                                         onChangeText={onChange}
@@ -194,7 +198,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                                                         : null,
                                                 ]}
                                                 placeholder="Nhập lý do khác"
-                                                placeholderTextColor={colors.textTertiary}
+                                                placeholderTextColor={theme.textTertiary}
                                                 value={value}
                                                 onChangeText={onChange}
                                                 onBlur={onBlur}
@@ -233,75 +237,76 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-        position: 'relative',
-    },
-    scrollContent: {
-        padding: spacing.md,
-        paddingBottom: 100,
-        gap: spacing.sm,
-    },
-    formCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.lg,
-        borderWidth: 1,
-        borderColor: colors.border,
-        padding: spacing.md,
-    },
-    instructionText: {
-        fontSize: 14,
-        color: colors.gray[500],
-        marginBottom: spacing.lg,
-    },
-    inputGroup: {
-        marginBottom: spacing.md,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: 'bold',
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.xs,
-    },
-    input: {
-        height: 48,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.sm,
-        fontSize: 16,
-        color: colors.text,
-        backgroundColor: colors.white,
-    },
-    textArea: {
-        paddingTop: spacing.sm,
-        height: 100,
-    },
-    inputError: {
-        borderColor: colors.red[600],
-    },
-    errorText: {
-        marginTop: 4,
-        fontSize: 12,
-        color: colors.red[600],
-    },
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+            position: 'relative',
+        },
+        scrollContent: {
+            padding: spacing.md,
+            paddingBottom: 100,
+            gap: spacing.sm,
+        },
+        formCard: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.lg,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            padding: spacing.md,
+        },
+        instructionText: {
+            fontSize: 14,
+            color: theme.gray[500],
+            marginBottom: spacing.lg,
+        },
+        inputGroup: {
+            marginBottom: spacing.md,
+        },
+        label: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: 'bold',
+        },
+        labelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: spacing.xs,
+        },
+        input: {
+            height: 48,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: borderRadius.md,
+            paddingHorizontal: spacing.sm,
+            fontSize: 16,
+            color: theme.text,
+            backgroundColor: theme.background,
+        },
+        textArea: {
+            paddingTop: spacing.sm,
+            height: 100,
+        },
+        inputError: {
+            borderColor: theme.red[600],
+        },
+        errorText: {
+            marginTop: 4,
+            fontSize: 12,
+            color: theme.red[600],
+        },
 
-    checkboxContainer: {
-        marginTop: spacing.sm,
-    },
-    checkboxOption: {
-        paddingVertical: spacing.xs,
-        marginBottom: spacing.xs,
-    },
-    checkboxText: {
-        fontSize: 15,
-        color: colors.text,
-        flex: 1,
-    },
-});
+        checkboxContainer: {
+            marginTop: spacing.sm,
+        },
+        checkboxOption: {
+            paddingVertical: spacing.xs,
+            marginBottom: spacing.xs,
+        },
+        checkboxText: {
+            fontSize: 15,
+            color: theme.text,
+            flex: 1,
+        },
+    });

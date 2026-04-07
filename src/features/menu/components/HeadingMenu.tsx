@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 export interface MenuTabItem {
     key: string;
@@ -26,6 +28,9 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
     counts = { all: 0, active: 0, ended: 0 },
     tabs: customTabs,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const tabs: MenuTabItem[] = customTabs || [
         { key: 'all', label: 'Tất cả', count: counts.all },
         // { key: 'active', label: 'Hoạt động', count: counts.active },
@@ -64,36 +69,37 @@ export const HeadingMenu: React.FC<HeadingMenuProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    scrollContent: {
-        paddingHorizontal: spacing.md,
-    },
-    tab: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.lg,
-    },
-    tabContent: {
-        paddingVertical: spacing.md,
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-        alignItems: 'center',
-    },
-    activeTabContent: {
-        borderBottomColor: colors.primary,
-    },
-    tabText: {
-        fontSize: 15,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    activeTabText: {
-        color: colors.primary,
-        fontWeight: '600',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.white,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        scrollContent: {
+            paddingHorizontal: spacing.md,
+        },
+        tab: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.lg,
+        },
+        tabContent: {
+            paddingVertical: spacing.md,
+            borderBottomWidth: 2,
+            borderBottomColor: 'transparent',
+            alignItems: 'center',
+        },
+        activeTabContent: {
+            borderBottomColor: theme.primary,
+        },
+        tabText: {
+            fontSize: 15,
+            color: theme.text,
+            fontWeight: '400',
+        },
+        activeTabText: {
+            color: theme.primary,
+            fontWeight: '600',
+        },
+    });
