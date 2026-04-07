@@ -10,7 +10,7 @@ import { useAllPondsByZone } from '@/features/farm/hooks/usePonds';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { useSizeMeasurements } from '@/features/farm/hooks/useSizeMeasurement';
 import { useCurrentShrimpBreed } from '@/features/material/hooks/useShrimpSeeds';
-import { stockTransferService } from '@/features/farm/services/stock-transfer.service';
+import { stockTransferService } from '@/features/farm/services/pond-work/stock-transfer.service';
 import { stockTransferFormSchema } from '@/features/farm/schemas/stockTransferFormSchema';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { StockTransferSkeleton } from '@/features/farm/components/skeleton/StockTransferSkeleton';

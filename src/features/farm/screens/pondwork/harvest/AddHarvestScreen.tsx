@@ -17,7 +17,7 @@ import {
     useUpdateHarvestRecord,
     useDeleteHarvestRecord,
 } from '@/features/farm/hooks/useHarvestRecord';
-import { harvestService } from '@/features/farm/services/harvest.service';
+import { harvestService } from '@/features/farm/services/pond-work/harvest.service';
 import { HarvestFormData, getHarvestTypeDisplay } from '@/features/farm/schemas/harvestFormSchema';
 
 import { AddHarvestForm } from './AddHarvestForm';
