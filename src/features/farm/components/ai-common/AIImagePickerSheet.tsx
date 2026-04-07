@@ -17,7 +17,9 @@ import {
     type Asset,
     type ImagePickerResponse,
 } from 'react-native-image-picker';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { spacing, borderRadius, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ImageCropperView } from '@/shared/components/image-cropper';
 import type { CropRegion } from '@/shared/components/image-cropper';
 
@@ -47,6 +49,8 @@ export function AIImagePickerSheet({
     title = 'Chọn ảnh',
     subtitle = 'Ảnh sẽ được đưa vào AI để phân tích',
 }: AIImagePickerSheetProps) {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const insets = useSafeAreaInsets();
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const [cropperVisible, setCropperVisible] = React.useState(false);
@@ -145,7 +149,7 @@ export function AIImagePickerSheet({
                                         activeOpacity={0.75}
                                     >
                                         <View style={[styles.iconBox, styles.iconBoxCamera]}>
-                                            <Ionicons name="camera" size={26} color={colors.text} />
+                                            <Ionicons name="camera" size={26} color={theme.text} />
                                         </View>
                                         <View style={styles.optionText}>
                                             <Text style={styles.optionTitle}>Chụp ảnh mới</Text>
@@ -156,7 +160,7 @@ export function AIImagePickerSheet({
                                         <Ionicons
                                             name="chevron-forward"
                                             size={18}
-                                            color={colors.gray[400]}
+                                            color={theme.textSecondary}
                                         />
                                     </TouchableOpacity>
 
@@ -169,7 +173,7 @@ export function AIImagePickerSheet({
                                         activeOpacity={0.75}
                                     >
                                         <View style={[styles.iconBox, styles.iconBoxGallery]}>
-                                            <Ionicons name="images" size={26} color={colors.text} />
+                                            <Ionicons name="images" size={26} color={theme.text} />
                                         </View>
                                         <View style={styles.optionText}>
                                             <Text style={styles.optionTitle}>Chọn từ thư viện</Text>
@@ -180,7 +184,7 @@ export function AIImagePickerSheet({
                                         <Ionicons
                                             name="chevron-forward"
                                             size={18}
-                                            color={colors.gray[400]}
+                                            color={theme.textSecondary}
                                         />
                                     </TouchableOpacity>
                                 </View>
@@ -213,88 +217,89 @@ export function AIImagePickerSheet({
     );
 }
 
-const styles = StyleSheet.create({
-    backdrop: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        padding: 16,
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        paddingTop: spacing.sm,
-        paddingBottom: 24,
-        padding: spacing.md,
-        overflow: 'hidden',
-    },
-    header: {
-        alignItems: 'center',
-        paddingBottom: spacing.md,
-    },
-    indicator: {
-        width: 60,
-        height: 4,
-        backgroundColor: colors.gray[300],
-        borderRadius: 2,
-        marginBottom: spacing.md,
-    },
-    title: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginBottom: spacing.xs,
-    },
-    subtitle: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        textAlign: 'center',
-        lineHeight: 18,
-    },
-    options: {
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        overflow: 'hidden',
-        marginBottom: spacing.sm,
-    },
-    optionCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.md,
-    },
-    iconBox: {
-        width: 44,
-        height: 44,
-        borderRadius: borderRadius.full,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.md,
-        backgroundColor: colors.gray[100],
-    },
-    iconBoxCamera: {
-        backgroundColor: colors.gray[100],
-    },
-    iconBoxGallery: {
-        backgroundColor: colors.gray[100],
-    },
-    optionText: {
-        flex: 1,
-    },
-    optionTitle: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text,
-        marginBottom: 2,
-    },
-    optionDesc: {
-        fontSize: typography.fontSize.xs,
-        color: colors.textSecondary,
-        lineHeight: 17,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.gray[100],
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        backdrop: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+            padding: 16,
+        },
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: 24,
+            paddingTop: spacing.sm,
+            paddingBottom: 24,
+            padding: spacing.md,
+            overflow: 'hidden',
+        },
+        header: {
+            alignItems: 'center',
+            paddingBottom: spacing.md,
+        },
+        indicator: {
+            width: 60,
+            height: 4,
+            backgroundColor: theme.defaultBorder,
+            borderRadius: 2,
+            marginBottom: spacing.md,
+        },
+        title: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+            marginBottom: spacing.xs,
+        },
+        subtitle: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            lineHeight: 18,
+        },
+        options: {
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'hidden',
+            marginBottom: spacing.sm,
+        },
+        optionCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.md,
+        },
+        iconBox: {
+            width: 44,
+            height: 44,
+            borderRadius: borderRadius.full,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: spacing.md,
+            backgroundColor: theme.backgroundSecondary,
+        },
+        iconBoxCamera: {
+            backgroundColor: theme.backgroundSecondary,
+        },
+        iconBoxGallery: {
+            backgroundColor: theme.backgroundSecondary,
+        },
+        optionText: {
+            flex: 1,
+        },
+        optionTitle: {
+            fontSize: typography.fontSize.base,
+            fontWeight: typography.fontWeight.medium,
+            color: theme.text,
+            marginBottom: 2,
+        },
+        optionDesc: {
+            fontSize: typography.fontSize.xs,
+            color: theme.textSecondary,
+            lineHeight: 17,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+        },
+    });

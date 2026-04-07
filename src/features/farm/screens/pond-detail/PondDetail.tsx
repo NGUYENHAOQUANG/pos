@@ -3,7 +3,9 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Button } from '@/shared/components/buttons/Button';
 import { PondData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
@@ -74,6 +76,9 @@ export const PondDetail: React.FC<PondDetailProps> = ({
 }) => {
     const insets = useSafeAreaInsets();
     const availableJobTypes = jobs.map(j => j.type);
+
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     return (
         <View style={styles.container}>
@@ -183,41 +188,42 @@ export const PondDetail: React.FC<PondDetailProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    content: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: 100,
-        flexGrow: 1,
-    },
-    footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: spacing.md,
-        paddingBottom: 32,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    placeholderContainer: {
-        padding: spacing.xl,
-        alignItems: 'center',
-    },
-    placeholderText: {
-        color: colors.text,
-    },
-    cycleCardWrapper: {
-        marginHorizontal: 16,
-    },
-    emptyCard: {
-        marginTop: spacing.lg,
-        marginBottom: spacing.lg,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        content: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingBottom: 100,
+            flexGrow: 1,
+        },
+        footer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: spacing.md,
+            paddingBottom: 32,
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+        placeholderContainer: {
+            padding: spacing.xl,
+            alignItems: 'center',
+        },
+        placeholderText: {
+            color: theme.text,
+        },
+        cycleCardWrapper: {
+            marginHorizontal: 16,
+        },
+        emptyCard: {
+            marginTop: spacing.lg,
+            marginBottom: spacing.lg,
+        },
+    });

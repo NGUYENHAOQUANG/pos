@@ -13,7 +13,7 @@
 import React, { useCallback } from 'react';
 import { RefreshControl as RNRefreshControl, RefreshControlProps } from 'react-native';
 import { haptics } from '@/shared/utils/haptics';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 
 /**
  * Shared RefreshControl with haptic feedback and consistent styling.
@@ -21,10 +21,16 @@ import { colors } from '@/styles';
  */
 export const RefreshControl: React.FC<RefreshControlProps> = ({
     onRefresh,
-    tintColor = colors.black,
-    colors: refreshColors = [colors.black],
+    tintColor,
+    colors: refreshColors,
+    progressBackgroundColor,
     ...props
 }) => {
+    const theme = useAppTheme();
+    const activeTintColor = tintColor || theme.text;
+    const activeColors = refreshColors || [theme.text];
+    const activeBackgroundColor = progressBackgroundColor || theme.background;
+
     const handleRefresh = useCallback(() => {
         haptics.light();
         onRefresh?.();
@@ -33,8 +39,9 @@ export const RefreshControl: React.FC<RefreshControlProps> = ({
     return (
         <RNRefreshControl
             onRefresh={handleRefresh}
-            tintColor={tintColor}
-            colors={refreshColors}
+            tintColor={activeTintColor}
+            colors={activeColors}
+            progressBackgroundColor={activeBackgroundColor}
             {...props}
         />
     );

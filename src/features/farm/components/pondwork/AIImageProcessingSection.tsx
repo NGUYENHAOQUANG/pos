@@ -5,7 +5,9 @@ import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { Button } from '@/shared/components/buttons/Button';
 import { IconCamera } from '@/assets/icons';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
-import { colors, typography, borderRadius, spacing } from '@/styles';
+import { typography, borderRadius, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 interface Props {
     imageUri: string | null;
@@ -33,6 +35,8 @@ export const AIImageProcessingSection: React.FC<Props> = ({
     onOpenPickerSheet,
     children,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const defaultAspectRatio =
         imageDimensions.width > 0 && imageDimensions.height > 0
             ? imageDimensions.width / imageDimensions.height
@@ -55,7 +59,7 @@ export const AIImageProcessingSection: React.FC<Props> = ({
                 title="Chụp hoặc chọn ảnh"
                 variant="outline"
                 onPress={onOpenPickerSheet ?? openPicker}
-                renderLeftIcon={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
+                renderLeftIcon={<IconCamera width={20} height={20} fill={theme.textSecondary} />}
                 style={styles.emptyStateButton}
                 textStyle={styles.emptyStateButtonText}
             />
@@ -102,51 +106,52 @@ export const AIImageProcessingSection: React.FC<Props> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    emptyUploadContainer: {
-        borderWidth: 0,
-        backgroundColor: 'transparent',
-    },
-    imageUploadContainer: {
-        backgroundColor: colors.gray[100],
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderStyle: 'dashed',
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
-    },
-    emptyStateContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    emptyStateText: {
-        fontSize: 16,
-        color: colors.textSecondary,
-        textAlign: 'center',
-        marginTop: spacing.md,
-        marginBottom: spacing.lg,
-        lineHeight: 20,
-    },
-    emptyStateButtonWrapper: {
-        width: '100%',
-    },
-    emptyStateButton: {
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-        borderRadius: 100,
-        borderWidth: 1,
-        height: 44,
-    },
-    emptyStateButtonText: {
-        color: colors.textSecondary,
-        fontSize: typography.fontSize.base,
-        fontWeight: '500',
-    },
-    bottomButtonContainer: {
-        width: '100%',
-    },
-    bottomButtonWithImage: {
-        marginTop: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        emptyUploadContainer: {
+            borderWidth: 0,
+            backgroundColor: 'transparent',
+        },
+        imageUploadContainer: {
+            backgroundColor: theme.backgroundSecondary,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderStyle: 'dashed',
+            borderRadius: borderRadius.md,
+            overflow: 'hidden',
+        },
+        emptyStateContainer: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        emptyStateText: {
+            fontSize: 16,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            marginTop: spacing.md,
+            marginBottom: spacing.lg,
+            lineHeight: 20,
+        },
+        emptyStateButtonWrapper: {
+            width: '100%',
+        },
+        emptyStateButton: {
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+            borderRadius: 100,
+            borderWidth: 1,
+            height: 44,
+        },
+        emptyStateButtonText: {
+            color: theme.textSecondary,
+            fontSize: typography.fontSize.base,
+            fontWeight: '500',
+        },
+        bottomButtonContainer: {
+            width: '100%',
+        },
+        bottomButtonWithImage: {
+            marginTop: spacing.md,
+        },
+    });

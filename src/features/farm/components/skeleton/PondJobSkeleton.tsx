@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 const SKELETON_COUNT = 6;
 
 const JobCardSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.cardContainer}>
             {/* Header */}
@@ -43,6 +48,9 @@ const JobCardSkeleton: React.FC = () => {
 
 // New Cycle Skeleton
 const CycleCardSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.cycleContainer}>
             {/* Cycle Header */}
@@ -83,6 +91,9 @@ const CycleCardSkeleton: React.FC = () => {
 };
 
 export const PondJobSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     // Mimic JobListCard structure
     return (
         <View style={styles.container}>
@@ -105,85 +116,86 @@ export const PondJobSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.backgroundPrimary,
-    },
-    dateHeader: {
-        paddingHorizontal: spacing.md,
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-    },
-    listContainer: {
-        paddingHorizontal: 16,
-        paddingTop: spacing.sm,
-    },
-    // Card Styles
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 16,
-        marginBottom: 8,
-        overflow: 'hidden',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-    },
-    leftContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    iconSkeleton: {
-        marginRight: 12,
-    },
-    titleContainer: {
-        flex: 1,
-    },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
-    body: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        alignItems: 'center', // Center content like "Chưa có dữ liệu"
-    },
-    // Cycle Skeleton Styles
-    cycleContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: spacing.sm,
-    },
-    cycleHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.md,
-        paddingBottom: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    infoGrid: {
-        gap: 8,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.backgroundPrimary,
+        },
+        dateHeader: {
+            paddingHorizontal: spacing.md,
+            marginTop: spacing.md,
+            marginBottom: spacing.xs,
+        },
+        listContainer: {
+            paddingHorizontal: 16,
+            paddingTop: spacing.sm,
+        },
+        // Card Styles
+        cardContainer: {
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 16,
+            marginBottom: 8,
+            overflow: 'hidden',
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+        },
+        leftContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            flex: 1,
+        },
+        iconSkeleton: {
+            marginRight: 12,
+        },
+        titleContainer: {
+            flex: 1,
+        },
+        actions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginHorizontal: -spacing.md,
+        },
+        body: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: 12,
+            alignItems: 'center', // Center content like "Chưa có dữ liệu"
+        },
+        // Cycle Skeleton Styles
+        cycleContainer: {
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            padding: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            marginBottom: spacing.sm,
+        },
+        cycleHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: spacing.md,
+            paddingBottom: spacing.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.borderLight,
+        },
+        infoGrid: {
+            gap: 8,
+        },
+        infoRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+    });

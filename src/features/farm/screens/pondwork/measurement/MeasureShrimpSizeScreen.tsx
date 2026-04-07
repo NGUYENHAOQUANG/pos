@@ -4,7 +4,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarmStore } from '@/features/farm/store/farmStore';
@@ -32,6 +33,8 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     const { itemToEdit, pondId, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const zoneId = useFarmStore(state => state.selectedZoneId) || '';
 
@@ -168,21 +171,22 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: 0,
-        paddingBottom: 100,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            padding: 0,
+            paddingBottom: 100,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+    });

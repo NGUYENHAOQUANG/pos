@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, typography } from '@/styles';
+import { typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useCycleDetail } from '@/features/farm/hooks/useCycle';
 import { formatDate } from '@/features/farm/utils/dateUtils';
@@ -20,6 +22,9 @@ import type { HarvestType } from '@/features/farm/types/harvestRecord.types';
 
 type ScreenRouteProp = RouteProp<AppStackParamList, 'CycleDetailScreen'>;
 export const CycleDetailScreen: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     const navigation = useNavigation<any>();
     const route = useRoute<ScreenRouteProp>();
     const { pondId, zoneId, warehouseId, cycleId } = route.params ?? {};
@@ -234,32 +239,33 @@ export const CycleDetailScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    infoContainer: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    badgeWrapper: {
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-    },
-    leftTitleContainer: {
-        alignItems: 'flex-start',
-        marginLeft: 8,
-    },
-    headerTitle: {
-        fontSize: 14,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: typography.fontWeight.regular,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        infoContainer: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        badgeWrapper: {
+            height: 40,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+        },
+        leftTitleContainer: {
+            alignItems: 'flex-start',
+            marginLeft: 8,
+        },
+        headerTitle: {
+            fontSize: 14,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+        },
+        headerSubtitle: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            fontWeight: typography.fontWeight.regular,
+        },
+    });

@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { BreedOption, PondData } from '@/features/farm/types/farm.types';
 
 import { Control, Controller, useWatch } from 'react-hook-form';
@@ -31,6 +33,8 @@ const CreateCycleForm: React.FC<Props> = ({
     onPressCountingShrimp,
 }) => {
     const activeNotes = useWatch({ control, name: 'notes' });
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     return (
         <View style={styles.container}>
@@ -63,10 +67,11 @@ const CreateCycleForm: React.FC<Props> = ({
 
 export default CreateCycleForm;
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-        gap: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+            gap: spacing.sm,
+        },
+    });

@@ -5,7 +5,8 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { GeneralInfoBoxRef } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -44,6 +45,8 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
     onDelete,
     onBack,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -199,14 +202,15 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        footer: {
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: theme.defaultBorder,
+        },
+    });

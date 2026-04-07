@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 
 interface ShrimpPondInfoProps {
@@ -17,6 +19,9 @@ export const ShrimpPondInfo: React.FC<ShrimpPondInfoProps> = ({
     lastUpdate,
     lastActivity,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.body}>
             {hasData ? (
@@ -43,36 +48,37 @@ export const ShrimpPondInfo: React.FC<ShrimpPondInfoProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    body: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-    },
-    contentContainer: {
-        gap: spacing.sm,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-    value: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
-    },
-    bodyEmptyText: {
-        fontSize: 14,
-        color: colors.text,
-        textAlign: 'center',
-        paddingVertical: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        body: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: 12,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+        },
+        contentContainer: {
+            gap: spacing.sm,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+        value: {
+            fontSize: 14,
+            color: theme.text,
+            fontWeight: typography.fontWeight.bold,
+        },
+        bodyEmptyText: {
+            fontSize: 14,
+            color: theme.text,
+            textAlign: 'center',
+            paddingVertical: spacing.sm,
+        },
+    });

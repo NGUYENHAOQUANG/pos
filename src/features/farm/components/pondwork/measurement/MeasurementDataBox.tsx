@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import { Button } from '@/shared/components/buttons/Button';
 import { IconAICheck } from '@/assets/icons';
 import { formatDecimalInput } from '@/shared/utils';
@@ -25,6 +25,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
     onAIMeasurePress,
     averageSizeCm: _averageSizeCm,
 }) => {
+    const theme = useAppTheme();
     const [totalShrimp, setTotalShrimp] = useState<number | null>(null);
     const [survivalRate, setSurvivalRate] = useState<number | null>(null);
 
@@ -93,7 +94,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 title="Kiểm tra kích thước tôm bằng AI"
                 variant="outline"
                 onPress={onAIMeasurePress || (() => {})}
-                renderLeftIcon={<IconAICheck width={20} height={20} fill={colors.text} />}
+                renderLeftIcon={<IconAICheck width={20} height={20} fill={theme.text} />}
                 fullWidth
             />
 

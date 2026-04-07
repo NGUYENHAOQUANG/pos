@@ -11,7 +11,9 @@ import {
 import { Text } from '@/shared/components/typography/Text';
 
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
 
@@ -37,6 +39,8 @@ export const Filter: React.FC<FilterProps> = ({
 }) => {
     const [selectedTypes, setSelectedTypes] = useState<string[]>(initialSelectedTypes);
     const slideAnim = React.useRef(new Animated.Value(Dimensions.get('window').height)).current;
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     useEffect(() => {
         if (visible) {
@@ -108,14 +112,14 @@ export const Filter: React.FC<FilterProps> = ({
                         <View style={styles.header}>
                             <Text style={styles.headerTitle}>Bộ lọc</Text>
                             <TouchableOpacity onPress={onClose}>
-                                <CloseIcon width={20} height={20} />
+                                <CloseIcon width={20} height={20} color={theme.text} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.content}>
                             <Text
                                 style={{
                                     textAlign: 'center',
-                                    color: colors.textSecondary,
+                                    color: theme.textSecondary,
                                     marginTop: spacing.lg,
                                 }}
                             >
@@ -153,7 +157,7 @@ export const Filter: React.FC<FilterProps> = ({
                             onPress={onClose}
                             style={[styles.headerSide, { alignItems: 'flex-end' }]}
                         >
-                            <CloseIcon width={20} height={20} />
+                            <CloseIcon width={20} height={20} color={theme.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -206,70 +210,70 @@ export const Filter: React.FC<FilterProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        paddingBottom: 40,
-    },
-    overlayTouchable: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    container: {
-        width: '94%',
-        backgroundColor: colors.white,
-        borderRadius: 24,
-        paddingBottom: spacing.md,
-        maxHeight: '80%',
-        overflow: 'hidden',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-    },
-    headerTitle: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSide: {
-        flex: 1,
-    },
-    resetText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.primary,
-        fontWeight: typography.fontWeight.medium,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    scrollArea: {
-        maxHeight: 400,
-    },
-    sectionTitle: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginBottom: spacing.sm,
-    },
-    checkboxRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: spacing.sm,
-    },
-
-    checkboxLabel: {
-        fontSize: typography.fontSize.base,
-        color: colors.text,
-        fontWeight: typography.fontWeight.regular,
-        marginLeft: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: theme.overlay,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            paddingBottom: 40,
+        },
+        overlayTouchable: {
+            ...StyleSheet.absoluteFillObject,
+        },
+        container: {
+            width: '94%',
+            backgroundColor: theme.background,
+            borderRadius: 24,
+            paddingBottom: spacing.md,
+            maxHeight: '80%',
+            overflow: 'hidden',
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottomWidth: 1,
+            borderBottomColor: theme.defaultBorder,
+            paddingVertical: 6,
+            paddingHorizontal: 16,
+        },
+        headerTitle: {
+            fontSize: typography.fontSize.lg,
+            fontWeight: typography.fontWeight.semibold,
+            color: theme.text,
+            textAlign: 'center',
+        },
+        headerSide: {
+            flex: 1,
+        },
+        resetText: {
+            fontSize: typography.fontSize.sm,
+            color: theme.primary,
+            fontWeight: typography.fontWeight.medium,
+        },
+        content: {
+            padding: spacing.md,
+        },
+        scrollArea: {
+            maxHeight: 400,
+        },
+        sectionTitle: {
+            fontSize: typography.fontSize.base,
+            fontWeight: typography.fontWeight.bold,
+            color: theme.text,
+            marginBottom: spacing.sm,
+        },
+        checkboxRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: spacing.sm,
+        },
+        checkboxLabel: {
+            fontSize: typography.fontSize.base,
+            color: theme.text,
+            fontWeight: typography.fontWeight.regular,
+            marginLeft: spacing.sm,
+        },
+    });

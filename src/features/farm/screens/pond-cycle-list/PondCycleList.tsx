@@ -4,13 +4,14 @@ import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { DropdownMaterial } from '@/features/material/components/DropdownMaterial';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { DetailRow } from '@/features/material/components/DetailRow';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { spacing, borderRadius } from '@/styles';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { CycleData } from '@/features/farm/types/cycle.types';
-import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { Tag } from '@/features/farm/components/pond/Tag';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
@@ -18,11 +19,9 @@ interface PondCycleDetailContentProps {
     isLoading: boolean;
     displayedCycles: CycleData[];
     getBreedLabel: (cycle: CycleData) => string;
-    seasonOptions: DropdownOption[];
+    seasonOptions: DropDownItem[];
     selectedSeason: string;
     setSelectedSeason: (val: string) => void;
-    dropdownOpen: boolean;
-    setDropdownOpen: (val: boolean) => void;
     onBack: () => void;
     onPressCycle: (cycleId: string) => void;
 }
@@ -34,37 +33,30 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
     seasonOptions,
     selectedSeason,
     setSelectedSeason,
-    dropdownOpen,
-    setDropdownOpen,
     onBack,
     onPressCycle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     return (
         <View style={styles.safeArea}>
             <HeaderSection title="Chu kỳ nuôi" onBack={onBack} />
-            <View
-                style={[
-                    styles.dropdownContainer,
-                    { zIndex: dropdownOpen ? 10 : 1, elevation: dropdownOpen ? 10 : 1 },
-                ]}
-            >
-                <DropdownMaterial
-                    options={seasonOptions}
-                    value={selectedSeason}
-                    onChange={value => {
-                        setSelectedSeason(value);
+            <View style={[styles.dropdownContainer, { zIndex: 10, elevation: 10 }]}>
+                <DropDownButtonBasic
+                    data={seasonOptions}
+                    value={seasonOptions.find(o => o.id === selectedSeason) || seasonOptions[0]}
+                    onSelect={item => {
+                        setSelectedSeason(item.id as string);
                     }}
                     placeholder="Chọn vụ nuôi"
-                    isOpen={dropdownOpen}
-                    onToggle={() => setDropdownOpen(!dropdownOpen)}
-                    useAutoScroll={true}
+                    showIcon={false}
                 />
             </View>
             <SafeInputLayout style={styles.listContainer} contentContainerStyle={styles.container}>
                 {isLoading ? (
                     <ActivityIndicator
                         size="large"
-                        color={colors.primary}
+                        color={theme.primary}
                         style={{ marginTop: spacing.xl }}
                     />
                 ) : displayedCycles.length === 0 ? (
@@ -104,7 +96,7 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                                         <Ionicons
                                             name="chevron-forward"
                                             size={16}
-                                            color={colors.textSecondary}
+                                            color={theme.textSecondary}
                                         />
                                     </View>
                                 </TouchableOpacity>
@@ -142,67 +134,68 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-    container: {
-        padding: spacing.md,
-        gap: spacing.sm,
-    },
-    listContainer: {
-        flex: 1,
-    },
-    emptyText: {
-        textAlign: 'center',
-        padding: spacing.xl,
-        color: colors.textSecondary,
-        fontSize: 15,
-    },
-    dropdownContainer: {
-        marginHorizontal: spacing.md,
-        marginTop: spacing.sm,
-        marginBottom: -8, // Reduce gap between dropdown and list
-    },
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        overflow: 'hidden',
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 12,
-    },
-    headerLeft: {
-        flex: 1,
-        paddingRight: spacing.sm,
-    },
-    cycleName: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 4,
-    },
-    dateLabel: {
-        fontSize: 13,
-        color: colors.textSecondary,
-    },
-    headerRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
-    },
-    cardContent: {
-        padding: 12,
-        gap: spacing.sm,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        safeArea: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+        container: {
+            padding: spacing.md,
+            gap: spacing.sm,
+        },
+        listContainer: {
+            flex: 1,
+        },
+        emptyText: {
+            textAlign: 'center',
+            padding: spacing.xl,
+            color: theme.textSecondary,
+            fontSize: 15,
+        },
+        dropdownContainer: {
+            marginHorizontal: spacing.md,
+            marginTop: spacing.sm,
+            marginBottom: -8, // Reduce gap between dropdown and list
+        },
+        card: {
+            backgroundColor: theme.background,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            overflow: 'hidden',
+        },
+        cardHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 12,
+        },
+        headerLeft: {
+            flex: 1,
+            paddingRight: spacing.sm,
+        },
+        cycleName: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 4,
+        },
+        dateLabel: {
+            fontSize: 13,
+            color: theme.textSecondary,
+        },
+        headerRight: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.sm,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+        },
+        cardContent: {
+            padding: 12,
+            gap: spacing.sm,
+        },
+    });

@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox, GeneralInfoBoxRef } from '../../components/pondwork/GeneralInfoBox';
@@ -40,6 +41,8 @@ export const HandleProblemForm = ({
     onDelete,
     isMaterialRequired = true,
 }: HandleProblemFormProps) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const { control, handleSubmit, reset, watch } = useForm<HandleProblemFormValues>({
         resolver: zodResolver(handleProblemSchema),
         defaultValues: initialData,
@@ -177,7 +180,11 @@ export const HandleProblemForm = ({
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSubmit(handleFormSubmit)}
                     onSecondaryPress={onBack}
-                    style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                    style={{
+                        borderTopWidth: 1,
+                        borderTopColor: theme.defaultBorder,
+                        backgroundColor: theme.background,
+                    }}
                     primaryDisabled={isEditMode && !hasChanges}
                 />
 
@@ -192,8 +199,9 @@ export const HandleProblemForm = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.backgroundPrimary },
-    scrollContent: { paddingBottom: 100 },
-    spacer: { height: 80 },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: { flex: 1, backgroundColor: theme.backgroundPrimary },
+        scrollContent: { paddingBottom: 100 },
+        spacer: { height: 80 },
+    });

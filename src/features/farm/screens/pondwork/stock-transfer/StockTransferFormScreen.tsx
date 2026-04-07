@@ -14,7 +14,8 @@ import { stockTransferService } from '@/features/farm/services/stock-transfer.se
 import { stockTransferFormSchema } from '@/features/farm/schemas/stockTransferFormSchema';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { StockTransferSkeleton } from '@/features/farm/components/skeleton/StockTransferSkeleton';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import Toast from 'react-native-toast-message';
 import {
     StockTransferForm,
@@ -29,6 +30,8 @@ export const StockTransferFormScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { setTabBarVisible } = useTabBarVisibility();
     const { mutateAsync: createStockTransfer, isPending: isCreating } = useCreateStockTransfer();
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
     const zoneId = selectedZoneId ? String(selectedZoneId) : undefined;
@@ -134,9 +137,10 @@ export const StockTransferFormScreen: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.backgroundPrimary,
+        },
+    });

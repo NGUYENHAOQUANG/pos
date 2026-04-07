@@ -5,7 +5,9 @@ import { Text } from '@/shared/components/typography/Text';
 import { launchImageLibrary, ImagePickerResponse, Asset } from 'react-native-image-picker';
 import { Image as ImageCompressor } from 'react-native-compressor';
 import RNFS from 'react-native-fs';
-import { colors, spacing, typography } from '@/styles';
+import { spacing, typography } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import { IconCamera } from '@/assets/icons';
 import { Button } from '@/shared/components/buttons/Button';
@@ -26,6 +28,8 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
     onOpenCamera,
     onImagePicked,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [sheetVisible, setSheetVisible] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -102,7 +106,7 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
                 variant="outline"
                 onPress={() => setSheetVisible(true)}
                 disabled={isProcessing}
-                renderLeftIcon={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
+                renderLeftIcon={<IconCamera width={20} height={20} fill={theme.textSecondary} />}
                 style={styles.ctaButton}
                 textStyle={styles.ctaLabel}
             />
@@ -117,41 +121,42 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.lg,
-    },
-    emptyState: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingBottom: spacing.xl,
-    },
-    emptyTitle: {
-        fontSize: typography.fontSize.lg,
-        color: colors.text,
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-    },
-    emptySubtitle: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        textAlign: 'center',
-        lineHeight: 20,
-    },
-    ctaButton: {
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-        borderRadius: 100,
-        borderWidth: 1,
-        height: 44,
-        marginBottom: spacing.md,
-    },
-    ctaLabel: {
-        color: colors.textSecondary,
-        fontSize: typography.fontSize.base,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.xl,
+            paddingBottom: spacing.lg,
+        },
+        emptyState: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingBottom: spacing.xl,
+        },
+        emptyTitle: {
+            fontSize: typography.fontSize.lg,
+            color: theme.text,
+            marginTop: spacing.md,
+            marginBottom: spacing.xs,
+        },
+        emptySubtitle: {
+            fontSize: typography.fontSize.sm,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            lineHeight: 20,
+        },
+        ctaButton: {
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+            borderRadius: 100,
+            borderWidth: 1,
+            height: 44,
+            marginBottom: spacing.md,
+        },
+        ctaLabel: {
+            color: theme.textSecondary,
+            fontSize: typography.fontSize.base,
+        },
+    });

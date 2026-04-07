@@ -1,10 +1,15 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { spacing, colors } from '@/styles';
+import { spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 
 // Wrapper to render a card section with a skeleton header and divider
-const CardSkeleton: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const CardSkeleton: React.FC<{ children: React.ReactNode; styles: any }> = ({
+    children,
+    styles,
+}) => (
     <View style={styles.card}>
         <View style={styles.cardHeader}>
             <Skeleton width={150} height={16} borderRadius={4} />
@@ -23,10 +28,13 @@ const InputSkeleton: React.FC = () => (
 );
 
 export const EnvSkeleton: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Card: Thông tin chung (DateInput + Image section) */}
-            <CardSkeleton>
+            <CardSkeleton styles={styles}>
                 {/* Date input */}
                 <InputSkeleton />
 
@@ -38,7 +46,7 @@ export const EnvSkeleton: React.FC = () => {
             </CardSkeleton>
 
             {/* Card: Chỉ số môi trường (6 full-width inputs + setup button) */}
-            <CardSkeleton>
+            <CardSkeleton styles={styles}>
                 {/* pH */}
                 <InputSkeleton />
                 {/* DO */}
@@ -57,7 +65,7 @@ export const EnvSkeleton: React.FC = () => {
             </CardSkeleton>
 
             {/* Card: Ghi chú */}
-            <CardSkeleton>
+            <CardSkeleton styles={styles}>
                 <View>
                     <Skeleton
                         width={100}
@@ -82,34 +90,35 @@ export const EnvSkeleton: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    card: {
-        backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        marginTop: 8,
-        marginHorizontal: 16,
-        borderRadius: 8,
-    },
-    cardHeader: {
-        marginBottom: 12,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginBottom: 12,
-        marginHorizontal: -spacing.md,
-    },
-    cardContent: {
-        gap: spacing.md,
-    },
-    footer: {
-        flexDirection: 'row',
-        marginTop: spacing.sm,
-        paddingBottom: spacing.xl,
-        paddingHorizontal: spacing.md,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+        },
+        card: {
+            backgroundColor: theme.background,
+            paddingHorizontal: spacing.md,
+            paddingVertical: 12,
+            marginTop: 8,
+            marginHorizontal: 16,
+            borderRadius: 8,
+        },
+        cardHeader: {
+            marginBottom: 12,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.borderLight,
+            marginBottom: 12,
+            marginHorizontal: -spacing.md,
+        },
+        cardContent: {
+            gap: spacing.md,
+        },
+        footer: {
+            flexDirection: 'row',
+            marginTop: spacing.sm,
+            paddingBottom: spacing.xl,
+            paddingHorizontal: spacing.md,
+        },
+    });

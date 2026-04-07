@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 
 interface SelectionInfoBoxProps {
@@ -17,6 +18,9 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
     style,
     titleStyle,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={[styles.infoBox, style]}>
             <CollapseHead
@@ -32,23 +36,24 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    infoBox: {
-        backgroundColor: colors.white,
-        marginHorizontal: 16,
-        marginTop: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-    },
-    collapseHead: {
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 4,
-    },
-    childrenContainer: {
-        padding: 16,
-        paddingTop: 8,
-        gap: 16,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        infoBox: {
+            backgroundColor: theme.background,
+            marginHorizontal: 16,
+            marginTop: 8,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+        },
+        collapseHead: {
+            paddingHorizontal: 16,
+            paddingTop: 12,
+            paddingBottom: 4,
+        },
+        childrenContainer: {
+            padding: 16,
+            paddingTop: 8,
+            gap: 16,
+        },
+    });

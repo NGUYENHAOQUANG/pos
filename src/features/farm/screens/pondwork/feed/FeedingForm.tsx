@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { colors } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import {
     MaterialSelectionBox,
@@ -40,6 +41,8 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         { isEditMode, isLoadingDetail, isSubmitting, initialData, onSubmit, onHasChangesChange },
         ref
     ) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
         const initializedRef = useRef(false);
 
         const { control, handleSubmit, reset, watch } = useForm<FeedingFormValues>({
@@ -165,7 +168,12 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 {
                     <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
-                            <InfoIcon width={16} height={16} style={styles.infoIcon} />
+                            <InfoIcon
+                                width={16}
+                                height={16}
+                                style={styles.infoIcon}
+                                color={theme.info}
+                            />
                             <Text style={styles.infoText}>
                                 Chọn Thủ công để chạy ngay, hoặc Lịch trình để thiết lập nhiều lượt
                                 hoạt động trong ngày
@@ -237,89 +245,91 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
     }
 );
 
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.white,
-        padding: 16,
-        marginTop: 8,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.borderSubtle || colors.gray[100],
-        marginHorizontal: 0,
-        width: '100%',
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 12,
-    },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        gap: 24,
-    },
-    radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.gray[300],
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 8,
-    },
-    radioOuterSelected: {
-        borderColor: colors.primaryOrange,
-    },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primaryOrange,
-    },
-    radioLabel: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    infoBox: {
-        backgroundColor: colors.white,
-        padding: 12,
-        borderRadius: 12,
-        marginBottom: 16,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        borderColor: colors.border,
-        borderWidth: 1,
-    },
-    infoIcon: {
-        marginRight: 8,
-        marginTop: 2,
-    },
-    infoText: {
-        flex: 1,
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 20,
-        fontWeight: '400',
-    },
-    activitySchedule: {
-        marginTop: 8,
-        marginHorizontal: 16,
-    },
-    activityScheduleTitle: {
-        fontSize: 16,
-    },
-    spacer: {
-        height: 80,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        card: {
+            backgroundColor: theme.background,
+            padding: 16,
+            marginTop: 8,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.borderSubtle,
+            marginHorizontal: 0,
+            width: '100%',
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 12,
+        },
+        fullWidthDivider: {
+            height: 1,
+            backgroundColor: theme.defaultBorder,
+            marginHorizontal: -16,
+            marginBottom: 16,
+        },
+        radioGroup: {
+            flexDirection: 'row',
+            gap: 24,
+        },
+        radioItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        radioOuter: {
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: theme.textSecondary,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 8,
+        },
+        radioOuterSelected: {
+            borderColor: theme.primaryOrange,
+        },
+        radioInner: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: theme.primaryOrange,
+        },
+        radioLabel: {
+            fontSize: 14,
+            color: theme.text,
+        },
+        infoBox: {
+            backgroundColor: theme.background,
+            padding: 12,
+            borderRadius: 12,
+            marginBottom: 16,
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            borderColor: theme.defaultBorder,
+            borderWidth: 1,
+        },
+        infoIcon: {
+            marginRight: 8,
+            marginTop: 2,
+            color: theme.info,
+        },
+        infoText: {
+            flex: 1,
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 20,
+            fontWeight: '400',
+        },
+        activitySchedule: {
+            marginTop: 8,
+            marginHorizontal: 16,
+        },
+        activityScheduleTitle: {
+            fontSize: 16,
+        },
+        spacer: {
+            height: 80,
+        },
+    });
