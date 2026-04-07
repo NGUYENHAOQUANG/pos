@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text } from '@/shared/components/typography/Text';
+// import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppTheme } from '@/styles/themeContext';
@@ -12,12 +12,12 @@ import {
 } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import InfoIcon from '@/assets/Icon/information-circle.svg';
-import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { RadioButton } from '@/shared/components/forms/RadioButton';
-import ActivitySchedule, {
-    ScheduleItem,
-} from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
+// import InfoIcon from '@/assets/Icon/information-circle.svg';
+// import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+// import { RadioButton } from '@/shared/components/forms/RadioButton';
+// import ActivitySchedule, {
+//     ScheduleItem,
+// } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
 import { feedingFormSchema, FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { handleFeedingFormError } from '@/features/farm/utils/toastMessages';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
@@ -56,7 +56,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
             },
         });
 
-        const currentMode = watch('mode');
+        // const currentMode = watch('mode');
 
         useEffect(() => {
             if (isEditMode) {
@@ -165,6 +165,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     }}
                 />
 
+                {/* TODO: Temporarily hidden - Operation Mode section
                 {
                     <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
@@ -229,6 +230,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                         }}
                     />
                 )}
+                */}
 
                 <Controller
                     name="note"

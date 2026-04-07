@@ -48,7 +48,7 @@ const getStyles = (theme: Colors) =>
             paddingTop: spacing.xs,
         },
         cardContainer: {
-            backgroundColor: theme.white,
+            backgroundColor: theme.background,
             padding: spacing.md,
             marginTop: spacing.sm,
             marginHorizontal: spacing.md,
