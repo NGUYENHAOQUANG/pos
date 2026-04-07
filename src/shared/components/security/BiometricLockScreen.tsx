@@ -7,6 +7,7 @@ import {
     AppStateStatus,
     TouchableOpacity,
     Platform,
+    Modal,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Animated, {
@@ -21,6 +22,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics';
 import { borderRadius, colors } from '@/styles';
+import { Colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
 import { useSettingsStore, AutoLockTimeout } from '@/features/menu/store/settingsStore';
 import { Button } from '@/shared/components/buttons/Button';
 import { PinEntryPad } from '@/shared/components/security/PinEntryPad';
@@ -68,7 +71,7 @@ interface LockScreenProps {
 /** Get the appropriate biometric SVG icon based on biometry type */
 function getBiometricSvgIcon(
     biometryType: string | undefined
-): React.FC<{ width: number; height: number }> {
+): React.FC<{ width: number; height: number; color?: string }> {
     if (Platform.OS === 'ios') {
         // Only show Fingerprint for iPhone SE (TouchID) — all others get FaceID
         if (biometryType === BiometryTypes.TouchID) return FingerprintIcon;
@@ -80,6 +83,9 @@ function getBiometricSvgIcon(
 
 export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlock }) => {
     const insets = useSafeAreaInsets();
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
     const lockMethod = useSettingsStore(s => s.lockMethod);
     const pinHash = useSettingsStore(s => s.pinHash);
     const setPinHash = useSettingsStore(s => s.setPinHash);
@@ -210,43 +216,143 @@ export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlo
 
     if (!visible) return null;
 
+    // Determine StatusBar style based on theme
+    const statusBarStyle = theme.isDark ? 'light-content' : 'dark-content';
+    const statusBarBg = theme.isDark ? theme.backgroundPrimary : theme.background;
+
     // PIN-only mode: show full PIN pad
     if (usePin && !useBiometric) {
         return (
+            <Modal visible animationType="none" statusBarTranslucent>
+                <Animated.View
+                    entering={FadeIn.duration(200)}
+                    exiting={FadeOut.duration(200)}
+                    style={[
+                        themedStyles.container,
+                        { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 20 },
+                    ]}
+                >
+                    <StatusBar barStyle={statusBarStyle} backgroundColor={statusBarBg} />
+                    {showForgotPin ? (
+                        <View style={staticStyles.lockedContent}>
+                            <Ionicons name="lock-closed" size={48} color={theme.error} />
+                            <Text style={themedStyles.lockedTitle}>Đã vượt quá số lần thử</Text>
+                            <Text style={themedStyles.lockedSubtitle}>
+                                Bạn đã nhập sai mã PIN quá {MAX_PIN_ATTEMPTS} lần. Vui lòng đăng
+                                xuất và đăng nhập lại.
+                            </Text>
+                            <TouchableOpacity
+                                style={staticStyles.forgotButton}
+                                onPress={handleForgotPin}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={staticStyles.forgotText}>Quên mã PIN? Đăng xuất</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <PinEntryPad
+                            title="Nhập mã PIN"
+                            subtitle={`Nhập mã PIN để mở khóa ứng dụng${
+                                remainingAttempts < MAX_PIN_ATTEMPTS
+                                    ? ` (còn ${remainingAttempts} lần)`
+                                    : ''
+                            }`}
+                            onComplete={handlePinComplete}
+                            error={pinError}
+                            errorMessage={`Mã PIN không đúng, còn ${remainingAttempts} lần thử`}
+                            onErrorReset={handlePinErrorReset}
+                        />
+                    )}
+                    <ConfirmationModalUI
+                        visible={forgotModalVisible}
+                        onConfirm={executeForgotPin}
+                        onCancel={() => setForgotModalVisible(false)}
+                        title="Quên mã PIN?"
+                        message="Bạn sẽ được đăng xuất và cần đăng nhập lại để đặt mã PIN mới."
+                        confirmText="Đăng xuất"
+                        cancelText="Hủy"
+                        showSuccessToast={false}
+                    />
+                </Animated.View>
+            </Modal>
+        );
+    }
+
+    // Biometric-only mode: show icon + button
+    if (useBiometric && !usePin) {
+        return (
+            <Modal visible animationType="none" statusBarTranslucent>
+                <Animated.View
+                    entering={FadeIn.duration(200)}
+                    exiting={FadeOut.duration(200)}
+                    style={[
+                        themedStyles.container,
+                        { paddingTop: insets.top, paddingBottom: insets.bottom },
+                    ]}
+                >
+                    <StatusBar barStyle={statusBarStyle} backgroundColor={statusBarBg} />
+                    <View style={staticStyles.content}>
+                        <Animated.View style={[themedStyles.iconContainer, pulseStyle]}>
+                            <BiometricSvgIcon width={64} height={64} color={theme.text} />
+                        </Animated.View>
+                        <Text style={themedStyles.title}>Ứng dụng đang khóa</Text>
+                        <Text style={themedStyles.subtitle}>
+                            Xác thực để tiếp tục sử dụng Mebieco
+                        </Text>
+                        <Button
+                            title="Mở khóa"
+                            onPress={handleBiometricAuth}
+                            variant="primary"
+                            size="large"
+                        />
+                    </View>
+                </Animated.View>
+            </Modal>
+        );
+    }
+
+    // Both mode: PIN pad with biometric button
+    return (
+        <Modal visible animationType="none" statusBarTranslucent>
             <Animated.View
                 entering={FadeIn.duration(200)}
                 exiting={FadeOut.duration(200)}
                 style={[
-                    styles.container,
+                    themedStyles.container,
                     { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 20 },
                 ]}
             >
-                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <StatusBar barStyle={statusBarStyle} backgroundColor={statusBarBg} />
                 {showForgotPin ? (
-                    <View style={styles.lockedContent}>
-                        <Ionicons name="lock-closed" size={48} color={colors.error} />
-                        <Text style={styles.lockedTitle}>Đã vượt quá số lần thử</Text>
-                        <Text style={styles.lockedSubtitle}>
+                    <View style={staticStyles.lockedContent}>
+                        <Ionicons name="lock-closed" size={48} color={theme.error} />
+                        <Text style={themedStyles.lockedTitle}>Đã vượt quá số lần thử</Text>
+                        <Text style={themedStyles.lockedSubtitle}>
                             Bạn đã nhập sai mã PIN quá {MAX_PIN_ATTEMPTS} lần. Vui lòng đăng xuất và
                             đăng nhập lại.
                         </Text>
                         <TouchableOpacity
-                            style={styles.forgotButton}
+                            style={staticStyles.forgotButton}
                             onPress={handleForgotPin}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.forgotText}>Quên mã PIN? Đăng xuất</Text>
+                            <Text style={staticStyles.forgotText}>Quên mã PIN? Đăng xuất</Text>
                         </TouchableOpacity>
                     </View>
                 ) : (
                     <PinEntryPad
                         title="Nhập mã PIN"
-                        subtitle={`Nhập mã PIN để mở khóa ứng dụng${
+                        subtitle={`Hoặc sử dụng sinh trắc học để mở khóa${
                             remainingAttempts < MAX_PIN_ATTEMPTS
                                 ? ` (còn ${remainingAttempts} lần)`
                                 : ''
                         }`}
                         onComplete={handlePinComplete}
+                        showBiometric
+                        onBiometricPress={handleBiometricAuth}
+                        biometricIcon={
+                            <BiometricSvgIcon width={40} height={40} color={theme.text} />
+                        }
                         error={pinError}
                         errorMessage={`Mã PIN không đúng, còn ${remainingAttempts} lần thử`}
                         onErrorReset={handlePinErrorReset}
@@ -263,90 +369,7 @@ export const BiometricLockScreen: React.FC<LockScreenProps> = ({ visible, onUnlo
                     showSuccessToast={false}
                 />
             </Animated.View>
-        );
-    }
-
-    // Biometric-only mode: show icon + button
-    if (useBiometric && !usePin) {
-        return (
-            <Animated.View
-                entering={FadeIn.duration(200)}
-                exiting={FadeOut.duration(200)}
-                style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-            >
-                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-                <View style={styles.content}>
-                    <Animated.View style={[styles.iconContainer, pulseStyle]}>
-                        <BiometricSvgIcon width={64} height={64} />
-                    </Animated.View>
-                    <Text style={styles.title}>Ứng dụng đang khóa</Text>
-                    <Text style={styles.subtitle}>Xác thực để tiếp tục sử dụng Mebieco</Text>
-                    <Button
-                        title="Mở khóa"
-                        onPress={handleBiometricAuth}
-                        variant="primary"
-                        size="large"
-                    />
-                </View>
-            </Animated.View>
-        );
-    }
-
-    // Both mode: PIN pad with biometric button
-    return (
-        <Animated.View
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(200)}
-            style={[
-                styles.container,
-                { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 20 },
-            ]}
-        >
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            {showForgotPin ? (
-                <View style={styles.lockedContent}>
-                    <Ionicons name="lock-closed" size={48} color={colors.error} />
-                    <Text style={styles.lockedTitle}>Đã vượt quá số lần thử</Text>
-                    <Text style={styles.lockedSubtitle}>
-                        Bạn đã nhập sai mã PIN quá {MAX_PIN_ATTEMPTS} lần. Vui lòng đăng xuất và
-                        đăng nhập lại.
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.forgotButton}
-                        onPress={handleForgotPin}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.forgotText}>Quên mã PIN? Đăng xuất</Text>
-                    </TouchableOpacity>
-                </View>
-            ) : (
-                <PinEntryPad
-                    title="Nhập mã PIN"
-                    subtitle={`Hoặc sử dụng sinh trắc học để mở khóa${
-                        remainingAttempts < MAX_PIN_ATTEMPTS
-                            ? ` (còn ${remainingAttempts} lần)`
-                            : ''
-                    }`}
-                    onComplete={handlePinComplete}
-                    showBiometric
-                    onBiometricPress={handleBiometricAuth}
-                    biometricIcon={<BiometricSvgIcon width={40} height={40} />}
-                    error={pinError}
-                    errorMessage={`Mã PIN không đúng, còn ${remainingAttempts} lần thử`}
-                    onErrorReset={handlePinErrorReset}
-                />
-            )}
-            <ConfirmationModalUI
-                visible={forgotModalVisible}
-                onConfirm={executeForgotPin}
-                onCancel={() => setForgotModalVisible(false)}
-                title="Quên mã PIN?"
-                message="Bạn sẽ được đăng xuất và cần đăng nhập lại để đặt mã PIN mới."
-                confirmText="Đăng xuất"
-                cancelText="Hủy"
-                showSuccessToast={false}
-            />
-        </Animated.View>
+        </Modal>
     );
 };
 
@@ -435,40 +458,11 @@ export async function checkBiometricAvailability(): Promise<{
     }
 }
 
-const styles = StyleSheet.create({
-    container: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 9999,
-    },
+// Static styles that don't change with theme
+const staticStyles = StyleSheet.create({
     content: {
         alignItems: 'center',
         paddingHorizontal: 40,
-    },
-    iconContainer: {
-        width: 120,
-        height: 120,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.gray[100],
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 15,
-        fontWeight: '400',
-        color: colors.textSecondary,
-        textAlign: 'center',
-        marginBottom: 40,
-        lineHeight: 22,
     },
     lockedContent: {
         flex: 1,
@@ -476,19 +470,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: 40,
         gap: 12,
-    },
-    lockedTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: colors.text,
-        marginTop: 16,
-    },
-    lockedSubtitle: {
-        fontSize: 15,
-        fontWeight: '400',
-        color: colors.textSecondary,
-        textAlign: 'center',
-        lineHeight: 22,
     },
     forgotButton: {
         marginTop: 24,
@@ -501,3 +482,52 @@ const styles = StyleSheet.create({
         color: colors.primaryOrange,
     },
 });
+
+// Dynamic styles that adapt to theme
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: theme.backgroundPrimary,
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+            elevation: 9999,
+        },
+        iconContainer: {
+            width: 120,
+            height: 120,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.backgroundSecondary,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 24,
+        },
+        title: {
+            fontSize: 22,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 8,
+        },
+        subtitle: {
+            fontSize: 15,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            textAlign: 'center',
+            marginBottom: 40,
+            lineHeight: 22,
+        },
+        lockedTitle: {
+            fontSize: 20,
+            fontWeight: '700',
+            color: theme.text,
+            marginTop: 16,
+        },
+        lockedSubtitle: {
+            fontSize: 15,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            textAlign: 'center',
+            lineHeight: 22,
+        },
+    });

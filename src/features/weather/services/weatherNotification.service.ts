@@ -62,7 +62,7 @@ export class WeatherNotificationService {
      */
     private static async triggerNotification(title: string, body: string) {
         await notifee.displayNotification({
-            title: `⚠️ ${title}`,
+            title: `${title}`,
             body,
             android: {
                 channelId: CHANNEL_ID,

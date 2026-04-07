@@ -151,6 +151,6 @@ const getStyles = (theme: Colors) =>
     StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: theme.white,
+            backgroundColor: theme.backgroundPrimary,
         },
     });

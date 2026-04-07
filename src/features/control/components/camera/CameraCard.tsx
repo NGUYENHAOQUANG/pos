@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
-import { Colors } from '@/styles/colors';
+import { colors, Colors } from '@/styles/colors';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
 
@@ -35,7 +35,7 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
                     width={CARD_WIDTH}
                     height={CARD_HEIGHT}
                     preserveAspectRatio="xMidYMid slice"
-                    color={theme.isDark ? theme.border : theme.borderMedium}
+                    color={theme.isDark ? theme.border : colors.gray[300]}
                 />
                 {/* Camera code + camera name badges */}
                 <View style={styles.placeholderBadgesRow}>

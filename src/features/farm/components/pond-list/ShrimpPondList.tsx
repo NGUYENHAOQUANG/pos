@@ -18,6 +18,7 @@ interface ShrimpPondListProps {
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
     ListFooterComponent?: React.ComponentType | React.ReactElement | null;
+    ListEmptyComponent?: React.ComponentType | React.ReactElement | null;
     refreshing?: boolean;
     onRefresh?: () => void;
     zoneId?: string;
@@ -33,6 +34,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
             onEndReached,
             onEndReachedThreshold = 0.5,
             ListFooterComponent,
+            ListEmptyComponent,
             refreshing,
             onRefresh,
             zoneId,
@@ -89,11 +91,16 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                 data={data}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
-                contentContainerStyle={[styles.listContent, { paddingBottom: bottomBarHeight }]}
+                contentContainerStyle={[
+                    styles.listContent,
+                    { paddingBottom: bottomBarHeight },
+                    data.length === 0 && styles.emptyContent,
+                ]}
                 showsVerticalScrollIndicator={false}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={onEndReachedThreshold}
                 ListFooterComponent={ListFooterComponent}
+                ListEmptyComponent={ListEmptyComponent}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
             />
@@ -108,5 +115,8 @@ const styles = StyleSheet.create({
     },
     item: {
         marginBottom: spacing.sm,
+    },
+    emptyContent: {
+        flexGrow: 1,
     },
 });

@@ -28,6 +28,10 @@ export interface Measurement {
     pcsPerKg: number;
 }
 
+// Polling config
+const POLLING_INTERVAL_MS = 2000;
+const MAX_POLLING_ATTEMPTS = 30;
+
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const theme = useAppTheme();
@@ -48,9 +52,10 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [isSheetVisible, setIsSheetVisible] = useState(false);
     const [isResetModalVisible, setIsResetModalVisible] = useState(false);
     const [weight, setWeight] = useState('');
+    const [isPolling, setIsPolling] = useState(false);
 
     // ── Derived ──────────────────────────────────
-    const isLoading = isPredicting || isFetchingResult;
+    const isLoading = isPredicting || isFetchingResult || isPolling;
     const currentMeasurement =
         measurements.length > 0 ? measurements[measurements.length - 1] : null;
     const previousMeasurement =
@@ -117,6 +122,41 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         []
     );
 
+    // ── Polling for inference result ──────────────
+    const pollForResult = useCallback(
+        (requestId: string, weightVal: number, attempt: number = 0) => {
+            if (attempt >= MAX_POLLING_ATTEMPTS) {
+                setIsPolling(false);
+                Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
+                return;
+            }
+
+            setTimeout(() => {
+                getResult(requestId, {
+                    onSuccess: async data => {
+                        console.log('[AI Measure] getResult status:', data.status);
+
+                        if (data.status === 'Success') {
+                            setIsPolling(false);
+                            await processInferenceResult(data, weightVal);
+                        } else if (data.status === 'Failed') {
+                            setIsPolling(false);
+                            Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
+                        } else {
+                            // Still pending, continue polling
+                            pollForResult(requestId, weightVal, attempt + 1);
+                        }
+                    },
+                    onError: () => {
+                        // Network error — retry polling
+                        pollForResult(requestId, weightVal, attempt + 1);
+                    },
+                });
+            }, POLLING_INTERVAL_MS);
+        },
+        [getResult, processInferenceResult]
+    );
+
     // ── Handlers ─────────────────────────────────
     const handleImageSelect = useCallback(
         (
@@ -180,27 +220,16 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                         return;
                     }
 
-                    // Step 2: Get inference result directly (wait for response)
-                    getResult(predictResult.requestId, {
-                        onSuccess: async data => {
-                            console.log(
-                                '[AI Measure] getResult response:',
-                                JSON.stringify(data, null, 2)
-                            );
-                            await processInferenceResult(data, weightVal);
-                        },
-                        onError: error => {
-                            console.log('[AI Measure] getResult error:', error);
-                            Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);
-                        },
-                    });
+                    // Step 2: Poll for inference result
+                    setIsPolling(true);
+                    pollForResult(predictResult.requestId, weightVal);
                 },
                 onError: error => {
                     console.log('[AI Measure] predict error:', error);
                 },
             }
         );
-    }, [imageUri, selectedZoneId, predict, getResult, processInferenceResult, weight]);
+    }, [imageUri, selectedZoneId, predict, pollForResult, weight]);
 
     const handleReset = useCallback(() => {
         setIsResetModalVisible(true);

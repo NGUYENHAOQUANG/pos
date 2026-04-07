@@ -7,6 +7,7 @@ import { ShrimpPondList } from '@/features/farm/components/pond-list/ShrimpPondL
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondListSkeleton } from '@/features/farm/components/skeleton/PondListSkeleton';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { PondData } from '@/features/farm/types/farm.types';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ICurrentWeather } from '@/features/weather/types/weather.types';
@@ -33,6 +34,7 @@ export interface ShrimpPondListContentProps {
     warehouseId?: string;
     weatherEnabled?: boolean;
     currentWeather?: ICurrentWeather;
+    locationName?: string;
     onWeatherPress?: () => void;
 }
 
@@ -56,6 +58,7 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
     warehouseId,
     weatherEnabled,
     currentWeather,
+    locationName,
     onWeatherPress,
 }) => {
     const flatListRef = useRef<FlatList<PondData>>(null);
@@ -82,7 +85,11 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
                 onMenuPress={onFarmInfoPress}
                 rightTopComponent={
                     weatherEnabled && currentWeather ? (
-                        <WeatherWidget current={currentWeather} onPress={onWeatherPress} />
+                        <WeatherWidget
+                            current={currentWeather}
+                            locationName={locationName}
+                            onPress={onWeatherPress}
+                        />
                     ) : undefined
                 }
             />
@@ -104,6 +111,12 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
                     onEndReached={onLoadMore}
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={renderFooter}
+                    ListEmptyComponent={
+                        <EmptyStateCard
+                            message="Chưa có ao nào được thêm."
+                            style={{ flex: 1, justifyContent: 'center' }}
+                        />
+                    }
                     refreshing={isRefetching}
                     onRefresh={onRefresh}
                     zoneId={selectedZoneId}
