@@ -103,7 +103,8 @@ const getStyles = (theme: Colors) =>
             lineHeight: 22,
         },
         button: {
-            width: '100%',
+            alignSelf: 'center',
+            paddingHorizontal: spacing.xl,
             height: 40,
         },
     });

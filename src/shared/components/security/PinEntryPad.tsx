@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, borderRadius } from '@/styles';
+import { Colors, colors } from '@/styles/colors';
+import { borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -49,6 +51,9 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
     onErrorReset,
     errorMessage = 'Mã PIN không đúng',
 }) => {
+    const theme = useAppTheme();
+    const themedStyles = getStyles(theme);
+
     const [pin, setPin] = useState('');
     const [showError, setShowError] = useState(false);
     const [dotError, setDotError] = useState(false);
@@ -114,7 +119,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
                 <View
                     key={i}
                     style={[
-                        styles.dot,
+                        themedStyles.dot,
                         i < pin.length && styles.dotFilled,
                         dotError && styles.dotError,
                     ]}
@@ -124,8 +129,13 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
     );
 
     const renderKey = (value: string, onPress: () => void) => (
-        <TouchableOpacity key={value} style={styles.key} onPress={onPress} activeOpacity={0.6}>
-            <Text style={styles.keyText}>{value}</Text>
+        <TouchableOpacity
+            key={value}
+            style={themedStyles.key}
+            onPress={onPress}
+            activeOpacity={0.6}
+        >
+            <Text style={themedStyles.keyText}>{value}</Text>
         </TouchableOpacity>
     );
 
@@ -147,7 +157,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
                 <View style={styles.keyRow}>
                     {showBiometric ? (
                         <TouchableOpacity
-                            style={styles.key}
+                            style={themedStyles.key}
                             onPress={onBiometricPress}
                             activeOpacity={0.6}
                         >
@@ -158,7 +168,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
                     )}
                     {renderKey('0', () => handlePress('0'))}
                     <TouchableOpacity
-                        style={styles.key}
+                        style={themedStyles.key}
                         onPress={handleDelete}
                         activeOpacity={0.6}
                         disabled={pin.length === 0}
@@ -166,7 +176,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
                         <Ionicons
                             name="backspace-outline"
                             size={26}
-                            color={pin.length > 0 ? colors.text : colors.gray[300]}
+                            color={pin.length > 0 ? theme.text : theme.gray[400]}
                         />
                     </TouchableOpacity>
                 </View>
@@ -177,8 +187,8 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>{title}</Text>
-                {subtitle && !showError && <Text style={styles.subtitle}>{subtitle}</Text>}
+                <Text style={themedStyles.title}>{title}</Text>
+                {subtitle && !showError && <Text style={themedStyles.subtitle}>{subtitle}</Text>}
                 {showError && <Text style={styles.errorText}>{errorMessage}</Text>}
             </View>
             {renderDots()}
@@ -189,6 +199,7 @@ export const PinEntryPad: React.FC<PinEntryPadProps> = ({
 
 const KEY_SIZE = 72;
 
+// Static styles that don't change with theme
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
@@ -198,18 +209,6 @@ const styles = StyleSheet.create({
     header: {
         alignItems: 'center',
         marginBottom: 32,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.textSecondary,
-        textAlign: 'center',
     },
     errorText: {
         fontSize: 14,
@@ -221,14 +220,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 16,
         marginBottom: 40,
-    },
-    dot: {
-        width: 14,
-        height: 14,
-        borderRadius: 7,
-        borderWidth: 2,
-        borderColor: colors.gray[300],
-        backgroundColor: 'transparent',
     },
     dotFilled: {
         backgroundColor: colors.primaryOrange,
@@ -245,21 +236,46 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 20,
     },
-    key: {
-        width: KEY_SIZE,
-        height: KEY_SIZE,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.gray[100],
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    keyText: {
-        fontSize: 28,
-        fontWeight: '500',
-        color: colors.text,
-    },
     keyEmpty: {
         width: KEY_SIZE,
         height: KEY_SIZE,
     },
 });
+
+// Dynamic styles that adapt to theme
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        title: {
+            fontSize: 22,
+            fontWeight: '700',
+            color: theme.text,
+            marginBottom: 8,
+        },
+        subtitle: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            textAlign: 'center',
+        },
+        dot: {
+            width: 14,
+            height: 14,
+            borderRadius: 7,
+            borderWidth: 2,
+            borderColor: theme.gray[300],
+            backgroundColor: 'transparent',
+        },
+        key: {
+            width: KEY_SIZE,
+            height: KEY_SIZE,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.isDark ? theme.backgroundSecondary : theme.gray[200],
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        keyText: {
+            fontSize: 28,
+            fontWeight: '500',
+            color: theme.text,
+        },
+    });

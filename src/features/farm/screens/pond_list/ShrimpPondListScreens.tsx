@@ -213,6 +213,7 @@ export const ShrimpPondListScreens: React.FC = () => {
             warehouseId={warehouseId}
             weatherEnabled={weatherEnabled}
             currentWeather={weatherData?.current}
+            locationName={selectedLocation?.name}
             onWeatherPress={handleWeatherPress}
         />
     );

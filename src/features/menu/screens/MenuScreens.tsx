@@ -19,7 +19,7 @@ import WeatherForecastIcon from '@/assets/Icon/IconMenu/WeatherForecast.svg';
 
 import UserIcon from '@/assets/Icon/IconMenu/User.svg';
 import UsersIcon from '@/assets/Icon/IconMenu/Users.svg';
-import GearSixIcon from '@/assets/Icon/GearSix.svg';
+import GearIcon from '@/assets/Icon/IconMenu/Gear.svg';
 
 import GavelIcon from '@/assets/Icon/IconMenu/Gavel.svg';
 import ArticleIcon from '@/assets/Icon/IconMenu/Article.svg';
@@ -144,7 +144,7 @@ export const MenuScreens: React.FC = () => {
         {
             id: 'settings',
             title: 'Cài đặt',
-            Icon: GearSixIcon,
+            Icon: GearIcon,
             onPress: () => navigation.navigate('Settings'),
         },
     ];
@@ -234,8 +234,11 @@ export const MenuScreens: React.FC = () => {
                         </View>
                     )}
 
-                    {/* Bottom Actions Group */}
-                    <MenuSection items={actionItems} />
+                    {/* Bottom Actions - each as individual card */}
+                    <View style={styles.actionGroup}>
+                        <MenuSection items={[actionItems[0]]} />
+                        <MenuSection items={[actionItems[1]]} />
+                    </View>
 
                     <View style={styles.versionContainer}>
                         <Text style={styles.versionText}>Phiên bản {DeviceInfo.getVersion()}</Text>
@@ -309,7 +312,6 @@ const getStyles = (theme: Colors) =>
         profileName: {
             fontSize: 16,
             fontWeight: '500',
-            lineHeight: 20,
             color: theme.text,
             marginBottom: 4,
         },
@@ -329,13 +331,15 @@ const getStyles = (theme: Colors) =>
             color: theme.blue[600],
             fontSize: 14,
             fontWeight: '500',
-            lineHeight: 20,
         },
         contentContainer: {
             gap: 32,
         },
         bottomSpacer: {
             height: 8,
+        },
+        actionGroup: {
+            gap: 8,
         },
         versionContainer: {
             alignItems: 'center',

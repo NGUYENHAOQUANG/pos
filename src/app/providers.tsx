@@ -85,10 +85,11 @@ export function AppProviders() {
                         </ErrorBoundary>
                     </QueryClientProvider>
                 </AntdProvider>
+                {!showSplash && <BiometricLockScreen visible={isLocked} onUnlock={handleUnlock} />}
             </GestureHandlerRootView>
 
             <SplashScreen visible={showSplash} />
-            {!showSplash && <BiometricLockScreen visible={isLocked} onUnlock={handleUnlock} />}
+
             <NetworkStatusModal />
         </SafeAreaProvider>
     );

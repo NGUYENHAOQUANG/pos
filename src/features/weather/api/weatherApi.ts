@@ -106,7 +106,7 @@ const mapWeatherApiCodeToWMO = (code: number): number => {
 export const weatherApi = {
     getWeatherForecast: async (latitude: number, longitude: number): Promise<IWeatherData> => {
         if (!WEATHER_API_KEY) {
-            console.warn('⚠️ Missing WEATHER_API_KEY trong file .env!');
+            console.warn('Missing WEATHER_API_KEY trong file .env!');
         }
 
         const response = await axios.get<IWeatherApiFullResponse>(WEATHER_API_BASE_URL, {

@@ -7,8 +7,6 @@ import type {
     InferenceResultResponse,
 } from '@/features/farm/types/ai.types';
 
-const delay = (ms: number): Promise<void> => new Promise<void>(resolve => setTimeout(resolve, ms));
-
 export const aiApi = {
     inferencePredict: async (data: InferencePredictRequest): Promise<InferencePredictResponse> => {
         const formData = new FormData();
@@ -32,7 +30,6 @@ export const aiApi = {
         return response.data?.data || { requestId: '', imageId: '', status: '', message: '' };
     },
     getInferenceResult: async (requestId: string): Promise<InferenceResultResponse> => {
-        await delay(2000);
         const response = await apiClient.get<IApiResponse<InferenceResultResponse>>(
             API_ENDPOINTS.INFERENCE.GET_RESULT(requestId),
             { timeout: 60000 }

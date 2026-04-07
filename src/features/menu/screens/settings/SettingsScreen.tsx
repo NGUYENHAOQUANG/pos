@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { spacing } from '@/styles';
@@ -12,6 +12,7 @@ import {
     checkBiometricAvailability,
     AUTO_LOCK_OPTIONS,
 } from '@/shared/components/security/BiometricLockScreen';
+import ReactNativeBiometrics from 'react-native-biometrics';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -124,7 +125,11 @@ const AutoLockSelector: React.FC<AutoLockSelectorProps> = ({
                                     {option.label}
                                 </Text>
                                 {isActive && (
-                                    <Ionicons name="checkmark" size={18} color={theme.primary} />
+                                    <Ionicons
+                                        name="checkmark"
+                                        size={18}
+                                        color={theme.textSecondary}
+                                    />
                                 )}
                             </TouchableOpacity>
                         );
@@ -189,6 +194,29 @@ export const SettingsScreen: React.FC = () => {
             setTimeout(() => setShowLoadingDemo(false), 3000);
         }
     };
+
+    const handleBiometricToggle = useCallback(
+        async (enabled: boolean) => {
+            if (!enabled) {
+                setLockMethod('pin');
+                return;
+            }
+            try {
+                const rnBiometrics = new ReactNativeBiometrics();
+                const { success } = await rnBiometrics.simplePrompt({
+                    promptMessage: `Xác thực ${biometricLabel} để bật tính năng`,
+                    cancelButtonText: 'Hủy',
+                });
+
+                if (success) {
+                    setLockMethod('both');
+                }
+            } catch {
+                // User cancelled or error — keep current method
+            }
+        },
+        [biometricLabel, setLockMethod]
+    );
 
     return (
         <Loading isLoading={showLoadingDemo} transparent>
@@ -325,9 +353,7 @@ export const SettingsScreen: React.FC = () => {
                                     title={`Mở khóa bằng ${biometricLabel}`}
                                     subtitle={`Dùng ${biometricLabel} thay cho mã PIN để mở khóa nhanh hơn`}
                                     value={lockMethod === 'both'}
-                                    onValueChange={enabled => {
-                                        setLockMethod(enabled ? 'both' : 'pin');
-                                    }}
+                                    onValueChange={handleBiometricToggle}
                                 />
                             </View>
                         )}
@@ -452,7 +478,7 @@ const getStyles = (theme: Colors) =>
             borderBottomColor: theme.borderLight,
         },
         optionItemActive: {
-            backgroundColor: theme.blue[25],
+            backgroundColor: theme.backgroundTertiary,
         },
         optionText: {
             fontSize: 14,
@@ -461,7 +487,7 @@ const getStyles = (theme: Colors) =>
         },
         optionTextActive: {
             fontWeight: '500',
-            color: theme.primary,
+            color: theme.text,
         },
         pinActions: {
             flexDirection: 'row',
@@ -473,7 +499,7 @@ const getStyles = (theme: Colors) =>
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            backgroundColor: theme.white,
+            backgroundColor: theme.background,
             borderRadius: 12,
             borderWidth: 1,
             borderColor: theme.border,
