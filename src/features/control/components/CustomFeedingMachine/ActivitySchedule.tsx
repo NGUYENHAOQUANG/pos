@@ -195,7 +195,7 @@ const staticStyles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal: 8,
+        marginRight: 12,
     },
     timeInput: {
         flex: 1,

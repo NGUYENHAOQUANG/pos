@@ -21,19 +21,17 @@ import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import FeedChart from '@/assets/Icon/IconReport/FeedChart.svg';
 import { useFeedingProduction } from '@/features/reports/hooks/useFeedingProduction';
 
-interface Props {
-    zoneId: string;
-    pondId?: string;
-}
+import { CompilationFeedProdProps } from '@/features/reports/types/feeding-production';
 
-export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
+export const CompilationFeedProd = ({ zoneId, pondId, seasonId }: CompilationFeedProdProps) => {
     const chartStyles = useChartStyles();
     const [isExpanded, setIsExpanded] = useState(false);
     const theme = useAppTheme();
 
     const { data: response, isLoading: queryLoading } = useFeedingProduction({
         ZoneId: zoneId,
-        Id: pondId,
+        PondIds: pondId ? [pondId] : undefined,
+        SeasonId: seasonId,
     });
 
     const isLoading = isExpanded && queryLoading;
@@ -120,6 +118,12 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
                                 cardVariant="prodSummary"
                                 activeFilters={activeFilters}
                                 onToggleFilter={handleToggleFilter}
+                                tooltipProduction={`${(
+                                    summaryData?.totalBiomass ?? 0
+                                ).toLocaleString('vi-VN')} kg`}
+                                tooltipConsumed={`${(summaryData?.totalFood ?? 0).toLocaleString(
+                                    'vi-VN'
+                                )} kg`}
                             />
                             <Chart
                                 chartWidth={chartWidth}

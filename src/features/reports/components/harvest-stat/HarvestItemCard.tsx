@@ -61,12 +61,18 @@ export const HarvestItemCard = ({ item, index }: Props) => {
                         style={styles.topAction}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.topActionText}>
+                        <Text
+                            style={[
+                                styles.topActionText,
+                                { color: theme.isDark ? '#fb923c' : colors.orange[600] },
+                            ]}
+                        >
                             {expanded ? 'Thu gọn' : 'Xem thêm'}
                         </Text>
                         <CaretDownIcon
                             width={14}
                             height={14}
+                            color={theme.isDark ? '##FD6900' : colors.orange[600]}
                             style={{ transform: [{ rotate: expanded ? '180deg' : '-90deg' }] }}
                         />
                     </TouchableOpacity>

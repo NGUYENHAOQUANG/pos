@@ -37,4 +37,23 @@ export interface HarvestStatsData {
     byDOC: HarvestStatsByDOC[];
 }
 
+export interface HarvestStatsParams {
+    ZoneId: string;
+    Id?: string;
+    PondIds?: string[];
+    PondCategoryIds?: string[];
+    SeasonId?: string;
+}
+
 export type HarvestStatsResponse = IApiResponse<HarvestStatsData>;
+
+// ===== Component Props =====
+export interface HarvestChartProps {
+    zoneId: string;
+    pondId?: string;
+    seasonId?: string;
+}
+export interface HarvestChartData {
+    pond: string;
+    yield: number;
+}

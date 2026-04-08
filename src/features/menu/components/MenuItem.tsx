@@ -20,7 +20,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({ Icon, title, onPress, hideAr
     return (
         <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
             <View style={styles.iconWrapper}>
-                <Icon width={18} height={18} color={theme.text} />
+                <Icon width={20} height={20} color={theme.text} />
             </View>
             <Text style={styles.itemTitle}>{title}</Text>
             {!hideArrow && <AntDesign name="right" size={16} color={theme.textSecondary} />}
@@ -34,12 +34,8 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             height: 44,
-            paddingHorizontal: 12,
+            paddingHorizontal: 16,
             gap: 16,
-            backgroundColor: theme.background,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: theme.defaultBorder,
         },
         iconWrapper: {
             justifyContent: 'center',
@@ -47,8 +43,7 @@ const getStyles = (theme: Colors) =>
         },
         itemTitle: {
             flex: 1,
-            fontSize: 15,
-            lineHeight: 20,
+            fontSize: 16,
             color: theme.text,
             fontWeight: '400',
         },

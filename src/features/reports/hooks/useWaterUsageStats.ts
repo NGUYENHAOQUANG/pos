@@ -1,27 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { reportApi } from '../api/reportApi';
+import { WaterUsageParams } from '../types/water-usage';
 
-interface UseWaterUsageStatsOptions {
-    zoneId: string;
-    pondIds?: string[];
-    startDate?: string;
-    endDate?: string;
+export interface UseWaterUsageStatsOptions extends WaterUsageParams {
     enabled?: boolean;
 }
 
-export const useWaterUsageStats = ({
-    zoneId,
-    pondIds,
-    startDate,
-    endDate,
-    enabled = true,
-}: UseWaterUsageStatsOptions) => {
+export const useWaterUsageStats = (options: UseWaterUsageStatsOptions) => {
+    const { zoneId, pondIds, seasonId, startDate, endDate, enabled = true } = options;
+
     return useQuery({
-        queryKey: ['water-usage-stats', zoneId, pondIds, startDate, endDate],
+        queryKey: ['water-usage-stats', zoneId, pondIds, seasonId, startDate, endDate],
         queryFn: () =>
             reportApi.getDailyWaterStats({
                 zoneId,
                 pondIds,
+                seasonId,
                 startDate,
                 endDate,
             }),

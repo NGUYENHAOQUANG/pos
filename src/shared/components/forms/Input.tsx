@@ -371,7 +371,7 @@ const getStyles = (theme: Colors) =>
             height: 4,
             borderRadius: 3,
             backgroundColor: theme.error,
-            marginLeft: 2,
+            marginLeft: 4,
         },
         labelWrapper: {
             flexDirection: 'row',

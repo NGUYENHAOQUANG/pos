@@ -29,6 +29,6 @@ export const WEATHER_LOCATIONS: readonly IWeatherLocation[] = [
 ] as const;
 
 /**
- * Default location (first in list)
+ * Default location — Kiên Giang
  */
-export const DEFAULT_WEATHER_LOCATION: IWeatherLocation = WEATHER_LOCATIONS[0];
+export const DEFAULT_WEATHER_LOCATION: IWeatherLocation = WEATHER_LOCATIONS[6];

@@ -8,6 +8,7 @@ export interface EnvMeasurementChartParams {
     PondCategoryIds?: string[];
     PondIds?: string[];
     CycleId?: string;
+    SeasonId?: string;
     FromDate?: string;
     ToDate?: string;
 }
@@ -40,3 +41,22 @@ export interface EnvMeasurementChartData {
 }
 
 export type EnvMeasurementChartResponse = IApiResponse<EnvMeasurementChartData>;
+
+// ===== Component Props =====
+export interface CompilationEnvChartProps {
+    zoneId: string;
+    pondIds?: string[];
+    seasonId?: string;
+    cycleId?: string;
+}
+
+// ===== Chart Internal Types =====
+export interface EnvChartDataPointLocal {
+    date: Date;
+    value: number;
+    pond: string;
+}
+export interface EnvChartSeriesEntry {
+    pond: string;
+    data: EnvChartDataPointLocal[];
+}

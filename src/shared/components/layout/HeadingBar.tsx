@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     View,
     TouchableOpacity,
@@ -13,6 +13,20 @@ import { borderRadius, spacing } from '@/styles';
 import { haptics } from '@/shared/utils/haptics';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+
+/** Spring config for smooth, snappy sliding */
+const SPRING_CONFIG = {
+    damping: 20,
+    stiffness: 200,
+    mass: 0.8,
+};
+
+/** Layout info for each tab */
+interface TabLayout {
+    x: number;
+    width: number;
+}
 
 export interface HeadingBarItem {
     key: string;
@@ -43,9 +57,44 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
+    // Store layout measurements for each tab
+    const [tabLayouts, setTabLayouts] = useState<Record<string, TabLayout>>({});
+    const indicatorX = useSharedValue(0);
+    const indicatorWidth = useSharedValue(0);
+    const [isReady, setIsReady] = useState(false);
+
     const handleLayout = useCallback((event: LayoutChangeEvent) => {
         setContainerWidth(event.nativeEvent.layout.width);
     }, []);
+
+    // Measure each tab's layout
+    const handleTabLayout = useCallback((key: string, event: LayoutChangeEvent) => {
+        const { x, width } = event.nativeEvent.layout;
+        setTabLayouts(prev => ({ ...prev, [key]: { x, width } }));
+    }, []);
+
+    // Animate indicator when selectedTab or layouts change
+    useEffect(() => {
+        const layout = tabLayouts[selectedTab];
+        if (!layout) return;
+
+        if (!isReady) {
+            // First render — snap immediately without animation
+            indicatorX.value = layout.x;
+            indicatorWidth.value = layout.width;
+            setIsReady(true);
+        } else {
+            // Subsequent changes — spring animation
+            indicatorX.value = withSpring(layout.x, SPRING_CONFIG);
+            indicatorWidth.value = withSpring(layout.width, SPRING_CONFIG);
+        }
+    }, [selectedTab, tabLayouts, indicatorX, indicatorWidth, isReady]);
+
+    // Animated style for the sliding indicator
+    const indicatorStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: indicatorX.value }],
+        width: indicatorWidth.value,
+    }));
 
     // Calculate min width per tab when spreadTabs is enabled
     // Subtract padding (4px each side = 8px total) from container width
@@ -63,12 +112,12 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
                     styles.tab,
                     flexTabs && { flex: 1 },
                     spreadTabs && tabMinWidth > 0 && { minWidth: tabMinWidth },
-                    isSelected && styles.activeTab,
                 ]}
                 onPress={() => {
                     haptics.light();
                     onTabSelect(tab.key);
                 }}
+                onLayout={event => handleTabLayout(tab.key, event)}
                 activeOpacity={0.7}
             >
                 <Text style={[styles.tabText, isSelected && styles.activeTabText]}>
@@ -85,7 +134,13 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
                 {/* Inner clip view - clips scrollable tab content to pill shape */}
                 <View style={styles.scrollClip}>
                     {flexTabs ? (
-                        <View style={[styles.scrollContent, { width: '100%' }]}>{renderTabs}</View>
+                        <View style={[styles.scrollContent, { width: '100%' }]}>
+                            {/* Sliding indicator inside content */}
+                            {isReady && (
+                                <Animated.View style={[styles.indicator, indicatorStyle]} />
+                            )}
+                            {renderTabs}
+                        </View>
                     ) : (
                         <ScrollView
                             horizontal
@@ -96,6 +151,10 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
                             ]}
                             style={styles.scrollView}
                         >
+                            {/* Sliding indicator inside ScrollView content */}
+                            {isReady && (
+                                <Animated.View style={[styles.indicator, indicatorStyle]} />
+                            )}
                             {renderTabs}
                         </ScrollView>
                     )}
@@ -109,15 +168,13 @@ const getStyles = (theme: Colors) =>
     StyleSheet.create({
         backgroundWrapper: {
             height: 40,
-            backgroundColor: theme.backgroundTertiary, // Using backgroundTertiary for the grayish background
+            backgroundColor: theme.backgroundTertiary,
             borderRadius: borderRadius.full,
             marginHorizontal: spacing.md,
             padding: 4,
             flexDirection: 'row',
             alignItems: 'center',
-            // No overflow:hidden here - that would clip the background at the corners on Android
         },
-        // Separate inner view that does the actual clip of scrollable content
         scrollClip: {
             flex: 1,
             height: 36,
@@ -131,6 +188,16 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
         },
+        indicator: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: 36,
+            borderRadius: borderRadius.full,
+            backgroundColor: theme.backgroundButtonActive,
+            borderWidth: 0.5,
+            borderColor: theme.defaultBorder,
+        },
         tab: {
             height: 36,
             paddingHorizontal: 12,
@@ -138,11 +205,6 @@ const getStyles = (theme: Colors) =>
             borderRadius: borderRadius.full,
             justifyContent: 'center',
             alignItems: 'center',
-        },
-        activeTab: {
-            backgroundColor: theme.backgroundButtonActive,
-            borderWidth: 0.5,
-            borderColor: theme.defaultBorder,
         },
         tabText: {
             fontSize: 14,

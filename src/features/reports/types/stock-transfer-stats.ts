@@ -15,7 +15,9 @@ export interface StockTransferRecordDto {
 
 export interface StockTransferStatsParams {
     ZoneId: string;
-    CycleId?: string;
+    PondIds?: string[];
+    PondCategoryIds?: string[];
+    SeasonId?: string;
     StartDate?: string;
     EndDate?: string;
     Id?: string;
@@ -51,5 +53,5 @@ export interface TransferData {
 export interface PondTransferProps {
     zoneId: string;
     pondId?: string;
-    cycleId?: string;
+    seasonId?: string;
 }

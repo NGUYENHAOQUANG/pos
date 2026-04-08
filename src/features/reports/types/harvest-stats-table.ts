@@ -15,6 +15,9 @@ export interface HarvestRecord {
 
 export interface HarvestStatsTableParams {
     ZoneId: string;
+    PondIds?: string[];
+    PondCategoryIds?: string[];
+    SeasonId?: string;
     CycleId?: string;
     StartDate?: string;
     EndDate?: string;
@@ -33,9 +36,9 @@ export type HarvestStatsTableResponse = IApiResponse<IPaginate<HarvestRecord>>;
 // UI TYPES
 // ----------------------------------------------------------------------
 
-/** Props for HarvestStat main component */
 export interface HarvestStatProps {
     zoneId: string;
     pondId?: string;
+    seasonId?: string;
     cycleId?: string;
 }

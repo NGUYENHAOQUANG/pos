@@ -5,11 +5,7 @@
 import React from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { reportApi } from '../api/reportApi';
-import {
-    StockTransferStatsParams,
-    StockTransferRecordDto,
-    TransferData,
-} from '../types/stock-transfer-stats';
+import { StockTransferRecordDto, TransferData } from '../types/stock-transfer-stats';
 import { APP_CONFIG } from '@/shared/constants/config';
 
 /** Format date as dd/MM/yyyy (e.g. 03/12/2026) */
@@ -22,23 +18,32 @@ const formatDateDDMMYYYY = (dateStr: string): string => {
 };
 
 // Infinite scroll hook
-interface UseInfiniteStockTransferParams
-    extends Omit<StockTransferStatsParams, 'Page' | 'PageSize'> {
+export const useInfiniteStockTransferStats = (params: {
+    ZoneId: string | null | undefined;
+    Id?: string | null | undefined;
+    PondIds?: string[];
+    SeasonId?: string;
     enabled?: boolean;
-}
-
-export const useInfiniteStockTransferStats = ({
-    enabled = true,
-    ...apiParams
-}: UseInfiniteStockTransferParams) => {
+}) => {
     const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
 
     const query = useInfiniteQuery({
-        queryKey: ['report', 'stock-transfer-stats', 'infinite', apiParams],
+        queryKey: [
+            'report',
+            'stock-transfer-stats',
+            'infinite',
+            params.ZoneId,
+            params.Id,
+            params.PondIds,
+            params.SeasonId,
+        ],
         queryFn: async ({ pageParam = 1 }) => {
-            if (!apiParams.ZoneId) throw new Error('ZoneId is required');
+            if (!params.ZoneId) throw new Error('ZoneId is required');
             return reportApi.getStockTransferStats({
-                ...apiParams,
+                ZoneId: params.ZoneId,
+                Id: params.Id || undefined,
+                PondIds: params.PondIds,
+                SeasonId: params.SeasonId,
                 Page: pageParam,
                 PageSize: pageSize,
             });
@@ -48,7 +53,7 @@ export const useInfiniteStockTransferStats = ({
             if (!lastPage.data?.hasNextPage) return undefined;
             return lastPage.data.pageNumber + 1;
         },
-        enabled: enabled && !!apiParams.ZoneId,
+        enabled: (params.enabled ?? true) && !!params.ZoneId,
     });
 
     // Flatten pages into a single array with UI-ready data

@@ -14,12 +14,13 @@ import { TransferItemCard } from './TransferItemCard';
 import { useInfiniteStockTransferStats } from '@/features/reports/hooks/useStockTransferStats';
 import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatIcon.svg';
+
 import { PondTransferProps } from '@/features/reports/types/stock-transfer-stats';
 
 // Wrap item with React.memo for performance
 const MemoizedTransferItemCard = React.memo(TransferItemCard);
 
-export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycleId }) => {
+export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, seasonId }) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [isSectionOpen, setIsSectionOpen] = React.useState(false);
@@ -27,8 +28,8 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
     const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
         useInfiniteStockTransferStats({
             ZoneId: zoneId,
-            Id: pondId,
-            CycleId: cycleId,
+            PondIds: pondId ? [pondId] : undefined,
+            SeasonId: seasonId,
             enabled: isSectionOpen,
         });
 

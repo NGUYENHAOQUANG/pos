@@ -79,19 +79,23 @@ export const ReportsScreen = () => {
             <CompilationEnvChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <GrowthChart />
             <ProdChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <CompilationFeedProd
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <CompilationProfitChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <CompilationCostChart
                 zoneId={selectedZoneId?.toString() || ''}
@@ -100,11 +104,13 @@ export const ReportsScreen = () => {
             <WaterUsageChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <FoodChart />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
         </>
     );
@@ -114,19 +120,26 @@ export const ReportsScreen = () => {
             <CompilationEnvChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <CompilationFeedProd
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
-            <ActivePondChart zoneId={selectedZoneId?.toString() || ''} />
+            <ActivePondChart
+                zoneId={selectedZoneId?.toString() || ''}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
+            />
             <ProdChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <CompilationProfitChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <CompilationCostChart
                 zoneId={selectedZoneId?.toString() || ''}
@@ -135,18 +148,22 @@ export const ReportsScreen = () => {
             <WaterUsageChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <HarvestChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
             <HarvestStat
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
         </>
     );

@@ -20,14 +20,16 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ title, items }) => {
         <View style={styles.container}>
             {title && <Text style={styles.headerTitle}>{title}</Text>}
             <View style={styles.card}>
-                {items.map(item => (
-                    <MenuItem
-                        key={item.id}
-                        Icon={item.Icon}
-                        title={item.title}
-                        onPress={item.onPress}
-                        hideArrow={item.hideArrow}
-                    />
+                {items.map((item, index) => (
+                    <React.Fragment key={item.id}>
+                        <MenuItem
+                            Icon={item.Icon}
+                            title={item.title}
+                            onPress={item.onPress}
+                            hideArrow={item.hideArrow}
+                        />
+                        {index < items.length - 1 && <View style={styles.separator} />}
+                    </React.Fragment>
                 ))}
             </View>
         </View>
@@ -41,11 +43,19 @@ const getStyles = (theme: Colors) =>
         },
         headerTitle: {
             fontSize: 16,
-            lineHeight: 20,
             fontWeight: '600',
             color: theme.text,
         },
         card: {
-            gap: 8,
+            backgroundColor: theme.background,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: theme.border,
+            overflow: 'hidden',
+        },
+        separator: {
+            height: 0.5,
+            backgroundColor: theme.border,
+            marginHorizontal: 16,
         },
     });

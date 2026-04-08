@@ -34,13 +34,9 @@ const POND_COLOR_PALETTE = [
     '#65A30D', // lime
 ];
 
-interface CompilationEnvChartProps {
-    zoneId: string;
-    pondIds?: string[];
-    cycleId?: string;
-}
+import { CompilationEnvChartProps } from '@/features/reports/types/env-measurement-chart';
 
-const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartProps) => {
+const CompilationEnvChart = ({ zoneId, pondIds, seasonId, cycleId }: CompilationEnvChartProps) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(true);
@@ -78,6 +74,7 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
         MetricId: selectedMetricId,
         PondIds: pondIds,
         CycleId: cycleId,
+        SeasonId: seasonId,
     });
 
     const chartData = chartResponse?.data;

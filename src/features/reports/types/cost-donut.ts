@@ -33,3 +33,10 @@ export interface CostDonutParams {
     PondIds?: string[];
     CycleId?: string;
 }
+
+// ===== Component Props =====
+
+export interface CompilationCostChartProps {
+    zoneId: string;
+    pondId?: string;
+}

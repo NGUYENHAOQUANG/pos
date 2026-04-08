@@ -43,15 +43,23 @@ const REMAINING_COLOR = colors.blue[600];
 
 export const useProductionDistribution = (params: {
     ZoneId: string | null | undefined;
-    Id?: string | null | undefined;
+    PondIds?: string[];
+    SeasonId?: string;
 }) => {
     return useQuery({
-        queryKey: ['report', 'production-distribution', params.ZoneId, params.Id],
+        queryKey: [
+            'report',
+            'production-distribution',
+            params.ZoneId,
+            params.PondIds,
+            params.SeasonId,
+        ],
         queryFn: () => {
             if (!params.ZoneId) throw new Error('ZoneId is required');
             return reportApi.getProductionDistribution({
                 ZoneId: params.ZoneId,
-                Id: params.Id || undefined,
+                PondIds: params.PondIds,
+                SeasonId: params.SeasonId,
             });
         },
         enabled: !!params.ZoneId,
@@ -108,11 +116,13 @@ export const useProdChartData = (
     zoneId: string,
     pondId?: string,
     enabled = true,
-    viewMode: ProdChartViewMode = 'area'
+    viewMode: ProdChartViewMode = 'area',
+    seasonId?: string
 ): UseProdChartDataResult => {
     const { data: response, isLoading } = useProductionDistribution({
         ZoneId: enabled ? zoneId : null,
-        Id: pondId,
+        PondIds: pondId ? [pondId] : undefined,
+        SeasonId: seasonId,
     });
 
     const apiData = response?.data;

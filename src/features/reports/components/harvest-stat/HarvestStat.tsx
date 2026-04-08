@@ -19,7 +19,7 @@ import { HarvestStatProps } from '@/features/reports/types/harvest-stats-table';
 // Wrap item with React.memo for performance
 const MemoizedHarvestItemCard = React.memo(HarvestItemCard);
 
-export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleId }) => {
+export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, seasonId, cycleId }) => {
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [isSectionOpen, setIsSectionOpen] = React.useState(false);
@@ -27,7 +27,8 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleI
     const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
         useInfiniteHarvestStatsTable({
             ZoneId: zoneId,
-            Id: pondId,
+            PondIds: pondId ? [pondId] : undefined,
+            SeasonId: seasonId,
             CycleId: cycleId,
             enabled: isSectionOpen,
         });

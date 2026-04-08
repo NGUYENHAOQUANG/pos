@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, TextInput as RNTextInput } from 'react-native';
+import { StyleSheet, TextInput as RNTextInput } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -27,21 +27,19 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
     };
 
     return (
-        <View style={styles.container}>
-            <SelectionInfoBox title="Ghi chú">
-                <TextInput
-                    ref={inputRef}
-                    style={styles.textArea}
-                    placeholder="Nhập ghi chú"
-                    placeholderTextColor={theme.borderSubtle}
-                    value={notes}
-                    onChangeText={handleChangeText}
-                    multiline
-                    textAlignVertical="top"
-                    maxLength={2000}
-                />
-            </SelectionInfoBox>
-        </View>
+        <SelectionInfoBox title="Ghi chú">
+            <TextInput
+                ref={inputRef}
+                style={styles.textArea}
+                placeholder="Nhập ghi chú"
+                placeholderTextColor={theme.borderSubtle}
+                value={notes}
+                onChangeText={handleChangeText}
+                multiline
+                textAlignVertical="top"
+                maxLength={2000}
+            />
+        </SelectionInfoBox>
     );
 };
 
