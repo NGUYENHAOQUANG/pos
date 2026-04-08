@@ -142,7 +142,10 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         const actualPondId = currentPond?.id || pondId;
         navigation.navigate('MeasureShrimpSizeAIScreen', {
             pondId: actualPondId || '',
-        });
+            onReturnData: (aiSize: string) => {
+                navigation.setParams({ aiShrimpSize: aiSize });
+            },
+        } as never);
     }, [currentPond?.id, pondId, navigation]);
 
     return (
