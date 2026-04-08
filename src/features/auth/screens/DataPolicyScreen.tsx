@@ -178,7 +178,7 @@ export default function DataPolicyScreen() {
                 {/* PDF attachment card */}
                 <View style={styles.pdfCard}>
                     <View style={styles.pdfIconContainer}>
-                        <FilePdfIcon width={32} height={32} />
+                        <FilePdfIcon width={32} height={32} color={theme.text} />
                     </View>
                     <View style={styles.pdfInfo}>
                         <Text style={styles.pdfFileName}>Chính sách.pdf</Text>
