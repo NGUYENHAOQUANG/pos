@@ -129,7 +129,7 @@ export const sendMessageToAI = async (text: string): Promise<AIResponse> => {
         // ── Device Control: Trả về text + widget DEVICE_CONTROL ──────────────
         case 'DEVICE_CONTROL':
             return {
-                text: '⚙️ Đã tìm thấy thiết bị quạt nước:',
+                text: '⚙️ Đã tìm thấy thiết bị quạt nước asdasd á Đã tìm thấy thiết bị quạt nước asdasd á Đã tìm thấy thiết bị quạt nước asdasd á Đã tìm thấy thiết bị quạt nước asdasd á :',
                 widget: {
                     type: 'DEVICE_CONTROL',
                     data: {
@@ -145,7 +145,7 @@ export const sendMessageToAI = async (text: string): Promise<AIResponse> => {
         case 'GENERAL':
         default:
             return {
-                text: '🤖 Cảm ơn bạn! Tôi có thể hỗ trợ bạn:\n\n• Xem thông số ao: "Tình trạng ao nuôi"\n• Điều khiển thiết bị: "Bật quạt nước"\n• Chào hỏi: "Xin chào"\n\nVui lòng thử lại với các câu lệnh trên!',
+                text: '🤖 Cảm ơn bạn! Tôi có thể hỗ trợ bạn Cảm ơn bạn! Tôi có thể hỗ trợ bạn  Cảm ơn bạn! Tôi có thể hỗ trợ bạn Cảm ơn bạn! Tôi có thể hỗ trợ bạn:\n\n• Xem thông số ao: "Tình trạng ao nuôi"\n• Điều khiển thiết bị: "Bật quạt nước"\n• Chào hỏi: "Xin chào"\n\nVui lòng thử lại với các câu lệnh trên!',
             };
     }
 };

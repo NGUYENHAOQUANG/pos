@@ -355,12 +355,12 @@ export const Chart: React.FC<ChartProps> = ({
                             />
                         )}
 
-                        {/* Green line (Sản lượng) - historical only, solid */}
+                        {/* Orange line (Sản lượng) - historical only, solid */}
                         {BLUE_DATA_HISTORICAL.length > 0 && !hiddenSeries?.has('production') && (
                             <Path
                                 d={createBluePathHistorical()}
                                 fill="none"
-                                stroke={CHART_THEME.green}
+                                stroke={CHART_THEME.orange}
                                 strokeWidth={2}
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -396,12 +396,12 @@ export const Chart: React.FC<ChartProps> = ({
                                 />
                             )}
 
-                        {/* Orange line - historical (solid) */}
+                        {/* Green line - historical (solid) */}
                         {!hiddenSeries?.has('consumed') && (
                             <Path
                                 d={createOrangePathHistorical()}
                                 fill="none"
-                                stroke={CHART_THEME.orange}
+                                stroke={CHART_THEME.green}
                                 strokeWidth={2}
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
