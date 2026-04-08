@@ -3,7 +3,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
@@ -19,19 +19,19 @@ import { MeasureShrimpSizeFormValues } from '@/features/farm/schemas/measureShri
 import { measureShrimpSizeService } from '@/features/farm/services/pond-work/measure-shrimp-size.service';
 import { MeasureShrimpSizeForm } from './MeasureShrimpSizeForm';
 
-type MeasureShrimpSizeScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeScreen'>;
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type MeasureShrimpSizeScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeScreen'>;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
 
-    // Support either itemToEdit standard or pondId/aiShrimpSize override
-    const { itemToEdit, pondId, aiShrimpSize } = route.params || {};
+    // Support either MeasureShrimpSizeId standard or pondId/aiShrimpSize override
+    const { measureShrimpSizeId, pondId, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const zoneId = useFarmStore(state => state.selectedZoneId) || '';
 
-    const measurementId = itemToEdit?.id;
+    const measurementId = measureShrimpSizeId;
     const isEditing = !!measurementId;
 
     // --- Data Fetching ---

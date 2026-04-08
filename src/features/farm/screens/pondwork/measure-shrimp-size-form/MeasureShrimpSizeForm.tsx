@@ -112,8 +112,8 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
             estimatedRemainingStockKg,
             averageShrimpSize,
             notes,
-            imageUris,
             documentIds,
+            imageUris,
         }),
         [
             executionDate,
@@ -121,14 +121,15 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
             estimatedRemainingStockKg,
             averageShrimpSize,
             notes,
-            imageUris,
             documentIds,
+            imageUris,
         ]
     );
 
     const hasChanges = useMemo(() => {
+        if (!executionDate || typeof shrimpSizePcsPerKg !== 'string') return false;
         return measureShrimpSizeService.hasChanges(currentFormValues, initialSnapshot);
-    }, [currentFormValues, initialSnapshot]);
+    }, [currentFormValues, initialSnapshot, executionDate, shrimpSizePcsPerKg]);
 
     const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 

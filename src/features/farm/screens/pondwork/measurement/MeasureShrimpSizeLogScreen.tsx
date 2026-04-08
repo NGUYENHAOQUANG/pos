@@ -44,7 +44,7 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
         metaConverter: (item: JobExecution, meta: MeasureSizeMeta) =>
             convertMeasureSizeMetaToActivityData(item, meta),
         editRoute: 'MeasureShrimpSizeScreen',
-        getEditParams: (_pondData, item) => ({ pondId, itemToEdit: item }),
+        getEditParams: (_pondData, item) => ({ pondId, measureShrimpSizeId: item.id }),
     };
 
     const { groupedData } = useLogScreenData(config);

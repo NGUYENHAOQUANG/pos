@@ -132,7 +132,7 @@ export type AppStackParamList = {
     MeasureShrimpSizeLogScreen: { pondId: string };
     MeasureShrimpSizeScreen: {
         pondId: string;
-        itemToEdit?: JobExecution;
+        measureShrimpSizeId?: string;
         aiShrimpSize?: string;
     };
     MeasureShrimpSizeAIScreen: { pondId: string };

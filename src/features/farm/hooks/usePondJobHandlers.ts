@@ -135,7 +135,7 @@ export const usePondJobEditHandlers = ({
                 if (!pond?.id) return;
                 navigation.navigate('MeasureShrimpSizeScreen', {
                     pondId: pond.id,
-                    itemToEdit: item,
+                    measureShrimpSizeId: item.id,
                 });
             },
 
