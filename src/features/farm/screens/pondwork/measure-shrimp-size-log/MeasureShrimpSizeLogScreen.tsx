@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { MeasureSizeMeta, JobExecution } from '@/features/farm/types/farm.types';
 import { convertMeasureSizeMetaToActivityData } from '@/features/farm/utils/metaConverters';
@@ -10,8 +10,8 @@ import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogS
 import { useSizeMeasurementsAsJobs } from '@/features/farm/hooks/useSizeMeasurement';
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeLogScreen'>;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeLogScreen'>;
 
 export const MeasureShrimpSizeLogScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
