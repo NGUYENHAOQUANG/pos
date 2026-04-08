@@ -58,7 +58,7 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
                 <Text style={styles.label}>Tình trạng tôm - AI</Text>
                 {(() => {
                     if (results.length === 0) {
-                        return <Text style={styles.value}>-</Text>;
+                        return <Text style={styles.value}>0</Text>;
                     }
 
                     const allItems = results.reduce<HealthCheckItem[]>(
@@ -67,7 +67,7 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
                     );
 
                     if (allItems.length === 0) {
-                        return <Text style={styles.value}>-</Text>;
+                        return <Text style={styles.value}>0</Text>;
                     }
 
                     const firstSick = allItems.find(i => i.status !== 'HEALTHY');
