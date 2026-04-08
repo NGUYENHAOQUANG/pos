@@ -31,7 +31,7 @@ import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/Harve
 import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDetailScreen';
 import { PondCycleListScreen } from '@/features/farm/screens/pond-cycle-list/PondCycleListScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
-import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
+import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measure-shrimp-size-form/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
 import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feedlog/FeedingLogScreens';
