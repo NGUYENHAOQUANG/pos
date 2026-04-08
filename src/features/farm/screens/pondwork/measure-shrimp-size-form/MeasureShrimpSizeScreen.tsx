@@ -7,7 +7,6 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
-import { documentApi } from '@/features/material/api/documentApi';
 
 import {
     useCreateSizeMeasurement,
@@ -17,6 +16,7 @@ import {
 } from '@/features/farm/hooks/useSizeMeasurement';
 import { MeasureShrimpSizeFormValues } from '@/features/farm/schemas/measureShrimpSizeSchema';
 import { measureShrimpSizeService } from '@/features/farm/services/pond-work/measure-shrimp-size.service';
+import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 import { MeasureShrimpSizeForm } from './MeasureShrimpSizeForm';
 
 type MeasureShrimpSizeScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeScreen'>;
@@ -51,16 +51,11 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const isSavingActively =
         createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
-    const [imageUris, setImageUris] = useState<string[]>([]);
-
-    // Automatically resolve image URIs if backend provided Document IDs
-    useEffect(() => {
-        if (!detail?.documentIds?.length) return;
-        documentApi
-            .getUrls(detail.documentIds)
-            .then(setImageUris)
-            .catch(() => {});
-    }, [detail?.documentIds]);
+    const currentDocIds = useMemo(
+        () => detail?.documentIds || detail?.documents?.map(d => d.id) || [],
+        [detail?.documentIds, detail?.documents]
+    );
+    const { imageUris } = useDocumentUrls(currentDocIds);
 
     // Minimum visual loading time (skeleton logic)
     const [initialLoading, setInitialLoading] = useState(true);

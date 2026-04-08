@@ -128,7 +128,7 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
         await onDelete();
         setDeleteModalVisible(false);
         Toast.show({ type: 'success', text1: 'Xóa thành công' });
-        onBack();
+        setTimeout(() => onBack(), 300);
     }, [allowNavigation, onDelete, onBack]);
 
     const handleCancelDelete = useCallback(() => setDeleteModalVisible(false), []);

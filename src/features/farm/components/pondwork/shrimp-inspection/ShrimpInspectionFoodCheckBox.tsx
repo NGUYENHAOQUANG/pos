@@ -15,11 +15,13 @@ interface ShrimpInspectionFoodCheckBoxProps {
     onLeftoverFoodChange: (value: string) => void;
 }
 
+import { LeftoverFoodEnum } from '@/features/farm/schemas/shrimpInspectionSchema';
+
 const leftoverFoodOptions = [
-    { label: 'Hết', value: 'Hết' },
-    { label: 'Còn 5–10%', value: 'Còn 5–10%' },
-    { label: 'Còn 10–15%', value: 'Còn 10–15%' },
-    { label: 'Còn 15–20%', value: 'Còn 15–20%' },
+    { label: 'Hết', value: LeftoverFoodEnum.NONE },
+    { label: 'Còn 5–10%', value: LeftoverFoodEnum.LESS_THAN_10 },
+    { label: 'Còn 10–15%', value: LeftoverFoodEnum.LESS_THAN_15 },
+    { label: 'Còn 15–20%', value: LeftoverFoodEnum.LESS_THAN_20 },
 ];
 
 export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBoxProps> = ({

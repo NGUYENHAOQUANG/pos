@@ -175,7 +175,7 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
             allowNavigation();
             setShowDeleteModal(false);
             showDeleteJobSuccessToast('MEASURE_SIZE');
-            onBack();
+            setTimeout(() => onBack(), 300);
         } catch (error) {
             handleError(error as Error);
         }
