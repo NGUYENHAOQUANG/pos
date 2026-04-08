@@ -289,7 +289,7 @@ export const Chart: React.FC<ChartProps> = ({
                         top: 0,
                         height: CHART_HEIGHT,
                         width: PADDING_LEFT,
-                        zIndex: 10,
+                        zIndex: 1,
                         backgroundColor: theme.background, // Thêm nền để che nội dung khi scroll
                     }}
                     pointerEvents="none"
