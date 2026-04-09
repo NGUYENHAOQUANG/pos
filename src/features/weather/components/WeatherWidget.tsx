@@ -136,13 +136,13 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({ current, locationName, on
 
     if (onPress) {
         return (
-            <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+            <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={{ flexShrink: 1 }}>
                 {content}
             </TouchableOpacity>
         );
     }
 
-    return content;
+    return <View style={{ flexShrink: 1 }}>{content}</View>;
 };
 
 export default WeatherWidget;
@@ -160,13 +160,14 @@ const getStyles = (theme: Colors) =>
             paddingHorizontal: 12,
             height: 28,
             gap: 4,
+            flexShrink: 1,
         },
 
         location: {
             fontSize: 14,
             fontWeight: '400',
             color: theme.text,
-            maxWidth: 80,
+            flexShrink: 1,
         },
 
         dash: {

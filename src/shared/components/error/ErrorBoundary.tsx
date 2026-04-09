@@ -70,6 +70,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
 // ─── Functional Fallback Component (Supports Theme Hooks) ───────────
 import { useAppTheme } from '@/styles/themeContext';
+import { NavigationContext } from '@react-navigation/native';
 
 interface ErrorBoundaryFallbackProps {
     error: Error | null;
@@ -84,6 +85,14 @@ const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
 }) => {
     const theme = useAppTheme();
     const themedStyles = getStyles(theme);
+    const navigation = React.useContext(NavigationContext);
+
+    const handleBack = () => {
+        onReset();
+        if (navigation && navigation.canGoBack()) {
+            navigation.goBack();
+        }
+    };
 
     return (
         <View style={themedStyles.container}>
@@ -107,13 +116,23 @@ const ErrorBoundaryFallback: React.FC<ErrorBoundaryFallbackProps> = ({
 
             {/* Button area - pinned to bottom */}
             <View style={themedStyles.buttonContainer}>
-                <Button
-                    title="Thử lại"
-                    onPress={onReset}
-                    variant="primary"
-                    size="large"
-                    fullWidth
-                />
+                {__DEV__ ? (
+                    <Button
+                        title="Thử lại"
+                        onPress={onReset}
+                        variant="primary"
+                        size="large"
+                        fullWidth
+                    />
+                ) : (
+                    <Button
+                        title="Quay lại"
+                        onPress={handleBack}
+                        variant="primary"
+                        size="large"
+                        fullWidth
+                    />
+                )}
             </View>
         </View>
     );
