@@ -7,7 +7,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxType,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
 
@@ -126,7 +129,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                     control={control}
                     render={({ field }) => (
                         <GeneralInfoBox
-                            type="harvest"
+                            type={GeneralInfoBoxType.HARVEST}
                             date={selectedDate}
                             onDateChange={setSelectedDate}
                             activityLabel="Chọn loại thu hoạch"

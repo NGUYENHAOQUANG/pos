@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
@@ -18,7 +17,7 @@ import {
 import { EnvironmentFormValues } from '@/features/farm/schemas/environmentFormSchema';
 import { environmentService } from '@/features/farm/services/pond-work/environment.service';
 import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
-
+import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 import { AddEnvironmentForm } from '@/features/farm/screens/pondwork/environment-form/AddEnvironmentForm';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -29,8 +28,6 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { pondId, environmentId } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const isEditMode = !!environmentId;
-
-    const generalInfoBoxRef = useRef<any>(null);
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
@@ -117,11 +114,6 @@ export const AddEnvironmentScreen: React.FC = () => {
         return environmentService.mapLimitsToCodes(parameterLimits, metricTypes);
     }, [selectedZoneId, parameterSettings, metricTypes]);
 
-    // --- Unsaved Changes ---
-    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(
-        hasImagesChanged || imageUris.length > 0
-    );
-
     // --- Handlers ---
     const handleBack = () => {
         if (navigation.canGoBack()) navigation.goBack();
@@ -135,43 +127,57 @@ export const AddEnvironmentScreen: React.FC = () => {
         });
     };
 
-    const handleSubmit = (values: EnvironmentFormValues) => {
+    const { uploadAndSyncDocuments, markUploadsAsSaved } = useSyncDocuments();
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleSubmit = async (values: EnvironmentFormValues) => {
         if (!pondId) {
             Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin ao' });
             return;
         }
 
-        const docIds = generalInfoBoxRef.current?.getUploadedIds?.() || [];
-        const measurements = environmentService.mapFormToPayload(
-            metricTypes,
-            values,
-            advancedParameters
-        );
-
-        const commonData = {
-            documentIds: docIds,
-            envMeasurementDetail: {
-                envMeasurementDetails: measurements,
-                notes: values.notes,
-            },
-        };
-
-        const onMutationSuccess = () => {
-            generalInfoBoxRef.current?.markAsSaved?.();
-            allowNavigation();
-            navigation.goBack();
-        };
-
-        if (environmentId) {
-            updateEnvMeasurement.mutate(
-                { pondId, id: environmentId, data: commonData },
-                { onSuccess: onMutationSuccess }
+        setIsUploading(true);
+        try {
+            const finalDocIds = await uploadAndSyncDocuments(
+                imageUris,
+                initialImageUris,
+                documentIds
             );
-        } else {
-            createEnvMeasurement.mutate(
-                { pondId, data: commonData },
-                { onSuccess: onMutationSuccess }
+
+            const measurements = environmentService.mapFormToPayload(
+                metricTypes,
+                values,
+                advancedParameters
             );
+
+            const commonData = {
+                documentIds: finalDocIds,
+                envMeasurementDetail: {
+                    envMeasurementDetails: measurements,
+                    notes: values.notes,
+                },
+            };
+
+            const onMutationSuccess = () => {
+                markUploadsAsSaved();
+                navigation.goBack();
+            };
+
+            if (environmentId) {
+                updateEnvMeasurement.mutate(
+                    { pondId, id: environmentId, data: commonData },
+                    { onSuccess: onMutationSuccess }
+                );
+            } else {
+                createEnvMeasurement.mutate(
+                    { pondId, data: commonData },
+                    { onSuccess: onMutationSuccess }
+                );
+            }
+        } catch (error) {
+            console.error('Submit failed', error);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -182,7 +188,6 @@ export const AddEnvironmentScreen: React.FC = () => {
             { pondId, id: environmentId },
             {
                 onSuccess: () => {
-                    allowNavigation();
                     setDeleteModalVisible(false);
                     setTimeout(() => navigation.goBack(), 300);
                 },
@@ -191,6 +196,7 @@ export const AddEnvironmentScreen: React.FC = () => {
     };
 
     const isSubmitting =
+        isUploading ||
         createEnvMeasurement.isPending ||
         updateEnvMeasurement.isPending ||
         deleteEnvMeasurement.isPending;
@@ -202,10 +208,8 @@ export const AddEnvironmentScreen: React.FC = () => {
             isLoading={isLoading}
             isSubmitting={isSubmitting}
             initialData={initialData}
-            generalInfoBoxRef={generalInfoBoxRef}
             imageUris={imageUris}
             onImagesChange={setImageUris}
-            documentIds={documentIds}
             hasImagesChanged={hasImagesChanged}
             limits={limitsWithCodes}
             advancedParameters={advancedParameters}
@@ -217,7 +221,6 @@ export const AddEnvironmentScreen: React.FC = () => {
             deleteModalVisible={deleteModalVisible}
             onConfirmDelete={handleDelete}
             onCancelDelete={() => setDeleteModalVisible(false)}
-            UnsavedChangesModal={UnsavedChangesModal}
         />
     );
 };

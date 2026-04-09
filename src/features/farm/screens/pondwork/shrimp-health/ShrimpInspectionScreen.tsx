@@ -5,6 +5,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ShrimpInspectionForm } from './ShrimpInspectionForm';
 import { AIHealthCheckResult } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
+import { useAppTheme } from '@/styles/themeContext';
+import { View } from 'react-native';
 import {
     useCreateShrimpHealthCheck,
     useUpdateShrimpHealthCheck,
@@ -92,7 +94,11 @@ export const ShrimpHealthScreen: React.FC = () => {
         updateMutation.isPending ||
         deleteMutation.isPending;
 
-    const handleSubmit = (formState: ShrimpHealthFormState, documentIds: string[]) => {
+    const handleSubmit = (
+        formState: ShrimpHealthFormState,
+        documentIds: string[],
+        markUploadsAsSaved: () => void
+    ) => {
         const payload = shrimpHealthService.mapFormToPayload({
             state: formState,
             documentIds,
@@ -107,6 +113,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                 },
                 {
                     onSuccess: () => {
+                        markUploadsAsSaved();
                         AppToast({
                             type: 'success',
                             text1: TOAST_MESSAGES_CONFIG.JOB.SHRIMP_INSPECTION?.edit || '',
@@ -123,6 +130,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                 },
                 {
                     onSuccess: () => {
+                        markUploadsAsSaved();
                         AppToast({
                             type: 'success',
                             text1: TOAST_MESSAGES_CONFIG.JOB.SHRIMP_INSPECTION?.add || '',
@@ -195,8 +203,10 @@ export const ShrimpHealthScreen: React.FC = () => {
         } as never);
     };
 
+    const theme = useAppTheme();
+
     return (
-        <>
+        <View style={{ flex: 1, backgroundColor: theme.backgroundPrimary }}>
             {initialData && (
                 <ShrimpInspectionForm
                     isEditMode={isEditMode}
@@ -214,6 +224,6 @@ export const ShrimpHealthScreen: React.FC = () => {
                     onSubmit={handleSubmit}
                 />
             )}
-        </>
+        </View>
     );
 };

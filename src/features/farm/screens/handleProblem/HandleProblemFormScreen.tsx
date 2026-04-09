@@ -119,7 +119,11 @@ export const HandleProblemFormScreen = () => {
         return handleProblemService.mapDetailToForm(item, allMaterials, imageUrls);
     }, [item, allMaterials, imageUrls]);
 
-    const onSubmit = async (data: HandleProblemFormValues, documentIds: string[]) => {
+    const onSubmit = async (
+        data: HandleProblemFormValues,
+        documentIds: string[],
+        markUploadsAsSaved: () => void
+    ) => {
         if (!pondId) return;
 
         // Material required only for CLEAN_POND (Rửa ao)
@@ -171,6 +175,7 @@ export const HandleProblemFormScreen = () => {
                     }
 
                     showEditJobSuccessToast(currentJobType);
+                    markUploadsAsSaved();
                     navigation.goBack();
                 } else {
                     const res: any = await createCleanMutation.mutateAsync({
@@ -188,6 +193,7 @@ export const HandleProblemFormScreen = () => {
                     }
 
                     showAddJobSuccessToast(currentJobType);
+                    markUploadsAsSaved();
                     navigation.goBack();
                 }
             } catch (error) {
@@ -203,6 +209,7 @@ export const HandleProblemFormScreen = () => {
                     {
                         onSuccess: () => {
                             showEditJobSuccessToast(currentJobType);
+                            markUploadsAsSaved();
                             navigation.goBack();
                         },
                         onError: handleError,
@@ -214,6 +221,7 @@ export const HandleProblemFormScreen = () => {
                     {
                         onSuccess: () => {
                             showAddJobSuccessToast(currentJobType);
+                            markUploadsAsSaved();
                             navigation.goBack();
                         },
                         onError: handleError,
@@ -230,6 +238,7 @@ export const HandleProblemFormScreen = () => {
                     {
                         onSuccess: () => {
                             showEditJobSuccessToast(currentJobType);
+                            markUploadsAsSaved();
                             navigation.goBack();
                         },
                         onError: handleError,
@@ -241,6 +250,7 @@ export const HandleProblemFormScreen = () => {
                     {
                         onSuccess: () => {
                             showAddJobSuccessToast(currentJobType);
+                            markUploadsAsSaved();
                             navigation.goBack();
                         },
                         onError: handleError,

@@ -5,7 +5,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxType,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
@@ -128,7 +131,12 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     name="executionDate"
                     control={control}
                     render={({ field: { value, onChange } }) => (
-                        <GeneralInfoBox date={value} onDateChange={onChange} disabledDate={true} />
+                        <GeneralInfoBox
+                            type={GeneralInfoBoxType.DEFAULT}
+                            date={value}
+                            onDateChange={onChange}
+                            disabledDate={true}
+                        />
                     )}
                 />
 
