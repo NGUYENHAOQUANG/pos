@@ -32,6 +32,8 @@ interface CheckboxProps {
     size?: CheckboxSize;
     /** Custom active/checked color (default: theme.primary) */
     activeColor?: string;
+    /** Indicator for validation error */
+    hasError?: boolean;
     /** Custom container styles */
     style?: ViewStyle;
     /** Custom label styles */
@@ -55,6 +57,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     disabled = false,
     size = 'md',
     activeColor,
+    hasError,
     style,
     labelStyle,
 }) => {
@@ -88,7 +91,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
                               backgroundColor: activeColor || theme.primary,
                               borderColor: activeColor || theme.primary,
                           }
-                        : styles.boxUnchecked,
+                        : [styles.boxUnchecked, hasError ? { borderColor: theme.error } : null],
                     disabled && styles.boxDisabled,
                 ]}
             >

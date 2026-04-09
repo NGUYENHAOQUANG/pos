@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
     ScrollView,
     StatusBar,
@@ -11,17 +11,21 @@ import {
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { CompleteProfilePayload } from '@/features/auth/types/auth.types';
+import { AuthStackNavigationProp } from '@/app/navigation/types';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
+import { Checkbox } from '@/shared/components/forms/Checkbox';
 
 import { spacing, typography } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
 import InfoIcon from '@/assets/Icon/Info.svg';
+import WarningCircleIcon from '@/assets/Icon/IconPolicy/WarningCircle.svg';
 
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 import { handleError } from '@/shared/utils';
@@ -32,15 +36,34 @@ export default function InfoScreen() {
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [agreedPolicy, setAgreedPolicy] = useState(false);
+    const [showPolicyError, setShowPolicyError] = useState(false);
 
     const { user, completeProfile } = useAuthStore();
     const { keyboardVisible } = useKeyboard();
+    const navigation = useNavigation<AuthStackNavigationProp>();
     const theme = useAppTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+
+    const handleOpenPolicy = useCallback(() => {
+        navigation.navigate('DataPolicy');
+    }, [navigation]);
+
+    const handleTogglePolicy = useCallback((val: boolean) => {
+        setAgreedPolicy(val);
+        if (val) setShowPolicyError(false);
+    }, []);
+
+    const isSubmitDisabled = !fullName.trim();
 
     const handleSubmit = async () => {
         if (!fullName.trim()) {
             Alert.alert('Thông báo', 'Vui lòng nhập họ và tên');
+            return;
+        }
+
+        if (!agreedPolicy) {
+            setShowPolicyError(true);
             return;
         }
 
@@ -151,12 +174,48 @@ export default function InfoScreen() {
                                     keyboardVisible && styles.footerKeyboardOpen,
                                 ]}
                             >
+                                {/* Policy agreement */}
+                                <View style={styles.policySection}>
+                                    <Checkbox
+                                        checked={agreedPolicy}
+                                        onToggle={handleTogglePolicy}
+                                        size="sm"
+                                        activeColor={theme.primaryOrange}
+                                        hasError={showPolicyError}
+                                    />
+                                    <Text style={styles.policyText}>
+                                        Tôi đồng ý với{' '}
+                                        <Text style={styles.policyLink} onPress={handleOpenPolicy}>
+                                            Chính sách bảo vệ dữ liệu cá nhân
+                                        </Text>{' '}
+                                        của Mebieco theo NĐ 13/2023/NĐ-CP.
+                                    </Text>
+                                </View>
+
+                                {showPolicyError && (
+                                    <View style={styles.errorContainer}>
+                                        <WarningCircleIcon
+                                            width={20}
+                                            height={20}
+                                            color={theme.red[500]}
+                                        />
+                                        <Text style={styles.errorText}>
+                                            Vui lòng đồng ý với Chính sách bảo vệ dữ liệu cá nhân để
+                                            tiếp tục.
+                                        </Text>
+                                    </View>
+                                )}
+
                                 <Button
-                                    title="Tạo tài khoản"
+                                    title="Tạo Tài Khoản"
                                     onPress={handleSubmit}
                                     variant="primary"
                                     fullWidth
-                                    style={styles.submitButton}
+                                    disabled={isSubmitDisabled}
+                                    style={[
+                                        styles.submitButton,
+                                        isSubmitDisabled && styles.submitButtonDisabled,
+                                    ]}
                                 />
                             </View>
                         </View>
@@ -219,12 +278,13 @@ const getStyles = (theme: Colors) =>
         submitButton: {
             backgroundColor: theme.primary,
             borderRadius: 25,
-            height: 40,
+            height: 36,
         },
         footer: {
             paddingHorizontal: spacing.md,
+            paddingTop: spacing.md,
             paddingBottom: spacing.xl + spacing.sm + 12,
-            paddingTop: spacing.xs,
+            gap: 12,
         },
         footerKeyboardOpen: {
             paddingBottom: spacing.md,
@@ -236,5 +296,44 @@ const getStyles = (theme: Colors) =>
             color: theme.textTertiary,
             fontWeight: '400',
             fontSize: 14,
+        },
+        policySection: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+        },
+        policyText: {
+            flex: 1,
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            lineHeight: 18,
+            marginLeft: spacing.sm,
+        },
+        policyLink: {
+            color: theme.primaryOrange,
+            fontWeight: '500',
+            fontSize: 14,
+            lineHeight: 18,
+            textDecorationLine: 'underline',
+        },
+        submitButtonDisabled: {
+            opacity: 0.5,
+        },
+        errorContainer: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            backgroundColor: theme.red[25],
+            borderWidth: 1,
+            borderColor: theme.red[200],
+            borderRadius: 8,
+            padding: 12,
+            gap: 8,
+        },
+        errorText: {
+            flex: 1,
+            fontSize: 14,
+            fontWeight: '500',
+            lineHeight: 20,
+            color: theme.red[500],
         },
     });
