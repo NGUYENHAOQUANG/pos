@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
@@ -9,10 +9,6 @@ import { Colors, spacing } from '@/styles';
 import { useMaterial } from '@/features/material/hooks';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { DetailRow } from '@/features/material/components/DetailRow';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface WarehouseMaterialItemProps {
     item: IWarehouseItem;

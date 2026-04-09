@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
+import { View, StyleSheet, LayoutAnimation } from 'react-native';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
@@ -14,10 +14,6 @@ import { DateInputButton } from '@/features/farm/components/pondwork/DateInputBu
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';
 import { Zone } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/pond.types';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface ExportWarehouseInformationProps {
     date: Date;

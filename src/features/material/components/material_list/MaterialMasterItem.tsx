@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
@@ -15,10 +8,6 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DetailRow } from '@/features/material/components/DetailRow';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface MaterialMasterItemProps {
     item: IMaterial;
