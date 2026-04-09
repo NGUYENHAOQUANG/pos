@@ -40,7 +40,8 @@ export const useWebRTCStream = (url: string) => {
                 await pc.setLocalDescription(offer);
 
                 // Ensure URL points to the WHEP endpoint for Mediamtx
-                const signalingUrl = url.endsWith('/whep') ? url : `${url}/whep`;
+                const cleanUrl = url.trim();
+                const signalingUrl = cleanUrl.endsWith('/whep') ? cleanUrl : `${cleanUrl}/whep`;
 
                 // Send offer to signaling server (WHEP standard)
                 const response = await fetch(signalingUrl, {
@@ -65,9 +66,14 @@ export const useWebRTCStream = (url: string) => {
 
                 await pc.setRemoteDescription(answer);
             } catch (err: any) {
-                console.error('WebRTC Error:', err);
                 if (isMounted) {
-                    setError(err.message || 'Không thể thiết lập WebRTC');
+                    if (err.message === 'Network request failed') {
+                        setError(
+                            `Không thể kết nối đến server. Vui lòng kiểm tra lại địa chỉ IP/PORT hoặc mạng Wifi gốc.\n(URL đang gọi: ${url})`
+                        );
+                    } else {
+                        setError(err.message || 'Không thể thiết lập WebRTC');
+                    }
                 }
             }
         };
