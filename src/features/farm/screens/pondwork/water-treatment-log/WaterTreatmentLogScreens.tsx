@@ -3,7 +3,7 @@ import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, View } from 'react-native';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
 import { convertWaterTreatmentJobToActivityData } from '@/features/farm/utils/metaConverters';
 import { JobExecution } from '@/features/farm/types/farm.types';
@@ -12,8 +12,8 @@ import { useWaterTreatmentRecordsAsJobs } from '@/features/farm/hooks/useWaterTr
 import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 import { useAppTheme } from '@/styles/themeContext';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterTreatmentLog'>;
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'WaterTreatmentLog'>;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 export const WaterTreatmentLogScreens = () => {
     const navigation = useNavigation<NavigationProp>();
@@ -48,12 +48,10 @@ export const WaterTreatmentLogScreens = () => {
         setStartDate,
         setEndDate,
         metaConverter: (item: JobExecution) => convertWaterTreatmentJobToActivityData(item),
-        editRoute: 'EditWaterTreatmentScreens',
+        editRoute: 'WaterTreatmentScreen',
         getEditParams: (_pond, item) => ({
             pondId: targetPondId!,
             jobId: item.id,
-            pond: pond,
-            item,
         }),
         externalData: jobs, // Use real API data instead of store
     };
@@ -61,8 +59,8 @@ export const WaterTreatmentLogScreens = () => {
     const { groupedData } = useLogScreenData(config);
 
     const handleStartActivity = () => {
-        if (pond) {
-            navigation.navigate('AddWaterTreatmentScreen', { pond });
+        if (targetPondId) {
+            navigation.navigate('WaterTreatmentScreen', { pondId: targetPondId });
         }
     };
 

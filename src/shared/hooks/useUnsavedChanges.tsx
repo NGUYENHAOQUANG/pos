@@ -52,12 +52,14 @@ export const useUnsavedChanges = (hasUnsavedChanges: boolean, onDiscard?: () => 
 
     const handleConfirmLeave = () => {
         setShowModal(false);
-        if (onDiscard) {
-            onDiscard();
-        }
-        if (pendingAction) {
-            navigation.dispatch(pendingAction);
-        }
+        setTimeout(() => {
+            if (onDiscard) {
+                onDiscard();
+            }
+            if (pendingAction) {
+                navigation.dispatch(pendingAction);
+            }
+        }, 300);
     };
 
     const handleCancelLeave = () => {

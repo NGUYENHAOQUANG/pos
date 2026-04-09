@@ -18,7 +18,7 @@ import {
     showEditJobSuccessToast,
     showMaterialQuantityZeroToast,
 } from '@/features/farm/utils/toastMessages';
-import { siphonFormService } from '@/features/farm/services/siphon.service';
+import { siphonFormService } from '@/features/farm/services/pond-work/siphon.service';
 import { siphonFormSchema, SiphonFormValues } from '@/features/farm/schemas/siphonFormSchema';
 import { SiphonFormInformation } from '@/features/farm/components/pondwork/xyphon/SiphonFormInformation';
 
@@ -128,7 +128,7 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
         await onDelete();
         setDeleteModalVisible(false);
         Toast.show({ type: 'success', text1: 'Xóa thành công' });
-        onBack();
+        setTimeout(() => onBack(), 300);
     }, [allowNavigation, onDelete, onBack]);
 
     const handleCancelDelete = useCallback(() => setDeleteModalVisible(false), []);

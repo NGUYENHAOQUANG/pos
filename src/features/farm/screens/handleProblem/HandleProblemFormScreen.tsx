@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
@@ -10,7 +10,7 @@ import {
     showEditJobSuccessToast,
     showMaterialQuantityZeroToast,
 } from '@/features/farm/utils/toastMessages';
-import { documentApi } from '@/features/material/api/documentApi';
+import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 import { Loading } from '@/shared/components/ui/Loading';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
@@ -31,9 +31,9 @@ import {
 } from '@/features/farm/hooks/useIncidentData';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
-import { handleProblemService } from '../../services/handleproblem-service/handleProblem.service';
-import { HandleProblemForm } from './HandleProblemForm';
-import { HandleProblemFormValues } from '../../schemas/handleProblemSchema';
+import { handleProblemService } from '@/features/farm/services/pond-work/handleProblem.service';
+import { HandleProblemForm } from '@/features/farm/screens/handleProblem/HandleProblemForm';
+import { HandleProblemFormValues } from '@/features/farm/schemas/handleProblemSchema';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblem'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -103,40 +103,17 @@ export const HandleProblemFormScreen = () => {
         });
     };
 
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
-    const hasDocuments =
-        (item?.documentIds?.length ?? 0) > 0 || ((item?.meta as any)?.documentIds?.length ?? 0) > 0;
-    const [isLoadingImages, setIsLoadingImages] = useState(hasDocuments);
-
-    // Fetch image URLs if they exist
-    useEffect(() => {
-        let isMounted = true;
-        const fetchUrls = async () => {
-            let ids: string[] = [];
-            if (item?.documentIds?.length) {
-                ids = item.documentIds;
-            } else if ((item?.meta as any)?.documentIds?.length) {
-                ids = (item?.meta as any).documentIds;
-            }
-
-            if (ids.length > 0) {
-                try {
-                    const urls = await documentApi.getUrls(ids);
-                    if (isMounted) setImageUrls(urls);
-                } catch (_e) {
-                    // ignore
-                } finally {
-                    if (isMounted) setIsLoadingImages(false);
-                }
-            } else {
-                if (isMounted) setIsLoadingImages(false);
-            }
-        };
-        fetchUrls();
-        return () => {
-            isMounted = false;
-        };
+    const currentDocIds = useMemo(() => {
+        let ids: string[] = [];
+        if (item?.documentIds?.length) {
+            ids = item.documentIds;
+        } else if ((item?.meta as any)?.documentIds?.length) {
+            ids = (item?.meta as any).documentIds;
+        }
+        return ids;
     }, [item]);
+
+    const { imageUris: imageUrls, isLoadingImages } = useDocumentUrls(currentDocIds);
 
     const initialData = useMemo(() => {
         return handleProblemService.mapDetailToForm(item, allMaterials, imageUrls);

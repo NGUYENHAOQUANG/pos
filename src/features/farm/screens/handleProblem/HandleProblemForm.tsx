@@ -101,7 +101,9 @@ export const HandleProblemForm = ({
     const handleConfirmDelete = () => {
         setShowDeleteModal(false);
         allowNavigation();
-        onDelete();
+        setTimeout(() => {
+            onDelete();
+        }, 300);
     };
 
     return (
