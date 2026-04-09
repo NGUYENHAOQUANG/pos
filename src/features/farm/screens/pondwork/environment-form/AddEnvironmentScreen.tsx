@@ -14,9 +14,10 @@ import {
     useDeleteEnvMeasurement,
     useEnvMeasurement,
 } from '@/features/farm/hooks/useEnvMeasurement';
-import { documentApi } from '@/features/material/api/documentApi';
+
 import { EnvironmentFormValues } from '@/features/farm/schemas/environmentFormSchema';
 import { environmentService } from '@/features/farm/services/pond-work/environment.service';
+import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 
 import { AddEnvironmentForm } from '@/features/farm/screens/pondwork/environment-form/AddEnvironmentForm';
 
@@ -44,10 +45,23 @@ export const AddEnvironmentScreen: React.FC = () => {
     const deleteEnvMeasurement = useDeleteEnvMeasurement();
 
     // --- Image State ---
-    const [imageUris, setImageUris] = useState<string[]>([]);
-    const [initialImageUris, setInitialImageUris] = useState<string[]>([]);
+    const currentDocIds = useMemo(() => detail?.documentIds || [], [detail?.documentIds]);
+    const { imageUris, setImageUris } = useDocumentUrls(currentDocIds);
+    // documentIds state to track the IDs that are currently loaded map to the images
     const [documentIds, setDocumentIds] = useState<string[]>([]);
-    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [initialImageUris, setInitialImageUris] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (detail?.documentIds) {
+            setDocumentIds(detail.documentIds);
+        }
+    }, [detail?.documentIds]);
+
+    useEffect(() => {
+        if (imageUris.length > 0 && initialImageUris.length === 0) {
+            setInitialImageUris(imageUris);
+        }
+    }, [imageUris, initialImageUris.length]);
 
     const initialData = useMemo<EnvironmentFormValues | null>(() => {
         if (detail) {
@@ -56,21 +70,7 @@ export const AddEnvironmentScreen: React.FC = () => {
         return null;
     }, [detail, metricTypes]);
 
-    useEffect(() => {
-        const fetchImageUrls = async () => {
-            if (environmentId && detail?.documentIds && detail.documentIds.length > 0) {
-                try {
-                    const urls = await documentApi.getUrls(detail.documentIds);
-                    setImageUris(urls);
-                    setInitialImageUris(urls);
-                    setDocumentIds(detail.documentIds);
-                } catch (error) {
-                    console.error('[AddEnvironmentScreen] Failed to fetch image URLs:', error);
-                }
-            }
-        };
-        fetchImageUrls();
-    }, [environmentId, detail]);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     const hasImagesChanged = useMemo(() => {
         if (!environmentId) return false;

@@ -1,16 +1,22 @@
-import { JobExecution, ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
 import { mapToApiPayload, mapFromApiResponse } from '@/features/farm/utils/shrimpHealthCheckMapper';
-import { parseDate } from '@/features/farm/utils/dateUtils';
 import type { ShrimpHealthCheckDto } from '@/features/farm/types/shrimpHealthCheck.types';
+
+import {
+    LeftoverFoodEnum,
+    IntestineStatusEnum,
+    IntestineColorEnum,
+    StoolColorEnum,
+    LiverStatusEnum,
+} from '@/features/farm/schemas/shrimpInspectionSchema';
 
 export interface ShrimpHealthFormState {
     date: Date;
     foodAmount: string;
-    leftoverFood: string;
-    intestine: string;
-    intestineColor: string;
-    stoolColor: string;
-    liver: string;
+    leftoverFood: LeftoverFoodEnum;
+    intestine: IntestineStatusEnum;
+    intestineColor: IntestineColorEnum;
+    stoolColor: StoolColorEnum;
+    liver: LiverStatusEnum;
     notes: string;
     images: string[];
     averageInfectionRate: number;
@@ -27,70 +33,57 @@ export interface ShrimpHealthDisplayResult {
 }
 
 export const shrimpHealthService = {
-    /**
-     * Build initial form state from JobExecution + meta (including WorkLog meta fallback).
-     */
-    buildInitialFormState: (
-        itemToEdit?: JobExecution,
-        meta?: ShrimpInspectionMeta
-    ): ShrimpHealthFormState => {
-        const date: Date = (() => {
-            if (!itemToEdit) return new Date();
-            const d = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
-            if (itemToEdit.date && itemToEdit.time) {
-                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                if (!isNaN(hours) && !isNaN(minutes)) {
-                    d.setHours(hours, minutes);
-                }
-            }
-            return d;
-        })();
+    createDefaultFormValues: (): ShrimpHealthFormState => ({
+        date: new Date(),
+        foodAmount: '',
+        leftoverFood: LeftoverFoodEnum.NONE,
+        intestine: IntestineStatusEnum.FULL,
+        intestineColor: IntestineColorEnum.FOOD_COLOR,
+        stoolColor: StoolColorEnum.FOOD_COLOR,
+        liver: LiverStatusEnum.NORMAL,
+        notes: '',
+        images: [],
+        averageInfectionRate: 0,
+        isHealthy: true,
+        diagnosisDetails: null,
+        aiItems: [],
+    }),
 
-        const baseState: ShrimpHealthFormState = {
-            date,
-            foodAmount: meta?.foodAmount || '',
-            leftoverFood: meta?.leftoverFood || 'Hết',
-            intestine: meta?.intestine || 'Đầy',
-            intestineColor: meta?.intestineColor || 'Màu thức ăn',
-            stoolColor: meta?.stoolColor || 'Màu thức ăn',
-            liver: meta?.liver || 'Bình thường',
-            notes: itemToEdit?.note || '',
-            images: meta?.images || [],
-            averageInfectionRate: meta?.averageInfectionRate ?? 0,
-            isHealthy: meta?.isHealthy ?? true,
-            diagnosisDetails: meta?.diagnosisDetails ?? null,
-            aiItems: meta?.aiItems || [],
-        };
+    createSnapshot: (data: ShrimpHealthFormState): string =>
+        JSON.stringify({
+            foodAmount: data.foodAmount || '',
+            leftoverFood: data.leftoverFood,
+            intestine: data.intestine,
+            intestineColor: data.intestineColor,
+            stoolColor: data.stoolColor,
+            liver: data.liver,
+            notes: data.notes || '',
+            images: (data.images || []).length,
+            averageInfectionRate: data.averageInfectionRate || 0,
+            isHealthy: data.isHealthy,
+            diagnosisCount: (data.diagnosisDetails || []).length,
+            aiItemsCount: (data.aiItems || []).length,
+        }),
 
-        if (!meta || (meta as any).feedInTrapG === undefined) {
-            return baseState;
+    hasChanges: (current: ShrimpHealthFormState, initialSnapshot: string | null): boolean => {
+        if (!initialSnapshot) {
+            return !!(
+                (current.foodAmount || '').length > 0 ||
+                current.leftoverFood !== LeftoverFoodEnum.NONE ||
+                current.intestine !== IntestineStatusEnum.FULL ||
+                current.intestineColor !== IntestineColorEnum.FOOD_COLOR ||
+                current.stoolColor !== StoolColorEnum.FOOD_COLOR ||
+                current.liver !== LiverStatusEnum.NORMAL ||
+                (current.notes || '').length > 0 ||
+                (current.images || []).length > 0 ||
+                (current.averageInfectionRate || 0) > 0 ||
+                !current.isHealthy ||
+                (current.aiItems || []).length > 0
+            );
         }
-
-        const fromApi = mapFromApiResponse({
-            value: (meta as any).feedInTrapG,
-            healthCheck: meta as any,
-            images: (meta as any).documents?.map((d: any) => d.publicUrl) || meta.images || [],
-        });
-
-        return {
-            ...baseState,
-            foodAmount: fromApi.foodAmount,
-            leftoverFood: fromApi.leftoverFood,
-            intestine: fromApi.intestine,
-            intestineColor: fromApi.intestineColor,
-            stoolColor: fromApi.stoolColor,
-            liver: fromApi.liver,
-            notes: fromApi.notes || itemToEdit?.note || '',
-            averageInfectionRate: fromApi.averageInfectionRate ?? baseState.averageInfectionRate,
-            isHealthy: fromApi.isHealthy ?? baseState.isHealthy,
-            diagnosisDetails: fromApi.diagnosisDetails ?? baseState.diagnosisDetails,
-            aiItems: fromApi.aiItems ?? baseState.aiItems,
-        };
+        return shrimpHealthService.createSnapshot(current) !== initialSnapshot;
     },
 
-    /**
-     * Map form state to API payload for create / update.
-     */
     mapFormToPayload: (input: { state: ShrimpHealthFormState; documentIds: string[] }) => {
         const { state, documentIds } = input;
         return mapToApiPayload({
@@ -108,9 +101,6 @@ export const shrimpHealthService = {
         });
     },
 
-    /**
-     * Parse AI health check details JSON string into aiItems + diagnosisDetails.
-     */
     parseAiDetails: (
         details: string | null | undefined
     ): {
@@ -163,52 +153,6 @@ export const shrimpHealthService = {
         }
     },
 
-    /**
-     * Build display result for AI health check summary (status string + items).
-     */
-    buildDisplayResult: (input: {
-        averageInfectionRate: number;
-        isHealthy: boolean;
-        diagnosisDetails: Array<{ diseaseType: string; probabilityPercent: number }> | null;
-        aiItems: any[];
-        aiTotalCount: number;
-    }): ShrimpHealthDisplayResult | null => {
-        const { averageInfectionRate, isHealthy, diagnosisDetails, aiItems, aiTotalCount } = input;
-
-        if (!diagnosisDetails && averageInfectionRate <= 0 && isHealthy) {
-            return null;
-        }
-
-        let statusString: string;
-
-        if (Array.isArray(diagnosisDetails) && diagnosisDetails.length > 0) {
-            const diseaseTypeToVietnamese: Record<string, string> = {
-                Healthy: 'Khỏe mạnh',
-                WSSV: 'Đốm trắng',
-                BlackGill: 'Mang đen',
-                Yellowhead: 'Đầu vàng',
-            };
-
-            const diseases = diagnosisDetails
-                .filter(d => d.diseaseType !== 'Healthy')
-                .map(d => diseaseTypeToVietnamese[d.diseaseType] || d.diseaseType);
-
-            statusString = diseases.length > 0 ? diseases.join(', ') : 'Khỏe mạnh';
-        } else {
-            statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
-        }
-
-        return {
-            totalCount: aiTotalCount,
-            infectionRate: averageInfectionRate,
-            status: statusString,
-            items: aiItems.length > 0 ? aiItems : undefined,
-        };
-    },
-
-    /**
-     * Build initial form state from ShrimpHealthCheckDto detail response.
-     */
     buildFormStateFromDetail: (detail: ShrimpHealthCheckDto): ShrimpHealthFormState => {
         const images =
             detail.documents?.map(doc => doc.publicUrl).filter((url): url is string => !!url) || [];
@@ -225,11 +169,11 @@ export const shrimpHealthService = {
         return {
             date: createdDate,
             foodAmount: mapped.foodAmount,
-            leftoverFood: mapped.leftoverFood,
-            intestine: mapped.intestine,
-            intestineColor: mapped.intestineColor,
-            stoolColor: mapped.stoolColor,
-            liver: mapped.liver,
+            leftoverFood: mapped.leftoverFood as LeftoverFoodEnum,
+            intestine: mapped.intestine as IntestineStatusEnum,
+            intestineColor: mapped.intestineColor as IntestineColorEnum,
+            stoolColor: mapped.stoolColor as StoolColorEnum,
+            liver: mapped.liver as LiverStatusEnum,
             notes: mapped.notes,
             images: mapped.images || [],
             averageInfectionRate: mapped.averageInfectionRate ?? 0,
