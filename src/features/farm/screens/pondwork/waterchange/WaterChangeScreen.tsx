@@ -45,8 +45,8 @@ import { CreateWaterSupplyCommand } from '@/features/farm/types/waterChange.type
 import { SpecificType } from '@/features/material/types/warehouse.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
-import { documentApi } from '@/features/material/api/documentApi';
 import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
+import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupply'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -86,11 +86,13 @@ export const WaterSupplyScreen = () => {
     const [note, setNote] = useState(item?.note || '');
 
     // Images
-    const [imageUris, setImageUris] = useState<string[]>([]);
-
     const [documentIds, setDocumentIds] = useState<string[]>([]);
     const [detailData, setDetailData] = useState<IWaterSupplyRecord | null>(null);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+    // Memos for doc IDs to use with hook
+    const currentDocIds = useMemo(() => detailData?.documentIds || [], [detailData?.documentIds]);
+    const { imageUris, setImageUris } = useDocumentUrls(currentDocIds);
 
     // Modal Delete
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -140,7 +142,6 @@ export const WaterSupplyScreen = () => {
             const docIds = detailData.documentIds;
             if (docIds && docIds.length > 0) {
                 setDocumentIds(docIds);
-                documentApi.getUrls(docIds).then(setImageUris).catch(console.error);
             }
         }
     }, [detailData, setImageUris]);

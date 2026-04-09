@@ -23,7 +23,7 @@ import {
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { FeedingForm, FeedingFormRef } from '@/features/farm/screens/pondwork/feed/FeedingForm';
 import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
-import { feedingService } from '@/features/farm/services/feeding.service';
+import { feedingService } from '@/features/farm/services/pond-work/feeding.service';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,

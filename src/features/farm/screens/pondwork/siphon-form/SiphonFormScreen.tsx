@@ -11,9 +11,10 @@ import {
     useSiphonDetail,
 } from '@/features/farm/hooks/useSiphonRecords';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { documentApi } from '@/features/material/api/documentApi';
+
 import { SiphonFormValues } from '@/features/farm/schemas/siphonFormSchema';
-import { siphonFormService } from '@/features/farm/services/siphon.service';
+import { siphonFormService } from '@/features/farm/services/pond-work/siphon.service';
+import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 import { SiphonFormContent } from '@/features/farm/screens/pondwork/siphon-form/SiphonFormContent';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -40,15 +41,8 @@ export const AddSiphonScreen: React.FC = () => {
     const { data: detail, isLoading: isLoadingDetail } = useSiphonDetail(pond?.id, siphonId);
 
     // ── Map detail → form values ────────────────────────────────────
-    const [imageUris, setImageUris] = useState<string[]>([]);
-
-    useEffect(() => {
-        if (!detail?.documentIds?.length) return;
-        documentApi
-            .getUrls(detail.documentIds)
-            .then(setImageUris)
-            .catch(() => {});
-    }, [detail?.documentIds]);
+    const currentDocIds = useMemo(() => detail?.documentIds || [], [detail?.documentIds]);
+    const { imageUris } = useDocumentUrls(currentDocIds);
 
     const initialValues: SiphonFormValues = useMemo(() => {
         if (!detail) return siphonFormService.createDefaultFormValues();

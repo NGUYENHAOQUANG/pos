@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppTheme } from '@/styles/themeContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -19,6 +19,7 @@ import { MeasureShrimpSizeAIForm } from '@/features/farm/screens/pondwork/ai-mea
 import { downloadAzureBlobImage } from '@/shared/utils/azureBlobUrl';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+type RoutePropType = any; // Bypass strict typing for onReturnData
 
 export interface Measurement {
     id: number;
@@ -34,6 +35,7 @@ const MAX_POLLING_ATTEMPTS = 30;
 
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<RoutePropType>();
     const theme = useAppTheme();
 
     // ── Hooks ────────────────────────────────────
@@ -251,16 +253,22 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             // 1 measurement → fill current pcsPerKg, 2+ → fill average pcsPerKg
             const valueToFill =
                 measurements.length === 1 ? currentMeasurement?.pcsPerKg ?? 0 : sizePcsPerKg ?? 0;
+            const resultString = Math.round(valueToFill).toString();
 
-            navigation.navigate({
-                name: 'MeasureShrimpSizeScreen',
-                params: { aiShrimpSize: Math.round(valueToFill).toString() },
-                merge: true,
-            } as never);
+            if (route.params?.onReturnData) {
+                route.params.onReturnData(resultString);
+                navigation.goBack();
+            } else {
+                navigation.navigate({
+                    name: 'MeasureShrimpSizeScreen',
+                    params: { aiShrimpSize: resultString },
+                    merge: true,
+                } as never);
+            }
         } else {
             navigation.goBack();
         }
-    }, [navigation, measurements, currentMeasurement, sizePcsPerKg]);
+    }, [navigation, measurements, currentMeasurement, sizePcsPerKg, route.params]);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.backgroundPrimary }}>

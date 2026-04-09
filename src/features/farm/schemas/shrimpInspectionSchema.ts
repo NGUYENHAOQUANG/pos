@@ -1,21 +1,42 @@
 import { z } from 'zod';
 
+export enum LeftoverFoodEnum {
+    NONE = 'Hết',
+    LESS_THAN_10 = 'Còn 5–10%',
+    LESS_THAN_15 = 'Còn 10–15%',
+    LESS_THAN_20 = 'Còn 15–20%',
+}
+
+export enum IntestineStatusEnum {
+    FULL = 'Đầy',
+    EMPTY = 'Rỗng',
+}
+
+export enum IntestineColorEnum {
+    FOOD_COLOR = 'Màu thức ăn',
+    BLACK = 'Màu đen',
+    ABNORMAL = 'Bất thường',
+}
+
+export enum StoolColorEnum {
+    FOOD_COLOR = 'Màu thức ăn',
+    ABNORMAL = 'Bất thường',
+}
+
+export enum LiverStatusEnum {
+    NORMAL = 'Bình thường',
+    ABNORMAL = 'Bất thường',
+}
+
 export const shrimpInspectionSchema = z.object({
-    // Thông tin chung
     date: z.date(),
-
-    // Trường bắt buộc khi tạo mới
-    foodAmount: z.string().trim().min(1, 'Vui lòng nhập lượng thức ăn giảm'),
-
-    // Các trường tuỳ chọn / có giá trị mặc định
-    leftoverFood: z.string().optional(),
-    intestine: z.string().optional(),
-    intestineColor: z.string().optional(),
-    stoolColor: z.string().optional(),
-    liver: z.string().optional(),
-    notes: z.string().optional(),
-
-    // Hình ảnh
+    foodAmount: z.string().trim().min(1, 'Vui lòng nhập lượng thức ăn cho vào nhá'),
+    leftoverFood: z.nativeEnum(LeftoverFoodEnum).default(LeftoverFoodEnum.NONE),
+    intestine: z.nativeEnum(IntestineStatusEnum).default(IntestineStatusEnum.FULL),
+    intestineColor: z.nativeEnum(IntestineColorEnum).default(IntestineColorEnum.FOOD_COLOR),
+    stoolColor: z.nativeEnum(StoolColorEnum).default(StoolColorEnum.FOOD_COLOR),
+    liver: z.nativeEnum(LiverStatusEnum).default(LiverStatusEnum.NORMAL),
+    notes: z.string().max(2000, 'Ghi chú tối đa 2000 ký tự').optional().default(''),
     images: z.array(z.string()).optional(),
 
     // Kết quả AI (không bắt buộc)

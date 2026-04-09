@@ -87,8 +87,9 @@ export const useUpdateSiphonRecord = () => {
             id: string;
             data: CreateSiphonCommand;
         }) => siphonApi.update(pondId, id, data),
-        onSuccess: (_, { pondId }) => {
+        onSuccess: (_, { pondId, id }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.siphon.detail(id) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
             // Invalidate report charts
