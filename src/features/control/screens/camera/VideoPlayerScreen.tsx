@@ -1,49 +1,24 @@
-import React, { useRef, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Platform, AppState } from 'react-native';
-import { WebView } from 'react-native-webview';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, StyleSheet, AppState, ActivityIndicator } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, PinchGestureHandler } from 'react-native-gesture-handler';
 import { colors } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import ViewShot from 'react-native-view-shot';
 import { useVideoOrientation } from '@/features/control/screens/camera/hooks/useVideoOrientation';
-import { useVideoSnapshot } from '@/features/control/screens/camera/hooks/useVideoSnapshot';
 import { VideoTopBar } from '@/features/control/screens/camera/components/VideoTopBar';
+import { RTCView } from 'react-native-webrtc';
+import { useWebRTCStream } from '@/features/control/screens/camera/hooks/useWebRTCStream';
+import { Text } from '@/shared/components/typography/Text';
 
 type VideoPlayerRouteProp = RouteProp<AppStackParamList, 'CameraPlayer'>;
-
-/** Parse URL to extract basic auth credentials if embedded */
-interface ParsedAuthUrl {
-    cleanUrl: string;
-    username: string;
-    password: string;
-    hasAuth: boolean;
-}
-
-const parseAuthFromUrl = (url: string): ParsedAuthUrl => {
-    // Match pattern: http(s)://user:pass@host
-    const authMatch = url.match(/^(https?:\/\/)([^:]+):([^@]+)@(.+)$/);
-    if (authMatch) {
-        return {
-            cleanUrl: `${authMatch[1]}${authMatch[4]}`,
-            username: authMatch[2],
-            password: authMatch[3],
-            hasAuth: true,
-        };
-    }
-    return { cleanUrl: url, username: '', password: '', hasAuth: false };
-};
 
 export const VideoPlayerScreen: React.FC = () => {
     const route = useRoute<VideoPlayerRouteProp>();
     const navigation = useNavigation<any>();
-    const { videoUrl, cameraName, pondName } = route.params;
-
-    const viewShotRef = useRef<ViewShot>(null);
+    const { videoUrl, cameraName, pondName, isHd } = route.params;
 
     const { contentAnimatedStyle, handleClose } = useVideoOrientation();
-    const { handleSnapshot } = useVideoSnapshot({ cameraName, viewShotRef });
 
     const appState = useRef(AppState.currentState);
 
@@ -64,69 +39,52 @@ export const VideoPlayerScreen: React.FC = () => {
         };
     }, [navigation]);
 
-    const parsedUrl = useMemo(() => parseAuthFromUrl(videoUrl), [videoUrl]);
+    const { stream, error } = useWebRTCStream(videoUrl);
 
-    // iOS: HTML img tag works with embedded auth in URL
-    const mjpegHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        img { width: 100%; height: 100%; object-fit: contain; }
-    </style>
-</head>
-<body>
-    <img src="${videoUrl}" alt="Camera Stream" />
-</body>
-</html>`;
+    const [isFullView, setIsFullView] = useState(false);
 
-    /**
-     * Android WebView strips basic auth from <img> sub-resource URLs.
-     * Use source={{ uri }} + basicAuthCredential to handle auth natively.
-     * iOS works fine with HTML img tag approach.
-     */
-    const webViewSource =
-        Platform.OS === 'android'
-            ? { uri: parsedUrl.hasAuth ? parsedUrl.cleanUrl : videoUrl }
-            : { html: mjpegHtml };
-
-    const basicAuth = parsedUrl.hasAuth
-        ? { username: parsedUrl.username, password: parsedUrl.password }
-        : undefined;
+    const onPinchStateChange = (event: any) => {
+        if (event.nativeEvent.state === 5) {
+            // State.END = 5
+            if (event.nativeEvent.scale > 1.1) {
+                setIsFullView(true);
+            } else if (event.nativeEvent.scale < 0.9) {
+                setIsFullView(false);
+            }
+        }
+    };
 
     return (
         <GestureHandlerRootView style={styles.root}>
             <Animated.View style={[styles.container, contentAnimatedStyle]}>
-                <ViewShot
-                    ref={viewShotRef}
-                    options={{ format: 'jpg', quality: 0.95 }}
-                    style={styles.video}
-                >
-                    <WebView
-                        source={webViewSource}
-                        style={styles.video}
-                        javaScriptEnabled={true}
-                        domStorageEnabled={true}
-                        scrollEnabled={false}
-                        bounces={false}
-                        mediaPlaybackRequiresUserAction={false}
-                        allowsInlineMediaPlayback={true}
-                        mixedContentMode="always"
-                        originWhitelist={['*']}
-                        basicAuthCredential={basicAuth}
-                    />
-                </ViewShot>
+                {error ? (
+                    <View style={styles.centered}>
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : !stream ? (
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color={colors.white} />
+                        <Text style={styles.loadingText}>Đang kết nối</Text>
+                    </View>
+                ) : (
+                    <PinchGestureHandler onHandlerStateChange={onPinchStateChange}>
+                        <Animated.View style={styles.videoContainer}>
+                            <RTCView
+                                streamURL={stream.toURL()}
+                                style={styles.video}
+                                objectFit={isFullView ? 'cover' : 'contain'}
+                            />
+                        </Animated.View>
+                    </PinchGestureHandler>
+                )}
 
                 {/* Close + snapshot overlay */}
                 <View style={styles.overlayBar} pointerEvents="box-none">
                     <VideoTopBar
                         pondName={pondName}
                         cameraName={cameraName}
-                        onSnapshot={handleSnapshot}
                         onClose={handleClose}
+                        isHd={isHd}
                     />
                 </View>
             </Animated.View>
@@ -146,9 +104,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         overflow: 'hidden',
     },
+    videoContainer: {
+        width: '100%',
+        height: '100%',
+    },
     video: {
         width: '100%',
         height: '100%',
+    },
+    centered: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: colors.white,
+        marginTop: 12,
+        fontSize: 16,
+    },
+    errorText: {
+        color: colors.error,
+        fontSize: 16,
+        paddingHorizontal: 24,
+        textAlign: 'center',
     },
     overlayBar: {
         position: 'absolute',

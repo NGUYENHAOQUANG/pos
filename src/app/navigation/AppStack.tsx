@@ -227,6 +227,7 @@ export type AppStackParamList = {
         videoUrl: string;
         cameraName: string;
         pondName: string;
+        isHd: boolean;
     };
 
     // ============== Menu Screens (Tab Bar hidden) ==============
