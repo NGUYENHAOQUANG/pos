@@ -31,9 +31,9 @@ import {
 } from '@/features/farm/hooks/useIncidentData';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
-import { handleProblemService } from '../../services/handleproblem-service/handleProblem.service';
-import { HandleProblemForm } from './HandleProblemForm';
-import { HandleProblemFormValues } from '../../schemas/handleProblemSchema';
+import { handleProblemService } from '@/features/farm/services/pond-work/handleProblem.service';
+import { HandleProblemForm } from '@/features/farm/screens/handleProblem/HandleProblemForm';
+import { HandleProblemFormValues } from '@/features/farm/schemas/handleProblemSchema';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblem'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;

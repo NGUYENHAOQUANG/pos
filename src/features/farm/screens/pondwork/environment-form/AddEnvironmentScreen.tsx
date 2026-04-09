@@ -16,7 +16,7 @@ import {
 } from '@/features/farm/hooks/useEnvMeasurement';
 import { documentApi } from '@/features/material/api/documentApi';
 import { EnvironmentFormValues } from '@/features/farm/schemas/environmentFormSchema';
-import { environmentService } from '@/features/farm/services/environment.service';
+import { environmentService } from '@/features/farm/services/pond-work/environment.service';
 
 import { AddEnvironmentForm } from '@/features/farm/screens/pondwork/environment-form/AddEnvironmentForm';
 

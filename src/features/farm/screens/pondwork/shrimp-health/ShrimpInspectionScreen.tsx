@@ -17,7 +17,7 @@ import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMess
 import {
     shrimpHealthService,
     ShrimpHealthFormState,
-} from '@/features/farm/services/shrimp-health.service';
+} from '@/features/farm/services/pond-work/shrimp-health.service';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { documentApi } from '@/features/material/api/documentApi';
 
