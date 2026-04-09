@@ -29,6 +29,18 @@ export const useWaterTreatmentRecords = (pondId: string, params?: IWaterTreatmen
     });
 };
 
+/** Fetch detail of a single water treatment record */
+export const useWaterTreatmentDetail = (pondId: string | undefined, id: string | undefined) => {
+    return useQuery({
+        queryKey: farmKeys.waterTreatment.detail(id as string),
+        queryFn: async () => {
+            const response = await waterTreatmentApi.getDetail(pondId as string, id as string);
+            return response;
+        },
+        enabled: !!pondId && !!id,
+    });
+};
+
 /** Fetch & transform water treatment records to JobExecution[] for LogScreen */
 export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTreatmentParams) => {
     const { data: listData, isLoading, error, refetch } = useWaterTreatmentRecords(pondId, params);

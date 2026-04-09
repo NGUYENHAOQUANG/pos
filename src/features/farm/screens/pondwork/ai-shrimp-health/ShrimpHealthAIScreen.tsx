@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppTheme } from '@/styles/themeContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -29,6 +29,7 @@ const MAX_POLLING_ATTEMPTS = 30;
 
 export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<any>();
     const theme = useAppTheme();
 
     // ── Hooks ────────────────────────────────────
@@ -291,11 +292,16 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 },
             };
 
-            navigation.navigate({
-                name: 'ShrimpHealthScreen',
-                params,
-                merge: true,
-            } as never);
+            if (route.params?.onReturnData) {
+                route.params.onReturnData(params.aiHealthCheckResult);
+                navigation.goBack();
+            } else {
+                navigation.navigate({
+                    name: 'ShrimpHealthScreen',
+                    params,
+                    merge: true,
+                } as never);
+            }
         } else {
             navigation.goBack();
         }

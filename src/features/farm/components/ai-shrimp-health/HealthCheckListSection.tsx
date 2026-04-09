@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, borderRadius } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { spacing, borderRadius } from '@/styles';
 import ArrowLeft from '@/assets/Icon/ArrowLeft.svg';
 import ArrowRight from '@/assets/Icon/ArrowRight.svg';
 
@@ -26,6 +28,8 @@ export const HealthCheckListSection: React.FC<HealthCheckListSectionProps> = ({
     entries,
     onViewEntry,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
     const [currentPage, setCurrentPage] = useState(1);
 
     if (entries.length === 0) {
@@ -91,7 +95,7 @@ export const HealthCheckListSection: React.FC<HealthCheckListSectionProps> = ({
                             <ArrowLeft
                                 width={14}
                                 height={14}
-                                color={currentPage <= 1 ? colors.textTertiary : colors.text}
+                                color={currentPage <= 1 ? theme.textTertiary : theme.text}
                             />
                             <Text
                                 style={[
@@ -128,9 +132,7 @@ export const HealthCheckListSection: React.FC<HealthCheckListSectionProps> = ({
                             <ArrowRight
                                 width={14}
                                 height={14}
-                                color={
-                                    currentPage >= totalPages ? colors.textTertiary : colors.text
-                                }
+                                color={currentPage >= totalPages ? theme.textTertiary : theme.text}
                             />
                         </TouchableOpacity>
                     </View>
@@ -140,100 +142,101 @@ export const HealthCheckListSection: React.FC<HealthCheckListSectionProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        paddingHorizontal: 16,
-        paddingVertical: spacing.sm,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginHorizontal: 16,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-        marginBottom: spacing.sm,
-    },
-    count: {
-        fontWeight: '400',
-        color: colors.textSecondary,
-    },
-    listContainer: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        overflow: 'hidden',
-        marginBottom: spacing.sm,
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    thumbnail: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.backgroundSecondary,
-    },
-    label: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-        marginLeft: spacing.md,
-    },
-    viewButton: {
-        paddingHorizontal: spacing.md,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    viewButtonText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.textSecondary,
-    },
-    pagination: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-    },
-    pageButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 4,
-        paddingHorizontal: spacing.md,
-        height: 32,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    pageButtonDisabled: {
-        borderColor: colors.border,
-        opacity: 0.4,
-    },
-    pageButtonText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    pageButtonTextDisabled: {
-        color: colors.textTertiary,
-    },
-    pageInfo: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            backgroundColor: theme.background,
+            paddingHorizontal: 16,
+            paddingVertical: spacing.sm,
+            borderRadius: borderRadius.md,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            marginHorizontal: 16,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.text,
+            marginBottom: spacing.sm,
+        },
+        count: {
+            fontWeight: '400',
+            color: theme.textSecondary,
+        },
+        listContainer: {
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            borderRadius: 12,
+            overflow: 'hidden',
+            marginBottom: spacing.sm,
+        },
+        row: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.defaultBorder,
+        },
+        thumbnail: {
+            width: 40,
+            height: 40,
+            borderRadius: borderRadius.sm,
+            backgroundColor: theme.backgroundSecondary,
+        },
+        label: {
+            flex: 1,
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            marginLeft: spacing.md,
+        },
+        viewButton: {
+            paddingHorizontal: spacing.md,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            height: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        viewButtonText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.textSecondary,
+        },
+        pagination: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+        },
+        pageButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+            paddingHorizontal: spacing.md,
+            height: 32,
+            borderRadius: borderRadius.full,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+        },
+        pageButtonDisabled: {
+            borderColor: theme.defaultBorder,
+            opacity: 0.4,
+        },
+        pageButtonText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+        },
+        pageButtonTextDisabled: {
+            color: theme.textTertiary,
+        },
+        pageInfo: {
+            fontSize: 14,
+            color: theme.textSecondary,
+        },
+    });

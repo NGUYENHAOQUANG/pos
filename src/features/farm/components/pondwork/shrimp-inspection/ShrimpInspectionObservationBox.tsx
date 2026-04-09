@@ -19,6 +19,12 @@ import { Button } from '@/shared/components/buttons/Button';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { IconAICheck, IconAICheckOrange } from '@/assets/icons';
+import {
+    IntestineStatusEnum,
+    IntestineColorEnum,
+    StoolColorEnum,
+    LiverStatusEnum,
+} from '@/features/farm/schemas/shrimpInspectionSchema';
 
 export interface AIHealthCheckResult {
     totalCount: number;
@@ -44,21 +50,21 @@ interface ShrimpInspectionObservationBoxProps {
 }
 
 const intestineOptions = [
-    { label: 'Đầy', value: 'Đầy' },
-    { label: 'Rỗng', value: 'Rỗng' },
+    { label: 'Đầy', value: IntestineStatusEnum.FULL },
+    { label: 'Rỗng', value: IntestineStatusEnum.EMPTY },
 ];
 const intestineColorOptions = [
-    { label: 'Màu thức ăn', value: 'Màu thức ăn' },
-    { label: 'Màu đen', value: 'Màu đen' },
-    { label: 'Bất thường', value: 'Bất thường' },
+    { label: 'Màu thức ăn', value: IntestineColorEnum.FOOD_COLOR },
+    { label: 'Màu đen', value: IntestineColorEnum.BLACK },
+    { label: 'Bất thường', value: IntestineColorEnum.ABNORMAL },
 ];
 const stoolColorOptions = [
-    { label: 'Màu thức ăn', value: 'Màu thức ăn' },
-    { label: 'Bất thường', value: 'Bất thường' },
+    { label: 'Màu thức ăn', value: StoolColorEnum.FOOD_COLOR },
+    { label: 'Bất thường', value: StoolColorEnum.ABNORMAL },
 ];
 const liverOptions = [
-    { label: 'Bình thường', value: 'Bình thường' },
-    { label: 'Bất thường', value: 'Bất thường' },
+    { label: 'Bình thường', value: LiverStatusEnum.NORMAL },
+    { label: 'Bất thường', value: LiverStatusEnum.ABNORMAL },
 ];
 
 export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservationBoxProps> = ({

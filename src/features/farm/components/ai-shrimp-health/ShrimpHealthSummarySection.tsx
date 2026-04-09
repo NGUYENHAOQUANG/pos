@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing } from '@/styles';
+import { useAppTheme } from '@/styles/themeContext';
+import { Colors } from '@/styles/colors';
+import { spacing } from '@/styles';
 import {
     HealthCheckItem,
     HealthCheckResult,
@@ -30,6 +32,9 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
     showAddMore,
     onAddMore,
 }) => {
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Total Count */}
@@ -53,13 +58,17 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
                 <Text style={styles.label}>Tình trạng tôm - AI</Text>
                 {(() => {
                     if (results.length === 0) {
-                        return <Text style={styles.value}>-</Text>;
+                        return <Text style={styles.value}>0</Text>;
                     }
 
                     const allItems = results.reduce<HealthCheckItem[]>(
-                        (acc, res) => acc.concat(res.items),
+                        (acc, res) => acc.concat(res.items || []),
                         []
                     );
+
+                    if (allItems.length === 0) {
+                        return <Text style={styles.value}>0</Text>;
+                    }
 
                     const firstSick = allItems.find(i => i.status !== 'HEALTHY');
 
@@ -139,81 +148,83 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        gap: 12,
-        paddingVertical: spacing.sm,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.textSecondary,
-        flex: 1,
-        lineHeight: 24,
-    },
-    value: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-        marginLeft: spacing.md,
-    },
-    statusPill: {
-        borderRadius: 100,
-        paddingHorizontal: spacing.md,
-        paddingVertical: 4,
-        borderWidth: 1,
-        marginLeft: spacing.md,
-        maxWidth: '60%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    statusText: {
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    statusPillHealthy: {
-        backgroundColor: colors.green[50], // Tương tự background màu xanh nhạt
-        borderColor: colors.green[200], // Viền màu xanh lá
-    },
-    statusTextHealthy: {
-        color: colors.green[600],
-    },
-    statusPillSick: {
-        backgroundColor: colors.red[50],
-        borderColor: colors.red[200],
-    },
-    statusTextSick: {
-        color: colors.red[600],
-    },
-    infoBox: {
-        backgroundColor: colors.white,
-        padding: 16,
-        borderRadius: 12,
-        marginTop: 4,
-        marginBottom: 4,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        borderColor: colors.border,
-        borderWidth: 1,
-        overflow: 'hidden',
-    },
-    infoIcon: {
-        marginRight: 8,
-        flexShrink: 0,
-        marginTop: 2,
-    },
-    infoText: {
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 20,
-        flex: 1,
-    },
-    addMoreText: {
-        color: colors.textSecondary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        container: {
+            gap: 12,
+            paddingVertical: spacing.sm,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        label: {
+            fontSize: 16,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            flex: 1,
+            lineHeight: 24,
+        },
+        value: {
+            fontSize: 16,
+            fontWeight: '500',
+            color: theme.text,
+            marginLeft: spacing.md,
+        },
+        statusPill: {
+            borderRadius: 100,
+            paddingHorizontal: spacing.md,
+            paddingVertical: 4,
+            borderWidth: 1,
+            marginLeft: spacing.md,
+            maxWidth: '60%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        statusText: {
+            fontSize: 14,
+            fontWeight: '500',
+        },
+        statusPillHealthy: {
+            backgroundColor: theme.isDark ? 'rgba(34, 197, 94, 0.2)' : '#F0FDF4', // green[50] equiv
+            borderColor: theme.isDark ? 'rgba(34, 197, 94, 0.4)' : '#BBF7D0', // green[200] equiv
+        },
+        statusTextHealthy: {
+            color: theme.isDark ? '#4ADE80' : '#16A34A', // green[400] : green[600]
+        },
+        statusPillSick: {
+            backgroundColor: theme.isDark ? 'rgba(239, 68, 68, 0.2)' : '#FEF2F2', // red[50]
+            borderColor: theme.isDark ? 'rgba(239, 68, 68, 0.4)' : '#FECACA', // red[200]
+        },
+        statusTextSick: {
+            color: theme.isDark ? '#F87171' : '#DC2626', // red[400] : red[600]
+        },
+        infoBox: {
+            backgroundColor: theme.background,
+            padding: 16,
+            borderRadius: 12,
+            marginTop: 4,
+            marginBottom: 4,
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            borderColor: theme.defaultBorder,
+            borderWidth: 1,
+            overflow: 'hidden',
+        },
+        infoIcon: {
+            marginRight: 8,
+            flexShrink: 0,
+            marginTop: 2,
+            color: theme.info,
+        },
+        infoText: {
+            fontSize: 14,
+            color: theme.text,
+            lineHeight: 20,
+            flex: 1,
+        },
+        addMoreText: {
+            color: theme.textSecondary,
+        },
+    });
