@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../constants';
+import { COLORS } from '@/features/menu/screens/chatbot/constants';
+import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -84,11 +85,7 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                 activeOpacity={0.7}
             >
                 <View style={[styles.iconBox, isActive && styles.iconBoxActive]}>
-                    <Ionicons
-                        name="chatbubble-outline"
-                        size={20}
-                        color={isActive ? COLORS.orange : COLORS.grayText}
-                    />
+                    <ChatBotIcon width={24} height={24} />
                 </View>
                 <View style={styles.sessionInfo}>
                     <Text
@@ -99,7 +96,6 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                     </Text>
                     <Text style={styles.sessionDate}>{item.date}</Text>
                 </View>
-                {isActive && <Ionicons name="checkmark-circle" size={20} color={COLORS.orange} />}
             </TouchableOpacity>
         );
     };
@@ -151,11 +147,9 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                             />
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Ionicons
-                                    name="chatbubbles-outline"
-                                    size={48}
-                                    color={COLORS.grayMedium}
-                                />
+                                <View style={{ marginBottom: 16 }}>
+                                    <ChatBotIcon width={64} height={64} />
+                                </View>
                                 <Text style={styles.emptyText}>Chưa có cuộc trò chuyện nào</Text>
                             </View>
                         )}
@@ -238,21 +232,20 @@ const styles = StyleSheet.create({
         borderColor: COLORS.inputBorder,
     },
     sessionItemActive: {
-        borderColor: COLORS.orange,
-        backgroundColor: '#FFF3E0',
+        backgroundColor: '#F3F4F6',
     },
     iconBox: {
         width: 40,
         height: 40,
-        borderRadius: 12,
-        backgroundColor: COLORS.inputBg,
+        borderRadius: 32,
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.inputBorder,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
-    iconBoxActive: {
-        backgroundColor: COLORS.white,
-    },
+    iconBoxActive: {},
     sessionInfo: {
         flex: 1,
         marginRight: 12,
@@ -264,7 +257,6 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     sessionTitleActive: {
-        color: COLORS.orange,
         fontWeight: '600',
     },
     sessionDate: {

@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { DeviceControlData } from '../types';
+import { DeviceControlData } from '@/features/menu/screens/chatbot/types';
 
 // ── Device Icon Mapping ─────────────────────────────────────────────────────────
 

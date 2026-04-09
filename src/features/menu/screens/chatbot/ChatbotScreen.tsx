@@ -7,14 +7,14 @@
  * Constants      → constants.ts
  * Components     → components/
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 import {
     GiftedChat,
     Bubble,
@@ -26,18 +26,23 @@ import {
 } from 'react-native-gifted-chat';
 
 // ── Local Imports ───────────────────────────────────────────────────────────────
-import { IChatMessage, PondStatusData, DeviceControlData } from './types';
-import { PondStatusWidget } from './widgets/PondStatusWidget';
-import { DeviceControlWidget } from './widgets/DeviceControlWidget';
+import {
+    IChatMessage,
+    PondStatusData,
+    DeviceControlData,
+} from '@/features/menu/screens/chatbot/types';
+import { PondStatusWidget } from '@/features/menu/screens/chatbot/widgets/PondStatusWidget';
+import { DeviceControlWidget } from '@/features/menu/screens/chatbot/widgets/DeviceControlWidget';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
-import { COLORS, BOT_USER, CURRENT_USER_ID } from './constants';
-import { TypingIndicator } from './components/TypingIndicator';
-import { WelcomeContent } from './components/WelcomeContent';
-import { MessageTimeRow } from './components/MessageTimeRow';
-import { useChatbot } from './hooks/useChatbot';
-import { styles } from './styles/chatbotStyles';
-import { QuickReplyBottomSheet } from './components/QuickReplyBottomSheet';
-import { ChatHistoryBottomSheet } from './components/ChatHistoryBottomSheet';
+
+import { COLORS, BOT_USER, CURRENT_USER_ID } from '@/features/menu/screens/chatbot/constants';
+import { TypingIndicator } from '@/features/menu/screens/chatbot/components/TypingIndicator';
+import { WelcomeContent } from '@/features/menu/screens/chatbot/components/WelcomeContent';
+import { MessageTimeRow } from '@/features/menu/screens/chatbot/components/MessageTimeRow';
+import { useChatbot } from '@/features/menu/screens/chatbot/hooks/useChatbot';
+import { styles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
+import { QuickReplyBottomSheet } from '@/features/menu/screens/chatbot/components/QuickReplyBottomSheet';
+import { ChatHistoryBottomSheet } from '@/features/menu/screens/chatbot/components/ChatHistoryBottomSheet';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ██ MAIN CHATBOT SCREEN
@@ -45,7 +50,6 @@ import { ChatHistoryBottomSheet } from './components/ChatHistoryBottomSheet';
 
 export const ChatbotScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
-    const navigation = useNavigation();
     const { userData } = useUserProfile();
 
     const {
@@ -64,6 +68,19 @@ export const ChatbotScreen: React.FC = () => {
 
     const [showQuickSheet, setShowQuickSheet] = useState(false);
     const [showHistorySheet, setShowHistorySheet] = useState(false);
+    const flatListRef = useRef<any>(null);
+
+    // Auto-scroll when messages length changes (if isInverted=false)
+    useEffect(() => {
+        if (messages.length > 0) {
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 200);
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 600);
+        }
+    }, [messages]);
 
     // ══════════════════════════════════════════════════════════════════════
     // ██ GENERATIVE UI: renderCustomView
@@ -97,10 +114,10 @@ export const ChatbotScreen: React.FC = () => {
                 {...props}
                 wrapperStyle={{
                     right: {
-                        backgroundColor: COLORS.blue,
+                        backgroundColor: COLORS.white,
+                        borderWidth: 1,
+                        borderColor: COLORS.inputBorder,
                         borderRadius: 22,
-                        paddingTop: 3,
-                        paddingHorizontal: 2,
                         marginBottom: 2,
                     },
                     left: {
@@ -125,8 +142,12 @@ export const ChatbotScreen: React.FC = () => {
         (props: any) => (
             <MessageText
                 {...props}
+                containerStyle={{
+                    right: { paddingHorizontal: 4, paddingVertical: 4 },
+                    left: { paddingHorizontal: 4, paddingVertical: 4 },
+                }}
                 textStyle={{
-                    right: { color: COLORS.white, fontSize: 14 },
+                    right: { color: COLORS.black, fontSize: 14 },
                     left: { color: COLORS.black, fontSize: 14 },
                 }}
                 linkStyle={{
@@ -167,7 +188,7 @@ export const ChatbotScreen: React.FC = () => {
         if (props.currentMessage?.user._id === BOT_USER._id) {
             return (
                 <View style={styles.botAvatar}>
-                    <MaterialCommunityIcons name="robot-outline" size={18} color={COLORS.white} />
+                    <ChatBotIcon width={32} height={32} />
                 </View>
             );
         }
@@ -257,45 +278,43 @@ export const ChatbotScreen: React.FC = () => {
     return (
         <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             {/* ── Header ────────────────────────────────────────────────── */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                >
-                    <AntDesign name="arrowleft" size={22} color={COLORS.black} />
-                </TouchableOpacity>
-
-                <View style={styles.headerCenter}>
-                    <View style={styles.headerAvatarContainer}>
-                        <View style={styles.headerAvatar}>
-                            <MaterialCommunityIcons
-                                name="robot-outline"
-                                size={18}
-                                color={COLORS.white}
-                            />
+            <HeaderSection
+                includeSafeArea={false}
+                titleAlign="left"
+                containerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 16 }}
+                centerComponent={
+                    <View style={styles.headerCenter}>
+                        <View style={styles.headerAvatarContainer}>
+                            <View style={styles.headerAvatar}>
+                                <ChatBotIcon width={36} height={36} />
+                            </View>
+                            <View style={styles.onlineIndicator} />
                         </View>
-                        <View style={styles.onlineIndicator} />
+                        <View style={{ marginLeft: 12 }}>
+                            <Text style={styles.headerTitle}>Mebieco AI</Text>
+                            <Text style={styles.headerSubtitle}>Trợ lý ảo • Thử nghiệm</Text>
+                        </View>
                     </View>
-                    <View>
-                        <Text style={styles.headerTitle}>Mebieco AI</Text>
-                        <Text style={styles.headerSubtitle}>Trợ lý ảo • Thử nghiệm</Text>
+                }
+                rightComponent={
+                    <View style={styles.headerRight}>
+                        <View style={styles.betaBadge}>
+                            <Text style={styles.betaText}>BETA</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.historyButton}
+                            onPress={() => setShowHistorySheet(true)}
+                            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                        >
+                            <MaterialCommunityIcons
+                                name="clipboard-text-clock-outline"
+                                size={24}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
                     </View>
-                </View>
-
-                <View style={styles.headerRight}>
-                    <View style={styles.betaBadge}>
-                        <Text style={styles.betaText}>BETA</Text>
-                    </View>
-                    <TouchableOpacity
-                        style={styles.historyButton}
-                        onPress={() => setShowHistorySheet(true)}
-                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                    >
-                        <Ionicons name="time-outline" size={24} color={COLORS.black} />
-                    </TouchableOpacity>
-                </View>
-            </View>
+                }
+            />
 
             {/* ── Chat area ──────────────────────────────────────────────── */}
             <View style={styles.chatContainer} {...chatPanResponder.panHandlers}>
@@ -304,6 +323,12 @@ export const ChatbotScreen: React.FC = () => {
                     onSend={newMessages => onSend(newMessages as IChatMessage[])}
                     user={{ _id: CURRENT_USER_ID }}
                     isInverted={false}
+                    // @ts-ignore
+                    listViewProps={{
+                        ref: (ref: any) => {
+                            flatListRef.current = ref;
+                        },
+                    }}
                     renderCustomView={renderCustomView}
                     renderDay={() => null}
                     renderChatEmpty={renderChatEmpty}
@@ -316,6 +341,14 @@ export const ChatbotScreen: React.FC = () => {
                     renderComposer={renderComposer}
                     renderSend={renderSend}
                     renderFooter={renderFooter}
+                    quickReplyStyle={styles.quickReplyStyle}
+                    quickReplyTextStyle={styles.quickReplyTextStyle}
+                    onQuickReply={replies => {
+                        const reply = replies[0];
+                        if (reply) {
+                            handleQuickAction(reply.value);
+                        }
+                    }}
                     isSendButtonAlwaysVisible
                 />
             </View>

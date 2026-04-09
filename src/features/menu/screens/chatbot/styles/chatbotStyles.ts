@@ -3,7 +3,7 @@
  * @description Tất cả styles cho ChatbotScreen
  */
 import { StyleSheet } from 'react-native';
-import { COLORS } from '../constants';
+import { COLORS } from '@/features/menu/screens/chatbot/constants';
 
 export const styles = StyleSheet.create({
     container: {
@@ -12,21 +12,6 @@ export const styles = StyleSheet.create({
     },
 
     // Header
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: COLORS.white,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.inputBorder,
-    },
-    backButton: {
-        width: 36,
-        height: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     headerCenter: {
         flex: 1,
         flexDirection: 'row',
@@ -41,7 +26,7 @@ export const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: COLORS.blue,
+        backgroundColor: COLORS.white,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -103,7 +88,7 @@ export const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: COLORS.blue,
+        backgroundColor: COLORS.white,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 4,
@@ -115,14 +100,14 @@ export const styles = StyleSheet.create({
         alignItems: 'flex-end',
         backgroundColor: COLORS.white,
         paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: 12,
+        paddingBottom: 16,
         gap: 8,
     },
     quickSheetButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
         borderWidth: 1,
         borderColor: COLORS.inputBorder,
         justifyContent: 'center',
@@ -141,25 +126,26 @@ export const styles = StyleSheet.create({
     },
     inputPrimary: {
         alignItems: 'center',
-        backgroundColor: COLORS.inputBg,
-        borderRadius: 24,
+        backgroundColor: COLORS.white,
+        borderRadius: 28,
         borderWidth: 1,
         borderColor: COLORS.inputBorder,
-        paddingLeft: 4,
+        paddingLeft: 8,
         paddingRight: 4,
+        minHeight: 56,
         maxHeight: 140,
         overflow: 'hidden',
     },
     composerInput: {
         backgroundColor: 'transparent',
         borderRadius: 0,
-        paddingHorizontal: 14,
-        paddingTop: 10,
-        paddingBottom: 10,
-        fontSize: 15,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 16,
+        fontSize: 16,
         color: COLORS.black,
         marginRight: 0,
-        minHeight: 40,
+        minHeight: 56,
         maxHeight: 120,
         borderWidth: 0,
         textAlignVertical: 'top',
@@ -170,7 +156,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         paddingRight: 4,
         marginBottom: 0,
-        paddingVertical: 2,
+        paddingVertical: 10,
         alignSelf: 'flex-end',
     },
     sendButton: {
@@ -184,5 +170,20 @@ export const styles = StyleSheet.create({
     },
     sendButtonDisabled: {
         backgroundColor: 'transparent',
+    },
+    quickReplyStyle: {
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: COLORS.inputBorder,
+        backgroundColor: COLORS.white,
+        marginTop: 8,
+        marginRight: 8,
+    },
+    quickReplyTextStyle: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#1A1A2E',
     },
 });

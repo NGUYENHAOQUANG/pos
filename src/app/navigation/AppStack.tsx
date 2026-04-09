@@ -76,6 +76,7 @@ import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebVie
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
 import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen';
 import { ChatbotScreen } from '@/features/menu/screens/chatbot/ChatbotScreen';
+import { IngestScreen } from '@/features/menu/screens/chatbot/IngestScreen';
 
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
@@ -270,6 +271,7 @@ export type AppStackParamList = {
     };
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
     Chatbot: undefined;
+    Ingest: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -391,6 +393,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
             <Stack.Screen name="PinSetup" component={PinSetupScreen} />
             <Stack.Screen name="Chatbot" component={ChatbotScreen} />
+            <Stack.Screen name="Ingest" component={IngestScreen} />
         </Stack.Navigator>
     );
 };

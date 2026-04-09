@@ -5,7 +5,7 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { COLORS } from '../constants';
+import { COLORS } from '@/features/menu/screens/chatbot/constants';
 
 interface MessageTimeRowProps {
     children: React.ReactNode;

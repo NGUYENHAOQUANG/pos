@@ -4,8 +4,8 @@
  */
 import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS } from '../constants';
+import { COLORS } from '@/features/menu/screens/chatbot/constants';
+import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 
 export const TypingIndicator: React.FC = () => {
     const dot1 = useRef(new Animated.Value(0)).current;
@@ -61,7 +61,7 @@ export const TypingIndicator: React.FC = () => {
     return (
         <View style={styles.container}>
             <View style={styles.botAvatarSmall}>
-                <MaterialCommunityIcons name="robot-outline" size={14} color={COLORS.white} />
+                <ChatBotIcon width={28} height={28} />
             </View>
             <View style={styles.bubble}>
                 <Animated.View style={[styles.dot, dotStyle(dot1)]} />
@@ -84,9 +84,10 @@ const styles = StyleSheet.create({
         width: 28,
         height: 28,
         borderRadius: 14,
-        backgroundColor: COLORS.blue,
+        backgroundColor: COLORS.white,
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
     },
     bubble: {
         flexDirection: 'row',

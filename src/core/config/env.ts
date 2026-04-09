@@ -4,11 +4,12 @@
  * @author Kindy
  * @created 2025-11-16
  */
-import { API_URL, AZURE_BLOB_SAS_KEY, NODE_ENV, API_TIMEOUT } from '@env';
+import { API_URL, AZURE_BLOB_SAS_KEY, NODE_ENV, API_TIMEOUT, CHATBOT_API_URL } from '@env';
 
 export const ENV = {
     API_URL: API_URL,
     AZURE_BLOB_SAS_KEY: AZURE_BLOB_SAS_KEY,
+    CHATBOT_API_URL: CHATBOT_API_URL,
     ENVIRONMENT: NODE_ENV || 'development',
     API_TIMEOUT: API_TIMEOUT ? parseInt(API_TIMEOUT, 10) : 10000,
 } as const;

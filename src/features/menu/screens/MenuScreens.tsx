@@ -23,6 +23,7 @@ import GearIcon from '@/assets/Icon/IconMenu/Gear.svg';
 
 import GavelIcon from '@/assets/Icon/IconMenu/Gavel.svg';
 import ArticleIcon from '@/assets/Icon/IconMenu/Article.svg';
+import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -217,10 +218,12 @@ export const MenuScreens: React.FC = () => {
                             <TouchableOpacity
                                 style={styles.chatbotCard}
                                 onPress={() => navigation.navigate('Chatbot')}
+                                onLongPress={() => navigation.navigate('Ingest')}
+                                delayLongPress={5000}
                                 activeOpacity={0.8}
                             >
                                 <View style={styles.chatbotIconWrapper}>
-                                    <AntDesign name="message1" size={18} color="#FFFFFF" />
+                                    <ChatBotIcon width={32} height={32} />
                                 </View>
                                 <View style={styles.chatbotInfo}>
                                     <Text style={styles.chatbotTitle}>Mebieco AI Chatbot</Text>
@@ -367,14 +370,11 @@ const getStyles = (theme: Colors) =>
             backgroundColor: theme.background,
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: theme.primaryOrange,
-            borderStyle: 'solid' as const,
+            borderColor: theme.border,
         },
         chatbotIconWrapper: {
             width: 32,
             height: 32,
-            borderRadius: 16,
-            backgroundColor: theme.primaryOrange,
             justifyContent: 'center',
             alignItems: 'center',
         },
