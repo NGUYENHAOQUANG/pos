@@ -15,7 +15,7 @@ import {
     calcAverageSizeCm,
     calcSizePcsPerKg,
 } from '@/features/farm/utils/measurement-calculations.utils';
-import { MeasureShrimpSizeAIForm } from '@/features/farm/screens/pondwork/ai-measure-shrimp-size/MeasureShrimpSizeAIForm';
+import { MeasureShrimpSizeAIForm } from '@/features/farm/screens/pond-work/ai-measure-shrimp-size/MeasureShrimpSizeAIForm';
 import { downloadAzureBlobImage } from '@/shared/utils/azureBlobUrl';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;

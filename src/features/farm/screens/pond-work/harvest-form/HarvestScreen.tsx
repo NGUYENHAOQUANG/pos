@@ -4,7 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { parseDate } from '@/features/farm/utils/dateUtils';
@@ -19,13 +19,12 @@ import {
 } from '@/features/farm/hooks/useHarvestRecord';
 import { harvestService } from '@/features/farm/services/pond-work/harvest.service';
 import { HarvestFormData, getHarvestTypeDisplay } from '@/features/farm/schemas/harvestFormSchema';
+import { HarvestForm } from '@/features/farm/screens/pond-work/harvest-form/HarvestForm';
 
-import { AddHarvestForm } from './AddHarvestForm';
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'HarvestFormScreen'>;
 
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddHarvestScreen'>;
-
-export const AddHarvestScreen: React.FC = () => {
+export const HarvestFormScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pond, itemToEdit } = route.params || {};
@@ -116,7 +115,7 @@ export const AddHarvestScreen: React.FC = () => {
     };
 
     return (
-        <AddHarvestForm
+        <HarvestForm
             initialData={initialData}
             initialDate={initialDate}
             isEditMode={isEditMode}

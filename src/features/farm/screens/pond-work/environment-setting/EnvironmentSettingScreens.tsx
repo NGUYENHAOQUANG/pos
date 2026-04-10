@@ -1,9 +1,6 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CompositeNavigationProp } from '@react-navigation/native';
-
-import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { useFarmStore } from '@/features/farm/store/farmStore';
@@ -22,12 +19,9 @@ import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
 import { useEnvironmentSettingStore } from '@/features/farm/store/environmentSettingStore';
 import { environmentSettingService } from '@/features/farm/services/environment-setting.service';
 
-import { SettingEnvironmentForm } from './EnvironmentSettingForm';
+import { SettingEnvironmentForm } from '@/features/farm/screens/pond-work/environment-setting/EnvironmentSettingForm';
 
-type NavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<AppStackParamList>,
-    NativeStackNavigationProp<MenuStackParamList>
->;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 const BASIC_METRIC_CODES: string[] = [
     ENVIRONMENT_METRIC_IDS.PH,

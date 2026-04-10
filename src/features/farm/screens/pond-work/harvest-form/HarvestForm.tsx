@@ -26,7 +26,7 @@ import {
 } from '@/features/farm/schemas/harvestFormSchema';
 import { handleHarvestFormError } from '@/features/farm/utils/toastMessages';
 
-export interface AddHarvestFormProps {
+export interface HarvestFormProps {
     initialData: HarvestFormData;
     initialDate: Date;
     isEditMode: boolean;
@@ -37,7 +37,7 @@ export interface AddHarvestFormProps {
     onCancel: () => void;
 }
 
-export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
+export const HarvestForm: React.FC<HarvestFormProps> = ({
     initialData,
     initialDate,
     isEditMode,

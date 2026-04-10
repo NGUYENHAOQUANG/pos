@@ -3,7 +3,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import {
     showAddJobSuccessToast,
@@ -32,11 +32,11 @@ import {
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 import { handleProblemService } from '@/features/farm/services/pond-work/handleProblem.service';
-import { HandleProblemForm } from '@/features/farm/screens/handleProblem/HandleProblemForm';
+import { HandleProblemForm } from '@/features/farm/screens/pond-work/handle-problem-form/HandleProblemForm';
 import { HandleProblemFormValues } from '@/features/farm/schemas/handleProblemSchema';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblem'>;
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'HandleProblem'>;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 export const HandleProblemFormScreen = () => {
     const navigation = useNavigation<NavigationProp>();

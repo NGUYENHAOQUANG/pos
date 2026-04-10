@@ -21,7 +21,10 @@ import {
     useFeedingRecordDetail,
 } from '@/features/farm/hooks/pondwork/feed/useFeeding';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { FeedingForm, FeedingFormRef } from '@/features/farm/screens/pondwork/feed/FeedingForm';
+import {
+    FeedingForm,
+    FeedingFormRef,
+} from '@/features/farm/screens/pond-work/feed-form/FeedingForm';
 import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { feedingService } from '@/features/farm/services/pond-work/feeding.service';
 import {
@@ -33,10 +36,10 @@ import { deviceApi, CreateScheduleRequest } from '@/features/control/api/deviceA
 import { DeviceData } from '@/features/control/types/control.types';
 import Toast from 'react-native-toast-message';
 
-type ScreenRouteProp = RouteProp<AppStackParamList, 'FeedingManagement'>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'FeedingFormScreen'>;
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
-export const FeedingManagementScreens = () => {
+export const FeedingFormScreens = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pondId, jobId, itemToEdit } = route.params || {};

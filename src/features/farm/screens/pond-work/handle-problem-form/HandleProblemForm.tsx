@@ -7,7 +7,7 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { GeneralInfoBox, GeneralInfoBoxType } from '../../components/pondwork/GeneralInfoBox';
+import { GeneralInfoBox, GeneralInfoBoxType } from '../../../components/pondwork/GeneralInfoBox';
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
@@ -22,7 +22,7 @@ import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 
-import { handleProblemSchema, HandleProblemFormValues } from '../../schemas/handleProblemSchema';
+import { handleProblemSchema, HandleProblemFormValues } from '../../../schemas/handleProblemSchema';
 
 export interface HandleProblemFormProps {
     isEditMode: boolean;

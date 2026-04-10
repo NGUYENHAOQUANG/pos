@@ -31,7 +31,7 @@ export const usePondJobNavigateHandlers = ({
         () => ({
             [JOB_TYPES.FEED]: () => {
                 if (!pond?.id) return;
-                navigation.navigate('FeedingManagement', { pondId: pond.id });
+                navigation.navigate('FeedingFormScreen', { pondId: pond.id });
             },
 
             [JOB_TYPES.SHRIMP_INSPECTION]: () => {
@@ -64,7 +64,7 @@ export const usePondJobNavigateHandlers = ({
 
             [JOB_TYPES.WATER_CHANGE]: () => {
                 if (!pond) return;
-                navigation.navigate('WaterSupply', { pond });
+                navigation.navigate('WaterChangeFormScreen', { pond });
             },
 
             [JOB_TYPES.TRANSFER_POND]: () => {
@@ -74,7 +74,7 @@ export const usePondJobNavigateHandlers = ({
 
             [JOB_TYPES.HARVEST]: () => {
                 if (!pond) return;
-                navigation.navigate('AddHarvestScreen', { pond });
+                navigation.navigate('HarvestFormScreen', { pond });
             },
 
             [JOB_TYPES.CLEAN_POND]: () => {
@@ -115,7 +115,7 @@ export const usePondJobEditHandlers = ({
         () => ({
             [JOB_TYPES.FEED]: item => {
                 if (!pond?.id) return;
-                navigation.navigate('FeedingManagement', {
+                navigation.navigate('FeedingFormScreen', {
                     pondId: pond.id,
                     jobId: item.id,
                     itemToEdit: item,
@@ -162,7 +162,7 @@ export const usePondJobEditHandlers = ({
 
             [JOB_TYPES.WATER_CHANGE]: item => {
                 if (!pond) return;
-                navigation.navigate('WaterSupply', { pond, item });
+                navigation.navigate('WaterChangeFormScreen', { pond, item });
             },
 
             [JOB_TYPES.TRANSFER_POND]: _item => {
@@ -171,7 +171,7 @@ export const usePondJobEditHandlers = ({
 
             [JOB_TYPES.HARVEST]: item => {
                 if (!pond) return;
-                navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
+                navigation.navigate('HarvestFormScreen', { pond, itemToEdit: item });
             },
 
             [JOB_TYPES.CLEAN_POND]: item => {

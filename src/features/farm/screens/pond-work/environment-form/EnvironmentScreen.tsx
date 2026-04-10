@@ -18,7 +18,7 @@ import { EnvironmentFormValues } from '@/features/farm/schemas/environmentFormSc
 import { environmentService } from '@/features/farm/services/pond-work/environment.service';
 import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
-import { AddEnvironmentForm } from '@/features/farm/screens/pondwork/environment-form/AddEnvironmentForm';
+import { EnvironmentForm } from '@/features/farm/screens/pond-work/environment-form/EnvironmentForm';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'AddEnvironmentScreen'>;
@@ -202,7 +202,7 @@ export const AddEnvironmentScreen: React.FC = () => {
         deleteEnvMeasurement.isPending;
 
     return (
-        <AddEnvironmentForm
+        <EnvironmentForm
             key={initialData ? 'loaded' : 'loading'}
             isEditMode={isEditMode}
             isLoading={isLoading}

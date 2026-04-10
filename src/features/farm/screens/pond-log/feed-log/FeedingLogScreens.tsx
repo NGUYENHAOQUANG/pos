@@ -30,14 +30,14 @@ export const FeedingLogScreens = () => {
         setStartDate,
         setEndDate,
         metaConverter: (item: JobExecution) => convertFeedJobToActivityData(item),
-        editRoute: 'FeedingManagement',
+        editRoute: 'FeedingFormScreen',
         getEditParams: (_pond, item) => ({ pondId: pondId!, jobId: item.id, itemToEdit: item }),
         externalData: apiJobs,
     };
     const { groupedData } = useLogScreenData(config);
     const handleStartFeeding = () => {
         if (pondId) {
-            navigation.navigate('FeedingManagement', { pondId });
+            navigation.navigate('FeedingFormScreen', { pondId });
         }
     };
     return (
