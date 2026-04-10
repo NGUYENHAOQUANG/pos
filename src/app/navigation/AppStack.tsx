@@ -83,6 +83,9 @@ import { IngestScreen } from '@/features/menu/screens/chatbot/IngestScreen';
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
 
+// Report screens
+import { ShrimpPriceScreen } from '@/features/menu/screens/shrimp-price/ShrimpPriceScreen';
+
 // Notifications
 import { useNotificationSetup } from '@/features/notifications';
 
@@ -269,6 +272,7 @@ export type AppStackParamList = {
 
     // ============== Weather Screens ==============
     WeatherScreen: undefined;
+    ShrimpPrice: undefined;
     DailyForecastDetail: {
         dailyData: readonly import('@/features/weather/types/weather.types').IDailyForecast[];
     };
@@ -408,6 +412,7 @@ export const AppStack: React.FC = () => {
                 <Stack.Screen name="PinSetup" component={PinSetupScreen} />
                 <Stack.Screen name="Chatbot" component={ChatbotScreen} />
                 <Stack.Screen name="Ingest" component={IngestScreen} />
+                <Stack.Screen name="ShrimpPrice" component={ShrimpPriceScreen} />
             </Stack.Navigator>
 
             {/* Chatbot FAB - overlays all screens */}
