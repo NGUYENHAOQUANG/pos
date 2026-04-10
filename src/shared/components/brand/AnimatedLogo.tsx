@@ -1,8 +1,8 @@
 /**
  * @file AnimatedLogo.tsx
  * @description Animated MebiEco logo for splash screen.
- * Text appears first, then 3 arcs draw in one by one (inner → outer)
- * with circular stroke animation.
+ * Text fades in with slide-up, then 3 arcs spring-pop with rotation (inner → outer).
+ * Uses Reanimated 3 UI-thread transforms for silky 60fps.
  */
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
@@ -14,6 +14,7 @@ import Animated, {
     withDelay,
     withSpring,
     SharedValue,
+    Easing,
 } from 'react-native-reanimated';
 
 // ─── SVG Path Data ──────────────────────────────────────────────────
@@ -34,23 +35,80 @@ const MEBI_PATHS = [
 ];
 
 /** Three arcs separated — inner to outer */
-// Inner arc (smallest)
 const ARC_INNER =
     'M35.2803 18.7197C35.9429 18.7199 36.4804 19.2573 36.4805 19.9199C36.4805 20.2313 36.3605 20.5143 36.166 20.7275C36.6977 22.7042 36.7428 24.7861 36.2871 26.792C35.7573 29.1234 34.5744 31.2558 32.8779 32.9404C31.1815 34.625 29.041 35.7922 26.7061 36.3057C24.8558 36.7125 22.9441 36.6941 21.1123 36.2627C20.8965 36.4709 20.6038 36.5995 20.2803 36.5996C19.6177 36.5996 19.0803 36.063 19.0801 35.4004C19.0801 34.7376 19.6175 34.2002 20.2803 34.2002C20.8418 34.2003 21.3116 34.5864 21.4424 35.1074C23.083 35.4852 24.7927 35.4978 26.4482 35.1338C28.5609 34.6692 30.4983 33.6131 32.0332 32.0889C33.568 30.5646 34.6379 28.6348 35.1172 26.5254C35.5255 24.7281 35.4886 22.8638 35.0205 21.0908C34.4826 20.9721 34.0801 20.4935 34.0801 19.9199C34.0801 19.2572 34.6176 18.7197 35.2803 18.7197Z';
 
-// Middle arc
 const ARC_MIDDLE =
     'M38.8799 12.5996C39.5426 12.5996 40.08 13.1372 40.0801 13.7998C40.0801 14.0144 40.0225 14.2154 39.9238 14.3896C42.2241 18.2007 43.0879 22.7227 42.334 27.1338C41.5199 31.8966 38.8845 36.156 34.9854 39.0098C31.0863 41.8634 26.2293 43.0879 21.4434 42.4238C17.1472 41.8276 13.2113 39.7509 10.2988 36.5781C10.2278 36.5912 10.1549 36.5996 10.0801 36.5996C9.41747 36.5996 8.88009 36.063 8.87988 35.4004C8.87988 34.7376 9.41734 34.2002 10.0801 34.2002C10.7428 34.2002 11.2803 34.7377 11.2803 35.4004C11.2802 35.5392 11.2544 35.6719 11.2109 35.7959C13.9328 38.7471 17.6029 40.6795 21.6084 41.2354C26.0856 41.8566 30.6288 40.7106 34.2764 38.041C37.9239 35.3714 40.3898 31.3871 41.1514 26.9316C41.8574 22.801 41.0464 18.5665 38.8896 14.999C38.8864 14.999 38.8831 15 38.8799 15C38.2172 14.9999 37.6797 14.4625 37.6797 13.7998C37.6798 13.1372 38.2173 12.5997 38.8799 12.5996Z';
 
-// Outer arc (biggest)
 const ARC_OUTER =
     'M40.0801 5.04004C40.7428 5.04008 41.2803 5.57752 41.2803 6.24023C41.2803 6.31913 41.2714 6.39606 41.2568 6.4707C43.5255 8.70405 45.3431 11.3578 46.6025 14.2891C48.0062 17.5561 48.6848 21.0889 48.5918 24.6436C48.4987 28.1981 47.6361 31.6908 46.0635 34.8799C44.4907 38.0691 42.2449 40.8803 39.4814 43.1182C36.7181 45.3559 33.502 46.9674 30.0557 47.8428C26.6091 48.7181 23.013 48.8365 19.5166 48.1885C16.0203 47.5404 12.7056 46.1411 9.80176 44.0889C6.99061 42.102 4.63106 39.5468 2.87012 36.5918C2.26865 36.527 1.8 36.019 1.7998 35.4004C1.7998 34.7376 2.33726 34.2002 3 34.2002C3.66274 34.2002 4.2002 34.7376 4.2002 35.4004C4.20011 35.6618 4.11465 35.9025 3.97266 36.0996C5.63987 38.8592 7.85945 41.2467 10.4951 43.1094C13.2573 45.0614 16.4097 46.3914 19.7354 47.0078C23.0612 47.6242 26.4814 47.5123 29.7598 46.6797C33.0382 45.8471 36.0979 44.3142 38.7266 42.1855C41.3552 40.0569 43.4913 37.3832 44.9873 34.3496C46.4833 31.316 47.3031 27.9936 47.3916 24.6123C47.4801 21.231 46.8352 17.8704 45.5 14.7627C44.3113 11.9959 42.5995 9.48914 40.4648 7.375C40.3439 7.416 40.2149 7.44042 40.0801 7.44043C39.4174 7.44043 38.88 6.90287 38.8799 6.24023C38.8799 5.57749 39.4173 5.04004 40.0801 5.04004Z';
 
 // Stagger delays (ms) — inner first, then middle, then outer
 const ARC_DELAYS = {
-    inner: 500,
-    middle: 700,
-    outer: 900,
+    inner: 600,
+    middle: 850,
+    outer: 1100,
+};
+
+// ─── Animated Text Group Component ──────────────────────────────────
+
+interface AnimatedTextGroupProps {
+    paths: string[];
+    fill: string;
+    delay: number;
+    svgSize: number;
+}
+
+/**
+ * Text group that fades in + slides up for a polished entrance.
+ */
+const AnimatedTextGroup: React.FC<AnimatedTextGroupProps> = ({ paths, fill, delay, svgSize }) => {
+    const opacity = useSharedValue(0);
+    const translateY = useSharedValue(12);
+
+    useEffect(() => {
+        opacity.value = withDelay(
+            delay,
+            withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) })
+        );
+        translateY.value = withDelay(
+            delay,
+            withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) })
+        );
+    }, [delay, opacity, translateY]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
+        transform: [{ translateY: translateY.value }],
+    }));
+
+    return (
+        <Animated.View
+            style={[
+                {
+                    ...StyleSheet.absoluteFillObject,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                animatedStyle,
+            ]}
+        >
+            <Svg
+                width={svgSize}
+                height={svgSize}
+                viewBox="-8 -8 65 65"
+                fill="none"
+                style={{ overflow: 'visible' }}
+            >
+                <G>
+                    {paths.map((d, i) => (
+                        <Path key={`text-${fill}-${i}`} d={d} fill={fill} />
+                    ))}
+                </G>
+            </Svg>
+        </Animated.View>
+    );
 };
 
 // ─── Animated Arc Component ─────────────────────────────────────────
@@ -63,32 +121,45 @@ interface AnimatedArcProps {
 }
 
 /**
- * Each arc is wrapped in its own Animated.View.
- * Transform (scale/opacity) runs on native UI thread via useAnimatedStyle,
- * NOT through JS-bridge animatedProps on SVG Path (which causes jank).
+ * Each arc springs in with a soft overshoot + subtle rotation for organic feel.
+ * All transforms run on native UI thread for 60fps.
  */
 const AnimatedArc: React.FC<AnimatedArcProps> = ({ d, delay, gradientId, svgSize }) => {
     const scale = useSharedValue(0);
     const opacity = useSharedValue(0);
+    const rotation = useSharedValue(-15);
 
     useEffect(() => {
-        // Fade in quickly
-        opacity.value = withDelay(delay, withTiming(1, { duration: 150 }));
-        // Spring pop-in
+        // Smooth fade-in
+        opacity.value = withDelay(
+            delay,
+            withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) })
+        );
+
+        // Spring pop-in with lower damping for bouncier feel
         scale.value = withDelay(
             delay,
             withSpring(1, {
-                damping: 8,
-                stiffness: 120,
-                mass: 0.8,
+                damping: 6,
+                stiffness: 100,
+                mass: 0.6,
             })
         );
-    }, [delay, scale, opacity]);
 
-    // Runs on UI thread — no JS bridge overhead
+        // Subtle rotation unwind for organic entrance
+        rotation.value = withDelay(
+            delay,
+            withSpring(0, {
+                damping: 10,
+                stiffness: 80,
+                mass: 0.5,
+            })
+        );
+    }, [delay, scale, opacity, rotation]);
+
     const animatedStyle = useAnimatedStyle(() => ({
         opacity: opacity.value,
-        transform: [{ scale: scale.value }],
+        transform: [{ scale: scale.value }, { rotate: `${rotation.value}deg` }],
     }));
 
     return (
@@ -132,7 +203,7 @@ const AnimatedArc: React.FC<AnimatedArcProps> = ({ d, delay, gradientId, svgSize
 // ─── Component Types ────────────────────────────────────────────────
 
 interface AnimatedLogoProps {
-    /** Shared value (unused, reserved for future) */
+    /** Shared value to signal ripple start */
     startAnimation?: SharedValue<number>;
 }
 
@@ -145,30 +216,13 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({ startAnimation: _sta
         <View
             style={[styles.container, { width: SVG_SIZE, height: SVG_SIZE, overflow: 'visible' }]}
         >
-            {/* Static text layer — always on top (rendered last in SVG stacking) */}
-            <Svg
-                width={SVG_SIZE}
-                height={SVG_SIZE}
-                viewBox="-8 -8 65 65"
-                fill="none"
-                style={{ overflow: 'visible' }}
-            >
-                {/* MEBI text (orange) */}
-                <G>
-                    {MEBI_PATHS.map((d, i) => (
-                        <Path key={`mebi-${i}`} d={d} fill="#FD6900" />
-                    ))}
-                </G>
+            {/* MEBI text (orange) — appears first with slide-up */}
+            <AnimatedTextGroup paths={MEBI_PATHS} fill="#FD6900" delay={100} svgSize={SVG_SIZE} />
 
-                {/* ECO text (blue) */}
-                <G>
-                    {ECO_PATHS.map((d, i) => (
-                        <Path key={`eco-${i}`} d={d} fill="#006AFF" />
-                    ))}
-                </G>
-            </Svg>
+            {/* ECO text (blue) — appears slightly after MEBI */}
+            <AnimatedTextGroup paths={ECO_PATHS} fill="#006AFF" delay={300} svgSize={SVG_SIZE} />
 
-            {/* Arc layers — each in own Animated.View for UI-thread transforms */}
+            {/* Arc layers — each springs in with rotation for organic feel */}
             <AnimatedArc
                 d={ARC_INNER}
                 delay={ARC_DELAYS.inner}

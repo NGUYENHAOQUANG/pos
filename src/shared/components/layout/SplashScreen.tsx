@@ -5,7 +5,7 @@
  * Uses Reanimated 3 for 60fps UI-thread animations.
  */
 import React, { useEffect, useMemo } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
     Easing,
     FadeOut,
@@ -14,7 +14,6 @@ import Animated, {
     SharedValue,
     useAnimatedStyle,
     useSharedValue,
-    withDelay,
     withRepeat,
     withSequence,
     withTiming,
@@ -22,8 +21,7 @@ import Animated, {
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { AnimatedLogo } from '@/shared/components/brand/AnimatedLogo';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
 
 // ─── Constants ────────────────────────────────────────────────────
 const RIPPLE_COUNT = 3;
@@ -42,14 +40,14 @@ const RippleRing: React.FC<RippleRingProps> = ({ delay, startAnimation }) => {
     const styles = useMemo(() => getStyles(theme), [theme]);
 
     useEffect(() => {
-        // Wait for logo animation to settle before starting ripples
+        // Start ripples shortly after logo settles
         const timer = setTimeout(() => {
             progress.value = withRepeat(
-                withTiming(1, { duration: 2400, easing: Easing.out(Easing.cubic) }),
+                withTiming(1, { duration: 2000, easing: Easing.out(Easing.cubic) }),
                 -1,
                 false
             );
-        }, 800 + delay);
+        }, 500 + delay);
 
         return () => clearTimeout(timer);
     }, [delay, progress]);
@@ -59,8 +57,8 @@ const RippleRing: React.FC<RippleRingProps> = ({ delay, startAnimation }) => {
             return { opacity: 0 };
         }
 
-        const scale = interpolate(progress.value, [0, 1], [0, 3.5]);
-        const opacity = interpolate(progress.value, [0, 0.3, 1], [0.6, 0.35, 0]);
+        const scale = interpolate(progress.value, [0, 1], [0, 4]);
+        const opacity = interpolate(progress.value, [0, 0.2, 1], [0.7, 0.4, 0]);
 
         return {
             opacity,
@@ -82,67 +80,6 @@ const RippleRing: React.FC<RippleRingProps> = ({ delay, startAnimation }) => {
     );
 };
 
-// ─── Floating Bubble Component ──────────────────────────────────────
-interface SplashBubbleProps {
-    initialX: number;
-    initialY: number;
-    size: number;
-    delay: number;
-    duration: number;
-}
-
-const SplashBubble: React.FC<SplashBubbleProps & { bubbleColor: string }> = ({
-    initialX,
-    initialY,
-    size,
-    delay,
-    duration,
-    bubbleColor,
-}) => {
-    const translateY = useSharedValue(0);
-    const opacity = useSharedValue(0);
-
-    useEffect(() => {
-        // Fade in softly
-        opacity.value = withDelay(delay, withTiming(1, { duration: 600 }));
-
-        // Float up and down gently
-        translateY.value = withDelay(
-            delay,
-            withRepeat(
-                withSequence(
-                    withTiming(-40, { duration, easing: Easing.inOut(Easing.ease) }),
-                    withTiming(0, { duration, easing: Easing.inOut(Easing.ease) })
-                ),
-                -1,
-                true
-            )
-        );
-    }, [delay, duration, opacity, translateY]);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        opacity: opacity.value * 0.08,
-        transform: [{ translateY: translateY.value }],
-    }));
-
-    return (
-        <Animated.View
-            style={[
-                {
-                    position: 'absolute',
-                    backgroundColor: bubbleColor,
-                    left: initialX,
-                    top: initialY,
-                    width: size,
-                    height: size,
-                    borderRadius: size / 2,
-                },
-                animatedStyle,
-            ]}
-        />
-    );
-};
-
 // ─── Main Splash Screen ─────────────────────────────────────────────
 interface SplashScreenProps {
     visible: boolean;
@@ -157,22 +94,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimation
     const logoOpacity = useSharedValue(0);
     const rippleStarted = useSharedValue(0);
 
-    // Bubble data - memoized so it doesn't regenerate
-    const bubbles = useMemo(
-        () => [
-            { x: -30, y: SCREEN_HEIGHT * 0.08, size: 180, delay: 200, duration: 5500 },
-            { x: SCREEN_WIDTH * 0.75, y: -20, size: 160, delay: 600, duration: 6000 },
-            {
-                x: SCREEN_WIDTH * 0.15,
-                y: SCREEN_HEIGHT * 0.65,
-                size: 200,
-                delay: 400,
-                duration: 7000,
-            },
-        ],
-        []
-    );
-
     useEffect(() => {
         if (!visible) {
             return;
@@ -186,10 +107,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimation
             withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) })
         );
 
-        // Phase 2: Start ripples after arcs animation completes (~1500ms)
+        // Phase 2: Start ripples sooner to sync with arc spring animations
         const rippleTimer = setTimeout(() => {
             rippleStarted.value = 1;
-        }, 1500);
+        }, 1000);
 
         return () => clearTimeout(rippleTimer);
     }, [visible, logoOpacity, logoScale, rippleStarted]);
@@ -222,20 +143,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimation
                     }
                 })}
         >
-            {/* Floating Bubbles */}
-            <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
-                {bubbles.map((bubble, index) => (
-                    <SplashBubble
-                        key={`splash-bubble-${index}`}
-                        initialX={bubble.x}
-                        initialY={bubble.y}
-                        size={bubble.size}
-                        delay={bubble.delay}
-                        duration={bubble.duration}
-                        bubbleColor={theme.isDark ? 'rgba(255,255,255,0.8)' : theme.primary}
-                    />
-                ))}
-            </View>
+            {/* Premium Aurora Background */}
+            <AnimatedBackground />
 
             {/* Center content: Ripples + Logo */}
             <View style={styles.centerContent}>

@@ -1,17 +1,24 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     StyleSheet,
-    ScrollView,
     ActivityIndicator,
     RefreshControl,
     TouchableOpacity,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withRepeat,
+    withTiming,
+    Easing,
+    useAnimatedScrollHandler,
+    interpolate,
+} from 'react-native-reanimated';
 import { Text } from '@/shared/components/typography/Text';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography } from '@/styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { borderRadius, colors, spacing, typography } from '@/styles';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useWeatherForecast } from '@/features/weather/hooks/useWeatherForecast';
@@ -19,27 +26,35 @@ import { getWeatherInfo, getWeatherIconKey } from '@/features/weather/utils/weat
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
 import { useWeatherStore } from '@/features/weather/store/weatherStore';
 import LocationPickerModal from '@/features/weather/components/LocationPickerModal';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import DegreeIcon from '@/assets/Icon/IconWeather/Temperature.svg';
 import HourlyForecastList from '@/features/weather/components/HourlyForecastList';
 import DailyForecastList from '@/features/weather/components/DailyForecastList';
 import FarmingWeatherAlert from '@/features/weather/components/FarmingWeatherAlert';
 import { CurrentWeatherCard } from '@/features/weather/components/CurrentWeatherCard';
+import { MoonPhaseCard } from '@/features/weather/components/MoonPhaseCard';
+import AnimatedSun from '@/features/weather/animation/AnimatedSun';
+import { RainShaderBackground } from '@/features/weather/components/RainShaderBackground';
+import SunShaderEffect from '@/features/weather/components/SunShaderEffect';
+import MoonShaderEffect from '@/features/weather/components/MoonShaderEffect';
+import CloudShaderEffect from '@/features/weather/components/CloudShaderEffect';
 
 /**
- * Get weather-code based gradient for the hero card.
- * In this layout, this gradient covers the entire screen!
+ * Get dynamic background image source based on weather code and day/night
  */
-const getScreenGradient = (code: number, isDay: boolean): readonly string[] => {
-    // A nice solid Light Blue gradient resembling the provided UI
-    if (!isDay) return ['#2C3E50', '#34495E', '#4A6274'];
-    if (code >= 95) return ['#3A4F63', '#506A7E', '#6B8599']; // Storm
-    if (code >= 51) return ['#4A6D8C', '#6E8FAB', '#8BAEC5']; // Rainy
+const getBackgroundImageSource = (code?: number, isDay?: boolean) => {
+    if (code === undefined || isDay === undefined) {
+        return require('@/assets/Icon/IconWeather/BG/BG-Day.png');
+    }
 
-    // Default bright blue gradient for Sun/Cloud
-    return ['#7AB2FA', '#68A4F1', '#5A99E9'];
+    if (code >= 51) return require('@/assets/Icon/IconWeather/BG/BG-Rain.png'); // Rainy/Storm
+    if (!isDay) return require('@/assets/Icon/IconWeather/BG/BG-Night.png');
+
+    // Default: clear/partly cloudy day
+    return require('@/assets/Icon/IconWeather/BG/BG-Day.png');
 };
 
 const WeatherScreen: React.FC = () => {
-    const insets = useSafeAreaInsets();
     const navigation = useNavigation();
     const [isLocationPickerVisible, setLocationPickerVisible] = useState(false);
 
@@ -55,11 +70,59 @@ const WeatherScreen: React.FC = () => {
         isRefetching,
     } = useWeatherForecast(location);
 
-    /** Screen gradient based on weather code */
-    const screenGradient = useMemo(() => {
-        if (!weatherData) return ['#7AB2FA', '#68A4F1', '#5A99E9'];
-        return getScreenGradient(weatherData.current.weatherCode, weatherData.current.isDay === 1);
-    }, [weatherData]);
+    const translateX = useSharedValue(40);
+    const insets = useSafeAreaInsets();
+    const scrollY = useSharedValue(0);
+    const [snapOffset, setSnapOffset] = React.useState(0);
+
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: event => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
+    React.useEffect(() => {
+        translateX.value = withRepeat(
+            withTiming(-40, {
+                duration: 12000,
+                easing: Easing.inOut(Easing.sin),
+            }),
+            -1,
+            true
+        );
+    }, [translateX]);
+
+    const animatedBgStyle = useAnimatedStyle(() => {
+        // Hiệu ứng Parallax: nền cuộn lên chậm hơn so với nội dung
+        const translateY = interpolate(scrollY.value, [0, 300], [0, -50], 'clamp');
+        return {
+            transform: [{ scale: 1.3 }, { translateX: translateX.value }, { translateY }],
+        };
+    });
+
+    const blurLayerStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(scrollY.value, [0, 150], [0, 1], 'clamp');
+        return { opacity, position: 'absolute', width: '100%', height: '100%' };
+    });
+
+    const overlayStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(scrollY.value, [0, 200], [0, 0.4], 'clamp');
+        return {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: '#000',
+            opacity,
+        };
+    });
+
+    const heroOpacityStyle = useAnimatedStyle(() => {
+        // Mờ đi nhanh hơn để không bị cắt nắp khi cuộn
+        return { opacity: interpolate(scrollY.value, [0, 50], [1, 0], 'clamp') };
+    });
+
+    const stickyOpacityStyle = useAnimatedStyle(() => {
+        // Hiện ra ngay khi Hero bắt đầu biến mất
+        return { opacity: interpolate(scrollY.value, [20, 70], [0, 1], 'clamp') };
+    });
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -70,43 +133,62 @@ const WeatherScreen: React.FC = () => {
     // Loading state
     if (isLoading) {
         return (
-            <LinearGradient colors={['#7AB2FA', '#68A4F1']} style={styles.flex1}>
-                <View style={[styles.heroOverlay, { paddingTop: insets.top + spacing.md }]}>
-                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
-                        <Ionicons name="arrow-back" size={26} color={colors.white} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => setLocationPickerVisible(true)}
-                        style={styles.headerBtnRight}
-                    >
-                        <Feather name="menu" size={26} color={colors.white} />
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.flex1}>
+                <Animated.Image
+                    source={getBackgroundImageSource()}
+                    style={[styles.bgImage, animatedBgStyle]}
+                />
+                <HeaderSection
+                    transparent
+                    containerStyle={{ zIndex: 10 }}
+                    leftComponent={
+                        <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
+                            <Ionicons name="arrow-back" size={26} color={colors.white} />
+                        </TouchableOpacity>
+                    }
+                    rightComponent={
+                        <TouchableOpacity
+                            onPress={() => setLocationPickerVisible(true)}
+                            style={styles.headerBtnRight}
+                        >
+                            <Feather name="menu" size={26} color={colors.white} />
+                        </TouchableOpacity>
+                    }
+                />
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color={colors.white} />
                     <Text style={styles.loadingText}>Đang tải dữ liệu thời tiết...</Text>
                 </View>
-            </LinearGradient>
+            </View>
         );
     }
 
     // Error state
     if (isError || !weatherData) {
         return (
-            <LinearGradient colors={['#4A6D8C', '#6E8FAB']} style={styles.flex1}>
-                <View style={[styles.heroOverlay, { paddingTop: insets.top + spacing.md }]}>
-                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
-                        <Ionicons name="arrow-back" size={26} color={colors.white} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => setLocationPickerVisible(true)}
-                        style={styles.headerBtnRight}
-                    >
-                        <Feather name="menu" size={26} color={colors.white} />
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.flex1}>
+                <Animated.Image
+                    source={getBackgroundImageSource()}
+                    style={[styles.bgImage, animatedBgStyle]}
+                />
+                <HeaderSection
+                    transparent
+                    containerStyle={{ zIndex: 10 }}
+                    leftComponent={
+                        <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
+                            <Ionicons name="arrow-back" size={26} color={colors.white} />
+                        </TouchableOpacity>
+                    }
+                    rightComponent={
+                        <TouchableOpacity
+                            onPress={() => setLocationPickerVisible(true)}
+                            style={styles.headerBtnRight}
+                        >
+                            <Feather name="menu" size={26} color={colors.white} />
+                        </TouchableOpacity>
+                    }
+                />
                 <View style={styles.centerContainer}>
-                    <Text style={styles.errorIcon}>⚠️</Text>
                     <Text style={styles.errorText}>Không thể tải dữ liệu thời tiết</Text>
                     <Text style={styles.errorHint}>Kiểm tra kết nối mạng và thử lại</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
@@ -120,27 +202,99 @@ const WeatherScreen: React.FC = () => {
                     currentLocation={location}
                     onSelect={newLoc => useWeatherStore.getState().setSelectedLocation(newLoc)}
                 />
-            </LinearGradient>
+            </View>
         );
     }
 
+    // DEBUG: Force night mode for testing moon shader. Set to false when done.
+    const DEBUG_FORCE_NIGHT = false;
+    const isDay = DEBUG_FORCE_NIGHT ? false : weatherData.current.isDay === 1;
+
     const weatherInfo = getWeatherInfo(weatherData.current.weatherCode);
-    const weatherIconKey = getWeatherIconKey(
-        weatherData.current.weatherCode,
-        weatherData.current.isDay === 1
-    );
+    const weatherIconKey = getWeatherIconKey(weatherData.current.weatherCode, isDay);
     const todayForecast = weatherData.daily[0];
-    const lastUpdatedTime = new Date(weatherData.lastUpdated).toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
 
     return (
-        <LinearGradient colors={[...screenGradient]} style={styles.flex1}>
-            <ScrollView
-                style={styles.flex1}
+        <View style={styles.flex1}>
+            <Animated.Image
+                source={getBackgroundImageSource(weatherData.current.weatherCode, isDay)}
+                style={[styles.bgImage, animatedBgStyle]}
+            />
+            {/* Lớp nền mờ thay thế dần lớp nền rõ */}
+            <Animated.View style={blurLayerStyle} pointerEvents="none">
+                <Animated.Image
+                    source={getBackgroundImageSource(weatherData.current.weatherCode, isDay)}
+                    style={[styles.bgImage, animatedBgStyle]}
+                    blurRadius={15}
+                />
+            </Animated.View>
+
+            {weatherData.current.weatherCode >= 51 && (
+                <RainShaderBackground weatherCode={weatherData.current.weatherCode} />
+            )}
+
+            {/* Sun shader effect for clear/partly cloudy daytime (codes 0, 1, 2) */}
+            {isDay && [0, 1, 2].includes(weatherData.current.weatherCode) && (
+                <SunShaderEffect
+                    scrollY={scrollY}
+                    sunrise={todayForecast?.sunrise}
+                    sunset={todayForecast?.sunset}
+                />
+            )}
+
+            {/* Moon shader effect for clear/partly cloudy nighttime */}
+            {!isDay && [0, 1, 2, 3].includes(weatherData.current.weatherCode) && (
+                <MoonShaderEffect
+                    scrollY={scrollY}
+                    sunset={todayForecast?.sunset}
+                    sunrise={todayForecast?.sunrise}
+                />
+            )}
+
+            {/* Cloud shader effect for volumetric drifting clouds */}
+            <CloudShaderEffect
+                weatherCode={weatherData.current.weatherCode}
+                isDay={isDay}
+                scrollY={scrollY}
+            />
+
+            <Animated.View style={overlayStyle} pointerEvents="none" />
+
+            <HeaderSection
+                transparent
+                containerStyle={{ zIndex: 10 }}
+                leftComponent={
+                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
+                        <Ionicons name="arrow-back" size={26} color={colors.white} />
+                    </TouchableOpacity>
+                }
+                centerComponent={
+                    <Animated.View
+                        style={[styles.headerLocationContainer, stickyOpacityStyle]}
+                        pointerEvents="none"
+                    >
+                        <Text style={styles.headerLocationText}>{location.name}</Text>
+                    </Animated.View>
+                }
+                rightComponent={
+                    <TouchableOpacity
+                        onPress={() => setLocationPickerVisible(true)}
+                        style={styles.headerBtnRight}
+                    >
+                        <Feather name="menu" size={26} color={colors.white} />
+                    </TouchableOpacity>
+                }
+            />
+            <Animated.ScrollView
+                style={[styles.flex1, { marginTop: 60 }]}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+                snapToOffsets={snapOffset > 0 ? [0, snapOffset] : undefined}
+                snapToStart={true}
+                snapToEnd={false}
+                decelerationRate="fast"
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefetching}
@@ -149,71 +303,102 @@ const WeatherScreen: React.FC = () => {
                     />
                 }
             >
-                {/* Overlay: hamburger menu */}
-                <View style={[styles.heroOverlay, { paddingTop: insets.top + spacing.md }]}>
-                    <TouchableOpacity onPress={handleBack} style={styles.headerBtnLeft}>
-                        <Ionicons name="arrow-back" size={26} color={colors.white} />
-                    </TouchableOpacity>
+                {/* Hero content - centered layout */}
+                <Animated.View style={[styles.heroSection, heroOpacityStyle]}>
+                    {/* Location name */}
                     <TouchableOpacity
+                        style={styles.locationRow}
                         onPress={() => setLocationPickerVisible(true)}
-                        style={styles.headerBtnRight}
+                        activeOpacity={0.7}
                     >
-                        <Feather name="menu" size={26} color={colors.white} />
+                        <Text style={styles.locationName}>{location.name}</Text>
                     </TouchableOpacity>
-                </View>
 
-                {/* Hero content matching UI */}
-                <View style={styles.heroSection}>
-                    <View style={styles.heroLeft}>
-                        {/* Huge temperature */}
+                    {/* Big temperature + icon row */}
+                    <View style={styles.tempRow}>
                         <Text style={styles.heroTemp}>
-                            {Math.round(weatherData.current.temperature2m)}°
+                            {Math.round(weatherData.current.temperature2m)}
                         </Text>
-
-                        {/* Weather condition */}
-                        <Text style={styles.heroCondition}>{weatherInfo.label}</Text>
-
-                        {/* Location name with pin */}
-                        <TouchableOpacity
-                            style={styles.locationRow}
-                            onPress={() => setLocationPickerVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.locationName}>{location.name}</Text>
-                            <Ionicons name="location-sharp" size={14} color={colors.white} />
-                        </TouchableOpacity>
-
-                        {/* High / Low & Feels Like */}
-                        {todayForecast && (
-                            <Text style={styles.heroHighLow}>
-                                {Math.round(todayForecast.temperature2mMax)}° /{' '}
-                                {Math.round(todayForecast.temperature2mMin)}° Cảm giác như{' '}
-                                {Math.round(weatherData.current.apparentTemperature)}°
-                            </Text>
+                        <DegreeIcon
+                            width={40}
+                            height={40}
+                            color={colors.white}
+                            style={styles.degreeIcon}
+                        />
+                        {weatherIconKey === 'ClearDay' ? (
+                            <AnimatedSun size={64} color={colors.white} />
+                        ) : (
+                            <WeatherIcon
+                                name={weatherIconKey}
+                                size={64}
+                                color={colors.white}
+                                animate={true}
+                            />
                         )}
                     </View>
 
-                    <View style={styles.heroRight}>
-                        {/* Large icon illustration */}
-                        <WeatherIcon name={weatherIconKey} size={120} color="#FFD700" />
-                    </View>
-                </View>
+                    {/* Weather condition */}
+                    <Text style={styles.heroCondition}>{weatherInfo.label}</Text>
+
+                    {/* High / Low & Feels Like */}
+                    {todayForecast && (
+                        <Text style={styles.heroHighLow}>
+                            {Math.round(todayForecast.temperature2mMax)}° /{' '}
+                            {Math.round(todayForecast.temperature2mMin)}° Cảm giác như{' '}
+                            {Math.round(weatherData.current.apparentTemperature)}°
+                        </Text>
+                    )}
+                </Animated.View>
 
                 {/* Content Cards */}
-                <View style={styles.contentWrapper}>
-                    <HourlyForecastList hourlyData={weatherData.hourly} />
+                <View
+                    style={styles.contentWrapper}
+                    onLayout={e => setSnapOffset(e.nativeEvent.layout.y)}
+                >
+                    <HourlyForecastList
+                        hourlyData={weatherData.hourly}
+                        conditionLabel={weatherInfo.label}
+                        tempMax={todayForecast?.temperature2mMax}
+                        tempMin={todayForecast?.temperature2mMin}
+                    />
                     <FarmingWeatherAlert current={weatherData.current} daily={weatherData.daily} />
                     <DailyForecastList dailyData={weatherData.daily} />
                     <CurrentWeatherCard current={weatherData.current} />
-
-                    {/* Footer */}
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>
-                            Dữ liệu từ WeatherAPI • Cập nhật lúc {lastUpdatedTime}
-                        </Text>
-                    </View>
+                    <MoonPhaseCard />
                 </View>
-            </ScrollView>
+            </Animated.ScrollView>
+
+            <Animated.View
+                style={[styles.stickyBar, stickyOpacityStyle, { top: insets.top + 60 }]}
+                pointerEvents="none"
+            >
+                <Text style={styles.stickyTemp}>
+                    {Math.round(weatherData.current.temperature2m)}°
+                </Text>
+
+                {weatherIconKey === 'ClearDay' ? (
+                    <AnimatedSun size={36} color={colors.white} />
+                ) : (
+                    <WeatherIcon
+                        name={weatherIconKey}
+                        size={36}
+                        color={colors.white}
+                        animate={true}
+                    />
+                )}
+
+                <View style={styles.stickyMiddle}>
+                    {todayForecast && (
+                        <Text style={styles.stickyHighLow}>
+                            {Math.round(todayForecast.temperature2mMax)}° /{' '}
+                            {Math.round(todayForecast.temperature2mMin)}°
+                        </Text>
+                    )}
+                    <Text style={styles.stickyCondition} numberOfLines={1}>
+                        {weatherInfo.label}
+                    </Text>
+                </View>
+            </Animated.View>
 
             <LocationPickerModal
                 visible={isLocationPickerVisible}
@@ -221,13 +406,12 @@ const WeatherScreen: React.FC = () => {
                 currentLocation={location}
                 onSelect={newLoc => useWeatherStore.getState().setSelectedLocation(newLoc)}
             />
-        </LinearGradient>
+        </View>
     );
 };
 
 export default React.memo(WeatherScreen);
 
-/* ===== STYLES ===== */
 const styles = StyleSheet.create({
     flex1: {
         flex: 1,
@@ -235,6 +419,13 @@ const styles = StyleSheet.create({
 
     scrollContent: {
         paddingBottom: spacing['2xl'],
+    },
+
+    bgImage: {
+        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
     },
 
     centerContainer: {
@@ -269,75 +460,81 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    // ── Hero Overlay ──
-    heroOverlay: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.sm,
-    },
+    // ── Header Actions ──
     headerBtnLeft: {
-        padding: spacing.xs,
-        marginLeft: -spacing.xs,
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.backgroundWeather,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     headerBtnRight: {
-        padding: spacing.xs,
-        marginRight: -spacing.xs,
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.backgroundWeather,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     // ── Hero Section ────
     heroSection: {
-        flexDirection: 'row',
-        paddingHorizontal: spacing.xl,
-        paddingTop: spacing.md,
-        paddingBottom: spacing['3xl'],
-        justifyContent: 'space-between',
-    },
-
-    heroLeft: {
-        flex: 1,
-    },
-
-    heroRight: {
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-        paddingRight: spacing.sm,
-        paddingTop: spacing.lg,
-    },
-
-    heroTemp: {
-        fontSize: 90,
-        fontWeight: '300',
-        color: colors.white,
-        lineHeight: 100,
-        letterSpacing: -2,
-    },
-
-    heroCondition: {
-        fontSize: typography.fontSize.xl,
-        color: 'rgba(255,255,255,0.9)',
-        fontWeight: typography.fontWeight.medium,
-        marginBottom: spacing.xl,
+        alignItems: 'center',
+        paddingTop: spacing.sm,
+        paddingBottom: spacing['2xl'],
     },
 
     locationRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginBottom: 6,
+        marginBottom: spacing.xs,
     },
 
     locationName: {
-        fontSize: typography.fontSize.xl,
-        fontWeight: typography.fontWeight.medium,
+        fontSize: 24,
+        fontWeight: typography.fontWeight.regular,
         color: colors.white,
+        textAlign: 'center',
+    },
+
+    tempRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    heroTemp: {
+        fontSize: 100,
+        fontWeight: '400',
+        color: colors.white,
+        lineHeight: 110,
+        letterSpacing: -4,
+    },
+
+    tempRight: {
+        alignSelf: 'flex-start',
+        marginTop: 8,
+    },
+
+    degreeIcon: {
+        alignSelf: 'flex-start',
+        marginLeft: -2,
+        marginRight: 6,
+    },
+
+    heroCondition: {
+        fontSize: 18,
+        color: colors.white,
+        fontWeight: '500',
+        textAlign: 'center',
+        marginTop: spacing.xs,
     },
 
     heroHighLow: {
-        fontSize: typography.fontSize.sm,
-        color: 'rgba(255,255,255,0.8)',
-        fontWeight: typography.fontWeight.regular,
+        fontSize: 14,
+        color: colors.white,
+        fontWeight: '400',
+        textAlign: 'center',
+        marginTop: spacing.sm,
     },
 
     contentWrapper: {
@@ -366,7 +563,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.sm,
         backgroundColor: 'rgba(255,255,255,0.2)',
-        borderRadius: 20,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.3)',
     },
@@ -375,5 +572,50 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.sm,
         color: colors.white,
         fontWeight: typography.fontWeight.medium,
+    },
+
+    // ── Sticky Header Styles ──
+    headerLocationContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: spacing.sm,
+    },
+    headerLocationText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.white,
+    },
+    stickyBar: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        paddingHorizontal: 16, // Đồng bộ padding bằng đúng 16px
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        zIndex: 100,
+    },
+    stickyTemp: {
+        fontSize: 48,
+        fontWeight: '400',
+        color: colors.white,
+        letterSpacing: -1,
+    },
+    stickyMiddle: {
+        paddingHorizontal: 8,
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+    },
+    stickyHighLow: {
+        fontSize: 14,
+        color: colors.white,
+        opacity: 0.9,
+        fontWeight: '600',
+    },
+    stickyCondition: {
+        fontSize: 14,
+        color: colors.white,
+        fontWeight: '400',
     },
 });

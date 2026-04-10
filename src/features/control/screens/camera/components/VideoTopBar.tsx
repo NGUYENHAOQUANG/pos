@@ -2,17 +2,16 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors } from '@/styles';
-import CameraIcon from '@/assets/Icon/IconFarm/camera.svg';
 
 interface VideoTopBarProps {
     /** Pond name badge text */
     pondName: string;
     /** Camera name badge text */
     cameraName: string;
-    /** Snapshot capture handler */
-    onSnapshot: () => void;
     /** Close/exit handler */
     onClose: () => void;
+    /** Whether it is HD stream */
+    isHd?: boolean;
 }
 
 /**
@@ -23,22 +22,26 @@ interface VideoTopBarProps {
 export const VideoTopBar: React.FC<VideoTopBarProps> = ({
     pondName,
     cameraName,
-    onSnapshot,
     onClose,
+    isHd,
 }) => (
     <View style={styles.topBar} pointerEvents="box-none">
         <View style={styles.badgesRow}>
             <View style={styles.badge}>
                 <Text style={styles.badgeText}>{pondName}</Text>
             </View>
-            <View style={styles.badge}>
-                <Text style={styles.badgeText}>{cameraName}</Text>
-            </View>
+            {cameraName !== pondName && (
+                <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{cameraName}</Text>
+                </View>
+            )}
+            {isHd !== undefined && (
+                <View style={[styles.badge, styles.hdBadge]}>
+                    <Text style={styles.badgeText}>{isHd ? 'HD' : 'SD'}</Text>
+                </View>
+            )}
         </View>
         <View style={styles.badgesRow}>
-            <TouchableOpacity onPress={onSnapshot} style={styles.snapshotButton}>
-                <CameraIcon width={20} height={20} color={colors.white} />
-            </TouchableOpacity>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                 <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
@@ -64,19 +67,13 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 20,
     },
+    hdBadge: {
+        backgroundColor: colors.overlayBadge, // Can be specialized if needed
+    },
     badgeText: {
         color: colors.white,
         fontSize: 14,
         fontWeight: '600',
-    },
-    snapshotButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.overlayBadge,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 8,
     },
     closeButton: {
         width: 36,

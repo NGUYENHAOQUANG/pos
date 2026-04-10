@@ -86,19 +86,19 @@ export const PersonalInformationScreens: React.FC = () => {
         defaultValues: initialData,
     });
 
-    // Sync form when initialData changes
-    const initializedRef = useRef(false);
+    // Sync form when initialData changes — reset ref when user changes
+    const initializedRef = useRef<string | null>(null);
     useEffect(() => {
-        if (initialData && !initializedRef.current) {
+        if (initialData && initializedRef.current !== userData.id) {
             reset(initialData);
-            initializedRef.current = true;
+            initializedRef.current = userData.id;
         }
-    }, [initialData, reset]);
+    }, [initialData, reset, userData.id]);
 
-    // Initialize avatar from userData
-    const isAvatarInitialized = useRef(false);
+    // Initialize avatar from userData — reset ref when user changes
+    const isAvatarInitialized = useRef<string | null>(null);
     useEffect(() => {
-        if (userData && !isAvatarInitialized.current) {
+        if (userData && isAvatarInitialized.current !== userData.id) {
             if (userData.avatarUri && typeof userData.avatarUri === 'string') {
                 setAvatarUri(userData.avatarUri);
             } else if (userData.avatarUri && typeof userData.avatarUri === 'object') {
@@ -109,7 +109,7 @@ export const PersonalInformationScreens: React.FC = () => {
                 setAvatarUri(null);
             }
             setAvatarAsset(null);
-            isAvatarInitialized.current = true;
+            isAvatarInitialized.current = userData.id;
         }
     }, [userData]);
 

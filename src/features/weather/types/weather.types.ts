@@ -27,6 +27,7 @@ export interface IHourlyForecast {
     readonly weatherCode: number;
     readonly windSpeed10m: number;
     readonly chanceOfRain?: number;
+    readonly isDay: number;
 }
 
 /** Daily forecast item */
@@ -73,6 +74,7 @@ export interface IWeatherApiHour {
     readonly condition: IWeatherApiCondition;
     readonly wind_kph: number;
     readonly chance_of_rain: number;
+    readonly is_day: number;
 }
 
 /** WeatherAPI daily day summary */

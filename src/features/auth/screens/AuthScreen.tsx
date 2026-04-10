@@ -17,7 +17,7 @@ import { spacing, typography } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { useLoginFlow } from '@/features/auth/hooks/useLoginFlow';
-import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
+import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
 import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 export default function AuthScreen() {
@@ -42,7 +42,7 @@ export default function AuthScreen() {
     return (
         <ErrorBoundary>
             <SafeAreaView style={styles.container} edges={Platform.OS === 'ios' ? ['top'] : []}>
-                <FloatingBubblesBackground />
+                <AnimatedBackground />
                 <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
                 {Platform.OS === 'android' && (
@@ -152,7 +152,7 @@ const getStyles = (theme: Colors) =>
             backgroundColor: theme.backgroundPrimary,
         },
         androidStatusBar: {
-            backgroundColor: theme.backgroundPrimary,
+            backgroundColor: 'transparent',
         },
         keyboardInner: {
             flex: 1,

@@ -13,6 +13,7 @@ export interface HeaderSectionProps {
     // Config
     includeSafeArea?: boolean;
     containerStyle?: StyleProp<ViewStyle>;
+    transparent?: boolean;
 
     // Content
     title?: string;
@@ -40,6 +41,7 @@ export interface HeaderSectionProps {
 export const HeaderSection: React.FC<HeaderSectionProps> = ({
     includeSafeArea = true,
     containerStyle,
+    transparent = false,
     title,
     titleAlign = 'center',
     titleStyle,
@@ -135,6 +137,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
         <View
             style={[
                 styles.container,
+                transparent && { backgroundColor: 'transparent' },
                 includeSafeArea && { paddingTop: insets.top + 12 },
                 containerStyle,
             ]}

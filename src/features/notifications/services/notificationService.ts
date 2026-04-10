@@ -1,8 +1,21 @@
 /**
  * @file notificationService.ts
  * @description FCM + Notifee notification service for push notification handling
+ * Uses the modular Firebase API to avoid deprecation warnings
  */
-import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import {
+    getMessaging,
+    getToken as firebaseGetToken,
+    onMessage,
+    onNotificationOpenedApp as firebaseOnNotificationOpenedApp,
+    onTokenRefresh as firebaseOnTokenRefresh,
+    getInitialNotification as firebaseGetInitialNotification,
+    requestPermission,
+    subscribeToTopic as firebaseSubscribeToTopic,
+    unsubscribeFromTopic as firebaseUnsubscribeFromTopic,
+    AuthorizationStatus,
+} from '@react-native-firebase/messaging';
+import type { RemoteMessage } from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, AndroidStyle } from '@notifee/react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 
@@ -30,10 +43,11 @@ export async function initializeNotificationChannels(): Promise<void> {
  */
 export async function requestNotificationPermission(): Promise<boolean> {
     if (Platform.OS === 'ios') {
-        const authStatus = await messaging().requestPermission();
+        const messaging = getMessaging();
+        const authStatus = await requestPermission(messaging);
         const enabled =
-            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+            authStatus === AuthorizationStatus.AUTHORIZED ||
+            authStatus === AuthorizationStatus.PROVISIONAL;
         return enabled;
     }
 
@@ -54,7 +68,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
  */
 export async function getFCMToken(): Promise<string | null> {
     try {
-        const token = await messaging().getToken();
+        const messaging = getMessaging();
+        const token = await firebaseGetToken(messaging);
         return token;
     } catch (error) {
         console.error('[FCM] Error getting token:', error);
@@ -68,7 +83,8 @@ export async function getFCMToken(): Promise<string | null> {
  * @returns Unsubscribe function
  */
 export function onTokenRefresh(callback: (token: string) => void): () => void {
-    return messaging().onTokenRefresh(callback);
+    const messaging = getMessaging();
+    return firebaseOnTokenRefresh(messaging, callback);
 }
 
 /**
@@ -76,10 +92,9 @@ export function onTokenRefresh(callback: (token: string) => void): () => void {
  * @param callback - Called when a message arrives while app is in foreground
  * @returns Unsubscribe function
  */
-export function onForegroundMessage(
-    callback: (message: FirebaseMessagingTypes.RemoteMessage) => void
-): () => void {
-    return messaging().onMessage(callback);
+export function onForegroundMessage(callback: (message: RemoteMessage) => void): () => void {
+    const messaging = getMessaging();
+    return onMessage(messaging, callback);
 }
 
 /**
@@ -87,27 +102,25 @@ export function onForegroundMessage(
  * @param callback - Called with the message that was tapped
  * @returns Unsubscribe function
  */
-export function onNotificationOpenedApp(
-    callback: (message: FirebaseMessagingTypes.RemoteMessage) => void
-): () => void {
-    return messaging().onNotificationOpenedApp(callback);
+export function onNotificationOpenedApp(callback: (message: RemoteMessage) => void): () => void {
+    const messaging = getMessaging();
+    return firebaseOnNotificationOpenedApp(messaging, callback);
 }
 
 /**
  * Check if app was opened from a notification when it was in quit state
  * @returns The remote message or null
  */
-export async function getInitialNotification(): Promise<FirebaseMessagingTypes.RemoteMessage | null> {
-    return messaging().getInitialNotification();
+export async function getInitialNotification(): Promise<RemoteMessage | null> {
+    const messaging = getMessaging();
+    return firebaseGetInitialNotification(messaging);
 }
 
 /**
  * Display a remote FCM message as a local notification via Notifee
  * (Useful for foreground messages that won't auto-display)
  */
-export async function displayForegroundNotification(
-    remoteMessage: FirebaseMessagingTypes.RemoteMessage
-): Promise<void> {
+export async function displayForegroundNotification(remoteMessage: RemoteMessage): Promise<void> {
     const title = remoteMessage.notification?.title ?? 'Thông báo mới';
     const body = remoteMessage.notification?.body ?? '';
 
@@ -137,7 +150,8 @@ export async function displayForegroundNotification(
  */
 export async function subscribeToTopic(topic: string): Promise<void> {
     try {
-        await messaging().subscribeToTopic(topic);
+        const messaging = getMessaging();
+        await firebaseSubscribeToTopic(messaging, topic);
         console.log(`[FCM] Subscribed to topic: ${topic}`);
     } catch (error) {
         console.error(`[FCM] Error subscribing to topic ${topic}:`, error);
@@ -149,7 +163,8 @@ export async function subscribeToTopic(topic: string): Promise<void> {
  */
 export async function unsubscribeFromTopic(topic: string): Promise<void> {
     try {
-        await messaging().unsubscribeFromTopic(topic);
+        const messaging = getMessaging();
+        await firebaseUnsubscribeFromTopic(messaging, topic);
         console.log(`[FCM] Unsubscribed from topic: ${topic}`);
     } catch (error) {
         console.error(`[FCM] Error unsubscribing from topic ${topic}:`, error);

@@ -22,7 +22,7 @@ export const API_ENDPOINTS = {
     },
     CAMERA: {
         LIST: '/camera',
-        STREAM: (sn: string) => `/camera/${sn}/stream`,
+        STREAM: (sn: string, isHd: boolean) => `/camera/${sn}/stream?isHd=${isHd}`,
     },
     DEVICE: {
         LIST: '/device',
@@ -258,5 +258,9 @@ export const API_ENDPOINTS = {
         PRODUCTION_DISTRIBUTION: '/report/production-distribution',
         ENV_MEASUREMENT_CHART: '/report/env-measurement-chart',
         COST_DONUT: '/report/cost-donut',
+    },
+    CHATBOT: {
+        CHAT: '/api/v1/chat',
+        INGEST: '/api/v1/ingest',
     },
 } as const;

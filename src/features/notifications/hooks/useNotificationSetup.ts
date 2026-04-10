@@ -6,7 +6,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import Toast from 'react-native-toast-message';
 import {
     requestNotificationPermission,
     getFCMToken,
@@ -151,15 +150,6 @@ export function useNotificationSetup(): void {
 
             // Display as local notification via Notifee
             await displayForegroundNotification(remoteMessage);
-
-            // Also show a toast for immediate user feedback
-            Toast.show({
-                type: 'info',
-                text1: remoteMessage.notification?.title ?? 'Thông báo mới',
-                text2: remoteMessage.notification?.body ?? '',
-                position: 'top',
-                visibilityTime: 4000,
-            });
         });
 
         return unsubscribe;

@@ -27,7 +27,7 @@ import { Input } from '@/shared/components/forms/Input';
 import InfoIcon from '@/assets/Icon/Info.svg';
 import WarningCircleIcon from '@/assets/Icon/IconPolicy/WarningCircle.svg';
 
-import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
+import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
 import { handleError } from '@/shared/utils';
 import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
@@ -95,7 +95,7 @@ export default function InfoScreen() {
         <ErrorBoundary>
             <Loading isLoading={isLoading}>
                 <SafeAreaView style={styles.container} edges={['top']}>
-                    <FloatingBubblesBackground />
+                    <AnimatedBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
                     <KeyboardAvoidingView

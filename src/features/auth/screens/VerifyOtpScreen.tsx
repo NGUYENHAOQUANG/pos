@@ -29,7 +29,7 @@ import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
 import { normalizeApiError } from '@/core/api/errorHandler';
-import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
+import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
 import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 const COUNTDOWN_DURATION = 60;
@@ -165,7 +165,7 @@ export default function VerifyOTPScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            <FloatingBubblesBackground />
+            <AnimatedBackground />
             <KeyboardAvoidingView
                 enabled={Platform.OS === 'ios'}
                 behavior="padding"

@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
 import { AppNavigator } from './navigation/AppNavigator';
+import { navigationRef } from '@/app/navigation/NavigationRef';
 import { antdTheme } from '../core/config/antd-theme';
 import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
@@ -47,6 +48,8 @@ onlineManager.setEventListener(setOnline => {
 
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
+    // Defer heavy navigator mount until splash animation is nearly done
+    const [appReady, setAppReady] = useState(false);
     const { isLocked, handleUnlock } = useBiometricLock();
     const themeColors = useAppTheme();
 
@@ -64,11 +67,20 @@ export function AppProviders() {
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        // Mount navigator just before splash fades — FadeOut (500ms) masks the mount lag
+        const readyTimer = setTimeout(() => {
+            setAppReady(true);
+        }, 2800);
+
+        // Hide splash after navigator starts mounting
+        const splashTimer = setTimeout(() => {
             setShowSplash(false);
         }, 3200);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(readyTimer);
+            clearTimeout(splashTimer);
+        };
     }, []);
 
     return (
@@ -78,8 +90,8 @@ export function AppProviders() {
                     <QueryClientProvider client={queryClient}>
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
-                                <NavigationContainer theme={AppTheme}>
-                                    <AppNavigator />
+                                <NavigationContainer ref={navigationRef} theme={AppTheme}>
+                                    {appReady ? <AppNavigator /> : null}
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>
                         </ErrorBoundary>

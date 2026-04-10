@@ -6,8 +6,31 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
-import { useSettingsStore, AutoLockTimeout } from '@/features/menu/store/settingsStore';
+import {
+    useSettingsStore,
+    AutoLockTimeout,
+    AnimatedBgType,
+} from '@/features/menu/store/settingsStore';
+
+const ANIMATED_BG_OPTIONS: { value: AnimatedBgType; label: string; description: string }[] = [
+    {
+        value: 'bubbles-shader',
+        label: 'Bong bóng (GPU)',
+        description: 'Bong bóng nổi chạy bằng GPU Shader',
+    },
+    {
+        value: 'gradient-shader',
+        label: 'Aurora (GPU)',
+        description: 'Gradient aurora chạy bằng GPU Shader',
+    },
+    {
+        value: 'bubbles-classic',
+        label: 'Bong bóng (Classic)',
+        description: 'Bong bóng nổi animated truyền thống',
+    },
+];
 import { Loading } from '@/shared/components/ui/Loading';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 import {
     checkBiometricAvailability,
     AUTO_LOCK_OPTIONS,
@@ -151,6 +174,10 @@ export const SettingsScreen: React.FC = () => {
     const tabSlideEnabled = useSettingsStore(s => s.tabSlideEnabled);
     const tabSwipeEnabled = useSettingsStore(s => s.tabSwipeEnabled);
     const logoLoadingEnabled = useSettingsStore(s => s.logoLoadingEnabled);
+    const animatedBgEnabled = useSettingsStore(s => s.animatedBgEnabled);
+    const animatedBgType = useSettingsStore(s => s.animatedBgType);
+    const toggleAnimatedBg = useSettingsStore(s => s.toggleAnimatedBg);
+    const setAnimatedBgType = useSettingsStore(s => s.setAnimatedBgType);
 
     const lockMethod = useSettingsStore(s => s.lockMethod);
     const autoLockTimeout = useSettingsStore(s => s.autoLockTimeout);
@@ -235,7 +262,7 @@ export const SettingsScreen: React.FC = () => {
                         <View style={styles.card}>
                             <SettingRow
                                 title="Rung khi thao tác"
-                                subtitle="Thiết bị rung nhẹ khi nhấn nút hoặc chuyển màn hình"
+                                subtitle="Thiết bị rung nhẹ khi nhấn nút hoặc nhận được thông báo"
                                 value={hapticEnabled}
                                 onValueChange={toggleHaptic}
                             />
@@ -298,6 +325,28 @@ export const SettingsScreen: React.FC = () => {
                                 value={logoLoadingEnabled}
                                 onValueChange={handleToggleLogoLoading}
                             />
+                        </View>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Nền động"
+                                subtitle="Hiệu ứng nền chuyển động trên màn hình đăng nhập"
+                                value={animatedBgEnabled}
+                                onValueChange={toggleAnimatedBg}
+                            />
+                            {animatedBgEnabled && (
+                                <View style={styles.optionsList}>
+                                    <RadioButton
+                                        options={ANIMATED_BG_OPTIONS}
+                                        value={animatedBgType}
+                                        onValueChange={val =>
+                                            setAnimatedBgType(val as AnimatedBgType)
+                                        }
+                                        direction="column"
+                                        gap={0}
+                                        itemStyle={styles.optionItem}
+                                    />
+                                </View>
+                            )}
                         </View>
                     </View>
 

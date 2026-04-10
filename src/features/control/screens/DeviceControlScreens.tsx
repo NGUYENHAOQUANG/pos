@@ -34,6 +34,7 @@ import { CameraList } from '@/features/control/components/camera/CameraList';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import { cameraApi } from '@/features/control/api/cameraApi';
 import Toast from 'react-native-toast-message';
+import { checkNetworkForHD } from '@/shared/utils/networkUtils';
 
 /** Stable key extractor - defined outside component to prevent re-creation */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -305,7 +306,7 @@ export const DeviceControlScreens = () => {
                                     setSelectedZoneId(item.value.id);
                                 }
                             }}
-                            showIcon={true}
+                            showIcon={false}
                             height={40}
                             borderRadius={12}
                         />
@@ -357,7 +358,8 @@ export const DeviceControlScreens = () => {
                 <CameraList
                     onCameraPress={async (camera: CameraItem) => {
                         try {
-                            const response = await cameraApi.getStream(camera.deviceSn);
+                            const isHd = await checkNetworkForHD();
+                            const response = await cameraApi.getStream(camera.deviceSn, isHd);
                             const streamData = response.data?.data;
                             if (!streamData?.url) {
                                 Toast.show({
@@ -372,6 +374,7 @@ export const DeviceControlScreens = () => {
                                 videoUrl: streamData.url,
                                 cameraName: camera.name,
                                 pondName: camera.name,
+                                isHd: isHd,
                             });
                         } catch {
                             Toast.show({

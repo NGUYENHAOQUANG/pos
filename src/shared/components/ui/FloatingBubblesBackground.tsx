@@ -97,6 +97,11 @@ export const FloatingBubblesBackground: React.FC<FloatingBubblesBackgroundProps>
     const resolvedColor =
         bubbleColor ?? (theme.isDark ? 'rgba(255, 255, 255, 0.06)' : theme.primary + '10');
 
+    // Disable animated background in dark mode
+    if (theme.isDark) {
+        return null;
+    }
+
     return (
         <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
             <FloatingBubble

@@ -99,7 +99,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
                             </View>
 
                             <Text style={[styles.yAxisTitle, { color: theme.textSecondary }]}>
-                                Lượng nước m3
+                                Lượng nước m³
                             </Text>
 
                             {/* Chart: fixed Y-axis + scrollable content */}
