@@ -8,15 +8,12 @@
  * Components     → components/
  */
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { View, Platform, LayoutAnimation, UIManager, TouchableOpacity } from 'react-native';
+import { View, Platform, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import PlusBlack from '@/assets/Icon/PlusBlack.svg';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
 import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 import { GiftedChat, Bubble, MessageText, Avatar, Message } from 'react-native-gifted-chat';
@@ -229,18 +226,14 @@ export const ChatbotScreen: React.FC = () => {
         [userData.name, handleQuickAction]
     );
 
-    useEffect(() => {
-        if (Platform.OS === 'android') {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        }
-    }, [keyboardVisible, keyboardHeight]);
-
     // ══════════════════════════════════════════════════════════════════════
     // ██ RENDER
     // ══════════════════════════════════════════════════════════════════════
 
+    const Wrapper = Platform.OS === 'ios' ? KeyboardAvoidingView : View;
+
     return (
-        <View
+        <Wrapper
             style={[
                 styles.container,
                 {
@@ -251,6 +244,7 @@ export const ChatbotScreen: React.FC = () => {
                             : insets.bottom,
                 },
             ]}
+            {...(Platform.OS === 'ios' ? { behavior: 'padding' as const } : {})}
         >
             {/* ── Header ────────────────────────────────────────────────── */}
             <HeaderSection
@@ -283,7 +277,7 @@ export const ChatbotScreen: React.FC = () => {
                             onPress={handleNewChat}
                             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                         >
-                            <PlusBlack width={20} height={20} color={theme.text} />
+                            <Ionicons name="refresh" size={20} color={theme.text} />
                         </TouchableOpacity>
                     </View>
                 }
@@ -349,6 +343,6 @@ export const ChatbotScreen: React.FC = () => {
                     setShowHistorySheet(false);
                 }}
             />
-        </View>
+        </Wrapper>
     );
 };
