@@ -59,7 +59,14 @@ function App(): React.JSX.Element {
                         onConfirm={handleSessionExpiredConfirm}
                     />
                     <UpdateModal />
-                    <Toast config={toastConfig} position="bottom" bottomOffset={0} />
+                    <Toast
+                        config={toastConfig}
+                        position="bottom"
+                        bottomOffset={0}
+                        autoHide={true}
+                        visibilityTime={2000}
+                        swipeable={false}
+                    />
                 </AppThemeContext.Provider>
             </SafeAreaProvider>
         </GestureHandlerRootView>
