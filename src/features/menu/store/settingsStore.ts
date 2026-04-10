@@ -60,7 +60,7 @@ export const useSettingsStore = create<SettingsStore>()(
             logoLoadingEnabled: true,
             liquidGlassEnabled: true,
             weatherEnabled: true,
-            chatbotEnabled: false,
+            chatbotEnabled: true,
             lockMethod: 'none' as LockMethod,
             autoLockTimeout: 0 as AutoLockTimeout,
             pinHash: null,

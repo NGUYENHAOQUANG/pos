@@ -17,6 +17,7 @@ import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
 import CloseOutlined from '@/assets/Icon/CloseOutlined.svg';
 import { colors } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
+import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 const HIDDEN_SCREENS = ['Chatbot', 'Ingest', 'CameraPlayer'];
 const FAB_SIZE = 56;
@@ -242,8 +243,10 @@ export const ChatbotFAB = memo(() => {
         })
     ).current;
 
-    // Don't render if hidden or on excluded screens
-    if (isHidden || HIDDEN_SCREENS.includes(currentRouteName)) {
+    const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
+
+    // Don't render if disabled in settings, hidden locally, or on excluded screens
+    if (!chatbotEnabled || isHidden || HIDDEN_SCREENS.includes(currentRouteName)) {
         return null;
     }
 
