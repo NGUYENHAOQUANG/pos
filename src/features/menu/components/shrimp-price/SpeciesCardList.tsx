@@ -59,10 +59,7 @@ const SpeciesCard: React.FC<SpeciesCardProps> = ({
             style={[
                 styles.speciesCardContainer,
                 { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
-                isSelected && [
-                    styles.speciesCardSelected,
-                    { borderColor: theme.primary, shadowColor: theme.primary },
-                ],
+                isSelected && styles.speciesCardSelected,
             ]}
         >
             {/* Image Overlay */}
@@ -144,17 +141,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         overflow: 'hidden',
         borderWidth: 1,
-        elevation: 2,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
     },
     speciesCardSelected: {
         transform: [{ scale: 1.02 }],
-        borderWidth: 2,
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-        elevation: 8,
     },
     speciesImageOverlay: {
         position: 'absolute',

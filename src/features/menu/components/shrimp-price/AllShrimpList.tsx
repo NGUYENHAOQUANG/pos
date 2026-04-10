@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors } from '@/styles/colors';
-import { shadows } from '@/styles/shadows';
 import { spacing } from '@/styles/spacing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ShrimpPrice } from '@/features/menu/types/shrimpPrice.types';
@@ -33,7 +32,6 @@ const ShrimpListItem = React.memo(({ item, theme }: { item: ShrimpPrice; theme: 
             style={[
                 styles.shrimpListItem,
                 { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
-                shadows.sm,
             ]}
         >
             <Image

@@ -2,7 +2,6 @@ import React from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Colors } from '@/styles/colors';
-import { shadows } from '@/styles/shadows';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ShrimpPrice } from '@/features/menu/types/shrimpPrice.types';
 import { formatPrice } from '@/features/menu/utils/shrimpPriceUtils';
@@ -86,9 +85,8 @@ export const SizePriceSection: React.FC<SizePriceSectionProps> = ({
                                     styles.sizeCard,
                                     {
                                         backgroundColor: theme.backgroundPrimary,
-                                        borderColor: isActive ? theme.primary : theme.defaultBorder,
+                                        borderColor: theme.defaultBorder,
                                     },
-                                    shadows.sm,
                                 ]}
                                 onPress={() => onSelectSize(item.id)}
                             >

@@ -45,7 +45,6 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ newsData, isLoading, e
                                 styles.featuredCard,
                                 {
                                     backgroundColor: theme.backgroundTertiary,
-                                    shadowColor: theme.shadow,
                                 },
                             ]}
                             activeOpacity={0.9}
@@ -79,10 +78,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ newsData, isLoading, e
                 return (
                     <TouchableOpacity
                         key={item.id}
-                        style={[
-                            styles.newsCard,
-                            { backgroundColor: theme.backgroundPrimary, shadowColor: theme.shadow },
-                        ]}
+                        style={[styles.newsCard, { backgroundColor: theme.backgroundPrimary }]}
                         activeOpacity={0.8}
                     >
                         <Image
@@ -143,10 +139,6 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: 12,
-        elevation: 3,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
     },
     featuredImage: {
         width: '100%',
@@ -187,10 +179,6 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 12,
         alignItems: 'center',
-        elevation: 1,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
     },
     newsImage: {
         width: 90,

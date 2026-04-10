@@ -248,7 +248,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({ data, theme }) => {
                                 {
                                     backgroundColor: theme.backgroundPrimary,
                                     borderColor: theme.border,
-                                    shadowColor: theme.shadow,
                                 },
                             ]}
                         >
@@ -293,7 +292,6 @@ const chartStyles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 8,
-        elevation: 4,
         borderWidth: 1,
         zIndex: 999,
     },
