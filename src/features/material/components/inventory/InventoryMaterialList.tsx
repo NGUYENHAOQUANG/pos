@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
+import { View, StyleSheet, LayoutAnimation } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { InventoryMaterialItem } from '@/features/material/components/inventory/InventoryMaterialItem';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 export interface InventoryItem {
     id: string;

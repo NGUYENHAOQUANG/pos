@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, LayoutAnimation } from 'react-native';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { useAppTheme } from '@/styles/themeContext';
@@ -8,10 +8,6 @@ import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import { getMaterialTypeOptions } from '@/features/material/utils/dropdownOptions';
 import { Input } from '@/shared/components/forms/Input';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface AddMaterialProps {
     // Basic Info

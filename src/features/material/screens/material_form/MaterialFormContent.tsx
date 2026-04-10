@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -19,10 +19,6 @@ import { IconTrashOutlined } from '@/assets/icons';
 import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 export interface MaterialFormProps {
     isEditMode: boolean;

@@ -69,6 +69,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         typeValue === POND_TYPES.CULTIVATION ||
         typeValue === POND_TYPES.NURSERY ||
         typeValue === POND_TYPES.READY ||
+        typeValue === POND_TYPES.SETTLING ||
         typeValue === POND_TYPES.TREATMENT ||
         typeValue === POND_TYPES.WATER_STORAGE ||
         typeValue === POND_TYPES.WASTE;

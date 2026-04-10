@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
+import { IconFarmVector } from '@/assets/icons';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -78,6 +79,8 @@ export const PondDetail: React.FC<PondDetailProps> = ({
 }) => {
     const insets = useSafeAreaInsets();
     const availableJobTypes = jobs.map(j => j.type);
+    const isSettlingPond =
+        (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) === POND_TYPES.SETTLING;
 
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -94,6 +97,7 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                     fullWidth
                     pond={pond}
                     onBack={onBack}
+                    onInfoPress={onGoToPondInfo}
                     menuOptions={[
                         {
                             value: 'Thông tin ao',
@@ -124,7 +128,23 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                             <PondJobSkeleton />
                         ) : (
                             <>
-                                {currentCycle ? (
+                                {/* Settling pond info card */}
+                                {isSettlingPond && (
+                                    <View style={styles.settlingCard}>
+                                        <IconFarmVector
+                                            width={16}
+                                            height={16}
+                                            color={theme.info}
+                                            style={styles.settlingIcon}
+                                        />
+                                        <Text style={styles.settlingText}>
+                                            Ao không có chu kỳ nuôi. Ao này hiện chưa có dữ liệu chu
+                                            kỳ nuôi. Bạn chưa thiết lập chu kỳ nuôi cho ao này.
+                                        </Text>
+                                    </View>
+                                )}
+
+                                {!isSettlingPond && currentCycle ? (
                                     <View style={styles.cycleCardWrapper}>
                                         <CycleCard
                                             cycle={currentCycle}
@@ -132,14 +152,14 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                                             onPress={onEditCycle}
                                         />
                                     </View>
-                                ) : (
+                                ) : !isSettlingPond ? (
                                     <EmptyStateCard
                                         message={
                                             'Ao chưa có chu kỳ nuôi nào.\nThực hiện các công việc được liệt kê bên dưới để chuẩn bị ao trước khi bắt đầu chu kỳ nuôi.'
                                         }
                                         style={styles.emptyCard}
                                     />
-                                )}
+                                ) : null}
 
                                 <JobListCard
                                     jobs={filteredJobs}
@@ -229,5 +249,27 @@ const getStyles = (theme: Colors) =>
         emptyCard: {
             marginTop: spacing.lg,
             marginBottom: spacing.lg,
+        },
+        settlingCard: {
+            marginHorizontal: 16,
+            marginTop: 0,
+            padding: 8,
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+        },
+        settlingIcon: {
+            marginHorizontal: 4,
+            marginRight: 8,
+            marginTop: 1,
+        },
+        settlingText: {
+            flex: 1,
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
         },
     });

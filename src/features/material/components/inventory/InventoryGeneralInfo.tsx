@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, LayoutAnimation } from 'react-native';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
@@ -7,10 +7,6 @@ import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors, spacing, borderRadius } from '@/styles';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface InventoryGeneralInfoProps {
     date: Date;
