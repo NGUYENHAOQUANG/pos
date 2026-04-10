@@ -1,13 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    View,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-} from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, View, Alert } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -98,12 +91,7 @@ export default function InfoScreen() {
                     <AnimatedBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-                    <KeyboardAvoidingView
-                        enabled={Platform.OS === 'ios'}
-                        behavior="padding"
-                        style={styles.keyboardInner}
-                        keyboardVerticalOffset={0}
-                    >
+                    <KeyboardAvoidingView behavior="padding" style={styles.keyboardInner}>
                         <View style={styles.mainContentContainer}>
                             <ScrollView
                                 style={styles.scrollView}

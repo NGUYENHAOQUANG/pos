@@ -8,15 +8,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import React, { useState, useMemo } from 'react';
-import {
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
-    KeyboardAvoidingView,
-    StatusBar,
-} from 'react-native';
+import { Platform, ScrollView, StyleSheet, TouchableOpacity, View, StatusBar } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing, typography } from '@/styles';
@@ -71,11 +64,7 @@ export default function LoginScreen() {
                 <View style={[styles.androidStatusBar, { height: insets.top }]} />
             )}
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-            >
+            <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
                 <ScrollView
                     style={styles.scrollView}
                     contentContainerStyle={styles.scrollContent}
