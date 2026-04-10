@@ -86,6 +86,11 @@ export const ChatbotFAB = memo(() => {
                 lastOffset.current = { x: resetX, y: resetY };
                 pan.setValue({ x: resetX, y: resetY });
                 pan.setOffset({ x: 0, y: 0 });
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đã bật lại trợ lý ảo AI',
+                    visibilityTime: 2000,
+                });
             }
         });
 
