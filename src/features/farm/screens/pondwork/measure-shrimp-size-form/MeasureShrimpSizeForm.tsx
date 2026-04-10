@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,7 @@ import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 import {
     GeneralInfoBox,
-    GeneralInfoBoxRef,
+    GeneralInfoBoxType,
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -33,6 +33,7 @@ import {
     showRemainingWeightErrorToast,
 } from '@/features/farm/utils/toastMessages';
 import { handleError } from '@/shared/utils/errorHandler';
+import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 
 interface MeasureShrimpSizeFormProps {
     isEditing: boolean;
@@ -64,8 +65,9 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
-    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
+    const { uploadAndSyncDocuments, markUploadsAsSaved } = useSyncDocuments();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     const { control, handleSubmit, setValue, reset } = useForm<MeasureShrimpSizeFormValues>({
         resolver: zodResolver(measureShrimpSizeSchema),
@@ -135,15 +137,23 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
 
     const onSubmit = useCallback(
         async (data: MeasureShrimpSizeFormValues) => {
-            if (isSaving) return;
+            if (isSaving || isUploading) return;
 
-            const uploadedDocumentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
-            const payload = measureShrimpSizeService.mapFormToPayload(data, uploadedDocumentIds);
-
+            setIsUploading(true);
             try {
+                const finalDocIds = await uploadAndSyncDocuments(
+                    data.imageUris || [],
+                    initialValues.imageUris || [],
+                    initialValues.documentIds || []
+                );
+
+                const payload = measureShrimpSizeService.mapFormToPayload(data, finalDocIds);
+
                 await onSave(payload);
+
+                markUploadsAsSaved();
                 allowNavigation();
-                generalInfoBoxRef.current?.markAsSaved();
+
                 if (isEditing) {
                     showEditJobSuccessToast('MEASURE_SIZE');
                 } else {
@@ -152,9 +162,21 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
                 onBack();
             } catch (error) {
                 handleError(error as Error);
+            } finally {
+                setIsUploading(false);
             }
         },
-        [isSaving, onSave, allowNavigation, isEditing, onBack]
+        [
+            isSaving,
+            isUploading,
+            onSave,
+            allowNavigation,
+            isEditing,
+            onBack,
+            uploadAndSyncDocuments,
+            markUploadsAsSaved,
+            initialValues,
+        ]
     );
 
     const onFormError = useCallback((errors: any) => {
@@ -219,7 +241,7 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
             <HeaderSection
                 title="Đo kích thước tôm"
                 onBack={onBack}
-                backButtonDisabled={isSaving}
+                backButtonDisabled={isSaving || isUploading}
                 rightComponent={
                     isEditing ? <DeleteButton onPress={handleShowDeleteModal} /> : undefined
                 }
@@ -233,25 +255,25 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
                     contentContainerStyle={styles.scrollContent}
                     extraScrollHeight={100}
                 >
-                    <GeneralInfoBox
-                        ref={generalInfoBoxRef}
-                        type="withImage"
-                        date={executionDate}
-                        onDateChange={handleExecutionDateChange}
-                        imageUris={imageUris}
-                        onImagesChange={handleImagesChange}
-                        documentIds={documentIds}
-                        disabledDate={true}
-                    />
-                    <MeasurementDataBox
-                        shrimpSize={shrimpSizePcsPerKg}
-                        onShrimpSizeChange={handleShrimpSizeChange}
-                        remainingWeight={estimatedRemainingStockKg}
-                        onRemainingWeightChange={handleRemainingWeightChange}
-                        stockingQuantity={stockingQuantity}
-                        onAIMeasurePress={onAIMeasurePress}
-                    />
-                    <SelectionNotesBox notes={notes} onNotesChange={handleNotesChange} />
+                    <View pointerEvents={isSaving || isUploading ? 'none' : 'auto'}>
+                        <GeneralInfoBox
+                            type={GeneralInfoBoxType.WITH_IMAGE}
+                            date={executionDate}
+                            onDateChange={handleExecutionDateChange}
+                            imageUris={imageUris}
+                            onImagesChange={handleImagesChange}
+                            disabledDate={true}
+                        />
+                        <MeasurementDataBox
+                            shrimpSize={shrimpSizePcsPerKg}
+                            onShrimpSizeChange={handleShrimpSizeChange}
+                            remainingWeight={estimatedRemainingStockKg}
+                            onRemainingWeightChange={handleRemainingWeightChange}
+                            stockingQuantity={stockingQuantity}
+                            onAIMeasurePress={onAIMeasurePress}
+                        />
+                        <SelectionNotesBox notes={notes} onNotesChange={handleNotesChange} />
+                    </View>
                 </SafeInputLayout>
             )}
 
@@ -261,9 +283,9 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSubmit(onSubmit, onFormError)}
                     onSecondaryPress={onBack}
-                    isLoading={isSaving}
-                    secondaryDisabled={isSaving}
-                    primaryDisabled={isSaving || (isEditing && !hasChanges)}
+                    isLoading={isSaving || isUploading}
+                    secondaryDisabled={isSaving || isUploading}
+                    primaryDisabled={isSaving || isUploading || (isEditing && !hasChanges)}
                 />
             </View>
 

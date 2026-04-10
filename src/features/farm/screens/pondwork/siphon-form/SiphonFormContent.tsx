@@ -1,9 +1,8 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GeneralInfoBoxRef } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -12,6 +11,7 @@ import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModal
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
+import { AppToast } from '@/features/farm/utils/toastMessages';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import {
     showAddJobSuccessToast,
@@ -21,6 +21,7 @@ import {
 import { siphonFormService } from '@/features/farm/services/pond-work/siphon.service';
 import { siphonFormSchema, SiphonFormValues } from '@/features/farm/schemas/siphonFormSchema';
 import { SiphonFormInformation } from '@/features/farm/components/pondwork/xyphon/SiphonFormInformation';
+import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 
 interface SiphonFormContentProps {
     isEditing: boolean;
@@ -49,8 +50,9 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
-    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
+    const { uploadAndSyncDocuments, markUploadsAsSaved } = useSyncDocuments();
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     // ── useForm + zodResolver ───────────────────────────────────────
     const { control, handleSubmit, setValue, reset } = useForm<SiphonFormValues>({
@@ -104,21 +106,43 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
                 return;
             }
 
-            const uploadedIds = generalInfoBoxRef.current?.getUploadedIds() || [];
-            const payload = siphonFormService.mapFormToPayload(data, uploadedIds);
+            setIsUploading(true);
+            try {
+                const finalDocIds = await uploadAndSyncDocuments(
+                    data.imageUris || [],
+                    initialValues.imageUris || [],
+                    initialValues.documentIds || []
+                );
 
-            allowNavigation();
-            await onSave(payload, uploadedIds);
-            generalInfoBoxRef.current?.markAsSaved();
+                const payload = siphonFormService.mapFormToPayload(data, finalDocIds);
 
-            if (isEditing) {
-                showEditJobSuccessToast('SIPHON');
-            } else {
-                showAddJobSuccessToast('SIPHON');
+                allowNavigation();
+                await onSave(payload, finalDocIds);
+
+                markUploadsAsSaved();
+
+                if (isEditing) {
+                    showEditJobSuccessToast('SIPHON');
+                } else {
+                    showAddJobSuccessToast('SIPHON');
+                }
+                onBack();
+            } catch (error) {
+                console.error('Save failed:', error);
+            } finally {
+                setIsUploading(false);
             }
-            onBack();
         },
-        [isEditing, allowNavigation, onSave, onBack]
+        [
+            isEditing,
+            allowNavigation,
+            onSave,
+            onBack,
+            initialValues.documentIds,
+            initialValues.imageUris,
+            uploadAndSyncDocuments,
+            markUploadsAsSaved,
+        ]
     );
 
     const handleDeletePress = useCallback(() => setDeleteModalVisible(true), []);
@@ -153,6 +177,19 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
             setValue('selectedMaterials', mats as any, { shouldDirty: true }),
         [setValue]
     );
+    const handleFormError = (errors: any) => {
+        if (errors?.lossAmount) {
+            AppToast({
+                type: 'error',
+                text1: errors.lossAmount.message,
+            });
+            return;
+        }
+        AppToast({
+            type: 'error',
+            text1: 'Vui lòng kiểm tra lại thông tin nhập',
+        });
+    };
 
     // ── Render ──────────────────────────────────────────────────────
     return (
@@ -160,7 +197,7 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
             <HeaderSection
                 title="Xi-phông"
                 onBack={onBack}
-                backButtonDisabled={isSaving}
+                backButtonDisabled={isSaving || isUploading}
                 rightComponent={
                     isEditing ? <DeleteButton onPress={handleDeletePress} /> : undefined
                 }
@@ -170,18 +207,17 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
                 <EnvSkeleton />
             ) : (
                 <SiphonFormInformation
-                    generalInfoBoxRef={generalInfoBoxRef}
                     selectedDate={selectedDate}
                     onDateChange={onDateChange}
                     imageUris={imageUris}
                     onImagesChange={handleImagesChange}
-                    documentIds={documentIds}
                     lossAmount={lossAmount}
                     onLossAmountChange={handleLossAmountChange}
                     selectedMaterials={selectedMaterials}
                     onMaterialsChange={handleMaterialsChange}
                     notes={notes}
                     onNotesChange={handleNotesChange}
+                    pointerEvents={isSaving || isUploading ? 'none' : 'auto'}
                 />
             )}
 
@@ -189,11 +225,11 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
                 <ButtonBarFarm
                     primaryTitle={isEditing ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                     secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSubmit(onSubmit)}
+                    onPrimaryPress={handleSubmit(onSubmit, handleFormError)}
                     onSecondaryPress={handleCancel}
-                    isLoading={isSaving}
-                    secondaryDisabled={isSaving}
-                    primaryDisabled={isSaving || isButtonDisabled}
+                    isLoading={isSaving || isUploading}
+                    secondaryDisabled={isSaving || isUploading}
+                    primaryDisabled={isSaving || isUploading || isButtonDisabled}
                 />
             </View>
 

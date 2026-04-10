@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {
@@ -17,7 +17,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import {
     GeneralInfoBox,
-    GeneralInfoBoxRef,
+    GeneralInfoBoxType,
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/waterchange/WaterChangeInfoBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
@@ -47,6 +47,7 @@ import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
 import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
+import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupply'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -67,7 +68,6 @@ export const WaterSupplyScreen = () => {
     const isSavingActively =
         createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
-    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
     // Initial Data
     const meta = useMemo(() => (item?.meta as WaterSupplyMeta) || {}, [item?.meta]);
 
@@ -86,13 +86,14 @@ export const WaterSupplyScreen = () => {
     const [note, setNote] = useState(item?.note || '');
 
     // Images
-    const [documentIds, setDocumentIds] = useState<string[]>([]);
     const [detailData, setDetailData] = useState<IWaterSupplyRecord | null>(null);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     // Memos for doc IDs to use with hook
     const currentDocIds = useMemo(() => detailData?.documentIds || [], [detailData?.documentIds]);
-    const { imageUris, setImageUris } = useDocumentUrls(currentDocIds);
+    const { imageUris, setImageUris, initialImageUris } = useDocumentUrls(currentDocIds);
+    const { uploadAndSyncDocuments, markUploadsAsSaved } = useSyncDocuments();
+    const [isUploading, setIsUploading] = useState(false);
 
     // Modal Delete
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -108,7 +109,7 @@ export const WaterSupplyScreen = () => {
     // --- Load Data khi Edit ---
     useEffect(() => {
         const fetchDetail = async () => {
-            if (pond?.id && item?.id) {
+            if (item?.id && pond?.id) {
                 setIsLoadingDetail(true);
                 try {
                     const result = await waterSupplyApi.getDetail(pond.id, item.id);
@@ -137,12 +138,6 @@ export const WaterSupplyScreen = () => {
             setTargetLevel(detail.targetWaterLevel?.toString() || '');
             setSupplyLevel(detail.waterAdded?.toString() || '');
             setNote(detail.note || '');
-
-            // Images — documentIds is at root level per API spec
-            const docIds = detailData.documentIds;
-            if (docIds && docIds.length > 0) {
-                setDocumentIds(docIds);
-            }
         }
     }, [detailData, setImageUris]);
 
@@ -230,7 +225,7 @@ export const WaterSupplyScreen = () => {
             volumeSupply: round5(V_add).toString(),
 
             // Thể tích nước sau cấp (m3)
-            volumeAfterSupply: round5(V_total).toString(),
+            volumeAfterSupply: V_total > 0 ? round5(V_total).toString() : '0',
         };
     }, [targetLevel, supplyLevel, pond]);
 
@@ -301,29 +296,32 @@ export const WaterSupplyScreen = () => {
 
         if (!pond?.id) return;
 
-        const currentDocumentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
-
-        // Payload
-        // Payload chuẩn theo Swagger
-        const payload: CreateWaterSupplyCommand = {
-            documentIds: currentDocumentIds, // Array string (Root level)
-            waterChangeDetail: {
-                // documentIds: currentDocumentIds, // Removed
-                targetWaterLevel: parseFloat(targetLevel),
-                waterAdded: parseFloat(supplyLevel),
-                waterRemoved: parseFloat(calculateInfo.drainLevel) || 0,
-                previousVolume: parseFloat(calculateInfo.volumeAfterDrain) || 0,
-                finalVolume: parseFloat(calculateInfo.volumeAfterSupply) || 0,
-                addedVolume: parseFloat(calculateInfo.volumeSupply) || 0,
-                note: note, // "note" (số ít)
-                materials: selectedMaterials.map(m => ({
-                    warehouseItemId: m.material.id, // warehouseItemId
-                    quantity: m.quantity,
-                })),
-            },
-        };
-
+        setIsUploading(true);
         try {
+            const finalDocIds = await uploadAndSyncDocuments(
+                imageUris,
+                initialImageUris,
+                detailData?.documentIds || []
+            );
+
+            // Payload chuẩn theo Swagger
+            const payload: CreateWaterSupplyCommand = {
+                documentIds: finalDocIds, // Array string (Root level)
+                waterChangeDetail: {
+                    targetWaterLevel: parseFloat(targetLevel),
+                    waterAdded: parseFloat(supplyLevel),
+                    waterRemoved: parseFloat(calculateInfo.drainLevel) || 0,
+                    previousVolume: parseFloat(calculateInfo.volumeAfterDrain) || 0,
+                    finalVolume: parseFloat(calculateInfo.volumeAfterSupply) || 0,
+                    addedVolume: parseFloat(calculateInfo.volumeSupply) || 0,
+                    note: note, // "note" (số ít)
+                    materials: selectedMaterials.map(m => ({
+                        warehouseItemId: m.material.id, // warehouseItemId
+                        quantity: m.quantity,
+                    })),
+                },
+            };
+
             if (item) {
                 // UPDATE
                 await updateMutation.mutateAsync({
@@ -331,7 +329,6 @@ export const WaterSupplyScreen = () => {
                     id: item.id,
                     data: payload,
                 });
-                generalInfoBoxRef.current?.markAsSaved();
                 showEditJobSuccessToast('WATER_CHANGE');
             } else {
                 // CREATE
@@ -339,9 +336,9 @@ export const WaterSupplyScreen = () => {
                     pondId: pond.id,
                     data: payload,
                 });
-                generalInfoBoxRef.current?.markAsSaved();
                 showAddJobSuccessToast('WATER_CHANGE');
             }
+            markUploadsAsSaved();
             allowNavigation();
             navigation.goBack();
         } catch (error: any) {
@@ -360,6 +357,8 @@ export const WaterSupplyScreen = () => {
                 text1: 'Lưu thất bại',
                 text2: message,
             });
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -395,7 +394,7 @@ export const WaterSupplyScreen = () => {
             <HeaderSection
                 title="Thay/Cấp nước"
                 onBack={handleBack}
-                backButtonDisabled={isSavingActively}
+                backButtonDisabled={isSavingActively || isUploading}
                 rightComponent={item ? <DeleteButton onPress={handleDelete} /> : undefined}
             />
 
@@ -407,43 +406,45 @@ export const WaterSupplyScreen = () => {
                         contentContainerStyle={styles.scrollContent}
                         extraScrollHeight={100}
                     >
-                        {/* 1. Thông tin chung */}
-                        <GeneralInfoBox
-                            ref={generalInfoBoxRef}
-                            type="withImage"
-                            date={selectedDate}
-                            onDateChange={setSelectedDate}
-                            imageUris={imageUris}
-                            onImagesChange={setImageUris}
-                            documentIds={documentIds}
-                            disabledDate={true}
-                        />
+                        <View pointerEvents={isSavingActively || isUploading ? 'none' : 'auto'}>
+                            {/* 1. Thông tin chung */}
+                            <GeneralInfoBox
+                                type={GeneralInfoBoxType.WITH_IMAGE}
+                                date={selectedDate}
+                                onDateChange={setSelectedDate}
+                                imageUris={imageUris}
+                                onImagesChange={uris => {
+                                    setImageUris(uris);
+                                }}
+                                disabledDate={true}
+                            />
 
-                        {/* 2. Mực nước & Thể tích */}
-                        <WaterSupplyInfoBox
-                            targetLevel={targetLevel}
-                            onTargetLevelChange={setTargetLevel}
-                            supplyLevel={supplyLevel}
-                            onSupplyLevelChange={setSupplyLevel}
-                            // Truyền các giá trị đã tính toán
-                            drainLevel={calculateInfo.drainLevel}
-                            volumeAfterDrain={calculateInfo.volumeAfterDrain}
-                            volumeSupply={calculateInfo.volumeSupply}
-                            volumeAfterSupply={calculateInfo.volumeAfterSupply}
-                        />
+                            {/* 2. Mực nước & Thể tích */}
+                            <WaterSupplyInfoBox
+                                targetLevel={targetLevel}
+                                onTargetLevelChange={setTargetLevel}
+                                supplyLevel={supplyLevel}
+                                onSupplyLevelChange={setSupplyLevel}
+                                // Truyền các giá trị đã tính toán
+                                drainLevel={calculateInfo.drainLevel}
+                                volumeAfterDrain={calculateInfo.volumeAfterDrain}
+                                volumeSupply={calculateInfo.volumeSupply}
+                                volumeAfterSupply={calculateInfo.volumeAfterSupply}
+                            />
 
-                        {/* 3. Chọn vật tư */}
-                        <MaterialSelectionBox
-                            selectedMaterials={selectedMaterials}
-                            onMaterialsChange={setSelectedMaterials}
-                            specificType={SpecificType.Normal}
-                            isRequired={false}
-                        />
+                            {/* 3. Chọn vật tư */}
+                            <MaterialSelectionBox
+                                selectedMaterials={selectedMaterials}
+                                onMaterialsChange={setSelectedMaterials}
+                                specificType={SpecificType.Normal}
+                                isRequired={false}
+                            />
 
-                        {/* 4. Ghi chú */}
-                        <SelectionNotesBox notes={note} onNotesChange={setNote} />
+                            {/* 4. Ghi chú */}
+                            <SelectionNotesBox notes={note} onNotesChange={setNote} />
 
-                        <View style={styles.spacer} />
+                            <View style={styles.spacer} />
+                        </View>
                     </SafeInputLayout>
                 )}
             </View>
@@ -454,9 +455,9 @@ export const WaterSupplyScreen = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
-                isLoading={isSavingActively}
-                secondaryDisabled={isSavingActively}
-                primaryDisabled={isSavingActively || (!!item && !hasChanges)}
+                isLoading={isSavingActively || isUploading}
+                secondaryDisabled={isSavingActively || isUploading}
+                primaryDisabled={isSavingActively || isUploading || (!!item && !hasChanges)}
                 style={{
                     borderTopWidth: 1,
                     borderTopColor: theme.defaultBorder,
