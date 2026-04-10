@@ -2,12 +2,15 @@
  * @file TypingIndicator.tsx
  * @description Hiển thị animation 3 chấm khi bot đang typing
  */
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
-import { COLORS } from '@/features/menu/screens/chatbot/constants';
+import { useAppTheme } from '@/styles/themeContext';
 import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 
 export const TypingIndicator: React.FC = () => {
+    const theme = useAppTheme();
+    const styles = useTypingStyles(theme);
+
     const dot1 = useRef(new Animated.Value(0)).current;
     const dot2 = useRef(new Animated.Value(0)).current;
     const dot3 = useRef(new Animated.Value(0)).current;
@@ -61,7 +64,7 @@ export const TypingIndicator: React.FC = () => {
     return (
         <View style={styles.container}>
             <View style={styles.botAvatarSmall}>
-                <ChatBotIcon width={28} height={28} />
+                <ChatBotIcon width={32} height={32} />
             </View>
             <View style={styles.bubble}>
                 <Animated.View style={[styles.dot, dotStyle(dot1)]} />
@@ -72,36 +75,40 @@ export const TypingIndicator: React.FC = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        paddingLeft: 8,
-        paddingBottom: 4,
-        gap: 8,
-    },
-    botAvatarSmall: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: COLORS.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    bubble: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.grayLight,
-        borderRadius: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        gap: 4,
-    },
-    dot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: COLORS.grayText,
-    },
-});
+const useTypingStyles = (theme: any) =>
+    useMemo(
+        () =>
+            StyleSheet.create({
+                container: {
+                    flexDirection: 'row',
+                    alignItems: 'flex-end',
+                    paddingLeft: 8,
+                    paddingBottom: 4,
+                    gap: 8,
+                },
+                botAvatarSmall: {
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: theme.background,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                },
+                bubble: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: theme.backgroundTertiary,
+                    borderRadius: 16,
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    gap: 4,
+                },
+                dot: {
+                    width: 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: theme.textSecondary,
+                },
+            }),
+        [theme]
+    );

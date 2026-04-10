@@ -10,6 +10,8 @@ import { Text } from '@/shared/components/typography/Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PondStatusData } from '@/features/menu/screens/chatbot/types';
+import { useAppTheme } from '@/styles/themeContext';
+import { useMemo } from 'react';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────────
 
@@ -46,7 +48,7 @@ interface ParamRowProps {
     statusLabel: string;
 }
 
-const ParamRow: React.FC<ParamRowProps> = ({
+const ParamRow: React.FC<ParamRowProps & { theme: any; paramStyles: any }> = ({
     icon,
     iconLib = 'mci',
     label,
@@ -54,13 +56,15 @@ const ParamRow: React.FC<ParamRowProps> = ({
     unit,
     statusColor,
     statusLabel,
+    theme,
+    paramStyles,
 }) => (
     <View style={paramStyles.row}>
         <View style={paramStyles.labelSection}>
             {iconLib === 'mci' ? (
-                <MaterialCommunityIcons name={icon} size={16} color="#6B7280" />
+                <MaterialCommunityIcons name={icon} size={16} color={theme.textSecondary} />
             ) : (
-                <Ionicons name={icon} size={16} color="#6B7280" />
+                <Ionicons name={icon} size={16} color={theme.textSecondary} />
             )}
             <Text style={paramStyles.label}>{label}</Text>
         </View>
@@ -77,56 +81,61 @@ const ParamRow: React.FC<ParamRowProps> = ({
     </View>
 );
 
-const paramStyles = StyleSheet.create({
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-    },
-    labelSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    label: {
-        fontSize: 13,
-        color: '#6B7280',
-        fontWeight: '400',
-    },
-    valueSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    value: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#000000',
-    },
-    unit: {
-        fontSize: 12,
-        fontWeight: '400',
-        color: '#9CA3AF',
-    },
-    statusBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 10,
-    },
-    statusDot: {
-        width: 5,
-        height: 5,
-        borderRadius: 2.5,
-    },
-    statusText: {
-        fontSize: 11,
-        fontWeight: '500',
-    },
-});
+const useParamStyles = (theme: any) =>
+    useMemo(
+        () =>
+            StyleSheet.create({
+                row: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingVertical: 8,
+                },
+                labelSection: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 6,
+                },
+                label: {
+                    fontSize: 13,
+                    color: theme.textSecondary,
+                    fontWeight: '400',
+                },
+                valueSection: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                },
+                value: {
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: theme.text,
+                },
+                unit: {
+                    fontSize: 12,
+                    fontWeight: '400',
+                    color: theme.textSecondary,
+                },
+                statusBadge: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                    borderRadius: 10,
+                },
+                statusDot: {
+                    width: 5,
+                    height: 5,
+                    borderRadius: 2.5,
+                },
+                statusText: {
+                    fontSize: 11,
+                    fontWeight: '500',
+                },
+            }),
+        [theme]
+    );
 
 // ── Main Component ──────────────────────────────────────────────────────────────
 
@@ -135,6 +144,9 @@ interface PondStatusWidgetProps {
 }
 
 export const PondStatusWidget: React.FC<PondStatusWidgetProps> = ({ data }) => {
+    const theme = useAppTheme();
+    const styles = useWidgetStyles(theme);
+    const paramStyles = useParamStyles(theme);
     const { pond_name, temperature, ph, oxygen, salinity, turbidity } = data;
 
     // Ngưỡng an toàn cho từng thông số (có thể custom theo SettingEnvironment)
@@ -257,6 +269,8 @@ export const PondStatusWidget: React.FC<PondStatusWidgetProps> = ({ data }) => {
                         unit={param.unit}
                         statusColor={getStatusColor(param.current, param.min, param.max)}
                         statusLabel={getStatusLabel(param.current, param.min, param.max)}
+                        theme={theme}
+                        paramStyles={paramStyles}
                     />
                     {index < params.length - 1 && <View style={styles.paramDivider} />}
                 </React.Fragment>
@@ -266,56 +280,61 @@ export const PondStatusWidget: React.FC<PondStatusWidgetProps> = ({ data }) => {
 };
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 14,
-        marginHorizontal: 4,
-        marginTop: 4,
-        marginBottom: 2,
-        borderWidth: 1,
-        borderColor: '#E6E8EC',
-        minWidth: 260,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    headerIcon: {
-        width: 28,
-        height: 28,
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#000000',
-    },
-    overallBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 12,
-    },
-    overallText: {
-        fontSize: 11,
-        fontWeight: '600',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#F3F4F6',
-        marginVertical: 8,
-    },
-    paramDivider: {
-        height: 1,
-        backgroundColor: '#F9FAFB',
-    },
-});
+const useWidgetStyles = (theme: any) =>
+    useMemo(
+        () =>
+            StyleSheet.create({
+                container: {
+                    backgroundColor: theme.background,
+                    borderRadius: 12,
+                    padding: 14,
+                    marginHorizontal: 4,
+                    marginTop: 4,
+                    marginBottom: 2,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                    minWidth: 260,
+                },
+                header: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                },
+                headerLeft: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                },
+                headerIcon: {
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                },
+                headerTitle: {
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: theme.text,
+                },
+                overallBadge: {
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 12,
+                },
+                overallText: {
+                    fontSize: 11,
+                    fontWeight: '600',
+                },
+                divider: {
+                    height: 1,
+                    backgroundColor: theme.backgroundTertiary,
+                    marginVertical: 8,
+                },
+                paramDivider: {
+                    height: 1,
+                    backgroundColor: theme.border,
+                },
+            }),
+        [theme]
+    );

@@ -18,11 +18,12 @@ import {
 import { Text } from '@/shared/components/typography/Text';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { COLORS, QUICK_REPLIES } from '@/features/menu/screens/chatbot/constants';
+import { QUICK_REPLIES } from '@/features/menu/screens/chatbot/constants';
 import { zoneApi } from '@/features/farm/api/zoneApi';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { pondCategoryApi } from '@/features/farm/api/pondCategoryApi';
 import { Zone, PondData } from '@/features/farm/types/farm.types';
+import { useAppTheme } from '@/styles/themeContext';
 import { PondCategory } from '@/features/farm/types/pond-category.types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -38,6 +39,9 @@ export const QuickReplyBottomSheet: React.FC<QuickReplyBottomSheetProps> = ({
     onClose,
     onSelect,
 }) => {
+    const theme = useAppTheme();
+    const sheetStyles = useQuickReplyStyles(theme);
+
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const slideAnimTranslateX = React.useRef(new Animated.Value(50)).current;
     const slideAnimOpacity = React.useRef(new Animated.Value(0)).current;
@@ -229,7 +233,7 @@ export const QuickReplyBottomSheet: React.FC<QuickReplyBottomSheetProps> = ({
                         activeOpacity={0.7}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                        <CloseIcon width={20} height={20} />
+                        <CloseIcon width={20} height={20} color={theme.text} />
                     </TouchableOpacity>
                 </View>
             );
@@ -248,7 +252,7 @@ export const QuickReplyBottomSheet: React.FC<QuickReplyBottomSheetProps> = ({
                     onPress={handleBack}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                    <Ionicons name="arrow-back" size={24} color={COLORS.black} />
+                    <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
                 <Text style={sheetStyles.title}>{title}</Text>
                 <View style={{ flex: 1 }} />
@@ -258,7 +262,7 @@ export const QuickReplyBottomSheet: React.FC<QuickReplyBottomSheetProps> = ({
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                    <CloseIcon width={20} height={20} />
+                    <CloseIcon width={20} height={20} color={theme.text} />
                 </TouchableOpacity>
             </View>
         );
@@ -268,7 +272,7 @@ export const QuickReplyBottomSheet: React.FC<QuickReplyBottomSheetProps> = ({
         if (isLoading) {
             return (
                 <View style={sheetStyles.loadingContainer}>
-                    <ActivityIndicator size="small" color={COLORS.blue} />
+                    <ActivityIndicator size="small" color={theme.info} />
                     <Text style={sheetStyles.loadingText}>Đang tải dữ liệu...</Text>
                 </View>
             );
@@ -363,59 +367,68 @@ export const QuickReplyBottomSheet: React.FC<QuickReplyBottomSheetProps> = ({
     );
 };
 
-const sheetStyles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        justifyContent: 'flex-end',
-    },
-    container: {
-        width: '100%',
-        backgroundColor: COLORS.white,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 24,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    title: {
-        fontSize: 17,
-        fontWeight: '700',
-        color: COLORS.black,
-    },
-    closeButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    content: {
-        gap: 0, // removed gap since itemRow has padding
-    },
-    itemRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 4,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#E5E7EB',
-    },
-    itemText: {
-        fontSize: 15,
-        color: COLORS.black,
-        fontWeight: '400',
-    },
-    loadingContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 30 },
-    loadingText: { marginTop: 8, fontSize: 13, color: COLORS.grayText },
-    emptyText: {
-        fontSize: 13,
-        color: COLORS.grayText,
-        fontStyle: 'italic',
-        paddingVertical: 10,
-        textAlign: 'center',
-    },
-});
+const useQuickReplyStyles = (theme: any) =>
+    React.useMemo(
+        () =>
+            StyleSheet.create({
+                overlay: {
+                    flex: 1,
+                    backgroundColor: theme.overlayLight,
+                    justifyContent: 'flex-end',
+                },
+                container: {
+                    width: '100%',
+                    backgroundColor: theme.background,
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                    paddingHorizontal: 20,
+                    paddingTop: 20,
+                    paddingBottom: 24,
+                },
+                header: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 16,
+                },
+                title: {
+                    fontSize: 17,
+                    fontWeight: '700',
+                    color: theme.text,
+                },
+                closeButton: {
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                content: {
+                    gap: 0, // removed gap since itemRow has padding
+                },
+                itemRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 14,
+                    paddingHorizontal: 4,
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    borderBottomColor: theme.border,
+                },
+                itemText: {
+                    fontSize: 15,
+                    color: theme.text,
+                    fontWeight: '400',
+                },
+                loadingContainer: {
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 30,
+                },
+                loadingText: { marginTop: 8, fontSize: 13, color: theme.textSecondary },
+                emptyText: {
+                    fontSize: 13,
+                    color: theme.textSecondary,
+                    fontStyle: 'italic',
+                    paddingVertical: 10,
+                    textAlign: 'center',
+                },
+            }),
+        [theme]
+    );

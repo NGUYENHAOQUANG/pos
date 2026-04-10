@@ -2,10 +2,10 @@
  * @file MessageTimeRow.tsx
  * @description Instagram-style swipe-to-reveal time cho mỗi message row
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { COLORS } from '@/features/menu/screens/chatbot/constants';
+import { useAppTheme } from '@/styles/themeContext';
 
 interface MessageTimeRowProps {
     children: React.ReactNode;
@@ -20,6 +20,9 @@ export const MessageTimeRow: React.FC<MessageTimeRowProps> = ({
     swipeTranslateX,
     swipeTimeOpacity,
 }) => {
+    const theme = useAppTheme();
+    const styles = useTimeRowStyles(theme);
+
     return (
         <View style={styles.container}>
             {/* Time — positioned on the right, visible when swiping */}
@@ -35,21 +38,26 @@ export const MessageTimeRow: React.FC<MessageTimeRowProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        position: 'relative',
-        overflow: 'hidden',
-    },
-    timeContainer: {
-        position: 'absolute',
-        right: 8,
-        top: 0,
-        bottom: 0,
-        justifyContent: 'center',
-    },
-    timeText: {
-        fontSize: 11,
-        color: COLORS.grayText,
-        fontWeight: '400',
-    },
-});
+const useTimeRowStyles = (theme: any) =>
+    useMemo(
+        () =>
+            StyleSheet.create({
+                container: {
+                    position: 'relative',
+                    overflow: 'hidden',
+                },
+                timeContainer: {
+                    position: 'absolute',
+                    right: 8,
+                    top: 0,
+                    bottom: 0,
+                    justifyContent: 'center',
+                },
+                timeText: {
+                    fontSize: 11,
+                    color: theme.textSecondary,
+                    fontWeight: '400',
+                },
+            }),
+        [theme]
+    );

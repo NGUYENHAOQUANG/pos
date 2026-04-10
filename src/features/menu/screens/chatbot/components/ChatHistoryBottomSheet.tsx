@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '@/features/menu/screens/chatbot/constants';
-import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
+import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
+import { useAppTheme } from '@/styles/themeContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -40,6 +40,9 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
     onSelectSession,
     onNewChat,
 }) => {
+    const theme = useAppTheme();
+    const styles = useHistoryStyles(theme);
+
     const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const opacity = useRef(new Animated.Value(0)).current;
 
@@ -85,7 +88,7 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                 activeOpacity={0.7}
             >
                 <View style={[styles.iconBox, isActive && styles.iconBoxActive]}>
-                    <ChatBotIcon width={24} height={24} />
+                    <BotIcon width={24} height={24} />
                 </View>
                 <View style={styles.sessionInfo}>
                     <Text
@@ -121,7 +124,7 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                     <View style={styles.header}>
                         <Text style={styles.title}>Lịch sử trò chuyện</Text>
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                            <Ionicons name="close" size={24} color={COLORS.black} />
+                            <Ionicons name="close" size={24} color={theme.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -131,7 +134,7 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                         onPress={onNewChat}
                         activeOpacity={0.8}
                     >
-                        <Ionicons name="add" size={20} color={COLORS.white} />
+                        <Ionicons name="add" size={20} color={theme.textInverse} />
                         <Text style={styles.newChatText}>Cuộc trò chuyện mới</Text>
                     </TouchableOpacity>
 
@@ -148,7 +151,7 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
                         ) : (
                             <View style={styles.emptyContainer}>
                                 <View style={{ marginBottom: 16 }}>
-                                    <ChatBotIcon width={64} height={64} />
+                                    <BotIcon width={64} height={64} />
                                 </View>
                                 <Text style={styles.emptyText}>Chưa có cuộc trò chuyện nào</Text>
                             </View>
@@ -163,115 +166,120 @@ export const ChatHistoryBottomSheet: React.FC<ChatHistoryBottomSheetProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    overlayContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    backdrop: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#000',
-    },
-    sheet: {
-        backgroundColor: COLORS.white,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        maxHeight: SCREEN_HEIGHT * 0.8,
-        minHeight: SCREEN_HEIGHT * 0.5,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: 24,
-        paddingBottom: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.inputBorder,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: COLORS.black,
-    },
-    closeButton: {
-        padding: 4,
-    },
-    newChatButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: COLORS.orange,
-        borderRadius: 12,
-        paddingVertical: 14,
-        marginHorizontal: 20,
-        marginTop: 20,
-        marginBottom: 12,
-        gap: 8,
-    },
-    newChatText: {
-        color: COLORS.white,
-        fontSize: 15,
-        fontWeight: '600',
-    },
-    listContainer: {
-        flex: 1,
-    },
-    listContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 24,
-        gap: 12,
-    },
-    sessionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 12,
-        borderRadius: 16,
-        backgroundColor: COLORS.white,
-        borderWidth: 1,
-        borderColor: COLORS.inputBorder,
-    },
-    sessionItemActive: {
-        backgroundColor: '#F3F4F6',
-    },
-    iconBox: {
-        width: 40,
-        height: 40,
-        borderRadius: 32,
-        backgroundColor: COLORS.white,
-        borderWidth: 1,
-        borderColor: COLORS.inputBorder,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    iconBoxActive: {},
-    sessionInfo: {
-        flex: 1,
-        marginRight: 12,
-    },
-    sessionTitle: {
-        fontSize: 15,
-        fontWeight: '500',
-        color: COLORS.black,
-        marginBottom: 4,
-    },
-    sessionTitleActive: {
-        fontWeight: '600',
-    },
-    sessionDate: {
-        fontSize: 13,
-        color: COLORS.grayText,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 40,
-    },
-    emptyText: {
-        marginTop: 12,
-        fontSize: 15,
-        color: COLORS.grayText,
-    },
-});
+const useHistoryStyles = (theme: any) =>
+    React.useMemo(
+        () =>
+            StyleSheet.create({
+                overlayContainer: {
+                    flex: 1,
+                    justifyContent: 'flex-end',
+                },
+                backdrop: {
+                    ...StyleSheet.absoluteFillObject,
+                    backgroundColor: '#000',
+                },
+                sheet: {
+                    backgroundColor: theme.background,
+                    borderTopLeftRadius: 24,
+                    borderTopRightRadius: 24,
+                    maxHeight: SCREEN_HEIGHT * 0.8,
+                    minHeight: SCREEN_HEIGHT * 0.5,
+                },
+                header: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 20,
+                    paddingTop: 24,
+                    paddingBottom: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.border,
+                },
+                title: {
+                    fontSize: 18,
+                    fontWeight: '700',
+                    color: theme.text,
+                },
+                closeButton: {
+                    padding: 4,
+                },
+                newChatButton: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: theme.primaryOrange,
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    marginHorizontal: 20,
+                    marginTop: 20,
+                    marginBottom: 12,
+                    gap: 8,
+                },
+                newChatText: {
+                    color: theme.textInverse,
+                    fontSize: 15,
+                    fontWeight: '600',
+                },
+                listContainer: {
+                    flex: 1,
+                },
+                listContent: {
+                    paddingHorizontal: 20,
+                    paddingBottom: 24,
+                    gap: 12,
+                },
+                sessionItem: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 12,
+                    borderRadius: 16,
+                    backgroundColor: theme.background,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                },
+                sessionItemActive: {
+                    backgroundColor: theme.backgroundTertiary,
+                },
+                iconBox: {
+                    width: 40,
+                    height: 40,
+                    borderRadius: 32,
+                    backgroundColor: theme.background,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 12,
+                },
+                iconBoxActive: {},
+                sessionInfo: {
+                    flex: 1,
+                    marginRight: 12,
+                },
+                sessionTitle: {
+                    fontSize: 15,
+                    fontWeight: '500',
+                    color: theme.text,
+                    marginBottom: 4,
+                },
+                sessionTitleActive: {
+                    fontWeight: '600',
+                },
+                sessionDate: {
+                    fontSize: 13,
+                    color: theme.textSecondary,
+                },
+                emptyContainer: {
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingVertical: 40,
+                },
+                emptyText: {
+                    marginTop: 12,
+                    fontSize: 15,
+                    color: theme.textSecondary,
+                },
+            }),
+        [theme]
+    );

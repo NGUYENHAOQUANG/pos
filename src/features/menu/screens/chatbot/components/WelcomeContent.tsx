@@ -12,7 +12,8 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { COLORS, WELCOME_SUGGESTIONS } from '@/features/menu/screens/chatbot/constants';
+import { WELCOME_SUGGESTIONS } from '@/features/menu/screens/chatbot/constants';
+import { useAppTheme } from '@/styles/themeContext';
 import { zoneApi } from '@/features/farm/api/zoneApi';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { pondCategoryApi } from '@/features/farm/api/pondCategoryApi';
@@ -27,6 +28,9 @@ interface WelcomeContentProps {
 }
 
 export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSuggestionPress }) => {
+    const theme = useAppTheme();
+    const styles = useWelcomeStyles(theme);
+
     // ── States for Onboarding Flow ──
     const [step, setStep] = useState<
         'SUGGESTIONS' | 'SELECT_ZONE' | 'SELECT_CATEGORY' | 'SELECT_POND'
@@ -330,7 +334,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
                         {shouldShowLoader ? (
                             <ActivityIndicator
                                 size="small"
-                                color={COLORS.blue}
+                                color={theme.info}
                                 style={{ padding: 20 }}
                             />
                         ) : data.length === 0 ? (
@@ -420,50 +424,69 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
     );
 };
 
-const styles = StyleSheet.create({
-    wrapper: { flex: 1, paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 },
-    greetingSection: { marginBottom: 40 },
-    greetingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-    greetingSmall: { fontSize: 16, fontWeight: '400', color: COLORS.grayText },
-    greetingLarge: { fontSize: 24, fontWeight: '700', color: '#1A1A2E', letterSpacing: -0.3 },
-    suggestionsSection: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        rowGap: 14,
-        width: '100%',
-    },
-    listContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        rowGap: 14,
-        width: '100%',
-        paddingBottom: 20,
-    },
-    columnWrapper: { width: '48%' },
-    suggestionChip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 12,
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: COLORS.inputBorder,
-        backgroundColor: COLORS.white,
-        width: '100%',
-    },
-    onboardingChip: { paddingVertical: 14, paddingHorizontal: 12 },
-    suggestionText: { fontSize: 13, fontWeight: '500', color: '#1A1A2E', textAlign: 'center' },
-    loadingContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
-    loadingText: { marginTop: 12, fontSize: 14, color: COLORS.grayText },
-    emptyText: {
-        fontSize: 14,
-        color: COLORS.grayText,
-        fontStyle: 'italic',
-        paddingVertical: 20,
-        width: '100%',
-        textAlign: 'center',
-    },
-});
+const useWelcomeStyles = (theme: any) =>
+    React.useMemo(
+        () =>
+            StyleSheet.create({
+                wrapper: { flex: 1, paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 },
+                greetingSection: { marginBottom: 40 },
+                greetingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+                greetingSmall: { fontSize: 16, fontWeight: '400', color: theme.textSecondary },
+                greetingLarge: {
+                    fontSize: 24,
+                    fontWeight: '700',
+                    color: theme.text,
+                    letterSpacing: -0.3,
+                },
+                suggestionsSection: {
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    rowGap: 14,
+                    width: '100%',
+                },
+                listContainer: {
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    rowGap: 14,
+                    width: '100%',
+                    paddingBottom: 20,
+                },
+                columnWrapper: { width: '48%' },
+                suggestionChip: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 14,
+                    paddingHorizontal: 12,
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                    backgroundColor: theme.backgroundPrimary,
+                    width: '100%',
+                },
+                onboardingChip: { paddingVertical: 14, paddingHorizontal: 12 },
+                suggestionText: {
+                    fontSize: 13,
+                    fontWeight: '500',
+                    color: theme.text,
+                    textAlign: 'center',
+                },
+                loadingContainer: {
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 40,
+                },
+                loadingText: { marginTop: 12, fontSize: 14, color: theme.textSecondary },
+                emptyText: {
+                    fontSize: 14,
+                    color: theme.textSecondary,
+                    fontStyle: 'italic',
+                    paddingVertical: 20,
+                    width: '100%',
+                    textAlign: 'center',
+                },
+            }),
+        [theme]
+    );

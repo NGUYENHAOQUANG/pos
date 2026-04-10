@@ -8,22 +8,18 @@
  * Components     → components/
  */
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, Platform, LayoutAnimation, UIManager, TouchableOpacity } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import PlusBlack from '@/assets/Icon/PlusBlack.svg';
+import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
 import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
-import {
-    GiftedChat,
-    Bubble,
-    InputToolbar,
-    Composer,
-    MessageText,
-    Avatar,
-    Message,
-} from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, MessageText, Avatar, Message } from 'react-native-gifted-chat';
 
 // ── Local Imports ───────────────────────────────────────────────────────────────
 import {
@@ -33,16 +29,23 @@ import {
 } from '@/features/menu/screens/chatbot/types';
 import { PondStatusWidget } from '@/features/menu/screens/chatbot/widgets/PondStatusWidget';
 import { DeviceControlWidget } from '@/features/menu/screens/chatbot/widgets/DeviceControlWidget';
+import {
+    ChatbotInputToolbar,
+    ChatbotComposer,
+    ChatbotSend,
+} from '@/features/menu/screens/chatbot/components/ChatbotInput';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
-import { COLORS, BOT_USER, CURRENT_USER_ID } from '@/features/menu/screens/chatbot/constants';
+import { BOT_USER, CURRENT_USER_ID } from '@/features/menu/screens/chatbot/constants';
 import { TypingIndicator } from '@/features/menu/screens/chatbot/components/TypingIndicator';
 import { WelcomeContent } from '@/features/menu/screens/chatbot/components/WelcomeContent';
 import { MessageTimeRow } from '@/features/menu/screens/chatbot/components/MessageTimeRow';
 import { useChatbot } from '@/features/menu/screens/chatbot/hooks/useChatbot';
-import { styles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
+import { useChatbotStyles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
 import { QuickReplyBottomSheet } from '@/features/menu/screens/chatbot/components/QuickReplyBottomSheet';
 import { ChatHistoryBottomSheet } from '@/features/menu/screens/chatbot/components/ChatHistoryBottomSheet';
+import { useAppTheme } from '@/styles/themeContext';
+import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ██ MAIN CHATBOT SCREEN
@@ -51,6 +54,9 @@ import { ChatHistoryBottomSheet } from '@/features/menu/screens/chatbot/componen
 export const ChatbotScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { userData } = useUserProfile();
+    const theme = useAppTheme();
+    const styles = useChatbotStyles();
+    const { keyboardVisible, keyboardHeight } = useKeyboard();
 
     const {
         messages,
@@ -114,9 +120,9 @@ export const ChatbotScreen: React.FC = () => {
                 {...props}
                 wrapperStyle={{
                     right: {
-                        backgroundColor: COLORS.white,
+                        backgroundColor: theme.background,
                         borderWidth: 1,
-                        borderColor: COLORS.inputBorder,
+                        borderColor: theme.border,
                         borderRadius: 22,
                         marginBottom: 2,
                     },
@@ -135,7 +141,7 @@ export const ChatbotScreen: React.FC = () => {
                 }}
             />
         ),
-        []
+        [theme]
     );
 
     const renderMessageText = useCallback(
@@ -147,16 +153,16 @@ export const ChatbotScreen: React.FC = () => {
                     left: { paddingHorizontal: 4, paddingVertical: 4 },
                 }}
                 textStyle={{
-                    right: { color: COLORS.black, fontSize: 14 },
-                    left: { color: COLORS.black, fontSize: 14 },
+                    right: { color: theme.text, fontSize: 14 },
+                    left: { color: theme.text, fontSize: 14 },
                 }}
                 linkStyle={{
-                    right: { color: '#B2DDFF' },
-                    left: { color: COLORS.blue },
+                    right: { color: theme.blue[200] },
+                    left: { color: theme.primary },
                 }}
             />
         ),
-        []
+        [theme]
     );
 
     const renderTime = useCallback(() => null, []);
@@ -184,76 +190,28 @@ export const ChatbotScreen: React.FC = () => {
         [swipeTranslateX, swipeTimeOpacity]
     );
 
-    const renderAvatar = useCallback((props: any) => {
-        if (props.currentMessage?.user._id === BOT_USER._id) {
-            return (
-                <View style={styles.botAvatar}>
-                    <ChatBotIcon width={32} height={32} />
-                </View>
-            );
-        }
-        return <Avatar {...props} />;
-    }, []);
+    const renderAvatar = useCallback(
+        (props: any) => {
+            if (props.currentMessage?.user._id === BOT_USER._id) {
+                return (
+                    <View style={styles.botAvatar}>
+                        <ChatBotIcon width={32} height={32} />
+                    </View>
+                );
+            }
+            return <Avatar {...props} />;
+        },
+        [styles.botAvatar]
+    );
 
     const renderInputToolbar = useCallback(
-        (props: any) => (
-            <View style={styles.inputToolbar}>
-                <TouchableOpacity
-                    style={styles.quickSheetButton}
-                    onPress={() => setShowQuickSheet(true)}
-                    activeOpacity={0.7}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                    <Ionicons name="options-outline" size={22} color={COLORS.grayText} />
-                </TouchableOpacity>
-                <View style={styles.inputPillContainer}>
-                    <InputToolbar
-                        {...props}
-                        containerStyle={styles.inputToolbarInner}
-                        primaryStyle={styles.inputPrimary}
-                    />
-                </View>
-            </View>
-        ),
-        []
+        (props: any) => <ChatbotInputToolbar {...props} setShowQuickSheet={setShowQuickSheet} />,
+        [setShowQuickSheet]
     );
 
-    const renderComposer = useCallback(
-        (props: any) => (
-            <Composer
-                {...props}
-                textInputStyle={styles.composerInput}
-                placeholder="Hỏi Mebieco AI..."
-                placeholderTextColor={COLORS.grayText}
-                multiline={true}
-            />
-        ),
-        []
-    );
+    const renderComposer = useCallback((props: any) => <ChatbotComposer {...props} />, []);
 
-    const renderSend = useCallback((props: any) => {
-        const hasText = props.text && props.text.trim().length > 0;
-        return (
-            <TouchableOpacity
-                style={styles.sendContainer}
-                onPress={() => {
-                    if (hasText && props.onSend) {
-                        props.onSend({ text: props.text.trim() }, true);
-                    }
-                }}
-                disabled={!hasText}
-                activeOpacity={0.7}
-            >
-                <View style={[styles.sendButton, !hasText && styles.sendButtonDisabled]}>
-                    <Ionicons
-                        name="send"
-                        size={16}
-                        color={hasText ? COLORS.white : COLORS.grayMedium}
-                    />
-                </View>
-            </TouchableOpacity>
-        );
-    }, []);
+    const renderSend = useCallback((props: any) => <ChatbotSend {...props} />, []);
 
     const renderFooter = useCallback(() => {
         if (isTyping) {
@@ -271,12 +229,29 @@ export const ChatbotScreen: React.FC = () => {
         [userData.name, handleQuickAction]
     );
 
+    useEffect(() => {
+        if (Platform.OS === 'android') {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        }
+    }, [keyboardVisible, keyboardHeight]);
+
     // ══════════════════════════════════════════════════════════════════════
     // ██ RENDER
     // ══════════════════════════════════════════════════════════════════════
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View
+            style={[
+                styles.container,
+                {
+                    paddingTop: insets.top,
+                    paddingBottom:
+                        Platform.OS === 'android' && keyboardVisible
+                            ? keyboardHeight
+                            : insets.bottom,
+                },
+            ]}
+        >
             {/* ── Header ────────────────────────────────────────────────── */}
             <HeaderSection
                 includeSafeArea={false}
@@ -286,7 +261,7 @@ export const ChatbotScreen: React.FC = () => {
                     <View style={styles.headerCenter}>
                         <View style={styles.headerAvatarContainer}>
                             <View style={styles.headerAvatar}>
-                                <ChatBotIcon width={36} height={36} />
+                                <BotIcon width={36} height={36} />
                             </View>
                             <View style={styles.onlineIndicator} />
                         </View>
@@ -301,16 +276,14 @@ export const ChatbotScreen: React.FC = () => {
                         <View style={styles.betaBadge}>
                             <Text style={styles.betaText}>BETA</Text>
                         </View>
+
+                        {/* Nút Tạo đoạn chat mới (Clear history tạm thời) */}
                         <TouchableOpacity
                             style={styles.historyButton}
-                            onPress={() => setShowHistorySheet(true)}
+                            onPress={handleNewChat}
                             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                         >
-                            <MaterialCommunityIcons
-                                name="clipboard-text-clock-outline"
-                                size={24}
-                                color={COLORS.black}
-                            />
+                            <PlusBlack width={20} height={20} color={theme.text} />
                         </TouchableOpacity>
                     </View>
                 }
