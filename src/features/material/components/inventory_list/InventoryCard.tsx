@@ -4,8 +4,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     LayoutAnimation,
-    Platform,
-    UIManager,
     ActivityIndicator,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
@@ -29,10 +27,6 @@ import { ButtonMaterialList } from '@/features/material/components/material_form
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface InventoryCardProps {
     data: IInventoryCheck;

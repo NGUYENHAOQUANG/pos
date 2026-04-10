@@ -321,15 +321,9 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                         {selectedBarIndex !== null &&
                             selectedTooltipData &&
                             (() => {
-                                const TOOLTIP_WIDTH = 220;
-                                const TOOLTIP_MARGIN = 30;
-                                const isOverflowRight =
-                                    tooltipX + 8 + TOOLTIP_WIDTH + TOOLTIP_MARGIN > svgWidth;
-                                // Check if placing tooltip to the left would be clipped by the Y-axis overlay
-                                const isOverflowLeft =
-                                    tooltipX - 8 - TOOLTIP_WIDTH < PADDING_LEFT + SCROLL_PADDING;
-                                // If overflows right but also overflows left, prefer showing on the right
-                                const showOnRight = !isOverflowRight || isOverflowLeft;
+                                // Simple and robust: if point is on the left half of the chart, show tooltip on the right.
+                                // If point is on the right half, show tooltip on the left.
+                                const showOnRight = tooltipX <= svgWidth / 2;
                                 return (
                                     <View
                                         style={[
@@ -465,7 +459,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                     top: 0,
                     width: PADDING_LEFT,
                     height: dynamicHeight,
-
+                    backgroundColor: theme.background,
                     zIndex: 10,
                 }}
                 pointerEvents="none"

@@ -19,7 +19,6 @@ export type {
     ShrimpHealthCheckDetail,
     CreateShrimpHealthCheckPayload,
     UpdateShrimpHealthCheckPayload,
-    Creator,
     ShrimpHealthCheckResult,
     ShrimpHealthCheckDetailDto,
     ShrimpHealthCheckDto,

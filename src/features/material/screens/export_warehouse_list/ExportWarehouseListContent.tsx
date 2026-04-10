@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FlatList, Platform, UIManager } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { ExportReceipt } from '@/features/material/types/exportReceipt.types';
 import { ExportWarehouseReceiptCard } from '../../components/export_warehouse_list/ExportWarehouseReceiptCard';
@@ -8,12 +8,6 @@ import { MaterialLoadingState } from '@/features/material/components/MaterialLoa
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { getMaterialListStyles } from '@/features/material/styles/materialListStyles';
 import { useAppTheme } from '@/styles/themeContext';
-
-if (Platform.OS === 'android') {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-        UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-}
 
 interface ExportWarehouseMaterialListProps {
     receipts: ExportReceipt[];

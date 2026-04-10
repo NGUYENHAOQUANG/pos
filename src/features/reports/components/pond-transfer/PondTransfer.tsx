@@ -48,10 +48,7 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, seas
             <BasicDropDownButton
                 prefixIcon={<HarvestStatIcon width={20} height={20} />}
                 label="Thống kê sang ao"
-                style={[
-                    styles.sectionHeader,
-                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
-                ]}
+                style={styles.sectionHeader}
                 onPress={toggleSection}
                 isExpanded={isSectionOpen}
             />

@@ -49,6 +49,11 @@ export const colors = {
         300: '#FCCEEE',
         900: '#DD2590',
     },
+    teal: {
+        50: '#E6FFFB',
+        200: '#99F6E0', // Tailwind teal-200
+        600: '#0E9384',
+    },
     cyan: {
         50: '#E6FFFB',
         600: '#87E8DE',
@@ -97,6 +102,7 @@ export const colors = {
     },
     pink: {
         50: '#FFF0F6',
+        200: '#FBCFE8',
         300: '#FFADD2',
         600: '#EB2F96',
     },

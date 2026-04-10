@@ -7,7 +7,7 @@
  * một object `widget` với `type` và `data` tương ứng.
  * Client sẽ dùng `type` để quyết định render component UI nào.
  */
-import { IMessage } from 'react-native-gifted-chat';
+import { IMessage, QuickReplies } from 'react-native-gifted-chat';
 
 // ── Widget Types ────────────────────────────────────────────────────────────────
 // Thêm widget type mới ở đây khi mở rộng tính năng
@@ -65,4 +65,6 @@ export interface AIResponse {
     text: string;
     /** Widget data nếu AI quyết định gọi tool/function (tuỳ chọn) */
     widget?: ChatWidget;
+    /** Các options gợi ý để người dùng click (bot tự hỏi ngược lại) */
+    quickReplies?: QuickReplies;
 }

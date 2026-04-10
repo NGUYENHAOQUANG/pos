@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ViewStyle, RefreshControlProps } from 'react-native';
+import { StyleSheet, ViewStyle, RefreshControlProps, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 interface SafeInputLayoutProps {
@@ -7,6 +7,9 @@ interface SafeInputLayoutProps {
     style?: ViewStyle;
     contentContainerStyle?: ViewStyle;
     extraScrollHeight?: number;
+    extraHeight?: number;
+    bounces?: boolean;
+    scrollEnabled?: boolean;
     /** Ref to access KeyboardAwareScrollView methods (e.g. scrollToPosition) */
     innerRef?: React.Ref<KeyboardAwareScrollView>;
     /** RefreshControl component for pull-to-refresh */
@@ -21,7 +24,10 @@ export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
     children,
     style,
     contentContainerStyle,
-    extraScrollHeight = 150,
+    extraScrollHeight = 15,
+    extraHeight = 15,
+    bounces = false, // We'll override in component body if iOS
+    scrollEnabled = true,
     innerRef,
     refreshControl,
 }) => {
@@ -32,10 +38,12 @@ export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
             contentContainerStyle={contentContainerStyle}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            bounces={Platform.OS === 'ios' ? true : bounces}
+            scrollEnabled={scrollEnabled}
+            extraHeight={extraHeight}
             extraScrollHeight={extraScrollHeight}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            keyboardOpeningTime={0}
             enableResetScrollToCoords={false}
             refreshControl={refreshControl}
         >

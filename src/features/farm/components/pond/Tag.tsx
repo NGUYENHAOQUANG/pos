@@ -87,7 +87,7 @@ const getStyles = (theme: Colors) =>
         },
         green: {
             backgroundColor: theme.status.activeBg,
-            borderColor: theme.status.activeText,
+            borderColor: theme.green[200],
             borderWidth: 1,
         },
         textGreen: {
@@ -95,7 +95,7 @@ const getStyles = (theme: Colors) =>
         },
         orange: {
             backgroundColor: theme.status.warningHighlightBg,
-            borderColor: theme.status.warningHighlightText,
+            borderColor: theme.yellow[200],
             borderWidth: 1,
         },
         textOrange: {

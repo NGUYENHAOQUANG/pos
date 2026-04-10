@@ -15,9 +15,10 @@ import { Colors } from '@/styles/colors';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
-import { PondType } from '@/features/farm/types/farm.types';
+import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import { IconInfomation } from '@/assets/icons';
 
 interface HeaderFarmProps {
     // Common
@@ -39,6 +40,7 @@ interface HeaderFarmProps {
     tagType?: PondType | string;
     status?: TagStatus; // Added status prop
     onBack?: () => void;
+    onInfoPress?: () => void;
     backButtonDisabled?: boolean;
     leftComponent?: React.ReactNode;
     rightAction?: React.ReactNode;
@@ -58,6 +60,7 @@ export const HeaderFarm = ({
     tagType,
     status,
     onBack,
+    onInfoPress,
     backButtonDisabled,
     leftComponent,
     rightAction,
@@ -133,6 +136,10 @@ export const HeaderFarm = ({
      * Layout: [Left Part (flex: 1)] [Right Part (auto)]
      */
     if (type === 'detail') {
+        // Check if this is a settling pond
+        const pondTypeName = typeof tagType === 'string' ? tagType : (tagType as PondType)?.name;
+        const isSettlingPond = pondTypeName === POND_TYPES.SETTLING;
+
         const centerNode = (
             <View style={styles.infoContainer}>
                 <Text style={styles.pondName} numberOfLines={1} ellipsizeMode="tail">
@@ -146,9 +153,19 @@ export const HeaderFarm = ({
             <View style={styles.detailRightContainer}>
                 {status && <Tag status={status} style={styles.tag} />}
                 {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
-                <View ref={buttonRef} collapsable={false}>
-                    <MoreButton onPress={openMenu} style={styles.menuButtonDetail} />
-                </View>
+                {isSettlingPond ? (
+                    <TouchableOpacity
+                        onPress={onInfoPress}
+                        style={styles.infoButton}
+                        activeOpacity={0.7}
+                    >
+                        <IconInfomation width={20} height={20} />
+                    </TouchableOpacity>
+                ) : (
+                    <View ref={buttonRef} collapsable={false}>
+                        <MoreButton onPress={openMenu} style={styles.menuButtonDetail} />
+                    </View>
+                )}
             </View>
         );
 
@@ -307,6 +324,16 @@ const getStyles = (theme: Colors) =>
         menuButtonDetail: {
             width: 40,
             height: 40,
+        },
+        infoButton: {
+            width: 40,
+            height: 40,
+            alignItems: 'center' as const,
+            justifyContent: 'center' as const,
+            borderRadius: 9999,
+            borderWidth: 1,
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
         },
         // Modal Styles
         modalOverlay: {

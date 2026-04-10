@@ -48,10 +48,7 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, season
             <BasicDropDownButton
                 prefixIcon={<HarvestStatIcon width={20} height={20} />}
                 label="Thống kê thu hoạch"
-                style={[
-                    styles.sectionHeader,
-                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
-                ]}
+                style={styles.sectionHeader}
                 onPress={toggleSection}
                 isExpanded={isSectionOpen}
             />

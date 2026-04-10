@@ -3,6 +3,7 @@ import { documentApi } from '@/features/material/api/documentApi';
 
 export function useDocumentUrls(documentIds: string[] | undefined | null) {
     const [imageUris, setImageUris] = useState<string[]>([]);
+    const [initialImageUris, setInitialImageUris] = useState<string[]>([]);
     const [isLoadingImages, setIsLoadingImages] = useState<boolean>(false);
 
     // Use stringified JSON to track stable reference of document IDs
@@ -21,6 +22,9 @@ export function useDocumentUrls(documentIds: string[] | undefined | null) {
                     .getUrls(currentDocIds)
                     .then(urls => {
                         setImageUris(urls);
+                        setInitialImageUris(prev =>
+                            prev.length === 0 && urls.length > 0 ? urls : prev
+                        );
                         setIsLoadingImages(false);
                     })
                     .catch(error => {
@@ -35,5 +39,5 @@ export function useDocumentUrls(documentIds: string[] | undefined | null) {
         }
     }, [documentIds]);
 
-    return { imageUris, isLoadingImages, setImageUris };
+    return { imageUris, isLoadingImages, setImageUris, initialImageUris };
 }
