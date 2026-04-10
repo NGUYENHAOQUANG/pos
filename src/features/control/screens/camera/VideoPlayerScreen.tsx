@@ -39,7 +39,7 @@ export const VideoPlayerScreen: React.FC = () => {
         };
     }, [navigation]);
 
-    const { stream, error } = useWebRTCStream(videoUrl);
+    const { stream, error, statusText, isConnected, progress } = useWebRTCStream(videoUrl);
 
     const [isFullView, setIsFullView] = useState(false);
 
@@ -61,21 +61,29 @@ export const VideoPlayerScreen: React.FC = () => {
                     <View style={styles.centered}>
                         <Text style={styles.errorText}>{error}</Text>
                     </View>
-                ) : !stream ? (
-                    <View style={styles.centered}>
-                        <ActivityIndicator size="large" color={colors.white} />
-                        <Text style={styles.loadingText}>Đang kết nối</Text>
-                    </View>
                 ) : (
-                    <PinchGestureHandler onHandlerStateChange={onPinchStateChange}>
-                        <Animated.View style={styles.videoContainer}>
-                            <RTCView
-                                streamURL={stream.toURL()}
-                                style={styles.video}
-                                objectFit={isFullView ? 'cover' : 'contain'}
-                            />
-                        </Animated.View>
-                    </PinchGestureHandler>
+                    <>
+                        <PinchGestureHandler onHandlerStateChange={onPinchStateChange}>
+                            <Animated.View style={styles.videoContainer}>
+                                {stream && (
+                                    <RTCView
+                                        streamURL={stream.toURL()}
+                                        style={styles.video}
+                                        objectFit={isFullView ? 'cover' : 'contain'}
+                                    />
+                                )}
+                            </Animated.View>
+                        </PinchGestureHandler>
+
+                        {(!stream || !isConnected) && (
+                            <View style={styles.centeredOverlay} pointerEvents="none">
+                                <ActivityIndicator size="large" color={colors.white} />
+                                <Text style={styles.loadingText}>
+                                    {statusText} {progress > 0 ? `(${progress}%)` : ''}
+                                </Text>
+                            </View>
+                        )}
+                    </>
                 )}
 
                 {/* Close + snapshot overlay */}
@@ -116,6 +124,13 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    centeredOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        zIndex: 5,
     },
     loadingText: {
         color: colors.white,
