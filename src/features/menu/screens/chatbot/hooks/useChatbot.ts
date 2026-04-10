@@ -1,11 +1,12 @@
 /**
  * @file useChatbot.ts
  * @description Hook quản lý toàn bộ state và logic cho ChatbotScreen
+ *
+ * Không còn phụ thuộc GiftedChat — tự quản lý messages array.
  */
 import { useState, useCallback, useRef, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Animated, PanResponder } from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat';
 
 import { IChatMessage } from '@/features/menu/screens/chatbot/types';
 import { sendMessageToAI } from '@/features/menu/screens/chatbot/services/chatbotApi';
@@ -28,7 +29,7 @@ export const useChatbot = () => {
                 const storedText = await AsyncStorage.getItem(CHAT_HISTORY_KEY);
                 if (storedText) {
                     const parsedMessages = JSON.parse(storedText);
-                    // GiftedChat objects include Date for 'createdAt', we need to restore them
+                    // Restore Date objects for 'createdAt'
                     const restoredMessages = parsedMessages.map((msg: any) => ({
                         ...msg,
                         createdAt: new Date(msg.createdAt),
@@ -98,46 +99,60 @@ export const useChatbot = () => {
         })
     ).current;
 
-    // ─── Xử lý phản hồi từ AI ──────────────────────────────────────────────
-    const processAIResponse = useCallback(async (userText: string) => {
-        setIsTyping(true);
-
-        try {
-            const aiResponse = await sendMessageToAI(userText);
-
-            const botMessage: IChatMessage = {
-                _id: `bot-${Date.now()}`,
-                text: aiResponse.text,
-                createdAt: new Date(),
-                user: BOT_USER,
-                ...(aiResponse.widget && { widget: aiResponse.widget }),
-                ...(aiResponse.quickReplies && { quickReplies: aiResponse.quickReplies }),
-            };
-
-            setMessages(prev => GiftedChat.append(prev, [botMessage]));
-        } catch (_error) {
-            const errorMessage: IChatMessage = {
-                _id: `error-${Date.now()}`,
-                text: 'Đã xảy ra lỗi khi xử lý. Vui lòng thử lại sau.',
-                createdAt: new Date(),
-                user: BOT_USER,
-            };
-            setMessages(prev => GiftedChat.append(prev, [errorMessage]));
-        } finally {
-            setIsTyping(false);
-        }
+    // ─── Append message helper (thay thế GiftedChat.append) ─────────────────
+    const appendMessages = useCallback((newMessages: IChatMessage[]) => {
+        setMessages(prev => [...prev, ...newMessages]);
     }, []);
+
+    // ─── Xử lý phản hồi từ AI ──────────────────────────────────────────────
+    const processAIResponse = useCallback(
+        async (userText: string) => {
+            setIsTyping(true);
+
+            try {
+                const aiResponse = await sendMessageToAI(userText);
+
+                const botMessage: IChatMessage = {
+                    _id: `bot-${Date.now()}`,
+                    text: aiResponse.text,
+                    createdAt: new Date(),
+                    user: BOT_USER,
+                    ...(aiResponse.widget && { widget: aiResponse.widget }),
+                    ...(aiResponse.quickReplies && { quickReplies: aiResponse.quickReplies }),
+                };
+
+                appendMessages([botMessage]);
+            } catch (_error) {
+                const errorMessage: IChatMessage = {
+                    _id: `error-${Date.now()}`,
+                    text: 'Đã xảy ra lỗi khi xử lý. Vui lòng thử lại sau.',
+                    createdAt: new Date(),
+                    user: BOT_USER,
+                };
+                appendMessages([errorMessage]);
+            } finally {
+                setIsTyping(false);
+            }
+        },
+        [appendMessages]
+    );
 
     // ─── Xử lý gửi tin nhắn ────────────────────────────────────────────────
     const onSend = useCallback(
-        (newMessages: IChatMessage[] = []) => {
-            setMessages(prev => GiftedChat.append(prev, newMessages));
+        (text: string) => {
+            if (!text.trim()) return;
 
-            if (newMessages.length > 0) {
-                processAIResponse(newMessages[0].text);
-            }
+            const userMessage: IChatMessage = {
+                _id: `user-${Date.now()}`,
+                text: text.trim(),
+                createdAt: new Date(),
+                user: { _id: CURRENT_USER_ID },
+            };
+
+            appendMessages([userMessage]);
+            processAIResponse(text.trim());
         },
-        [processAIResponse]
+        [appendMessages, processAIResponse]
     );
 
     // ─── Xử lý Quick Reply / Suggestion ────────────────────────────────────
@@ -155,12 +170,12 @@ export const useChatbot = () => {
                 createdAt: new Date(),
                 user: { _id: CURRENT_USER_ID },
             };
-            setMessages(prev => GiftedChat.append(prev, [userMessage]));
+            appendMessages([userMessage]);
 
             // Gửi giá trị đầy đủ (có prefix) cho AI xử lý intent
             processAIResponse(text);
         },
-        [processAIResponse]
+        [appendMessages, processAIResponse]
     );
 
     // ─── Xử lý Chat History ────────────────────────────────────────────────

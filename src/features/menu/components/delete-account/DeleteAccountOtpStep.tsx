@@ -5,8 +5,6 @@ import {
     TouchableOpacity,
     Keyboard,
     TouchableWithoutFeedback,
-    Platform,
-    KeyboardAvoidingView,
     ScrollView,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
@@ -85,10 +83,7 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
     const displayPhone = phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '09xx xxx xxx';
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.container}
-        >
+        <View style={styles.container}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.innerContainer}>
                     <ScrollView
@@ -146,18 +141,18 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
                         {/* Warning Box at the bottom */}
                         <DeleteAccountWarningBox style={{ marginTop: spacing.lg }} />
                     </ScrollView>
-
-                    {/* FOOTER */}
-                    <ButtonBar
-                        mode="double"
-                        primaryTitle="Tiếp tục"
-                        secondaryTitle="Ngừng xoá tài khoản"
-                        onPrimaryPress={handleNext}
-                        onSecondaryPress={onCancel}
-                    />
                 </View>
             </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+
+            {/* FOOTER */}
+            <ButtonBar
+                mode="double"
+                primaryTitle="Tiếp tục"
+                secondaryTitle="Ngừng xoá tài khoản"
+                onPrimaryPress={handleNext}
+                onSecondaryPress={onCancel}
+            />
+        </View>
     );
 };
 

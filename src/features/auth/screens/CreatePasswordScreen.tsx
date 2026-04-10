@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, StyleSheet, Platform, ScrollView } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
 import { BackButton } from '@/shared/components/buttons/BackButton';
 import { Button } from '@/shared/components/buttons/Button';
@@ -45,11 +46,7 @@ export default function CreatePasswordScreen() {
             </View>
 
             {/* KeyboardAvoidingView bọc ScrollView */}
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-            >
+            <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
                 <ScrollView
                     style={styles.scrollView}
                     contentContainerStyle={styles.scrollContent}
