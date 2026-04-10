@@ -87,7 +87,7 @@ export function AppProviders() {
     return (
         <SafeAreaProvider>
             <GestureHandlerRootView style={styles.gestureHandler}>
-                <KeyboardProvider>
+                <KeyboardProvider navigationBarTranslucent>
                     <AntdProvider theme={antdTheme}>
                         <QueryClientProvider client={queryClient}>
                             <ErrorBoundary>
