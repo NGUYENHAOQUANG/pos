@@ -12,7 +12,7 @@ import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IHourlyForecast } from '@/features/weather/types/weather.types';
 import { getWeatherInfo } from '@/features/weather/utils/weatherCodes';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import DropIcon from '@/assets/Icon/IconWeather/Drop.svg';
 
 /* ===== Layout Constants ===== */
 const ITEM_WIDTH = 64;
@@ -23,6 +23,9 @@ const LINE_GRADIENT_ID = 'tempLineGradient';
 
 interface HourlyForecastListProps {
     readonly hourlyData: readonly IHourlyForecast[];
+    readonly conditionLabel?: string;
+    readonly tempMax?: number;
+    readonly tempMin?: number;
 }
 
 interface ITempRange {
@@ -76,7 +79,12 @@ const formatRain = (item: IHourlyForecast): string => {
     return `${pct}%`;
 };
 
-const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) => {
+const HourlyForecastList: React.FC<HourlyForecastListProps> = ({
+    hourlyData,
+    conditionLabel,
+    tempMax,
+    tempMin,
+}) => {
     const tempRange: ITempRange = useMemo(() => {
         const temps = hourlyData.map(h => h.temperature2m);
         const min = Math.min(...temps);
@@ -103,6 +111,17 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
     return (
         <View style={styles.container}>
             <View style={styles.card}>
+                {/* Text Tổng hợp */}
+                {conditionLabel && tempMax !== undefined && tempMin !== undefined && (
+                    <View style={styles.summaryContainer}>
+                        <Text style={styles.summaryText}>
+                            {conditionLabel}. Cao {Math.round(tempMax)}°C và thấp{' '}
+                            {Math.round(tempMin)}°C.
+                        </Text>
+                    </View>
+                )}
+                {conditionLabel && <View style={styles.separator} />}
+
                 {/* Scrollable content */}
                 <ScrollView
                     horizontal
@@ -125,8 +144,8 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
                                         <View style={styles.iconWrapper}>
                                             <WeatherIcon
                                                 name={weatherInfo.icon}
-                                                size={22}
-                                                color="#FFD700"
+                                                size={28}
+                                                color={colors.white}
                                             />
                                         </View>
                                         <Text style={styles.hourTemp}>
@@ -163,7 +182,7 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
                             {/* Temperature curve */}
                             <Path
                                 d={linePath}
-                                stroke="#FFD700"
+                                stroke={colors.white}
                                 strokeWidth={2.5}
                                 fill="none"
                                 strokeLinecap="round"
@@ -178,7 +197,7 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
                                     cy={point.y}
                                     r={DOT_RADIUS}
                                     fill={colors.white}
-                                    stroke="#FFD700"
+                                    stroke={colors.white}
                                     strokeWidth={1.5}
                                 />
                             ))}
@@ -188,11 +207,7 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({ hourlyData }) =
                         <View style={styles.bottomInfoRow}>
                             {hourlyData.map((item, index) => (
                                 <View key={`rain-${item.time}-${index}`} style={styles.rainColumn}>
-                                    <Ionicons
-                                        name="water"
-                                        size={10}
-                                        color="rgba(255,255,255,0.7)"
-                                    />
+                                    <DropIcon width={12} height={12} color={colors.white} />
                                     <Text style={styles.rainText}>{formatRain(item)}</Text>
                                 </View>
                             ))}
@@ -213,13 +228,35 @@ const styles = StyleSheet.create({
     },
 
     card: {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-        borderRadius: borderRadius.xl,
+        backgroundColor: colors.backgroundWeather,
+        borderRadius: borderRadius.md,
         overflow: 'hidden',
+        borderColor: 'rgba(255, 255, 255, 0.04)',
+        borderWidth: 1,
+    },
+
+    summaryContainer: {
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.sm,
+    },
+
+    summaryText: {
+        fontSize: 14,
+        color: colors.white,
+        fontWeight: '600',
+        lineHeight: 20,
+    },
+
+    separator: {
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        marginHorizontal: spacing.lg,
+        marginBottom: spacing.xs,
     },
 
     scrollContent: {
-        paddingHorizontal: spacing.sm,
+        paddingHorizontal: 16,
     },
 
     topInfoRow: {
@@ -234,9 +271,9 @@ const styles = StyleSheet.create({
     },
 
     hourText: {
-        fontSize: typography.fontSize.xs,
+        fontSize: 14,
         color: colors.white,
-        fontWeight: typography.fontWeight.medium,
+        fontWeight: '500',
     },
 
     iconWrapper: {
@@ -263,7 +300,7 @@ const styles = StyleSheet.create({
     },
 
     rainText: {
-        fontSize: 10,
-        color: 'rgba(255,255,255,0.7)',
+        fontSize: 12,
+        color: colors.white,
     },
 });
