@@ -6,9 +6,8 @@ import {
     TouchableOpacity,
     AppState,
     AppStateStatus,
-    KeyboardAvoidingView,
-    Platform,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -202,12 +201,7 @@ export default function RegisterScreen() {
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <AnimatedBackground />
-            <KeyboardAvoidingView
-                enabled={Platform.OS === 'ios'}
-                behavior="padding"
-                style={styles.keyboardInner}
-                keyboardVerticalOffset={0}
-            >
+            <KeyboardAvoidingView behavior="padding" style={styles.keyboardInner}>
                 <View style={styles.mainContentContainer}>
                     <ScrollView
                         style={styles.scrollView}

@@ -11,6 +11,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { useAppTheme } from '@/styles/themeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { Provider as AntdProvider } from '@ant-design/react-native';
 import { AppNavigator } from './navigation/AppNavigator';
 import { navigationRef } from '@/app/navigation/NavigationRef';
@@ -86,17 +87,19 @@ export function AppProviders() {
     return (
         <SafeAreaProvider>
             <GestureHandlerRootView style={styles.gestureHandler}>
-                <AntdProvider theme={antdTheme}>
-                    <QueryClientProvider client={queryClient}>
-                        <ErrorBoundary>
-                            <TabBarVisibilityProvider>
-                                <NavigationContainer ref={navigationRef} theme={AppTheme}>
-                                    {appReady ? <AppNavigator /> : null}
-                                </NavigationContainer>
-                            </TabBarVisibilityProvider>
-                        </ErrorBoundary>
-                    </QueryClientProvider>
-                </AntdProvider>
+                <KeyboardProvider navigationBarTranslucent>
+                    <AntdProvider theme={antdTheme}>
+                        <QueryClientProvider client={queryClient}>
+                            <ErrorBoundary>
+                                <TabBarVisibilityProvider>
+                                    <NavigationContainer ref={navigationRef} theme={AppTheme}>
+                                        {appReady ? <AppNavigator /> : null}
+                                    </NavigationContainer>
+                                </TabBarVisibilityProvider>
+                            </ErrorBoundary>
+                        </QueryClientProvider>
+                    </AntdProvider>
+                </KeyboardProvider>
                 {!showSplash && <BiometricLockScreen visible={isLocked} onUnlock={handleUnlock} />}
             </GestureHandlerRootView>
 

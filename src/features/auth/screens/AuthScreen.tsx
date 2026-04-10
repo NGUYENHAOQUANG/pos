@@ -1,12 +1,6 @@
 import React, { useMemo } from 'react';
-import {
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    View,
-    KeyboardAvoidingView,
-} from 'react-native';
+import { Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -49,12 +43,7 @@ export default function AuthScreen() {
                     <View style={[styles.androidStatusBar, { height: insets.top }]} />
                 )}
 
-                <KeyboardAvoidingView
-                    enabled={Platform.OS === 'ios'}
-                    behavior="padding"
-                    style={styles.keyboardInner}
-                    keyboardVerticalOffset={0}
-                >
+                <KeyboardAvoidingView behavior="padding" style={styles.keyboardInner}>
                     <View style={styles.mainContentContainer}>
                         <ScrollView
                             style={styles.scrollView}

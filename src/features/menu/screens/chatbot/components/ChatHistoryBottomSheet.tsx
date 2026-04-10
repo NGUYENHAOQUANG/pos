@@ -16,7 +16,7 @@ import { useAppTheme } from '@/styles/themeContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// ── Types ──
 export interface ChatSession {
     id: string;
     title: string;

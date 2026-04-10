@@ -3,7 +3,6 @@ import {
     View,
     StyleSheet,
     ScrollView,
-    KeyboardAvoidingView,
     Platform,
     Keyboard,
     TextInput as RNTextInput,
@@ -101,11 +100,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
 
     return (
         <View style={styles.container}>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-            >
+            <View style={{ flex: 1 }}>
                 <ScrollView
                     ref={scrollViewRef}
                     contentContainerStyle={styles.scrollContent}
@@ -225,14 +220,14 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                         </View>
                     </View>
                 </ScrollView>
-            </KeyboardAvoidingView>
 
-            {/* Footer Button */}
-            <ButtonBar
-                mode="single"
-                primaryTitle="Tiếp tục"
-                onPrimaryPress={handleSubmit(onSubmit)}
-            />
+                {/* Footer Button */}
+                <ButtonBar
+                    mode="single"
+                    primaryTitle="Tiếp tục"
+                    onPrimaryPress={handleSubmit(onSubmit)}
+                />
+            </View>
         </View>
     );
 };

@@ -7,9 +7,8 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     ScrollView,
-    KeyboardAvoidingView,
-    Platform,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { useAppTheme } from '@/styles/themeContext';
@@ -123,7 +122,7 @@ export const IngestScreen: React.FC = () => {
     return (
         <KeyboardAvoidingView
             style={[styles.container, { backgroundColor: theme.backgroundPrimary }]}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            behavior="padding"
         >
             <HeaderSection title="Ingest" showBackButton />
 
