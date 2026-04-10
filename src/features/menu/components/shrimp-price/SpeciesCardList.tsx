@@ -132,6 +132,7 @@ export const SpeciesCardList: React.FC<SpeciesCardListProps> = ({
 const styles = StyleSheet.create({
     speciesListWrapper: {
         paddingHorizontal: 16,
+        paddingTop: 3,
         paddingBottom: 24,
         gap: 16,
     },
