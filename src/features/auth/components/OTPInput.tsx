@@ -2,7 +2,8 @@ import { View, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData } fr
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
-import { colors } from '@/styles';
+import { Colors } from '@/styles/colors';
+import { useAppTheme } from '@/styles/themeContext';
 
 interface OTPInputProps {
     code: string[]; // Array of 4 characters ['1', '2', '', '']
@@ -18,6 +19,9 @@ export interface OTPInputHandle {
 
 const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
     ({ code, onCodeChanged, isError = false, length = 4 }, ref) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
         // Refs for each input
         const inputRefs = useRef<Array<React.ElementRef<typeof TextInput> | null>>([]);
 
@@ -97,7 +101,7 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
                             key={index}
                             style={[
                                 styles.otpBoxInput,
-                                { borderColor: isError ? colors.error : colors.gray[100] },
+                                { borderColor: isError ? theme.error : theme.defaultBorder },
                                 digit ? styles.otpBoxInputFilled : null,
                             ]}
                         >
@@ -116,8 +120,8 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
                                 importantForAutofill="yes"
                                 selectTextOnFocus={true}
                                 textAlign="center"
-                                cursorColor={colors.primary}
-                                selectionColor={colors.primary}
+                                cursorColor={theme.primary}
+                                selectionColor={theme.primary}
                                 underlineColorAndroid="transparent"
                             />
                             {!digit && (
@@ -133,51 +137,52 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
     }
 );
 
-const styles = StyleSheet.create({
-    boxesContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        width: '100%',
-        gap: 12,
-    },
-    otpBoxInput: {
-        width: 60,
-        height: 60,
-        borderWidth: 1,
-        borderRadius: 30,
-        fontSize: 20,
-        fontWeight: '500',
-        color: colors.text,
-        backgroundColor: colors.white,
-        padding: 0,
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        includeFontPadding: false,
-    },
-    innerInput: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        fontSize: 20,
-        fontWeight: '500',
-        color: colors.text,
-        textAlign: 'center',
-        padding: 0,
-    },
-    dashPlaceholder: {
-        position: 'absolute',
-        fontSize: 20,
-        color: colors.gray[400],
-        textAlign: 'center',
-        width: '100%',
-        lineHeight: 56,
-        zIndex: -1,
-    },
-    otpBoxInputFilled: {
-        borderColor: colors.primary,
-    },
-});
+const getStyles = (theme: Colors) =>
+    StyleSheet.create({
+        boxesContainer: {
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            width: '100%',
+            gap: 12,
+        },
+        otpBoxInput: {
+            width: 60,
+            height: 60,
+            borderWidth: 1,
+            borderRadius: 30,
+            fontSize: 20,
+            fontWeight: '500',
+            color: theme.text,
+            backgroundColor: theme.isDark ? theme.backgroundSecondary : theme.background,
+            padding: 0,
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            includeFontPadding: false,
+        },
+        innerInput: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            fontSize: 20,
+            fontWeight: '500',
+            color: theme.text,
+            textAlign: 'center',
+            padding: 0,
+        },
+        dashPlaceholder: {
+            position: 'absolute',
+            fontSize: 20,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            width: '100%',
+            lineHeight: 56,
+            zIndex: -1,
+        },
+        otpBoxInputFilled: {
+            borderColor: theme.primary,
+        },
+    });
 
 export default OTPInput;

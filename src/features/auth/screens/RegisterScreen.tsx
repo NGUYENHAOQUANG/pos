@@ -24,7 +24,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import OTPInput, { OTPInputHandle } from '../components/OTPInput';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
-import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
+import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
 import { authApi } from '@/features/auth/api/authApi';
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
@@ -201,7 +201,7 @@ export default function RegisterScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            <FloatingBubblesBackground />
+            <AnimatedBackground />
             <KeyboardAvoidingView
                 enabled={Platform.OS === 'ios'}
                 behavior="padding"

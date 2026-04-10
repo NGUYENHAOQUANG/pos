@@ -11,6 +11,9 @@ export type LockMethod = 'none' | 'biometric' | 'pin' | 'both';
 
 export type ThemeMode = 'light' | 'dark';
 
+/** Animated background type for auth/splash screens */
+export type AnimatedBgType = 'bubbles-shader' | 'gradient-shader' | 'bubbles-classic';
+
 interface SettingsState {
     soundEnabled: boolean;
     hapticEnabled: boolean;
@@ -19,6 +22,8 @@ interface SettingsState {
     tabSwipeEnabled: boolean;
     logoLoadingEnabled: boolean;
     liquidGlassEnabled: boolean;
+    animatedBgEnabled: boolean;
+    animatedBgType: AnimatedBgType;
     weatherEnabled: boolean;
     chatbotEnabled: boolean;
     lockMethod: LockMethod;
@@ -37,6 +42,8 @@ interface SettingsActions {
     setTabSwipe: (enabled: boolean) => void;
     toggleLogoLoading: () => void;
     toggleLiquidGlass: () => void;
+    toggleAnimatedBg: () => void;
+    setAnimatedBgType: (type: AnimatedBgType) => void;
     toggleWeather: () => void;
     toggleChatbot: () => void;
     setLockMethod: (method: LockMethod) => void;
@@ -59,6 +66,8 @@ export const useSettingsStore = create<SettingsStore>()(
             tabSwipeEnabled: true,
             logoLoadingEnabled: true,
             liquidGlassEnabled: true,
+            animatedBgEnabled: true,
+            animatedBgType: 'bubbles-shader' as AnimatedBgType,
             weatherEnabled: true,
             chatbotEnabled: true,
             lockMethod: 'none' as LockMethod,
@@ -109,6 +118,16 @@ export const useSettingsStore = create<SettingsStore>()(
             toggleLiquidGlass: () =>
                 set(state => {
                     state.liquidGlassEnabled = !state.liquidGlassEnabled;
+                }),
+
+            toggleAnimatedBg: () =>
+                set(state => {
+                    state.animatedBgEnabled = !state.animatedBgEnabled;
+                }),
+
+            setAnimatedBgType: (type: AnimatedBgType) =>
+                set(state => {
+                    state.animatedBgType = type;
                 }),
 
             toggleWeather: () =>

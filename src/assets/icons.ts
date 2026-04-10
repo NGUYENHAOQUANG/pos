@@ -34,7 +34,6 @@ export { default as IconTransferPond } from '@/assets/Icon/IconFarm/TransferPond
 export { default as IconCleaningThePond } from '@/assets/Icon/IconFarm/CleaningThePond.svg';
 export { default as IconDryingThePond } from '@/assets/Icon/IconFarm/DryingThePond.svg';
 export { default as IconHarvest } from '@/assets/Icon/IconFarm/Harvest.svg';
-export { default as IconPond } from '@/assets/Icon/IconFarm/Pond.svg';
 export { default as IconError } from '@/assets/Icon/IconFarm/IconError.svg';
 export { default as IconFarmVector } from '@/assets/Icon/IconFarm/Vector.svg';
 export { default as IconFilter } from '@/assets/Icon/Filter.svg';
@@ -43,7 +42,6 @@ export { default as IconEdit } from '@/assets/Icon/IconFarm/Edit.svg';
 export { default as IconAICheck } from '@/assets/Icon/IconFarm/AIcheck.svg';
 export { default as IconAICheckOrange } from '@/assets/Icon/IconFarm/AIcheck-orange.svg';
 export { default as IconCamera } from '@/assets/Icon/IconFarm/camera.svg';
-
 export { default as IconCalender } from '@/assets/Icon/Calender.svg';
 export { default as IconCheckActive } from '@/assets/Icon/CheckActive.svg';
 export { default as IconCheckUnactive } from '@/assets/Icon/CheckUnactive.svg';

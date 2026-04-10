@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Canvas, Fill, Shader, Skia } from '@shopify/react-native-skia';
 import {
@@ -180,42 +180,6 @@ const parseTimeToHours = (timeStr: string): number => {
     return h + m / 60;
 };
 
-/**
- * Calculate sun position on a parabolic arc across the sky.
- *
- * Returns { x, y } normalized to [0, 1]:
- * - x: 0.12 (east/left) at sunrise → 0.5 at solar noon → 0.88 (west/right) at sunset
- * - y: ~0.40 at horizon → ~0.15 at zenith
- */
-const calculateSunPosition = (
-    sunrise: string,
-    sunset: string,
-    overrideHour?: number
-): { x: number; y: number } => {
-    const sunriseH = parseTimeToHours(sunrise);
-    const sunsetH = parseTimeToHours(sunset);
-    const dayLength = sunsetH - sunriseH;
-
-    const currentHours = overrideHour ?? new Date().getHours() + new Date().getMinutes() / 60;
-    if (dayLength <= 0) {
-        return { x: 0.5, y: 0.18 };
-    }
-    // Progress through the day: 0 = sunrise, 1 = sunset
-    const progress = Math.max(0, Math.min(1, (currentHours - sunriseH) / dayLength));
-
-    // Horizontal: left (0.12) at sunrise → right (0.88) at sunset
-    const x = 0.12 + progress * 0.76;
-
-    // Vertical: parabolic arc (y=0 is top, y=1 is bottom)
-    const zenithY = 0.08;
-    const horizonY = 0.3;
-    const parabola = Math.pow(2 * progress - 1, 2);
-    const y = zenithY + (horizonY - zenithY) * parabola;
-
-    // console.log('[SunShader] Progress:', progress.toFixed(3), '→ pos:', { x: x.toFixed(3), y: y.toFixed(3) });
-    return { x, y };
-};
-
 // ── DEMO MODE: set to false for real-time sun tracking ──
 const DEMO_MODE = false;
 const DEMO_INTERVAL_MS = 2000; // Advance 1 hour every 2 seconds
@@ -261,20 +225,43 @@ const SunShaderEffect: React.FC<SunShaderEffectProps> = ({
         return () => clearInterval(interval);
     }, [sunriseH, sunsetH]);
 
-    // Calculate sun position (demo or real)
-    const sunPos = useMemo(
-        () => calculateSunPosition(sunrise, sunset, DEMO_MODE ? demoHour : undefined),
-        [sunrise, sunset, demoHour]
-    );
+    // Calculate the real-time progress (0 = sunrise, 1 = sunset)
+    const realProgressValue = useMemo(() => {
+        const dayLength = sunsetH - sunriseH;
+        if (dayLength <= 0) return 0.5;
+        const now = DEMO_MODE ? demoHour : new Date().getHours() + new Date().getMinutes() / 60;
+        return Math.max(0, Math.min(1, (now - sunriseH) / dayLength));
+    }, [sunriseH, sunsetH, demoHour]);
 
-    // Smooth animated position using Reanimated
-    const sunPosX = useSharedValue(sunPos.x);
-    const sunPosY = useSharedValue(sunPos.y);
+    // Smooth shared value for sun progress (prevents jerky movement)
+    const realProgress = useSharedValue(realProgressValue);
+    useEffect(() => {
+        realProgress.value = withTiming(realProgressValue, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+        });
+    }, [realProgressValue, realProgress]);
+
+    // Greeting animation: sun travels along its parabolic arc from horizon
+    const animProgress = useSharedValue(0); // 0 = horizon start, 1 = actual position
+    const fadeIn = useSharedValue(0); // 0 = transparent, 1 = fully visible
+    const hasAnimated = useRef(false);
 
     useEffect(() => {
-        sunPosX.value = withTiming(sunPos.x, { duration: 800, easing: Easing.out(Easing.ease) });
-        sunPosY.value = withTiming(sunPos.y, { duration: 800, easing: Easing.out(Easing.ease) });
-    }, [sunPos.x, sunPos.y, sunPosX, sunPosY]);
+        if (!hasAnimated.current) {
+            hasAnimated.current = true;
+            // Animate from arc start (horizon) to current position along the parabolic path
+            animProgress.value = withTiming(1, {
+                duration: 1800,
+                easing: Easing.out(Easing.cubic),
+            });
+            // Fade in brightness gradually to prevent flash
+            fadeIn.value = withTiming(1, {
+                duration: 1500,
+                easing: Easing.out(Easing.quad),
+            });
+        }
+    }, [animProgress, fadeIn]);
 
     useEffect(() => {
         time.value = withRepeat(
@@ -284,25 +271,34 @@ const SunShaderEffect: React.FC<SunShaderEffectProps> = ({
         );
     }, [time]);
 
+    // Compute sun position along the parabolic arc using animated progress
     const uniforms = useDerivedValue(() => {
+        // Interpolate progress from 0 (horizon) to realProgress (current position)
+        const prog = animProgress.value * realProgress.value;
+
+        // Same parabolic arc formula
+        const x = 0.12 + prog * 0.76;
+        const zenithY = 0.08;
+        const horizonY = 0.3;
+        const parabola = Math.pow(2 * prog - 1, 2);
+        const y = zenithY + (horizonY - zenithY) * parabola;
+
         return {
             time: time.value,
-            resolution: [width, effectiveHeight],
-            sunCenter: [sunPosX.value, sunPosY.value],
+            resolution: [Math.max(1, width), Math.max(1, effectiveHeight)],
+            sunCenter: [x, y],
             sunRadius: radius,
         };
     }, [width, effectiveHeight, radius]);
 
     // Parallax: sun moves up slower than scroll
     const animatedStyle = useAnimatedStyle(() => {
-        if (!scrollY) {
-            return {};
-        }
-        const translateY = interpolate(scrollY.value, [0, 300], [0, -80], 'clamp');
-        const opacity = interpolate(scrollY.value, [0, 200], [1, 0], 'clamp');
+        // Combine fade-in with scroll opacity
+        const scrollOpacity = scrollY ? interpolate(scrollY.value, [0, 200], [1, 0], 'clamp') : 1;
+        const translateY = scrollY ? interpolate(scrollY.value, [0, 300], [0, -80], 'clamp') : 0;
         return {
             transform: [{ translateY }],
-            opacity,
+            opacity: fadeIn.value * scrollOpacity,
         };
     });
 
@@ -310,8 +306,6 @@ const SunShaderEffect: React.FC<SunShaderEffectProps> = ({
         console.error('[SunShader] Shader is null, not rendering');
         return null;
     }
-
-    console.log('[SunShader] Rendering with pos:', sunPos, 'canvas:', width, 'x', effectiveHeight);
 
     return (
         <Animated.View

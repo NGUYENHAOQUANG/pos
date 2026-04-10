@@ -42,7 +42,7 @@ export const cameraApi = {
     },
 
     /** Get stream URL for a specific camera by serial number */
-    getStream: (sn: string) => {
-        return apiClient.get<CameraStreamResponse>(API_ENDPOINTS.CAMERA.STREAM(sn));
+    getStream: (sn: string, isHd: boolean) => {
+        return apiClient.get<CameraStreamResponse>(API_ENDPOINTS.CAMERA.STREAM(sn, isHd));
     },
 };

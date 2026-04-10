@@ -22,7 +22,7 @@ export const API_ENDPOINTS = {
     },
     CAMERA: {
         LIST: '/camera',
-        STREAM: (sn: string) => `/camera/${sn}/stream`,
+        STREAM: (sn: string, isHd: boolean) => `/camera/${sn}/stream?isHd=${isHd}`,
     },
     DEVICE: {
         LIST: '/device',
