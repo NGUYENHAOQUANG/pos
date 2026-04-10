@@ -23,7 +23,7 @@ import GearIcon from '@/assets/Icon/IconMenu/Gear.svg';
 
 import GavelIcon from '@/assets/Icon/IconMenu/Gavel.svg';
 import ArticleIcon from '@/assets/Icon/IconMenu/Article.svg';
-import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
+import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -223,7 +223,7 @@ export const MenuScreens: React.FC = () => {
                                 activeOpacity={0.8}
                             >
                                 <View style={styles.chatbotIconWrapper}>
-                                    <ChatBotIcon width={32} height={32} />
+                                    <BotIcon width={32} height={32} />
                                 </View>
                                 <View style={styles.chatbotInfo}>
                                     <Text style={styles.chatbotTitle}>Mebieco AI Chatbot</Text>

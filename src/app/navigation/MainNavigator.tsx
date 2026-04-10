@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createNativeBottomTabNavigator } from '@react-navigation/bottom-tabs/unstable';
-import { Route, useNavigation } from '@react-navigation/native';
+import { Route } from '@react-navigation/native';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
@@ -31,10 +31,6 @@ import { DeviceControlScreens } from '@/features/control/screens/DeviceControlSc
 import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens';
 import { MaterialScreen } from '@/features/material/screens/material/MaterialScreen';
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
-
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppStackParamList } from '@/app/navigation/AppStack';
-import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
 
 // Native Stack for Control Tab
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -433,7 +429,6 @@ export function MainNavigator() {
         return (
             <BottomBarProvider isNativeTab>
                 <NativeTabNavigator />
-                <ChatbotFAB />
             </BottomBarProvider>
         );
     }
@@ -477,29 +472,10 @@ export function MainNavigator() {
                         ))}
                     </StandardTab.Navigator>
                 )}
-                <ChatbotFAB />
             </View>
         </BottomBarProvider>
     );
 }
-
-// ════════════════════════════════════════════════════════════════════
-// Chatbot Floating Action Button
-// ════════════════════════════════════════════════════════════════════
-const ChatbotFAB = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-    const insets = useSafeAreaInsets();
-
-    return (
-        <TouchableOpacity
-            style={[styles.fab, { bottom: 80 + Math.max(insets.bottom, 16) }]}
-            onPress={() => navigation.navigate('Chatbot')}
-            activeOpacity={0.8}
-        >
-            <ChatBotIcon width={32} height={32} />
-        </TouchableOpacity>
-    );
-};
 
 // ════════════════════════════════════════════════════════════════════
 // Styles (used by fallback / classic tab bar)
@@ -507,18 +483,6 @@ const ChatbotFAB = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    fab: {
-        position: 'absolute',
-        right: 20,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.gray[200],
     },
 
     fallbackContainer: {
