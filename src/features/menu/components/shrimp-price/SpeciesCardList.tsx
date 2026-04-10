@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     speciesListWrapper: {
         paddingHorizontal: 16,
         paddingTop: 3,
-        paddingBottom: 24,
+        paddingBottom: 16,
         gap: 16,
     },
     speciesCardContainer: {

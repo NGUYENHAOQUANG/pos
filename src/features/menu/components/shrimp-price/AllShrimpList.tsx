@@ -81,7 +81,6 @@ export const AllShrimpList: React.FC<AllShrimpListProps> = ({ shrimpPrices, them
         <View
             style={[
                 styles.sectionContainer,
-                styles.sectionContainerExtraTop,
                 { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
             ]}
         >
@@ -100,11 +99,8 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
         borderRadius: 20,
         padding: spacing.md,
-        marginHorizontal: spacing.sm + 4, // equivalent to 12
+        marginHorizontal: spacing.md,
         borderWidth: 1,
-    },
-    sectionContainerExtraTop: {
-        marginTop: spacing.sm,
     },
     sectionHeader: {
         flexDirection: 'row',
