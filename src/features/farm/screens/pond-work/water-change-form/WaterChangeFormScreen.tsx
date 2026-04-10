@@ -28,8 +28,7 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-// import { useFarmStore } from '@/features/farm/store/farmStore'; // Removed
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -49,10 +48,10 @@ import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
 import { useDocumentUrls } from '@/shared/hooks/useDocumentUrls';
 import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupply'>;
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'WaterChangeFormScreen'>;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
-export const WaterSupplyScreen = () => {
+export const WaterChangeFormScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { setTabBarVisible } = useTabBarVisibility();

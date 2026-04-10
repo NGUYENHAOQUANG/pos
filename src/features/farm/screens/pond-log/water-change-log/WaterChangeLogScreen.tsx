@@ -51,7 +51,7 @@ export const WaterSupplyLogScreen = () => {
         setEndDate,
         metaConverter: (item: JobExecution, meta: WaterSupplyMeta) =>
             convertWaterSupplyMetaToActivityData(item, meta),
-        editRoute: 'WaterSupply',
+        editRoute: 'WaterChangeFormScreen',
         getEditParams: (pondData, item) => ({ pond: pondData, item }),
         externalData: jobs, // Use real API data
     };
@@ -60,7 +60,7 @@ export const WaterSupplyLogScreen = () => {
 
     const handleCreateNew = () => {
         if (pond) {
-            navigation.navigate('WaterSupply', { pond });
+            navigation.navigate('WaterChangeFormScreen', { pond });
         }
     };
 

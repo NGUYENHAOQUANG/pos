@@ -38,7 +38,7 @@ import {
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { useSyncDocuments } from '@/shared/hooks/useDocumentUpload';
 
-interface Props {
+interface ShrimpHealthFormProps {
     isEditMode: boolean;
     initialData: ShrimpHealthFormState;
     documentIds: string[];
@@ -58,7 +58,7 @@ interface Props {
     ) => void;
 }
 
-export const ShrimpInspectionForm: React.FC<Props> = ({
+export const ShrimpHealthForm: React.FC<ShrimpHealthFormProps> = ({
     isEditMode,
     initialData,
     documentIds,

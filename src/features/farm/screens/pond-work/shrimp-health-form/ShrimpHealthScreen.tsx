@@ -3,7 +3,7 @@ import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { ShrimpInspectionForm } from './ShrimpInspectionForm';
+import { ShrimpHealthForm } from './ShrimpHealthForm';
 import { AIHealthCheckResult } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 import { useAppTheme } from '@/styles/themeContext';
 import { View } from 'react-native';
@@ -208,7 +208,7 @@ export const ShrimpHealthScreen: React.FC = () => {
     return (
         <View style={{ flex: 1, backgroundColor: theme.backgroundPrimary }}>
             {initialData && (
-                <ShrimpInspectionForm
+                <ShrimpHealthForm
                     isEditMode={isEditMode}
                     initialData={initialData}
                     documentIds={documentIds}

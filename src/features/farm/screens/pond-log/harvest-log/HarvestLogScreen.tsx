@@ -43,7 +43,7 @@ export const HarvestLogScreen: React.FC = () => {
         setEndDate,
         metaConverter: (item: JobExecution, meta: HarvestMeta) =>
             convertHarvestMetaToActivityData(item, meta),
-        editRoute: 'AddHarvestScreen',
+        editRoute: 'HarvestFormScreen',
         getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
     };
 
@@ -51,7 +51,7 @@ export const HarvestLogScreen: React.FC = () => {
 
     const handleNavigateToCreate = () => {
         if (pond) {
-            navigation.navigate('AddHarvestScreen', { pond });
+            navigation.navigate('HarvestFormScreen', { pond });
         }
     };
 

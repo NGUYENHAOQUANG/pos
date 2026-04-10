@@ -25,7 +25,7 @@ import {
 import { IParameterLimits } from '@/features/farm/types/envMeasurement.types';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
-interface AddEnvironmentFormProps {
+interface EnvironmentFormProps {
     isEditMode: boolean;
     isLoading: boolean;
     isSubmitting: boolean;
@@ -55,7 +55,7 @@ interface AddEnvironmentFormProps {
     onCancelDelete: () => void;
 }
 
-export const AddEnvironmentForm: React.FC<AddEnvironmentFormProps> = ({
+export const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
     isEditMode,
     isLoading,
     isSubmitting,

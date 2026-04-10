@@ -20,7 +20,7 @@ import Toast from 'react-native-toast-message';
 import {
     StockTransferForm,
     StockTransferFormData,
-} from '@/features/farm/screens/pondwork/stock-transfer/StockTransferForm';
+} from '@/features/farm/screens/pond-work/stock-transfer-form/StockTransferForm';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'StockTransferFormScreen'>;
