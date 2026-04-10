@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { colors, Colors } from '@/styles/colors';
@@ -21,6 +22,7 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     const theme = useAppTheme();
     const themedStyles = getStyles(theme);
     const isOnline = camera.status === 'On';
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
 
     const getStatusProps = () => {
         switch (camera.status) {
@@ -38,6 +40,41 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     };
 
     const statusProps = getStatusProps();
+    const hasSnapshot = !!camera.snapshotUrl;
+
+    // Show skeleton while snapshot is loading
+    if (hasSnapshot && !isImageLoaded) {
+        return (
+            <View style={styles.container}>
+                {/* Skeleton placeholder while image loads */}
+                <Skeleton width={CARD_WIDTH} height={CARD_HEIGHT} borderRadius={borderRadius.md} />
+
+                {/* Badge skeletons at bottom-left */}
+                <View style={styles.placeholderBadgesRow}>
+                    <Skeleton
+                        width={120}
+                        height={28}
+                        borderRadius={20}
+                        backgroundColor={theme.gray[300]}
+                    />
+                    <Skeleton
+                        width={150}
+                        height={28}
+                        borderRadius={20}
+                        backgroundColor={theme.gray[300]}
+                    />
+                </View>
+
+                {/* Hidden image to trigger onLoad */}
+                <Image
+                    source={{ uri: camera.snapshotUrl! }}
+                    style={styles.hiddenImage}
+                    onLoad={() => setIsImageLoaded(true)}
+                    onError={() => setIsImageLoaded(true)}
+                />
+            </View>
+        );
+    }
 
     return (
         <TouchableOpacity
@@ -46,14 +83,25 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             onPress={() => onPress(camera)}
             style={styles.container}
         >
-            {/* Placeholder background with VideoPlayer SVG */}
+            {/* Snapshot preview or placeholder background */}
             <View style={themedStyles.placeholderBg}>
-                <VideoPlayerBg
-                    width={CARD_WIDTH}
-                    height={CARD_HEIGHT}
-                    preserveAspectRatio="xMidYMid slice"
-                    color={theme.isDark ? theme.border : colors.gray[300]}
-                />
+                {hasSnapshot ? (
+                    // Snapshot image from server
+                    <Image
+                        source={{ uri: camera.snapshotUrl! }}
+                        style={styles.snapshotImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    // Fallback placeholder SVG (no snapshot available)
+                    <VideoPlayerBg
+                        width={CARD_WIDTH}
+                        height={CARD_HEIGHT}
+                        preserveAspectRatio="xMidYMid slice"
+                        color={theme.isDark ? theme.border : colors.gray[300]}
+                    />
+                )}
+
                 {/* Camera code + camera name badges */}
                 <View style={styles.placeholderBadgesRow}>
                     <View style={styles.placeholderBadge}>
@@ -83,6 +131,15 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginBottom: spacing.sm,
         alignSelf: 'center',
+    },
+    snapshotImage: {
+        width: '100%',
+        height: '100%',
+    },
+    hiddenImage: {
+        width: 0,
+        height: 0,
+        position: 'absolute',
     },
     placeholderBadgesRow: {
         position: 'absolute',

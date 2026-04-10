@@ -63,7 +63,13 @@ export function RadioButton<T = string | number | boolean>({
     const styles = getStyles(theme);
 
     return (
-        <View style={[styles.container, { flexDirection: direction }, containerStyle]}>
+        <View
+            style={[
+                styles.container,
+                direction === 'column' && styles.containerColumn,
+                containerStyle,
+            ]}
+        >
             {options.map((option, index) => {
                 const isSelected = value === option.value;
                 const isDisabled = disabled || option.disabled;
@@ -98,7 +104,7 @@ export function RadioButton<T = string | number | boolean>({
                                 <CheckboxIcon width={24} height={24} color={theme.defaultBorder} />
                             )}
                         </View>
-                        <View style={styles.textContainer}>
+                        <View style={direction === 'column' ? styles.textContainer : undefined}>
                             <Text
                                 style={[
                                     styles.radioLabel,
@@ -133,7 +139,11 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             flexWrap: 'wrap',
-            rowGap: spacing.sm,
+            gap: spacing.sm,
+        },
+        containerColumn: {
+            flexDirection: 'column',
+            alignItems: 'stretch',
         },
         radioItem: {
             flexDirection: 'row',

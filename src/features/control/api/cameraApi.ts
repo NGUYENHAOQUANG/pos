@@ -6,12 +6,16 @@ import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
 /** Single camera item from GET /camera */
 export interface CameraItem {
+    id: string;
     deviceSn: string;
     name: string;
     status: string;
     ipAddress: string;
     lanIpAddress: string | null;
+    /** Snapshot image URL (webp) for preview thumbnail */
+    snapshotUrl: string | null;
     modelCode: string;
+    streamUrl: string | null;
 }
 
 /** Camera stream data from GET /camera/{sn}/stream */
