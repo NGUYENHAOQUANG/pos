@@ -10,7 +10,7 @@ import Svg, {
 import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { IHourlyForecast } from '@/features/weather/types/weather.types';
-import { getWeatherInfo } from '@/features/weather/utils/weatherCodes';
+import { getWeatherIconKey } from '@/features/weather/utils/weatherCodes';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
 import DropIcon from '@/assets/Icon/IconWeather/Drop.svg';
 
@@ -132,7 +132,6 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({
                         {/* Row 1: Time, Icon, Temp */}
                         <View style={styles.topInfoRow}>
                             {hourlyData.map((item, index) => {
-                                const weatherInfo = getWeatherInfo(item.weatherCode);
                                 return (
                                     <View
                                         key={`info-${item.time}-${index}`}
@@ -143,7 +142,10 @@ const HourlyForecastList: React.FC<HourlyForecastListProps> = ({
                                         </Text>
                                         <View style={styles.iconWrapper}>
                                             <WeatherIcon
-                                                name={weatherInfo.icon}
+                                                name={getWeatherIconKey(
+                                                    item.weatherCode,
+                                                    item.isDay === 1
+                                                )}
                                                 size={28}
                                                 color={colors.white}
                                             />

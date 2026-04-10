@@ -2,18 +2,13 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { Button } from '@/shared/components';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-
 import { borderRadius, spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { useNavigation } from '@react-navigation/native';
 import { AuthStackNavigationProp } from '@/app/navigation/types';
-
-// ─── SVG Icons ───────────────────────────────────────────────────────────────
-
 import CheckCircleGreenIcon from '@/assets/Icon/IconPolicy/CheckCircleGreen.svg';
 import DatabaseIcon from '@/assets/Icon/IconPolicy/Database.svg';
 import ProhibitIcon from '@/assets/Icon/IconPolicy/Prohibit.svg';
@@ -25,16 +20,12 @@ import CaretUpIcon from '@/assets/Icon/IconPolicy/CaretUp.svg';
 import FilePdfIcon from '@/assets/Icon/IconPolicy/FilePdf.svg';
 import DownloadIcon from '@/assets/Icon/IconPolicy/Download.svg';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 interface PolicySection {
     id: string;
     title: string;
     icon: React.FC<{ width: number; height: number; color?: string }>;
     content: string;
 }
-
-// ─── Data ────────────────────────────────────────────────────────────────────
 
 const POLICY_SECTIONS: PolicySection[] = [
     {
@@ -81,8 +72,6 @@ const POLICY_SECTIONS: PolicySection[] = [
     },
 ];
 
-// ─── Accordion Item Component ────────────────────────────────────────────────
-
 interface AccordionItemProps {
     section: PolicySection;
     isExpanded: boolean;
@@ -119,8 +108,6 @@ const AccordionItem: React.FC<AccordionItemProps> = React.memo(
         );
     }
 );
-
-// ─── Main Screen ─────────────────────────────────────────────────────────────
 
 export default function DataPolicyScreen() {
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['1', '2', '3']));

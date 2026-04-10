@@ -36,6 +36,8 @@ import { MoonPhaseCard } from '@/features/weather/components/MoonPhaseCard';
 import AnimatedSun from '@/features/weather/animation/AnimatedSun';
 import { RainShaderBackground } from '@/features/weather/components/RainShaderBackground';
 import SunShaderEffect from '@/features/weather/components/SunShaderEffect';
+import MoonShaderEffect from '@/features/weather/components/MoonShaderEffect';
+import CloudShaderEffect from '@/features/weather/components/CloudShaderEffect';
 
 /**
  * Get dynamic background image source based on weather code and day/night
@@ -204,29 +206,24 @@ const WeatherScreen: React.FC = () => {
         );
     }
 
+    // DEBUG: Force night mode for testing moon shader. Set to false when done.
+    const DEBUG_FORCE_NIGHT = false;
+    const isDay = DEBUG_FORCE_NIGHT ? false : weatherData.current.isDay === 1;
+
     const weatherInfo = getWeatherInfo(weatherData.current.weatherCode);
-    const weatherIconKey = getWeatherIconKey(
-        weatherData.current.weatherCode,
-        weatherData.current.isDay === 1
-    );
+    const weatherIconKey = getWeatherIconKey(weatherData.current.weatherCode, isDay);
     const todayForecast = weatherData.daily[0];
 
     return (
         <View style={styles.flex1}>
             <Animated.Image
-                source={getBackgroundImageSource(
-                    weatherData.current.weatherCode,
-                    weatherData.current.isDay === 1
-                )}
+                source={getBackgroundImageSource(weatherData.current.weatherCode, isDay)}
                 style={[styles.bgImage, animatedBgStyle]}
             />
             {/* Lớp nền mờ thay thế dần lớp nền rõ */}
             <Animated.View style={blurLayerStyle} pointerEvents="none">
                 <Animated.Image
-                    source={getBackgroundImageSource(
-                        weatherData.current.weatherCode,
-                        weatherData.current.isDay === 1
-                    )}
+                    source={getBackgroundImageSource(weatherData.current.weatherCode, isDay)}
                     style={[styles.bgImage, animatedBgStyle]}
                     blurRadius={15}
                 />
@@ -237,16 +234,30 @@ const WeatherScreen: React.FC = () => {
             )}
 
             {/* Sun shader effect for clear/partly cloudy daytime (codes 0, 1, 2) */}
-            {weatherData.current.isDay === 1 &&
-                [0, 1, 2].includes(weatherData.current.weatherCode) && (
-                    <SunShaderEffect
-                        scrollY={scrollY}
-                        sunrise={todayForecast?.sunrise}
-                        sunset={todayForecast?.sunset}
-                    />
-                )}
+            {isDay && [0, 1, 2].includes(weatherData.current.weatherCode) && (
+                <SunShaderEffect
+                    scrollY={scrollY}
+                    sunrise={todayForecast?.sunrise}
+                    sunset={todayForecast?.sunset}
+                />
+            )}
 
-            {/* Lớp màu đen mờ dần để tăng độ đọc cho thẻ thời tiết */}
+            {/* Moon shader effect for clear/partly cloudy nighttime */}
+            {!isDay && [0, 1, 2, 3].includes(weatherData.current.weatherCode) && (
+                <MoonShaderEffect
+                    scrollY={scrollY}
+                    sunset={todayForecast?.sunset}
+                    sunrise={todayForecast?.sunrise}
+                />
+            )}
+
+            {/* Cloud shader effect for volumetric drifting clouds */}
+            <CloudShaderEffect
+                weatherCode={weatherData.current.weatherCode}
+                isDay={isDay}
+                scrollY={scrollY}
+            />
+
             <Animated.View style={overlayStyle} pointerEvents="none" />
 
             <HeaderSection
@@ -401,7 +412,6 @@ const WeatherScreen: React.FC = () => {
 
 export default React.memo(WeatherScreen);
 
-/* ===== STYLES ===== */
 const styles = StyleSheet.create({
     flex1: {
         flex: 1,

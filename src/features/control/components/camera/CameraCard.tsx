@@ -20,7 +20,24 @@ interface CameraCardProps {
 export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     const theme = useAppTheme();
     const themedStyles = getStyles(theme);
-    const isOnline = camera.status === 'Online';
+    const isOnline = camera.status === 'On';
+
+    const getStatusProps = () => {
+        switch (camera.status) {
+            case 'On':
+                return { text: 'Trực tuyến', dotStyle: themedStyles.onlineDot };
+            case 'Off':
+                return { text: 'Offline', dotStyle: themedStyles.offlineDot };
+            case 'Fault':
+                return { text: 'Kết nối thất bại', dotStyle: themedStyles.faultDot };
+            case 'Connecting':
+                return { text: 'Đang kết nối', dotStyle: themedStyles.connectingDot };
+            default:
+                return { text: camera.status || 'Offline', dotStyle: themedStyles.offlineDot };
+        }
+    };
+
+    const statusProps = getStatusProps();
 
     return (
         <TouchableOpacity
@@ -50,13 +67,8 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
 
             {/* Online/Offline indicator */}
             <View style={[styles.statusBadge, styles.overlayBadge]}>
-                <View
-                    style={[
-                        styles.statusDot,
-                        isOnline ? themedStyles.onlineDot : themedStyles.offlineDot,
-                    ]}
-                />
-                <Text style={styles.statusText}>{isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}</Text>
+                <View style={[styles.statusDot, statusProps.dotStyle]} />
+                <Text style={styles.statusText}>{statusProps.text}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -130,5 +142,11 @@ const getStyles = (theme: Colors) =>
         },
         offlineDot: {
             backgroundColor: theme.red[500],
+        },
+        faultDot: {
+            backgroundColor: theme.orange[500],
+        },
+        connectingDot: {
+            backgroundColor: theme.blue[400],
         },
     });

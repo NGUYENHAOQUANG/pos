@@ -9,6 +9,7 @@ import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
 
 export interface RadioOption<T = string | number | boolean> {
     label: string;
+    description?: string;
     value: T;
     disabled?: boolean;
 }
@@ -28,8 +29,12 @@ export interface RadioButtonProps<T = string | number | boolean> {
     itemStyle?: ViewStyle;
     /** Custom label styles */
     labelStyle?: TextStyle;
+    /** Custom description styles */
+    descriptionStyle?: TextStyle;
     /** Gap between radio items */
     gap?: number;
+    /** Layout direction of the radio buttons */
+    direction?: 'row' | 'column';
 }
 
 /**
@@ -44,7 +49,9 @@ export function RadioButton<T = string | number | boolean>({
     containerStyle,
     itemStyle,
     labelStyle,
+    descriptionStyle,
     gap = spacing.lg,
+    direction = 'row',
 }: RadioButtonProps<T>) {
     const handlePress = (optionValue: T) => {
         if (disabled) return;
@@ -56,7 +63,7 @@ export function RadioButton<T = string | number | boolean>({
     const styles = getStyles(theme);
 
     return (
-        <View style={[styles.container, containerStyle]}>
+        <View style={[styles.container, { flexDirection: direction }, containerStyle]}>
             {options.map((option, index) => {
                 const isSelected = value === option.value;
                 const isDisabled = disabled || option.disabled;
@@ -66,7 +73,12 @@ export function RadioButton<T = string | number | boolean>({
                         key={index}
                         style={[
                             styles.radioItem,
-                            { marginRight: index < options.length - 1 ? gap : 0 },
+                            {
+                                marginRight:
+                                    direction === 'row' && index < options.length - 1 ? gap : 0,
+                                marginBottom:
+                                    direction === 'column' && index < options.length - 1 ? gap : 0,
+                            },
                             itemStyle,
                         ]}
                         onPress={() => handlePress(option.value)}
@@ -86,15 +98,28 @@ export function RadioButton<T = string | number | boolean>({
                                 <CheckboxIcon width={24} height={24} color={theme.defaultBorder} />
                             )}
                         </View>
-                        <Text
-                            style={[
-                                styles.radioLabel,
-                                isDisabled && styles.radioLabelDisabled,
-                                labelStyle,
-                            ]}
-                        >
-                            {option.label}
-                        </Text>
+                        <View style={styles.textContainer}>
+                            <Text
+                                style={[
+                                    styles.radioLabel,
+                                    isDisabled && styles.radioLabelDisabled,
+                                    labelStyle,
+                                ]}
+                            >
+                                {option.label}
+                            </Text>
+                            {option.description && (
+                                <Text
+                                    style={[
+                                        styles.radioDesc,
+                                        isDisabled && styles.radioLabelDisabled,
+                                        descriptionStyle,
+                                    ]}
+                                >
+                                    {option.description}
+                                </Text>
+                            )}
+                        </View>
                     </TouchableOpacity>
                 );
             })}
@@ -112,7 +137,7 @@ const getStyles = (theme: Colors) =>
         },
         radioItem: {
             flexDirection: 'row',
-            alignItems: 'center',
+            alignItems: 'flex-start',
         },
         radioIconWrap: {
             width: 20,
@@ -120,6 +145,7 @@ const getStyles = (theme: Colors) =>
             justifyContent: 'center',
             alignItems: 'center',
             marginRight: spacing.sm,
+            marginTop: 1, // Align with first line of text
         },
         radioOuterDisabled: {
             opacity: 0.5,
@@ -133,5 +159,15 @@ const getStyles = (theme: Colors) =>
         radioLabelDisabled: {
             color: theme.textSecondary,
             opacity: 0.5,
+        },
+        textContainer: {
+            flex: 1,
+            justifyContent: 'center',
+        },
+        radioDesc: {
+            fontSize: 14,
+            fontWeight: '400',
+            color: theme.textSecondary,
+            marginTop: 2,
         },
     });

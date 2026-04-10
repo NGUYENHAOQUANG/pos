@@ -7,9 +7,7 @@ import {
     IWeatherApiFullResponse,
     IWeatherApiForecastDay,
 } from '@/features/weather/types/weather.types';
-import { WEATHER_API_KEY } from '@env';
-
-const WEATHER_API_BASE_URL = 'https://api.weatherapi.com/v1/forecast.json';
+import { WEATHER_API_KEY, WEATHER_API_BASE_URL } from '@env';
 
 /** Max hours to show in hourly forecast */
 const HOURLY_FORECAST_HOURS = 24;
@@ -152,6 +150,7 @@ export const weatherApi = {
                         weatherCode: mapWeatherApiCodeToWMO(hour.condition.code),
                         windSpeed10m: hour.wind_kph,
                         chanceOfRain: hour.chance_of_rain,
+                        isDay: hour.is_day,
                     });
                 }
             }
