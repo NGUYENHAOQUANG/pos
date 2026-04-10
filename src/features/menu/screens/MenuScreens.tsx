@@ -116,6 +116,12 @@ export const MenuScreens: React.FC = () => {
             Icon: ChartBarIcon,
             onPress: () => navigation.navigate('SettingEnvironment' as any),
         },
+        {
+            id: 'shrimp-price',
+            title: 'Tin tức và Giá cả',
+            Icon: ChartBarIcon,
+            onPress: () => navigation.navigate('ShrimpPrice' as never),
+        },
         ...(weatherEnabled
             ? [
                   {

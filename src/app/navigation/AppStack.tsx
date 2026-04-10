@@ -80,6 +80,9 @@ import { ChatbotScreen } from '@/features/menu/screens/chatbot/ChatbotScreen';
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
 
+// Report screens
+import { ShrimpPriceScreen } from '@/features/menu/screens/shrimp-price/ShrimpPriceScreen';
+
 // Notifications
 import { useNotificationSetup } from '@/features/notifications';
 
@@ -265,6 +268,7 @@ export type AppStackParamList = {
 
     // ============== Weather Screens ==============
     WeatherScreen: undefined;
+    ShrimpPrice: undefined;
     DailyForecastDetail: {
         dailyData: readonly import('@/features/weather/types/weather.types').IDailyForecast[];
     };
@@ -389,6 +393,7 @@ export const AppStack: React.FC = () => {
 
             {/* ============== Weather Screens ============== */}
             <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
+            <Stack.Screen name="ShrimpPrice" component={ShrimpPriceScreen} />
             <Stack.Screen name="PinSetup" component={PinSetupScreen} />
             <Stack.Screen name="Chatbot" component={ChatbotScreen} />
         </Stack.Navigator>
