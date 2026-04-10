@@ -63,7 +63,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                         {item.latitude.toFixed(2)}°N, {item.longitude.toFixed(2)}°E
                     </Text>
                 </View>
-                {isSelected && <AntDesign name="check" size={18} color={theme.info} />}
+                {isSelected && <AntDesign name="check" size={18} color={theme.text} />}
             </TouchableOpacity>
         );
     };
@@ -209,7 +209,7 @@ const getStyles = (theme: Colors) =>
         },
 
         locationItemSelected: {
-            backgroundColor: theme.isDark ? 'rgba(10, 132, 255, 0.15)' : '#E6F4FF',
+            backgroundColor: theme.backgroundSecondary,
         },
 
         locationInfo: {
@@ -223,7 +223,7 @@ const getStyles = (theme: Colors) =>
         },
 
         locationNameSelected: {
-            color: theme.info,
+            color: theme.text,
             fontWeight: typography.fontWeight.semibold,
         },
 

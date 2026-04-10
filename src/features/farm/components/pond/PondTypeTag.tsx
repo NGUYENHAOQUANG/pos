@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     // Blue - Ao nuôi
     blue: {
         backgroundColor: colors.blue[50], // Lightest
-        borderColor: colors.blue[400], // Medium
+        borderColor: colors.blue[200], // Medium
     },
     textBlue: {
         color: colors.blue[600], // Dark/Primary
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     // Orange - Ao vèo
     orange: {
         backgroundColor: colors.volcano[100], // Soft pinkish
-        borderColor: colors.volcano[400], // Soft red border
+        borderColor: colors.red[200], // Soft red border
     },
     textOrange: {
         color: colors.volcano[600], // Red text
@@ -109,16 +109,16 @@ const styles = StyleSheet.create({
     },
     // Purple - Ao lắng
     purple: {
-        backgroundColor: colors.purple[50],
-        borderColor: colors.purple[300],
+        backgroundColor: colors.teal[50],
+        borderColor: colors.teal[200],
     },
     textPurple: {
-        color: colors.purple[600],
+        color: colors.teal[600],
     },
     // Pink - Ao thải
     pink: {
         backgroundColor: colors.pink[50],
-        borderColor: colors.pink[300],
+        borderColor: colors.pink[200],
     },
     textPink: {
         color: colors.pink[600],

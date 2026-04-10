@@ -31,6 +31,7 @@ interface HeadingFarmProps {
     displayPondType?: PondType; // Allow overriding the type displayed in header
     status?: TagStatus; // Added status prop
     onBack?: () => void;
+    onInfoPress?: () => void;
     menuOptions?: { value: string; onMenuOptionPress: () => void }[];
 }
 
@@ -45,6 +46,7 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
     displayPondType,
     status,
     onBack,
+    onInfoPress,
     menuOptions,
 }) => {
     const dashboardTabs: TabItem[] = [
@@ -75,6 +77,7 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
                     tagType={displayPondType || pond?.type || 'Ao vèo'}
                     status={status}
                     onBack={onBack}
+                    onInfoPress={onInfoPress}
                     menuOptions={menuOptions}
                 />
             )}

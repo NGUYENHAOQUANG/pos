@@ -42,14 +42,14 @@ const RippleRing: React.FC<RippleRingProps> = ({ delay, startAnimation }) => {
     const styles = useMemo(() => getStyles(theme), [theme]);
 
     useEffect(() => {
-        // Wait for logo animation to settle before starting ripples
+        // Start ripples shortly after logo settles
         const timer = setTimeout(() => {
             progress.value = withRepeat(
-                withTiming(1, { duration: 2400, easing: Easing.out(Easing.cubic) }),
+                withTiming(1, { duration: 2000, easing: Easing.out(Easing.cubic) }),
                 -1,
                 false
             );
-        }, 800 + delay);
+        }, 500 + delay);
 
         return () => clearTimeout(timer);
     }, [delay, progress]);
@@ -59,8 +59,8 @@ const RippleRing: React.FC<RippleRingProps> = ({ delay, startAnimation }) => {
             return { opacity: 0 };
         }
 
-        const scale = interpolate(progress.value, [0, 1], [0, 3.5]);
-        const opacity = interpolate(progress.value, [0, 0.3, 1], [0.6, 0.35, 0]);
+        const scale = interpolate(progress.value, [0, 1], [0, 4]);
+        const opacity = interpolate(progress.value, [0, 0.2, 1], [0.7, 0.4, 0]);
 
         return {
             opacity,
@@ -186,10 +186,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ visible, onAnimation
             withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) })
         );
 
-        // Phase 2: Start ripples after arcs animation completes (~1500ms)
+        // Phase 2: Start ripples sooner to sync with arc spring animations
         const rippleTimer = setTimeout(() => {
             rippleStarted.value = 1;
-        }, 1500);
+        }, 1000);
 
         return () => clearTimeout(rippleTimer);
     }, [visible, logoOpacity, logoScale, rippleStarted]);

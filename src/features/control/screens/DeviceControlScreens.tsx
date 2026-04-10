@@ -305,7 +305,7 @@ export const DeviceControlScreens = () => {
                                     setSelectedZoneId(item.value.id);
                                 }
                             }}
-                            showIcon={true}
+                            showIcon={false}
                             height={40}
                             borderRadius={12}
                         />

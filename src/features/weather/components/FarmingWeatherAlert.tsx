@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 import { ICurrentWeather, IDailyForecast } from '@/features/weather/types/weather.types';
-import WeatherIcon from '@/features/weather/components/WeatherIcon';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import CheckIcon from '@/assets/Icon/IconWeather/Check.svg';
 
 interface FarmingWeatherAlertProps {
     readonly current: ICurrentWeather;
@@ -13,7 +15,8 @@ interface FarmingWeatherAlertProps {
 interface IWeatherAlert {
     readonly type: 'warning' | 'danger' | 'info';
     readonly message: string;
-    readonly icon: string;
+    readonly iconName: string;
+    readonly iconLib: 'ionicons' | 'material';
 }
 
 /**
@@ -32,7 +35,8 @@ const analyzeAlerts = (
             message: `Nhiệt độ cao ${Math.round(
                 current.temperature2m
             )}°C — Nguy cơ tôm bị sốc nhiệt. Cần tăng quạt nước và bổ sung nước.`,
-            icon: 'Fire',
+            iconName: 'flame',
+            iconLib: 'ionicons',
         });
     } else if (current.temperature2m < 22) {
         alerts.push({
@@ -40,7 +44,8 @@ const analyzeAlerts = (
             message: `Nhiệt độ thấp ${Math.round(
                 current.temperature2m
             )}°C — Tôm dễ bị stress, giảm ăn. Cần giảm lượng thức ăn.`,
-            icon: 'Cold',
+            iconName: 'snow',
+            iconLib: 'ionicons',
         });
     }
 
@@ -52,13 +57,15 @@ const analyzeAlerts = (
             message: `Dự báo mưa lớn ${todayForecast.rainSum.toFixed(
                 1
             )}mm — Chuẩn bị vôi, kiểm tra pH sau mưa.`,
-            icon: 'Thunderstorm',
+            iconName: 'thunderstorm',
+            iconLib: 'ionicons',
         });
     } else if (current.rain > 5) {
         alerts.push({
             type: 'warning',
             message: `Đang mưa ${current.rain}mm/h — Theo dõi DO và pH, giảm cho ăn.`,
-            icon: 'Rain',
+            iconName: 'rainy',
+            iconLib: 'ionicons',
         });
     }
 
@@ -69,7 +76,8 @@ const analyzeAlerts = (
             message: `Gió mạnh ${Math.round(
                 current.windSpeed10m
             )} km/h — Kiểm tra bạt phủ ao, dây neo.`,
-            icon: 'Tornado',
+            iconName: 'weather-tornado',
+            iconLib: 'material',
         });
     }
 
@@ -78,7 +86,8 @@ const analyzeAlerts = (
         alerts.push({
             type: 'info',
             message: 'Độ ẩm rất cao — Tăng sục khí để bổ sung oxy cho ao.',
-            icon: 'Humidity',
+            iconName: 'water',
+            iconLib: 'ionicons',
         });
     }
 
@@ -87,7 +96,8 @@ const analyzeAlerts = (
         alerts.push({
             type: 'danger',
             message: 'Cảnh báo giông bão — Tắt thiết bị điện, gia cố ao nuôi.',
-            icon: 'Lightning',
+            iconName: 'flash',
+            iconLib: 'ionicons',
         });
     }
 
@@ -96,11 +106,26 @@ const analyzeAlerts = (
         alerts.push({
             type: 'info',
             message: 'Thời tiết thuận lợi cho nuôi tôm. Tiếp tục chế độ chăm sóc bình thường.',
-            icon: 'CheckCircle',
+            iconName: 'checkmark-circle',
+            iconLib: 'ionicons',
         });
     }
 
     return alerts;
+};
+
+/**
+ * Render the correct icon based on the library
+ */
+const AlertIcon: React.FC<{
+    readonly iconName: string;
+    readonly iconLib: 'ionicons' | 'material';
+    readonly color: string;
+}> = ({ iconName, iconLib, color }) => {
+    if (iconLib === 'material') {
+        return <MaterialCommunityIcons name={iconName} size={20} color={color} />;
+    }
+    return <Ionicons name={iconName} size={20} color={color} />;
 };
 
 const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, daily }) => {
@@ -112,24 +137,25 @@ const FarmingWeatherAlert: React.FC<FarmingWeatherAlertProps> = ({ current, dail
         return colors.weather.alert.infoBg;
     };
 
-    const getAlertText = () => {
-        return colors.white; // Force pure white text for maximum readability on gradient bg
-    };
-
     return (
         <View style={styles.container}>
             <View style={styles.outerCard}>
-                <Text style={styles.sectionTitle}>Cảnh báo nuôi tôm</Text>
+                <View style={styles.sectionHeader}>
+                    <CheckIcon width={20} height={20} color={colors.white} />
+                    <Text style={styles.sectionTitle}>Dự đoán</Text>
+                </View>
                 <View style={styles.alertList}>
                     {alerts.map((alert, index) => (
                         <View
                             key={`alert-${index}`}
                             style={[styles.alertItem, { backgroundColor: getAlertBg(alert.type) }]}
                         >
-                            <WeatherIcon name={alert.icon} size={20} color={getAlertText()} />
-                            <Text style={[styles.alertMessage, { color: getAlertText() }]}>
-                                {alert.message}
-                            </Text>
+                            <AlertIcon
+                                iconName={alert.iconName}
+                                iconLib={alert.iconLib}
+                                color={colors.white}
+                            />
+                            <Text style={styles.alertMessage}>{alert.message}</Text>
                         </View>
                     ))}
                 </View>
@@ -147,18 +173,24 @@ const styles = StyleSheet.create({
     },
 
     outerCard: {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-        borderRadius: borderRadius.xl,
+        backgroundColor: colors.backgroundWeather,
+        borderRadius: borderRadius.md,
         paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: spacing.md,
+    },
+
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: spacing.sm,
+        marginLeft: spacing.xs,
     },
 
     sectionTitle: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.semibold,
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.white,
-        marginBottom: spacing.sm,
-        marginLeft: spacing.xs,
     },
 
     alertList: {
@@ -169,18 +201,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         padding: spacing.sm,
-        borderRadius: borderRadius.lg,
+        borderRadius: 12,
         gap: spacing.sm,
-    },
-
-    alertIcon: {
-        fontSize: typography.fontSize.lg,
-        marginTop: 2,
     },
 
     alertMessage: {
         flex: 1,
-        fontSize: typography.fontSize.sm,
-        lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.white,
     },
 });

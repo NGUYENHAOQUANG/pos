@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 import { IDailyForecast } from '@/features/weather/types/weather.types';
 import { getWeatherInfo } from '@/features/weather/utils/weatherCodes';
 import WeatherIcon from '@/features/weather/components/WeatherIcon';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import CalendarDotsIcon from '@/assets/Icon/IconWeather/CalendarDots.svg';
+import DropIcon from '@/assets/Icon/IconWeather/Drop.svg';
 
 interface DailyForecastListProps {
     readonly dailyData: readonly IDailyForecast[];
@@ -20,8 +21,8 @@ const formatDay = (dateString: string, index: number): string => {
 
     const date = new Date(dateString);
     const day = date.getDay();
-    if (day === 0) return 'Chủ nhật';
-    return `Thứ ${day + 1}`;
+    const dayNames = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+    return dayNames[day];
 };
 
 const DailyForecastList: React.FC<DailyForecastListProps> = ({ dailyData }) => {
@@ -31,35 +32,35 @@ const DailyForecastList: React.FC<DailyForecastListProps> = ({ dailyData }) => {
 
     return (
         <View style={styles.container}>
-            {/* Outer card styled like a translucent block */}
             <View style={styles.outerCard}>
+                <View style={styles.sectionHeader}>
+                    <CalendarDotsIcon width={20} height={20} color={colors.white} />
+                    <Text style={styles.sectionTitle}>
+                        Dự báo thời tiết trong {dailyData.length} ngày tới
+                    </Text>
+                </View>
                 {dailyData.map((item, index) => {
                     const weatherInfo = getWeatherInfo(item.weatherCode);
 
                     return (
                         <View key={`daily-${item.time}-${index}`} style={styles.row}>
-                            {/* Left: Day name */}
                             <Text style={styles.dayName}>{formatDay(item.time, index)}</Text>
-
-                            {/* Middle: Rain percentage / amount */}
+                            <View style={styles.iconContainer}>
+                                <WeatherIcon
+                                    name={weatherInfo.icon}
+                                    size={24}
+                                    color={colors.white}
+                                />
+                            </View>
                             <View style={styles.rainContainer}>
-                                {item.rainSum > 0 && (
+                                {item.rainSum >= 0.1 && (
                                     <>
-                                        <Ionicons
-                                            name="water"
-                                            size={12}
-                                            color={colors.weather.text.light}
-                                        />
+                                        <DropIcon width={20} height={20} color={colors.white} />
                                         <Text style={styles.rainText}>
-                                            {item.rainSum > 0 ? `${item.rainSum.toFixed(1)}mm` : ''}
+                                            {`${item.rainSum.toFixed(1)}mm`}
                                         </Text>
                                     </>
                                 )}
-                            </View>
-
-                            {/* Middle Right: Icon */}
-                            <View style={styles.iconContainer}>
-                                <WeatherIcon name={weatherInfo.icon} size={24} color="#FFD700" />
                             </View>
 
                             {/* Right: High & Low Temp */}
@@ -88,10 +89,26 @@ const styles = StyleSheet.create({
     },
 
     outerCard: {
-        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-        borderRadius: borderRadius.xl,
+        backgroundColor: colors.backgroundWeather,
+        borderRadius: borderRadius.md,
         paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: spacing.md,
+    },
+
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: spacing.xs,
+        paddingBottom: spacing.sm,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: 'rgba(255,255,255,0.15)',
+    },
+
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.white,
     },
 
     row: {
@@ -101,14 +118,14 @@ const styles = StyleSheet.create({
     },
 
     dayName: {
-        flex: 2,
-        fontSize: typography.fontSize.base,
+        flex: 1,
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.white,
-        fontWeight: typography.fontWeight.medium,
     },
 
     rainContainer: {
-        flex: 1.5,
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
@@ -116,17 +133,18 @@ const styles = StyleSheet.create({
     },
 
     rainText: {
-        fontSize: typography.fontSize.xs,
-        color: colors.weather.text.light,
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.white,
     },
 
     iconContainer: {
-        flex: 1.5,
+        flex: 1,
         alignItems: 'center',
     },
 
     tempContainer: {
-        flex: 2,
+        flex: 1.5,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
@@ -134,17 +152,17 @@ const styles = StyleSheet.create({
     },
 
     highTemp: {
-        fontSize: typography.fontSize.base,
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.white,
-        fontWeight: typography.fontWeight.medium,
         width: 32,
         textAlign: 'right',
     },
 
     lowTemp: {
-        fontSize: typography.fontSize.base,
-        color: colors.weather.text.medium,
-        fontWeight: typography.fontWeight.medium,
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.white,
         width: 32,
         textAlign: 'right',
     },

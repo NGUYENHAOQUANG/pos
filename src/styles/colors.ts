@@ -49,6 +49,11 @@ export const colors = {
         300: '#FCCEEE',
         900: '#DD2590',
     },
+    teal: {
+        50: '#E6FFFB',
+        200: '#99F6E0', // Tailwind teal-200
+        600: '#0E9384',
+    },
     cyan: {
         50: '#E6FFFB',
         600: '#87E8DE',
@@ -97,6 +102,7 @@ export const colors = {
     },
     pink: {
         50: '#FFF0F6',
+        200: '#FBCFE8',
         300: '#FFADD2',
         600: '#EB2F96',
     },
@@ -138,6 +144,7 @@ export const colors = {
     backgroundIconBtn: '#FAFAFA',
     backgroundSubtle: '#00000005', // Very light black background (5% opacity)
     backgroundButtonActive: '#FFFFFF',
+    backgroundWeather: 'rgba(255, 255, 255, 0.07)',
 
     // Text colors
     text: '#000000ff',
@@ -211,40 +218,13 @@ export const colors = {
         95: 'rgba(255, 255, 255, 0.95)',
     },
     weather: {
-        gradients: {
-            clear: ['#1B6CB0', '#3A8FD6', '#73BAE8'],
-            cloudy: ['#4A6D8C', '#6E8FAB', '#8BAEC5'],
-            rainy: ['#3A4F63', '#506A7E', '#6B8599'],
-            storm: ['#2C3E50', '#34495E', '#4A6274'],
-            night: ['#0F2027', '#203A43', '#2C5364'],
-        },
         alert: {
             dangerBg: 'rgba(255, 80, 80, 0.25)',
-            dangerText: '#FFB3B3',
             warningBg: 'rgba(255, 180, 50, 0.25)',
-            warningText: '#FFE0A0',
-            infoBg: 'rgba(100, 220, 120, 0.25)',
-            infoText: '#B0F0C0',
+            infoBg: 'rgba(255, 255, 255, 0.14)',
         },
-        text: {
-            light: 'rgba(255, 255, 255, 0.9)',
-            medium: 'rgba(255, 255, 255, 0.8)',
-            dim: 'rgba(255, 255, 255, 0.7)',
-            dimmer: 'rgba(255, 255, 255, 0.6)',
-            faint: 'rgba(255, 255, 255, 0.5)',
-        },
-        border: {
-            light: 'rgba(255, 255, 255, 0.2)',
-        },
-        bg: {
-            light: 'rgba(255, 255, 255, 0.15)',
-            page: ['#000000', '#000000', '#000000'],
-        },
-        rain: 'rgba(120, 200, 255, 0.9)',
         chart: {
-            lineWarm: '#FFB347',
             lineMid: '#FFCC33',
-            lineCool: '#66BB6A',
         },
     },
     skeleton: {

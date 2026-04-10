@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    TouchableOpacity,
-    StyleSheet,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, LayoutAnimation } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors, spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
@@ -16,10 +9,6 @@ import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { Input } from '@/shared/components/forms/Input';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface SearchBarMeterialProps {
     onSearch?: (text: string) => void;

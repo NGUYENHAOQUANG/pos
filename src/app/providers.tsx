@@ -48,6 +48,8 @@ onlineManager.setEventListener(setOnline => {
 
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
+    // Defer heavy navigator mount until splash animation is nearly done
+    const [appReady, setAppReady] = useState(false);
     const { isLocked, handleUnlock } = useBiometricLock();
     const themeColors = useAppTheme();
 
@@ -65,11 +67,20 @@ export function AppProviders() {
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        // Mount navigator just before splash fades — FadeOut (500ms) masks the mount lag
+        const readyTimer = setTimeout(() => {
+            setAppReady(true);
+        }, 2800);
+
+        // Hide splash after navigator starts mounting
+        const splashTimer = setTimeout(() => {
             setShowSplash(false);
         }, 3200);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(readyTimer);
+            clearTimeout(splashTimer);
+        };
     }, []);
 
     return (
@@ -80,7 +91,7 @@ export function AppProviders() {
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
                                 <NavigationContainer ref={navigationRef} theme={AppTheme}>
-                                    <AppNavigator />
+                                    {appReady ? <AppNavigator /> : null}
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>
                         </ErrorBoundary>

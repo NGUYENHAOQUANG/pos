@@ -13,7 +13,7 @@ import AvatarIcon from '@/assets/Icon/IconMenu/AvatarNew.svg';
 import { MenuSectionItemData, MenuSection } from '@/features/menu/components/MenuSection';
 
 import SwimmingPoolIcon from '@/assets/Icon/IconMenu/SwimmingPool.svg';
-import ToolboxIcon from '@/assets/Icon/IconMenu/Toolbox.svg';
+//import ToolboxIcon from '@/assets/Icon/IconMenu/Toolbox.svg';
 import ChartBarIcon from '@/assets/Icon/IconMenu/ChartBar.svg';
 import WeatherForecastIcon from '@/assets/Icon/IconMenu/WeatherForecast.svg';
 
@@ -105,12 +105,12 @@ export const MenuScreens: React.FC = () => {
             Icon: SwimmingPoolIcon,
             onPress: () => navigation.navigate('AquacultureManagement'),
         },
-        {
-            id: 'device-maintenance',
-            title: 'Quản lý bảo trì thiết bị',
-            Icon: ToolboxIcon,
-            onPress: () => navigation.navigate('DeviceManagement'),
-        },
+        // {
+        //     id: 'device-maintenance',
+        //     title: 'Quản lý bảo trì thiết bị',
+        //     Icon: ToolboxIcon,
+        //     onPress: () => navigation.navigate('DeviceManagement'),
+        // },
         {
             id: 'environment',
             title: 'Thiết lập thông số môi trường',
