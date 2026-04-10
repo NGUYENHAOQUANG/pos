@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, UIManager, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors, spacing, borderRadius } from '@/styles';
@@ -15,10 +15,6 @@ import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import { IMaterial } from '@/features/material/types/material.types';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 export enum WarehouseFormType {
     ImportReceipt = 'ImportReceipt',

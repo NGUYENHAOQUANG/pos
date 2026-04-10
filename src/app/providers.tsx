@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
 import { AppNavigator } from './navigation/AppNavigator';
+import { navigationRef } from '@/app/navigation/NavigationRef';
 import { antdTheme } from '../core/config/antd-theme';
 import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
@@ -89,7 +90,7 @@ export function AppProviders() {
                     <QueryClientProvider client={queryClient}>
                         <ErrorBoundary>
                             <TabBarVisibilityProvider>
-                                <NavigationContainer theme={AppTheme}>
+                                <NavigationContainer ref={navigationRef} theme={AppTheme}>
                                     {appReady ? <AppNavigator /> : null}
                                 </NavigationContainer>
                             </TabBarVisibilityProvider>

@@ -3,9 +3,7 @@ import {
     View,
     TouchableOpacity,
     StyleSheet,
-    Platform,
     LayoutAnimation,
-    UIManager,
     Dimensions,
     LayoutChangeEvent,
 } from 'react-native';
@@ -41,12 +39,6 @@ import {
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedView = Animated.createAnimatedComponent(View);
-
-if (Platform.OS === 'android') {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-        UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-}
 
 const formatDate = (dateStr: string) => {
     const parts = dateStr.split('-');

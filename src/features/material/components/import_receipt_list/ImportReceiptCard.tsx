@@ -4,9 +4,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     LayoutAnimation,
-    Platform,
     ActivityIndicator,
-    UIManager,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
@@ -25,10 +23,6 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface ImportReceiptCardProps {
     item: ImportReceipt;

@@ -88,9 +88,8 @@ export const useWebRTCStream = (url: string) => {
                             break;
                     }
                 };
-
-                // Add transceivers for receiving video
                 pc.addTransceiver('video', { direction: 'recvonly' });
+                pc.addTransceiver('audio', { direction: 'recvonly' });
 
                 // Create offer
                 if (isMounted) setStatusText('Đang tạo Offer...');

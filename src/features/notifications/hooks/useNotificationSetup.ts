@@ -110,7 +110,7 @@ export function useNotificationSetup(): void {
             const token = await getFCMToken();
             if (token) {
                 setFcmToken(token);
-                console.log('[FCM] Token obtained:', token.substring(0, 20) + '...');
+                console.log('[FCM] Token obtained:', token);
             }
         };
 

@@ -6,7 +6,9 @@
  * @created 2025-01-07
  */
 import React from 'react';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ChatbotFAB } from '@/shared/components/chatbot/ChatbotFAB';
 
 // Main Tabs
 import { MainNavigator } from './MainNavigator';
@@ -15,33 +17,33 @@ import { MainNavigator } from './MainNavigator';
 import { PondDetailScreen } from '@/features/farm/screens/pond-detail/PondDetailScreen';
 import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
-import { ShrimpHealthScreen } from '@/features/farm/screens/pondwork/shrimp-health/ShrimpInspectionScreen';
-import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-health-log/ShrimpInspectionLogScreen';
-import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment-form/AddEnvironmentScreen';
-import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment-setting/EnvironmentSettingScreens';
-import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment-log/EnvironmentLogScreen';
+import { ShrimpHealthScreen } from '@/features/farm/screens/pond-work/shrimp-health-form/ShrimpHealthScreen';
+import { PondworkLogScreen } from '@/features/farm/screens/pond-log/shrimp-health-log/ShrimpInspectionLogScreen';
+import { AddEnvironmentScreen } from '@/features/farm/screens/pond-work/environment-form/EnvironmentScreen';
+import { SettingEnvironmentScreens } from '@/features/farm/screens/pond-work/environment-setting/EnvironmentSettingScreens';
+import { EnvironmentLogScreen } from '@/features/farm/screens/pond-log/environment-log/EnvironmentLogScreen';
 import { CreateCycleScreen } from '@/features/farm/screens/create-cycle/CreateCycleScreen';
-import { AddSiphonScreen } from '@/features/farm/screens/pondwork/siphon-form/SiphonFormScreen';
-import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
-import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
-import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeLogScreen';
-import { StockTransferFormScreen } from '@/features/farm/screens/pondwork/stock-transfer/StockTransferFormScreen';
-import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
-import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
+import { AddSiphonScreen } from '@/features/farm/screens/pond-work/siphon-form/SiphonFormScreen';
+import { SiphonLogScreen } from '@/features/farm/screens/pond-log/xyphon-log/SiphonLogScreen';
+import { WaterChangeFormScreen } from '@/features/farm/screens/pond-work/water-change-form/WaterChangeFormScreen';
+import { WaterSupplyLogScreen } from '@/features/farm/screens/pond-log/water-change-log/WaterChangeLogScreen';
+import { StockTransferFormScreen } from '@/features/farm/screens/pond-work/stock-transfer-form/StockTransferFormScreen';
+import { HarvestFormScreen } from '@/features/farm/screens/pond-work/harvest-form/HarvestScreen';
+import { HarvestLogScreen } from '@/features/farm/screens/pond-log/harvest-log/HarvestLogScreen';
 import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDetailScreen';
 import { PondCycleListScreen } from '@/features/farm/screens/pond-cycle-list/PondCycleListScreen';
-import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measure-shrimp-size-log/MeasureShrimpSizeLogScreen';
-import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measure-shrimp-size-form/MeasureShrimpSizeScreen';
-import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
-import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
-import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feedlog/FeedingLogScreens';
-import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
-import { WaterTreatmentScreen } from '@/features/farm/screens/pondwork/water-treatment-form/WaterTreatmentScreen';
-import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment-log/WaterTreatmentLogScreens';
+import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pond-log/measure-shrimp-size-log/MeasureShrimpSizeLogScreen';
+import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pond-work/measure-shrimp-size-form/MeasureShrimpSizeScreen';
+import { HandleProblemFormScreen } from '@/features/farm/screens/pond-work/handle-problem-form/HandleProblemFormScreen';
+import { HandleProblemLogScreen } from '@/features/farm/screens/pond-log/handle-problem-log/HandleProblemLogScreen';
+import { FeedingLogScreens } from '@/features/farm/screens/pond-log/feed-log/FeedingLogScreens';
+import { FeedingFormScreens } from '@/features/farm/screens/pond-work/feed-form/FeedingFormScreens';
+import { WaterTreatmentScreen } from '@/features/farm/screens/pond-work/water-treatment-form/WaterTreatmentScreen';
+import { WaterTreatmentLogScreens } from '@/features/farm/screens/pond-log/water-treatment-log/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
 import CountingShrimpScreen from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
-import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/ai-measure-shrimp-size/MeasureShrimpSizeAIScreen';
-import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/ai-shrimp-health/ShrimpHealthAIScreen';
+import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pond-work/ai-measure-shrimp-size/MeasureShrimpSizeAIScreen';
+import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pond-work/ai-shrimp-health/ShrimpHealthAIScreen';
 
 // Material screens
 import { MaterialFormScreen } from '@/features/material/screens/material_form/MaterialFormScreen';
@@ -76,6 +78,7 @@ import { PolicyWebViewScreen } from '@/features/menu/screens/policy/PolicyWebVie
 import { SettingsScreen } from '@/features/menu/screens/settings/SettingsScreen';
 import { PinSetupScreen } from '@/features/menu/screens/settings/PinSetupScreen';
 import { ChatbotScreen } from '@/features/menu/screens/chatbot/ChatbotScreen';
+import { IngestScreen } from '@/features/menu/screens/chatbot/IngestScreen';
 
 // Weather screens
 import WeatherScreen from '@/features/weather/screens/WeatherScreen';
@@ -116,7 +119,7 @@ export type AppStackParamList = {
 
     // Feeding Module
     FeedingLog: { pondId: string; title?: string };
-    FeedingManagement: { pondId: string; jobId?: string; itemToEdit?: JobExecution }; // Màn hình Container gộp
+    FeedingFormScreen: { pondId: string; jobId?: string; itemToEdit?: JobExecution }; // Màn hình Container gộp
 
     // Job/Task Module
     PondDetail: { pondId: string; zoneId: string };
@@ -167,7 +170,7 @@ export type AppStackParamList = {
         jobId?: string;
     };
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
-    WaterSupply: { pond?: PondData; item?: JobExecution };
+    WaterChangeFormScreen: { pond?: PondData; item?: JobExecution };
     WaterSupplyLog: { pond: PondData };
     StockTransferFormScreen: {
         pondId: string;
@@ -175,7 +178,7 @@ export type AppStackParamList = {
         warehouseId: string;
     };
     TransferLog: { pond: PondData };
-    AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
+    HarvestFormScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
     CycleDetailScreen: { pondId: string; zoneId: string; warehouseId: string; cycleId: string };
     PondCycleListScreen: { pondId: string; zoneId: string; warehouseId: string };
@@ -271,6 +274,7 @@ export type AppStackParamList = {
     };
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
     Chatbot: undefined;
+    Ingest: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -279,119 +283,135 @@ export const AppStack: React.FC = () => {
     useNotificationSetup();
 
     return (
-        <Stack.Navigator
-            initialRouteName="MainTabs"
-            screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: '#FFFFFF' },
-            }}
-        >
-            {/* Main Tabs - Tab Bar visible */}
-            <Stack.Screen
-                name="MainTabs"
-                component={MainNavigator}
-                options={{
-                    freezeOnBlur: false,
+        <>
+            <Stack.Navigator
+                initialRouteName="MainTabs"
+                screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: '#FFFFFF' },
                 }}
-            />
+            >
+                {/* Main Tabs - Tab Bar visible */}
+                <Stack.Screen
+                    name="MainTabs"
+                    component={MainNavigator}
+                    options={{
+                        freezeOnBlur: false,
+                    }}
+                />
 
-            {/* ============== Farm Screens ============== */}
-            <Stack.Screen name="PondDetail" component={PondDetailScreen} />
-            <Stack.Screen name="FeedingManagement" component={FeedingManagementScreens} />
-            <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
-            <Stack.Screen name="PondInfo" component={PondInfoScreen} />
-            <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
-            <Stack.Screen name="ShrimpHealthScreen" component={ShrimpHealthScreen} />
-            <Stack.Screen
-                name="MeasureShrimpSizeLogScreen"
-                component={MeasureShrimpSizeLogScreen}
-            />
-            <Stack.Screen name="MeasureShrimpSizeScreen" component={MeasureShrimpSizeScreen} />
-            <Stack.Screen name="ShrimpHealthCheckAIScreen" component={ShrimpHealthCheckAIScreen} />
-            <Stack.Screen name="MeasureShrimpSizeAIScreen" component={MeasureShrimpSizeAIScreen} />
-            <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
-            <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
-            <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
-            <Stack.Screen name="EditEnvironment" component={EditEnvironmentScreens} />
-            <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
-            <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
-            <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
-            <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
-            <Stack.Screen name="WaterTreatmentScreen" component={WaterTreatmentScreen} />
-            <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
-            <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
-            <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
-            <Stack.Screen name="StockTransferFormScreen" component={StockTransferFormScreen} />
-            <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
-            <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
-            <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
-            <Stack.Screen name="PondCycleListScreen" component={PondCycleListScreen} />
-            <Stack.Screen name="HandleProblem" component={HandleProblemFormScreen} />
-            <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
-            <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
+                {/* ============== Farm Screens ============== */}
+                <Stack.Screen name="PondDetail" component={PondDetailScreen} />
+                <Stack.Screen name="FeedingFormScreen" component={FeedingFormScreens} />
+                <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
+                <Stack.Screen name="PondInfo" component={PondInfoScreen} />
+                <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
+                <Stack.Screen name="ShrimpHealthScreen" component={ShrimpHealthScreen} />
+                <Stack.Screen
+                    name="MeasureShrimpSizeLogScreen"
+                    component={MeasureShrimpSizeLogScreen}
+                />
+                <Stack.Screen name="MeasureShrimpSizeScreen" component={MeasureShrimpSizeScreen} />
+                <Stack.Screen
+                    name="ShrimpHealthCheckAIScreen"
+                    component={ShrimpHealthCheckAIScreen}
+                />
+                <Stack.Screen
+                    name="MeasureShrimpSizeAIScreen"
+                    component={MeasureShrimpSizeAIScreen}
+                />
+                <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
+                <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
+                <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
+                <Stack.Screen name="EditEnvironment" component={EditEnvironmentScreens} />
+                <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
+                <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
+                <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
+                <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
+                <Stack.Screen name="WaterTreatmentScreen" component={WaterTreatmentScreen} />
+                <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
+                <Stack.Screen name="WaterChangeFormScreen" component={WaterChangeFormScreen} />
+                <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
+                <Stack.Screen name="StockTransferFormScreen" component={StockTransferFormScreen} />
+                <Stack.Screen name="HarvestFormScreen" component={HarvestFormScreen} />
+                <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
+                <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
+                <Stack.Screen name="PondCycleListScreen" component={PondCycleListScreen} />
+                <Stack.Screen name="HandleProblem" component={HandleProblemFormScreen} />
+                <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
+                <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
 
-            {/* ============== Material Screens ============== */}
-            <Stack.Screen name="MaterialForm" component={MaterialFormScreen} />
-            <Stack.Screen name="ImportReceiptFormScreen" component={ImportReceiptFormScreen} />
-            <Stack.Screen name="ExportWarehouseForm" component={ExportWarehouseFormScreen} />
-            <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
+                {/* ============== Material Screens ============== */}
+                <Stack.Screen name="MaterialForm" component={MaterialFormScreen} />
+                <Stack.Screen name="ImportReceiptFormScreen" component={ImportReceiptFormScreen} />
+                <Stack.Screen name="ExportWarehouseForm" component={ExportWarehouseFormScreen} />
+                <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
 
-            {/* ============== Control Screens ============== */}
-            {/* ControlDetail moved to MainNavigator to show Tab Bar */}
-            {/* Control screens use Zustand store directly - no provider needed */}
-            <Stack.Screen name="ConnectDevice" component={ConnectDeviceScreens} />
-            <Stack.Screen
-                name="CustomFeedingMachine"
-                component={CustomFeedingMachine}
-                options={{ gestureEnabled: false }}
-            />
-            <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
-            <Stack.Screen name="History" component={HistoryActivitieScreens} />
-            <Stack.Screen name="UserManual" component={UserManualScreens} />
-            <Stack.Screen name="GeneralUserManual" component={GeneralUserManualScreens} />
-            <Stack.Screen
-                name="CameraPlayer"
-                component={VideoPlayerScreen}
-                options={{
-                    gestureEnabled: false,
-                    animation: 'fade',
-                    // animationDuration: 200,
-                    // contentStyle: { backgroundColor: '#000' },
-                }}
-            />
+                {/* ============== Control Screens ============== */}
+                {/* ControlDetail moved to MainNavigator to show Tab Bar */}
+                {/* Control screens use Zustand store directly - no provider needed */}
+                <Stack.Screen name="ConnectDevice" component={ConnectDeviceScreens} />
+                <Stack.Screen
+                    name="CustomFeedingMachine"
+                    component={CustomFeedingMachine}
+                    options={{ gestureEnabled: false }}
+                />
+                <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
+                <Stack.Screen name="History" component={HistoryActivitieScreens} />
+                <Stack.Screen name="UserManual" component={UserManualScreens} />
+                <Stack.Screen name="GeneralUserManual" component={GeneralUserManualScreens} />
+                <Stack.Screen
+                    name="CameraPlayer"
+                    component={VideoPlayerScreen}
+                    options={{
+                        gestureEnabled: false,
+                        animation: 'fade',
+                    }}
+                />
 
-            {/* ============== Menu Screens ============== */}
-            <Stack.Screen name="PersonalInformation" component={PersonalInformationWithProvider} />
-            <Stack.Screen
-                name="AquacultureManagement"
-                component={AquacultureManagementWithProvider}
-            />
-            <Stack.Screen name="MemberManagement" component={MemberManagementWithProvider} />
-            <Stack.Screen name="AddAquaculture" component={AddAquacultureWithProvider} />
-            <Stack.Screen name="EditAquaculture" component={EditAquacultureWithProvider} />
-            <Stack.Screen name="AddMember" component={AddMemberWithProvider} />
-            <Stack.Screen name="DeviceManagement" component={DeviceManagementWithProvider} />
-            <Stack.Screen name="AddDevice" component={AddDeviceWithProvider} />
-            <Stack.Screen name="EditDevice" component={AddDeviceWithProvider} />
-            <Stack.Screen name="HistoryDevices" component={HistoryDevicesWithProvider} />
-            <Stack.Screen
-                name="EquipmentMaintenance"
-                component={EquipmentMaintenanceWithProvider}
-            />
-            <Stack.Screen
-                name="EditEquimentMaintenance"
-                component={EditEquimentMaintenanceWithProvider}
-            />
+                {/* ============== Menu Screens ============== */}
+                <Stack.Screen
+                    name="PersonalInformation"
+                    component={PersonalInformationWithProvider}
+                />
+                <Stack.Screen
+                    name="AquacultureManagement"
+                    component={AquacultureManagementWithProvider}
+                />
+                <Stack.Screen name="MemberManagement" component={MemberManagementWithProvider} />
+                <Stack.Screen name="AddAquaculture" component={AddAquacultureWithProvider} />
+                <Stack.Screen name="EditAquaculture" component={EditAquacultureWithProvider} />
+                <Stack.Screen name="AddMember" component={AddMemberWithProvider} />
+                <Stack.Screen name="DeviceManagement" component={DeviceManagementWithProvider} />
+                <Stack.Screen name="AddDevice" component={AddDeviceWithProvider} />
+                <Stack.Screen name="EditDevice" component={AddDeviceWithProvider} />
+                <Stack.Screen name="HistoryDevices" component={HistoryDevicesWithProvider} />
+                <Stack.Screen
+                    name="EquipmentMaintenance"
+                    component={EquipmentMaintenanceWithProvider}
+                />
+                <Stack.Screen
+                    name="EditEquimentMaintenance"
+                    component={EditEquimentMaintenanceWithProvider}
+                />
 
-            <Stack.Screen name="DeleteAccount" component={DeleteAccountFormScreen} />
-            <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
-            <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="DeleteAccount" component={DeleteAccountFormScreen} />
+                <Stack.Screen
+                    name="EditPersonalInformationScreen"
+                    component={InformationFormScreen}
+                />
+                <Stack.Screen name="PolicyWebView" component={PolicyWebViewScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
 
-            {/* ============== Weather Screens ============== */}
-            <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
-            <Stack.Screen name="PinSetup" component={PinSetupScreen} />
-            <Stack.Screen name="Chatbot" component={ChatbotScreen} />
-        </Stack.Navigator>
+                {/* ============== Weather Screens ============== */}
+                <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
+                <Stack.Screen name="PinSetup" component={PinSetupScreen} />
+                <Stack.Screen name="Chatbot" component={ChatbotScreen} />
+                <Stack.Screen name="Ingest" component={IngestScreen} />
+            </Stack.Navigator>
+
+            {/* Chatbot FAB - overlays all screens */}
+            <ChatbotFAB />
+        </>
     );
 };

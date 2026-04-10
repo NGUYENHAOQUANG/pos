@@ -12,10 +12,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     LayoutChangeEvent,
-    Platform,
     StyleSheet,
     TouchableOpacity,
-    UIManager,
     View,
     ViewStyle,
 } from 'react-native';
@@ -58,13 +56,6 @@ export function SegmentedControl({
     // Store tab layouts
     const [tabLayouts, setTabLayouts] = useState<Array<{ x: number; width: number }>>([]);
     const containerLayout = useRef<{ width: number; x: number } | null>(null);
-
-    // Enable LayoutAnimation for Android (only once)
-    useEffect(() => {
-        if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-            UIManager.setLayoutAnimationEnabledExperimental(true);
-        }
-    }, []);
 
     // Animate slider when selectedIndex changes
     useEffect(() => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     GeneralInfoBox,
-    GeneralInfoBoxRef,
+    GeneralInfoBoxType,
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SiphonLossBox } from '@/features/farm/components/pondwork/xyphon/SiphonLossBox';
 import {
@@ -9,64 +9,63 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
+import { View } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { SpecificType } from '@/features/material/types/warehouse.types';
 
 interface SiphonFormInformationProps {
-    generalInfoBoxRef: React.RefObject<GeneralInfoBoxRef | null>;
     selectedDate: Date;
     onDateChange: (date: Date) => void;
     imageUris: string[];
     onImagesChange: (uris: string[]) => void;
-    documentIds: string[];
     lossAmount: string;
     onLossAmountChange: (value: string) => void;
     selectedMaterials: SelectedMaterialItem[];
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
     notes: string;
     onNotesChange: (value: string) => void;
+    pointerEvents?: 'auto' | 'none';
 }
 
 export const SiphonFormInformation: React.FC<SiphonFormInformationProps> = ({
-    generalInfoBoxRef,
     selectedDate,
     onDateChange,
     imageUris,
     onImagesChange,
-    documentIds,
     lossAmount,
     onLossAmountChange,
     selectedMaterials,
     onMaterialsChange,
     notes,
     onNotesChange,
+    pointerEvents = 'auto',
 }) => {
     return (
         <SafeInputLayout
             contentContainerStyle={{ padding: 0, paddingBottom: 100 }}
             extraScrollHeight={150}
         >
-            <GeneralInfoBox
-                ref={generalInfoBoxRef}
-                type="withImage"
-                date={selectedDate}
-                onDateChange={onDateChange}
-                imageUris={imageUris}
-                onImagesChange={onImagesChange}
-                documentIds={documentIds}
-                disabledDate={true}
-            />
+            <View pointerEvents={pointerEvents}>
+                <GeneralInfoBox
+                    type={GeneralInfoBoxType.WITH_IMAGE}
+                    date={selectedDate}
+                    onDateChange={onDateChange}
+                    imageUris={imageUris}
+                    onImagesChange={onImagesChange}
+                    disabledDate={true}
+                />
 
-            <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={onLossAmountChange} />
+                <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={onLossAmountChange} />
 
-            <MaterialSelectionBox
-                selectedMaterials={selectedMaterials}
-                onMaterialsChange={onMaterialsChange}
-                specificType={SpecificType.Normal}
-                isRequired={false}
-            />
+                <MaterialSelectionBox
+                    selectedMaterials={selectedMaterials}
+                    onMaterialsChange={onMaterialsChange}
+                    specificType={SpecificType.Normal}
+                    isRequired={false}
+                />
 
-            <SelectionNotesBox notes={notes} onNotesChange={onNotesChange} />
+                <SelectionNotesBox notes={notes} onNotesChange={onNotesChange} />
+            </View>
         </SafeInputLayout>
     );
 };

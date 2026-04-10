@@ -1,4 +1,4 @@
-import type { Measurement } from '@/features/farm/screens/pondwork/ai-measure-shrimp-size/MeasureShrimpSizeAIScreen';
+import type { Measurement } from '@/features/farm/screens/pond-work/ai-measure-shrimp-size/MeasureShrimpSizeAIScreen';
 export function calcAverageSizeCm(measurements: Measurement[]): number | null {
     if (measurements.length === 0) return null;
 

@@ -5,11 +5,12 @@
  * Được render bởi renderCustomView khi message có widget.type === 'DEVICE_CONTROL'
  * Widget hiển thị trạng thái thiết bị và cho phép toggle ON/OFF.
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { DeviceControlData } from '../types';
+import { useAppTheme } from '@/styles/themeContext';
+import { DeviceControlData } from '@/features/menu/screens/chatbot/types';
 
 // ── Device Icon Mapping ─────────────────────────────────────────────────────────
 
@@ -34,6 +35,9 @@ interface DeviceControlWidgetProps {
 }
 
 export const DeviceControlWidget: React.FC<DeviceControlWidgetProps> = ({ data }) => {
+    const theme = useAppTheme();
+    const styles = useWidgetStyles(theme);
+
     const { device_name, device_id, device_type, status: initialStatus } = data;
 
     // State local cho toggle (mock - trong thực tế sẽ gọi API)
@@ -65,13 +69,17 @@ export const DeviceControlWidget: React.FC<DeviceControlWidgetProps> = ({ data }
                 <View
                     style={[
                         styles.iconContainer,
-                        { backgroundColor: isOn ? '#EFF6FF' : '#F3F4F6' },
+                        {
+                            backgroundColor: isOn
+                                ? theme.primary + '1A'
+                                : theme.backgroundSecondary,
+                        },
                     ]}
                 >
                     <MaterialCommunityIcons
                         name={iconName}
                         size={22}
-                        color={isOn ? '#006AFF' : '#9CA3AF'}
+                        color={isOn ? theme.primary : theme.textSecondary}
                     />
                 </View>
 
@@ -100,10 +108,15 @@ export const DeviceControlWidget: React.FC<DeviceControlWidgetProps> = ({ data }
                         <View
                             style={[
                                 styles.statusDot,
-                                { backgroundColor: isOn ? '#16A34A' : '#9CA3AF' },
+                                { backgroundColor: isOn ? theme.success : theme.textSecondary },
                             ]}
                         />
-                        <Text style={[styles.statusValue, { color: isOn ? '#16A34A' : '#6B7280' }]}>
+                        <Text
+                            style={[
+                                styles.statusValue,
+                                { color: isOn ? theme.success : theme.textSecondary },
+                            ]}
+                        >
                             {isOn ? 'Đang hoạt động' : 'Đã tắt'}
                         </Text>
                     </View>
@@ -123,9 +136,14 @@ export const DeviceControlWidget: React.FC<DeviceControlWidgetProps> = ({ data }
                     <MaterialCommunityIcons
                         name={isOn ? 'power' : 'power-off'}
                         size={16}
-                        color={isOn ? '#FFFFFF' : '#6B7280'}
+                        color={isOn ? theme.textInverse : theme.textSecondary}
                     />
-                    <Text style={[styles.toggleText, { color: isOn ? '#FFFFFF' : '#6B7280' }]}>
+                    <Text
+                        style={[
+                            styles.toggleText,
+                            { color: isOn ? theme.textInverse : theme.textSecondary },
+                        ]}
+                    >
                         {isLoading ? '...' : isOn ? 'TẮT' : 'BẬT'}
                     </Text>
                 </TouchableOpacity>
@@ -135,123 +153,128 @@ export const DeviceControlWidget: React.FC<DeviceControlWidgetProps> = ({ data }
 };
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 14,
-        marginHorizontal: 4,
-        marginTop: 4,
-        marginBottom: 2,
-        borderWidth: 1,
-        borderColor: '#E6E8EC',
-        minWidth: 240,
-    },
+const useWidgetStyles = (theme: any) =>
+    useMemo(
+        () =>
+            StyleSheet.create({
+                container: {
+                    backgroundColor: theme.background,
+                    borderRadius: 12,
+                    padding: 14,
+                    marginHorizontal: 4,
+                    marginTop: 4,
+                    marginBottom: 2,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                    minWidth: 240,
+                },
 
-    // Info Row
-    infoRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    iconContainer: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    details: {
-        flex: 1,
-    },
-    deviceName: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#000000',
-        lineHeight: 20,
-    },
-    metaRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginTop: 2,
-    },
-    deviceType: {
-        fontSize: 12,
-        color: '#6B7280',
-    },
-    metaDot: {
-        width: 3,
-        height: 3,
-        borderRadius: 1.5,
-        backgroundColor: '#D1D5DB',
-    },
-    deviceId: {
-        fontSize: 12,
-        color: '#9CA3AF',
-    },
+                // Info Row
+                infoRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                },
+                iconContainer: {
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                },
+                details: {
+                    flex: 1,
+                },
+                deviceName: {
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: theme.text,
+                    lineHeight: 20,
+                },
+                metaRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 6,
+                    marginTop: 2,
+                },
+                deviceType: {
+                    fontSize: 12,
+                    color: theme.textSecondary,
+                },
+                metaDot: {
+                    width: 3,
+                    height: 3,
+                    borderRadius: 1.5,
+                    backgroundColor: theme.border,
+                },
+                deviceId: {
+                    fontSize: 12,
+                    color: theme.textSecondary,
+                },
 
-    // Divider
-    divider: {
-        height: 1,
-        backgroundColor: '#F3F4F6',
-        marginVertical: 12,
-    },
+                // Divider
+                divider: {
+                    height: 1,
+                    backgroundColor: theme.backgroundTertiary,
+                    marginVertical: 12,
+                },
 
-    // Control Row
-    controlRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    statusSection: {
-        gap: 4,
-    },
-    statusLabel: {
-        fontSize: 11,
-        color: '#9CA3AF',
-        fontWeight: '500',
-        textTransform: 'uppercase',
-        letterSpacing: 0.3,
-    },
-    statusValueRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    statusDot: {
-        width: 7,
-        height: 7,
-        borderRadius: 3.5,
-    },
-    statusValue: {
-        fontSize: 13,
-        fontWeight: '500',
-    },
+                // Control Row
+                controlRow: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                },
+                statusSection: {
+                    gap: 4,
+                },
+                statusLabel: {
+                    fontSize: 11,
+                    color: theme.textSecondary,
+                    fontWeight: '500',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.3,
+                },
+                statusValueRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 6,
+                },
+                statusDot: {
+                    width: 7,
+                    height: 7,
+                    borderRadius: 3.5,
+                },
+                statusValue: {
+                    fontSize: 13,
+                    fontWeight: '500',
+                },
 
-    // Toggle Button
-    toggleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-    },
-    toggleButtonOn: {
-        backgroundColor: '#DC2626', // Đỏ = nút TẮT
-    },
-    toggleButtonOff: {
-        backgroundColor: '#F3F4F6',
-        borderWidth: 1,
-        borderColor: '#E6E8EC',
-    },
-    toggleButtonLoading: {
-        opacity: 0.6,
-    },
-    toggleText: {
-        fontSize: 12,
-        fontWeight: '700',
-        letterSpacing: 0.5,
-    },
-});
+                // Toggle Button
+                toggleButton: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 6,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 20,
+                },
+                toggleButtonOn: {
+                    backgroundColor: theme.error, // Đỏ = nút TẮT
+                },
+                toggleButtonOff: {
+                    backgroundColor: theme.backgroundSecondary,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                },
+                toggleButtonLoading: {
+                    opacity: 0.6,
+                },
+                toggleText: {
+                    fontSize: 12,
+                    fontWeight: '700',
+                    letterSpacing: 0.5,
+                },
+            }),
+        [theme]
+    );

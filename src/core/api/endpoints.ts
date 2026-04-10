@@ -259,4 +259,8 @@ export const API_ENDPOINTS = {
         ENV_MEASUREMENT_CHART: '/report/env-measurement-chart',
         COST_DONUT: '/report/cost-donut',
     },
+    CHATBOT: {
+        CHAT: '/api/v1/chat',
+        INGEST: '/api/v1/ingest',
+    },
 } as const;

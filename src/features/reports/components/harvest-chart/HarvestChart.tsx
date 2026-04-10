@@ -63,10 +63,7 @@ export const HarvestChart: React.FC<HarvestChartProps> = ({ zoneId, pondId, seas
                 prefixIcon={<HarvestChartIcon width={20} height={20} />}
                 label="Biểu đồ thu hoạch"
                 onPress={() => setIsCollapsed(!isCollapsed)}
-                style={[
-                    styles.sectionHeader,
-                    { borderBottomColor: theme.isDark ? '#FFFFFF' : theme.borderLight },
-                ]}
+                style={styles.sectionHeader}
                 isExpanded={!isCollapsed}
             />
 

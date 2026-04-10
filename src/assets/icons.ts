@@ -19,6 +19,7 @@ export { default as IconEditOutlined } from '@/assets/Icon/IconDevices/EditOutli
 export { default as IconCloseOutlined } from '@/assets/Icon/IconDevices/CloseOutlined.svg';
 export { default as IconSkipBack } from '@/assets/Icon/IconDevices/SkipBack.svg';
 export { default as IconSkipForward } from '@/assets/Icon/IconDevices/SkipForward.svg';
+export { default as IconInfomation } from '@/assets/Icon/IconDevices/Infomation.svg';
 
 // Icon Farm
 export { default as IconFeed } from '@/assets/Icon/IconFarm/Feeding.svg';
@@ -34,6 +35,7 @@ export { default as IconCleaningThePond } from '@/assets/Icon/IconFarm/CleaningT
 export { default as IconDryingThePond } from '@/assets/Icon/IconFarm/DryingThePond.svg';
 export { default as IconHarvest } from '@/assets/Icon/IconFarm/Harvest.svg';
 export { default as IconError } from '@/assets/Icon/IconFarm/IconError.svg';
+export { default as IconFarmVector } from '@/assets/Icon/IconFarm/Vector.svg';
 export { default as IconFilter } from '@/assets/Icon/Filter.svg';
 export { default as IconFilterActive } from '@/assets/Icon/Filter-2.svg';
 export { default as IconEdit } from '@/assets/Icon/IconFarm/Edit.svg';

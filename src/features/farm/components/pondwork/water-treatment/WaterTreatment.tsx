@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxType,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { MaterialSelectionBox } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
@@ -35,7 +38,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
         <View style={styles.container}>
             {/* General Information */}
             <GeneralInfoBox
-                type="water_treatment"
+                type={GeneralInfoBoxType.WATER_TREATMENT}
                 date={executionDate}
                 onDateChange={onExecutionDateChange}
                 activityLabel="Chọn loại hoạt động"
