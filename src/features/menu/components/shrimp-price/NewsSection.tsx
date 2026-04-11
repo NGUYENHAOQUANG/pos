@@ -4,6 +4,7 @@ import { Text } from '@/shared/components/typography/Text';
 import { Colors } from '@/styles/colors';
 import { Loading } from '@/shared/components/ui/Loading';
 import { NewsItem } from '@/features/menu/types/news.types';
+import { getShrimpImage } from '@/features/menu/utils/shrimpPriceUtils';
 
 interface NewsSectionProps {
     newsData: NewsItem[];
@@ -49,7 +50,10 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ newsData, isLoading, e
                             ]}
                             activeOpacity={0.9}
                         >
-                            <Image source={{ uri: item.image }} style={styles.featuredImage} />
+                            <Image
+                                source={item.image ? { uri: item.image } : getShrimpImage('khác')}
+                                style={styles.featuredImage}
+                            />
                             <View
                                 style={[styles.featuredOverlay, { backgroundColor: theme.overlay }]}
                             >
@@ -82,7 +86,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ newsData, isLoading, e
                         activeOpacity={0.8}
                     >
                         <Image
-                            source={{ uri: item.image }}
+                            source={item.image ? { uri: item.image } : getShrimpImage('khác')}
                             style={[
                                 styles.newsImage,
                                 { backgroundColor: theme.backgroundTertiary },

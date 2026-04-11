@@ -3,12 +3,11 @@ import { NewsItem } from '@/features/menu/types/news.types';
 /** Map tab label to RSS feed URL */
 const RSS_URLS: Record<string, string> = {
     'Tất cả': 'https://tepbac.com/feeds/news/moi.xml',
-    'Tin tức thị trường': 'https://tepbac.com/feeds/news.xml',
+    'Tin tức nổi bật': 'https://tepbac.com/feeds/news.xml',
     'Kỹ thuật': 'https://tepbac.com/feeds/technical.xml',
 };
 
 const DEFAULT_RSS_URL = RSS_URLS['Tất cả'];
-const FALLBACK_IMAGE = 'https://picsum.photos/seed/shrimp/400/200';
 
 const FETCH_HEADERS = {
     'User-Agent':
@@ -47,12 +46,9 @@ const extractDescription = (itemXml: string): string => {
     return plainMatch ? stripCdata(plainMatch) : '';
 };
 
-/**
- * Extract image URL from RSS item.
- */
 const extractImage = (itemXml: string): string => {
     const match = itemXml.match(/<meta property="og:image" content="([^"]+)"/);
-    return match ? match[1] : FALLBACK_IMAGE;
+    return match ? match[1] : '';
 };
 
 /**
