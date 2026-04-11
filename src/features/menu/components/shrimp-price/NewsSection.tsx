@@ -78,7 +78,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ newsData, isLoading, e
                 return (
                     <TouchableOpacity
                         key={item.id}
-                        style={[styles.newsCard, { backgroundColor: theme.backgroundPrimary }]}
+                        style={[styles.newsCard, { backgroundColor: theme.background }]}
                         activeOpacity={0.8}
                     >
                         <Image

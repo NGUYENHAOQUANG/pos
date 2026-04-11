@@ -11,66 +11,68 @@ interface AllShrimpListProps {
     theme: Colors;
 }
 
-const ShrimpListItem = React.memo(({ item, theme }: { item: ShrimpPrice; theme: Colors }) => {
-    const getTrendColor = () => {
-        if (item.trend === 'up') return theme.green[600];
-        if (item.trend === 'down') return theme.red[600];
-        return theme.textSecondary;
-    };
+const ShrimpListItem = React.memo(
+    ({ item, theme, isLast }: { item: ShrimpPrice; theme: Colors; isLast: boolean }) => {
+        const getTrendColor = () => {
+            if (item.trend === 'up') return theme.status.activeText;
+            if (item.trend === 'down') return theme.status.warningText;
+            return theme.textSecondary;
+        };
 
-    const getTrendIcon = () => {
-        if (item.trend === 'up') return 'caret-up';
-        if (item.trend === 'down') return 'caret-down';
-        return 'remove';
-    };
+        const getTrendIcon = () => {
+            if (item.trend === 'up') return 'caret-up';
+            if (item.trend === 'down') return 'caret-down';
+            return 'remove';
+        };
 
-    const trendColor = getTrendColor();
+        const trendColor = getTrendColor();
 
-    return (
-        <TouchableOpacity
-            activeOpacity={0.8}
-            style={[
-                styles.shrimpListItem,
-                { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
-            ]}
-        >
-            <Image
-                source={item.image ? { uri: item.image } : getShrimpImage(item.name)}
-                style={[styles.shrimpListImage, { backgroundColor: theme.backgroundTertiary }]}
-                resizeMode="cover"
-            />
-            <View style={styles.shrimpListContent}>
-                <Text style={[styles.shrimpListName, { color: theme.text }]}>{item.name}</Text>
-                <Text style={[styles.shrimpListSize, { color: theme.textSecondary }]}>
-                    Kích cỡ: {item.size} {item.unit}
-                </Text>
-                <View style={styles.shrimpListPriceRow}>
-                    <Text style={[styles.shrimpListPrice, { color: theme.primary }]}>
-                        {formatPrice(item.price)} đ
+        return (
+            <TouchableOpacity
+                activeOpacity={0.8}
+                style={[
+                    styles.shrimpListItem,
+                    !isLast && { borderBottomWidth: 1, borderBottomColor: theme.defaultBorder },
+                ]}
+            >
+                <Image
+                    source={item.image ? { uri: item.image } : getShrimpImage(item.name)}
+                    style={[styles.shrimpListImage, { backgroundColor: theme.backgroundTertiary }]}
+                    resizeMode="cover"
+                />
+                <View style={styles.shrimpListContent}>
+                    <Text style={[styles.shrimpListName, { color: theme.text }]}>{item.name}</Text>
+                    <Text style={[styles.shrimpListSize, { color: theme.textSecondary }]}>
+                        Kích cỡ: {item.size} {item.unit}
                     </Text>
-                    <View
-                        style={[
-                            styles.shrimpListTrendBadge,
-                            {
-                                backgroundColor:
-                                    item.trend === 'stable'
-                                        ? theme.backgroundTertiary
-                                        : item.trend === 'up'
-                                        ? theme.green[50]
-                                        : theme.red[50],
-                            },
-                        ]}
-                    >
-                        <Ionicons name={getTrendIcon()} size={12} color={trendColor} />
-                        <Text style={[styles.shrimpListTrendText, { color: trendColor }]}>
-                            {item.trendValue || 'Ổn định'}
+                    <View style={styles.shrimpListPriceRow}>
+                        <Text style={[styles.shrimpListPrice, { color: theme.primary }]}>
+                            {formatPrice(item.price)} đ
                         </Text>
+                        <View
+                            style={[
+                                styles.shrimpListTrendBadge,
+                                {
+                                    backgroundColor:
+                                        item.trend === 'stable'
+                                            ? theme.backgroundTertiary
+                                            : item.trend === 'up'
+                                            ? theme.status.activeBg
+                                            : theme.status.warningBg,
+                                },
+                            ]}
+                        >
+                            <Ionicons name={getTrendIcon()} size={12} color={trendColor} />
+                            <Text style={[styles.shrimpListTrendText, { color: trendColor }]}>
+                                {item.trendValue || 'Ổn định'}
+                            </Text>
+                        </View>
                     </View>
                 </View>
-            </View>
-        </TouchableOpacity>
-    );
-});
+            </TouchableOpacity>
+        );
+    }
+);
 
 ShrimpListItem.displayName = 'ShrimpListItem';
 
@@ -81,14 +83,19 @@ export const AllShrimpList: React.FC<AllShrimpListProps> = ({ shrimpPrices, them
         <View
             style={[
                 styles.sectionContainer,
-                { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
+                { backgroundColor: theme.background, borderColor: theme.defaultBorder },
             ]}
         >
             <View style={styles.sectionHeader}>
                 <Text style={[styles.sectionTitle, { color: theme.text }]}>Tất cả loại tôm</Text>
             </View>
             {shrimpPrices.map((item, index) => (
-                <ShrimpListItem key={item.id || index.toString()} item={item} theme={theme} />
+                <ShrimpListItem
+                    key={item.id || index.toString()}
+                    item={item}
+                    theme={theme}
+                    isLast={index === shrimpPrices.length - 1}
+                />
             ))}
         </View>
     );
@@ -114,11 +121,8 @@ const styles = StyleSheet.create({
     },
     shrimpListItem: {
         flexDirection: 'row',
-        padding: spacing.sm + 4, // 12
-        marginBottom: spacing.sm + 4, // 12
-        borderRadius: 12,
+        paddingVertical: 12,
         alignItems: 'center',
-        borderWidth: 1,
     },
     shrimpListImage: {
         width: 64,

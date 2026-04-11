@@ -81,7 +81,7 @@ export const ShrimpPriceScreen: React.FC = () => {
     }, [selectedSizeShrimp]);
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: theme.backgroundPrimary }]}>
             <HeaderSection title="Tin tức và Giá cả" />
 
             {/* TABS */}
@@ -97,7 +97,7 @@ export const ShrimpPriceScreen: React.FC = () => {
             {activeTab === 'Thức ăn và thuốc' ? (
                 <WebView
                     source={{ uri: 'https://mebieco.vn/#thuc-an-va-thuoc' }}
-                    style={[styles.webview, { backgroundColor: theme.backgroundSecondary }]}
+                    style={[styles.webview, { backgroundColor: theme.backgroundPrimary }]}
                     showsVerticalScrollIndicator={false}
                 />
             ) : (
@@ -152,7 +152,7 @@ export const ShrimpPriceScreen: React.FC = () => {
                                             style={[
                                                 styles.sectionContainer,
                                                 {
-                                                    backgroundColor: theme.backgroundPrimary,
+                                                    backgroundColor: theme.background,
                                                     borderColor: theme.defaultBorder,
                                                 },
                                             ]}
