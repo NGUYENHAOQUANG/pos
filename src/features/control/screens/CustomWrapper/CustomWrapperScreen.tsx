@@ -10,22 +10,22 @@ import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import Toast from 'react-native-toast-message';
 import CheckCircleFilled from '@/assets/Icon/CheckCircleFilled.svg';
 import { CameraCard } from '@/features/control/components/camera/CameraCard';
-import { CameraItem } from '@/features/control/api/cameraApi';
-
-// Mock camera thumbnail for demo
-const MOCK_CAMERA_THUMBNAIL =
-    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=400&fit=crop';
+import { cameraApi, CameraItem } from '@/features/control/api/cameraApi';
+import { useCameras } from '@/features/control/hooks/useCameras';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { checkNetworkForHD } from '@/shared/utils/networkUtils';
 
 type WrapperAction = 'raise' | 'lower';
 
 export const CustomWrapperScreen: React.FC = () => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
     const route = useRoute<RouteProp<ControlStackParamList, 'CustomWrapper'>>();
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -35,23 +35,32 @@ export const CustomWrapperScreen: React.FC = () => {
     const [isExecuting, setIsExecuting] = useState(false);
 
     // ==========================================
-    // [TODO]: XÓA ĐOẠN MOCK NÀY KHI CÓ API
-    // Hiện tại thiết bị chưa có API trả về thông tin camera và thời gian
-    // nên mình mock dữ liệu giả lập cho UI.
-    // ==========================================
-    const cameraInfo = {
-        code: `CAM-${pondName.replace('Ao ', '')}-A`,
-        area: pondName,
-        status: 'Online',
-        time: pondName,
-    };
+    const { data: cameras = [], isLoading: isLoadingCameras } = useCameras();
 
-    const mockCameraItem: CameraItem = {
-        deviceSn: cameraInfo.code,
-        name: cameraInfo.area,
+    // ==========================================
+    // Lấy camera đầu tiên từ API (bỏ qua camera có tên là 'Default' nếu có)
+    const validCamera =
+        cameras.find(
+            cam =>
+                cam.name?.toLowerCase() !== 'default' && cam.deviceSn?.toLowerCase() !== 'default'
+        ) || cameras[0];
+
+    // Mock data dự phòng trong trường hợp API camera hoàn toàn trống
+    const mockFallbackItem: CameraItem = {
+        deviceSn: `CAM-${pondName.replace('Ao ', '')}-A`,
+        name: pondName,
         status: 'On',
-        snapshotUrl: MOCK_CAMERA_THUMBNAIL,
+        snapshotUrl: '', // Đã xóa mock thumbnail
     } as CameraItem;
+
+    const activeCamera: CameraItem = validCamera || mockFallbackItem;
+
+    const cameraInfo = {
+        code: activeCamera.deviceSn || `CAM-${pondName.replace('Ao ', '')}-A`,
+        area: activeCamera.name || pondName,
+        status: activeCamera.status === 'On' ? 'Online' : 'Offline',
+        time: pondName, // Vẫn giữ tạm thời gian theo tên Ao vì API camera không trả về "thời gian"
+    };
     // ==========================================
 
     // Determine wrapper position status
@@ -108,7 +117,46 @@ export const CustomWrapperScreen: React.FC = () => {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Camera Preview Card */}
-                <CameraCard camera={mockCameraItem} onPress={() => {}} />
+                {isLoadingCameras ? (
+                    <Skeleton
+                        width={'100%'}
+                        height={200}
+                        borderRadius={12}
+                        style={{ marginBottom: spacing.sm }}
+                    />
+                ) : (
+                    <CameraCard
+                        camera={activeCamera}
+                        onPress={async (camera: CameraItem) => {
+                            try {
+                                const isHd = await checkNetworkForHD();
+                                const response = await cameraApi.getStream(camera.deviceSn, isHd);
+                                const streamData = response.data?.data;
+                                if (!streamData?.url) {
+                                    Toast.show({
+                                        type: 'error',
+                                        text1: 'Lỗi',
+                                        text2: 'Không lấy được URL stream',
+                                    });
+                                    return;
+                                }
+
+                                navigation.navigate('CameraPlayer', {
+                                    videoUrl: streamData.url,
+                                    cameraName: camera.name,
+                                    pondName: camera.name,
+                                    isHd: isHd,
+                                });
+                            } catch {
+                                Toast.show({
+                                    type: 'error',
+                                    text1: 'Lỗi',
+                                    text2: 'Không thể kết nối đến camera',
+                                });
+                            }
+                        }}
+                    />
+                )}
 
                 {/* Camera Info Card */}
                 <View style={styles.cameraInfoCard}>
