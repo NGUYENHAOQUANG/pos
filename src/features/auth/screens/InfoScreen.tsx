@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ScrollView, StatusBar, StyleSheet, View, Alert } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -22,7 +22,6 @@ import WarningCircleIcon from '@/assets/Icon/IconPolicy/WarningCircle.svg';
 
 import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
 import { handleError } from '@/shared/utils';
-import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 export default function InfoScreen() {
     const [fullName, setFullName] = useState('');
@@ -33,10 +32,14 @@ export default function InfoScreen() {
     const [showPolicyError, setShowPolicyError] = useState(false);
 
     const { user, completeProfile } = useAuthStore();
-    const { keyboardVisible } = useKeyboard();
+    const insets = useSafeAreaInsets();
     const navigation = useNavigation<AuthStackNavigationProp>();
     const theme = useAppTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const stickyOffset = useMemo(
+        () => ({ closed: -(Math.max(insets.bottom, 16) + 16), opened: 0 }),
+        [insets.bottom]
+    );
 
     const handleOpenPolicy = useCallback(() => {
         navigation.navigate('DataPolicy');
@@ -91,123 +94,112 @@ export default function InfoScreen() {
                     <AnimatedBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-                    <KeyboardAvoidingView behavior="padding" style={styles.keyboardInner}>
-                        <View style={styles.mainContentContainer}>
-                            <ScrollView
-                                style={styles.scrollView}
-                                contentContainerStyle={styles.scrollContent}
-                                showsVerticalScrollIndicator={false}
-                                keyboardShouldPersistTaps="handled"
-                            >
-                                <View style={styles.topEmptySpace} />
+                    <View style={styles.mainContentContainer}>
+                        <ScrollView
+                            style={styles.scrollView}
+                            contentContainerStyle={styles.scrollContent}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <View style={styles.topEmptySpace} />
 
-                                <View style={styles.logoSection}>
-                                    <Logo size="square" />
-                                </View>
-
-                                <View style={styles.infoIconSection}>
-                                    <InfoIcon width={48} height={48} color={theme.text} />
-                                </View>
-
-                                <View style={styles.contentSection}>
-                                    <Text style={styles.screenTitle}>Tạo tài khoản</Text>
-
-                                    <View style={styles.formContent}>
-                                        <Input
-                                            label="Họ và tên"
-                                            required
-                                            placeholder="Nhập họ và tên"
-                                            value={fullName}
-                                            onChangeText={setFullName}
-                                            containerStyle={styles.inputSpacing}
-                                        />
-
-                                        <Input
-                                            label={
-                                                <Text style={styles.labelBase}>
-                                                    Email{' '}
-                                                    <Text style={styles.optionalText}>
-                                                        (Không bắt buộc)
-                                                    </Text>
-                                                </Text>
-                                            }
-                                            placeholder="Nhập email của bạn"
-                                            value={email}
-                                            onChangeText={setEmail}
-                                            keyboardType="email-address"
-                                            containerStyle={styles.inputSpacing}
-                                        />
-
-                                        <Input
-                                            label={
-                                                <Text style={styles.labelBase}>
-                                                    Địa chỉ{' '}
-                                                    <Text style={styles.optionalText}>
-                                                        (Không bắt buộc)
-                                                    </Text>
-                                                </Text>
-                                            }
-                                            placeholder="Nhập địa chỉ của bạn"
-                                            value={address}
-                                            onChangeText={setAddress}
-                                            containerStyle={styles.inputSpacing}
-                                        />
-                                    </View>
-                                </View>
-                            </ScrollView>
-
-                            <View
-                                style={[
-                                    styles.footer,
-                                    keyboardVisible && styles.footerKeyboardOpen,
-                                ]}
-                            >
-                                {/* Policy agreement */}
-                                <View style={styles.policySection}>
-                                    <Checkbox
-                                        checked={agreedPolicy}
-                                        onToggle={handleTogglePolicy}
-                                        size="sm"
-                                        activeColor={theme.primaryOrange}
-                                        hasError={showPolicyError}
-                                    />
-                                    <Text style={styles.policyText}>
-                                        Tôi đồng ý với{' '}
-                                        <Text style={styles.policyLink} onPress={handleOpenPolicy}>
-                                            Chính sách bảo vệ dữ liệu cá nhân
-                                        </Text>{' '}
-                                        của Mebieco theo NĐ 13/2023/NĐ-CP.
-                                    </Text>
-                                </View>
-
-                                {showPolicyError && (
-                                    <View style={styles.errorContainer}>
-                                        <WarningCircleIcon
-                                            width={20}
-                                            height={20}
-                                            color={theme.red[500]}
-                                        />
-                                        <Text style={styles.errorText}>
-                                            Vui lòng đồng ý với Chính sách bảo vệ dữ liệu cá nhân để
-                                            tiếp tục.
-                                        </Text>
-                                    </View>
-                                )}
-
-                                <Button
-                                    title="Tạo Tài Khoản"
-                                    onPress={handleSubmit}
-                                    variant="primary"
-                                    fullWidth
-                                    disabled={isSubmitDisabled}
-                                    style={[
-                                        styles.submitButton,
-                                        isSubmitDisabled && styles.submitButtonDisabled,
-                                    ]}
-                                />
+                            <View style={styles.logoSection}>
+                                <Logo size="square" />
                             </View>
+
+                            <View style={styles.infoIconSection}>
+                                <InfoIcon width={48} height={48} color={theme.text} />
+                            </View>
+
+                            <View style={styles.contentSection}>
+                                <Text style={styles.screenTitle}>Tạo tài khoản</Text>
+
+                                <View style={styles.formContent}>
+                                    <Input
+                                        label="Họ và tên"
+                                        required
+                                        placeholder="Nhập họ và tên"
+                                        value={fullName}
+                                        onChangeText={setFullName}
+                                        containerStyle={styles.inputSpacing}
+                                    />
+
+                                    <Input
+                                        label={
+                                            <Text style={styles.labelBase}>
+                                                Email{' '}
+                                                <Text style={styles.optionalText}>
+                                                    (Không bắt buộc)
+                                                </Text>
+                                            </Text>
+                                        }
+                                        placeholder="Nhập email của bạn"
+                                        value={email}
+                                        onChangeText={setEmail}
+                                        keyboardType="email-address"
+                                        containerStyle={styles.inputSpacing}
+                                    />
+
+                                    <Input
+                                        label={
+                                            <Text style={styles.labelBase}>
+                                                Địa chỉ{' '}
+                                                <Text style={styles.optionalText}>
+                                                    (Không bắt buộc)
+                                                </Text>
+                                            </Text>
+                                        }
+                                        placeholder="Nhập địa chỉ của bạn"
+                                        value={address}
+                                        onChangeText={setAddress}
+                                        containerStyle={styles.inputSpacing}
+                                    />
+                                </View>
+                            </View>
+                        </ScrollView>
+                    </View>
+
+                    <KeyboardStickyView offset={stickyOffset} style={styles.footer}>
+                        {/* Policy agreement */}
+                        <View style={styles.policySection}>
+                            <Checkbox
+                                checked={agreedPolicy}
+                                onToggle={handleTogglePolicy}
+                                size="sm"
+                                activeColor={theme.primaryOrange}
+                                hasError={showPolicyError}
+                            />
+                            <Text style={styles.policyText}>
+                                Tôi đồng ý với{' '}
+                                <Text style={styles.policyLink} onPress={handleOpenPolicy}>
+                                    Chính sách bảo vệ dữ liệu cá nhân
+                                </Text>{' '}
+                                của Mebieco theo NĐ 13/2023/NĐ-CP.
+                            </Text>
                         </View>
-                    </KeyboardAvoidingView>
+
+                        {showPolicyError && (
+                            <View style={styles.errorContainer}>
+                                <WarningCircleIcon width={20} height={20} color={theme.red[500]} />
+                                <Text style={styles.errorText}>
+                                    Vui lòng đồng ý với Chính sách bảo vệ dữ liệu cá nhân để tiếp
+                                    tục.
+                                </Text>
+                            </View>
+                        )}
+
+                        <Button
+                            title="Tạo Tài Khoản"
+                            onPress={handleSubmit}
+                            variant="primary"
+                            fullWidth
+                            disabled={isSubmitDisabled}
+                            style={[
+                                styles.submitButton,
+                                isSubmitDisabled && styles.submitButtonDisabled,
+                            ]}
+                        />
+                    </KeyboardStickyView>
                 </SafeAreaView>
             </Loading>
         </ErrorBoundary>
@@ -221,9 +213,7 @@ const getStyles = (theme: Colors) =>
             backgroundColor: theme.backgroundPrimary,
             overflow: 'hidden',
         },
-        keyboardInner: {
-            flex: 1,
-        },
+
         mainContentContainer: {
             flex: 1,
         },
@@ -271,11 +261,8 @@ const getStyles = (theme: Colors) =>
         footer: {
             paddingHorizontal: spacing.md,
             paddingTop: spacing.md,
-            paddingBottom: spacing.xl + spacing.sm + 12,
-            gap: 12,
-        },
-        footerKeyboardOpen: {
             paddingBottom: spacing.md,
+            gap: 12,
         },
         labelBase: {
             color: theme.text,

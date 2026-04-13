@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -15,6 +15,8 @@ import { Colors } from '@/styles/colors';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import OTPIcon from '@/assets/Icon/OTP.svg';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DeleteAccountOtpStepProps {
     phoneNumber: string;
@@ -33,6 +35,11 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
+    const insets = useSafeAreaInsets();
+    const stickyOffset = useMemo(
+        () => ({ closed: -(Math.max(insets.bottom, 16) + 16), opened: 0 }),
+        [insets.bottom]
+    );
 
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
     const [countdown, setCountdown] = useState(59);
@@ -145,13 +152,16 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
             </TouchableWithoutFeedback>
 
             {/* FOOTER */}
-            <ButtonBar
-                mode="double"
-                primaryTitle="Tiếp tục"
-                secondaryTitle="Ngừng xoá tài khoản"
-                onPrimaryPress={handleNext}
-                onSecondaryPress={onCancel}
-            />
+            <KeyboardStickyView offset={stickyOffset} style={styles.footer}>
+                <ButtonBar
+                    mode="double"
+                    primaryTitle="Tiếp tục"
+                    secondaryTitle="Ngừng xoá tài khoản"
+                    onPrimaryPress={handleNext}
+                    onSecondaryPress={onCancel}
+                    containerStyle={{ paddingBottom: 0, paddingTop: 0 }}
+                />
+            </KeyboardStickyView>
         </View>
     );
 };
@@ -234,5 +244,9 @@ const getStyles = (theme: Colors) =>
             color: theme.primary,
             fontWeight: '500',
             textDecorationLine: 'underline',
+        },
+        footer: {
+            paddingTop: spacing.xs,
+            paddingBottom: spacing.md,
         },
     });

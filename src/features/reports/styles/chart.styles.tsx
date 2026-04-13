@@ -4,7 +4,7 @@ export const useChartStyles = () => {
     const theme = useAppTheme();
     return {
         container: {
-            backgroundColor: theme.backgroundButton,
+            backgroundColor: theme.background,
             borderRadius: 8,
             borderWidth: 1,
             borderColor: theme.border,

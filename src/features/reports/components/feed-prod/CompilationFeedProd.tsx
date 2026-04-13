@@ -9,7 +9,6 @@ import { FeedProdInfoCard } from '@/features/reports/components/feed-prod/FeedPr
 import {
     CHART_WIDTH,
     CHART_HEIGHT,
-    PADDING_LEFT,
     PADDING_RIGHT,
     PADDING_TOP,
     PADDING_BOTTOM,
@@ -66,7 +65,7 @@ export const CompilationFeedProd = ({ zoneId, pondId, seasonId }: CompilationFee
         return set;
     }, [selectedFilter]);
 
-    const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
+    const chartWidth = CHART_WIDTH - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
     // Use API Data

@@ -8,9 +8,9 @@ import {
     AppStateStatus,
     Keyboard,
 } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { Text } from '@/shared/components/typography/Text';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
@@ -29,7 +29,6 @@ import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
 import { normalizeApiError } from '@/core/api/errorHandler';
 import AnimatedBackground from '@/shared/components/ui/AnimatedBackground';
-import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 const COUNTDOWN_DURATION = 60;
 
@@ -46,9 +45,13 @@ export default function VerifyOTPScreen() {
 
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
-    const { keyboardVisible } = useKeyboard();
+    const insets = useSafeAreaInsets();
     const theme = useAppTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const stickyOffset = useMemo(
+        () => ({ closed: -(Math.max(insets.bottom, 16) + 16), opened: 0 }),
+        [insets.bottom]
+    );
 
     const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -165,77 +168,71 @@ export default function VerifyOTPScreen() {
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <AnimatedBackground />
-            <KeyboardAvoidingView behavior="padding" style={styles.keyboardInner}>
-                <View style={styles.mainContentContainer}>
-                    <ScrollView
-                        style={styles.scrollView}
-                        contentContainerStyle={styles.scrollContent}
-                        keyboardShouldPersistTaps="handled"
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <View style={styles.backButtonSection}>
-                            <TouchableOpacity
-                                style={styles.backButton}
-                                onPress={() => navigation.goBack()}
-                            >
-                                <Ionicons name="arrow-back" size={20} color={theme.text} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.logoSection}>
-                            <OTPIcon width={60} height={40} color={theme.text} />
-                        </View>
-                        <View style={styles.contentSection}>
-                            <Text style={styles.title}>Nhập mã OTP</Text>
-                            <Text style={styles.subtitle}>
-                                Nhập mã được gửi đến số điện thoại{'\n'}
-                                <Text style={styles.phoneNumber}>{displayContact}</Text>
-                            </Text>
-                            <View style={styles.otpInputSection}>
-                                <OTPInput
-                                    ref={otpInputRef}
-                                    code={otp}
-                                    onCodeChanged={handleOtpChange}
-                                    isError={isError}
-                                    length={4}
-                                />
-                            </View>
-                            {isError ? (
-                                <Text style={styles.errorText}>{errorMessage}</Text>
-                            ) : (
-                                <View style={styles.errorPlaceholder} />
-                            )}
-                            <View style={styles.resendContainer}>
-                                <Text style={styles.resendLabel}>Không nhận được mã? </Text>
-                                {countdown > 0 ? (
-                                    <Text style={styles.timerText}>
-                                        <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau
-                                        0:{countdown.toString().padStart(2, '0')})
-                                    </Text>
-                                ) : (
-                                    <TouchableOpacity onPress={handleResendOTP}>
-                                        <Text style={styles.activeLink}>Gửi lại mã</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        </View>
-                    </ScrollView>
-                    <View
-                        style={[
-                            styles.submitButtonContainer,
-                            keyboardVisible && styles.footerKeyboardOpen,
-                        ]}
-                    >
-                        <Button
-                            title="Tiếp Tục"
-                            onPress={handleVerifyOTP}
-                            variant="primary"
-                            fullWidth
-                            loading={isVerifying}
-                            style={styles.submitButton}
-                        />
+            <View style={styles.mainContentContainer}>
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.backButtonSection}>
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Ionicons name="arrow-back" size={20} color={theme.text} />
+                        </TouchableOpacity>
                     </View>
-                </View>
-            </KeyboardAvoidingView>
+                    <View style={styles.logoSection}>
+                        <OTPIcon width={60} height={40} color={theme.text} />
+                    </View>
+                    <View style={styles.contentSection}>
+                        <Text style={styles.title}>Xác thực OTP</Text>
+                        <Text style={styles.subtitle}>
+                            Nhập mã được gửi đến số điện thoại{'\n'}
+                            <Text style={styles.phoneNumber}>{displayContact}</Text>
+                        </Text>
+                        <View style={styles.otpInputSection}>
+                            <OTPInput
+                                ref={otpInputRef}
+                                code={otp}
+                                onCodeChanged={handleOtpChange}
+                                isError={isError}
+                                length={4}
+                            />
+                        </View>
+                        {isError ? (
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                        ) : (
+                            <View style={styles.errorPlaceholder} />
+                        )}
+                        <View style={styles.resendContainer}>
+                            <Text style={styles.resendLabel}>Không nhận được mã? </Text>
+                            {countdown > 0 ? (
+                                <Text style={styles.timerText}>
+                                    <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau 0:
+                                    {countdown.toString().padStart(2, '0')})
+                                </Text>
+                            ) : (
+                                <TouchableOpacity onPress={handleResendOTP}>
+                                    <Text style={styles.activeLink}>Gửi lại mã</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                </ScrollView>
+            </View>
+
+            <KeyboardStickyView offset={stickyOffset} style={styles.submitButtonContainer}>
+                <Button
+                    title="Tiếp Tục"
+                    onPress={handleVerifyOTP}
+                    variant="primary"
+                    fullWidth
+                    loading={isVerifying}
+                    style={styles.submitButton}
+                />
+            </KeyboardStickyView>
         </SafeAreaView>
     );
 }
@@ -246,9 +243,7 @@ const getStyles = (theme: Colors) =>
             flex: 1,
             backgroundColor: theme.backgroundPrimary,
         },
-        keyboardInner: {
-            flex: 1,
-        },
+
         mainContentContainer: {
             flex: 1,
             justifyContent: 'space-between',
@@ -329,10 +324,7 @@ const getStyles = (theme: Colors) =>
         activeLink: { color: theme.primary, fontWeight: '500', textDecorationLine: 'underline' },
         submitButtonContainer: {
             paddingHorizontal: spacing.md,
-            paddingBottom: spacing.xl + spacing.sm + 12,
             paddingTop: spacing.xs,
-        },
-        footerKeyboardOpen: {
             paddingBottom: spacing.md,
         },
         submitButton: { backgroundColor: theme.primary, borderRadius: 25, height: 40 },

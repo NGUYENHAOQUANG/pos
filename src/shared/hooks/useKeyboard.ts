@@ -1,43 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Keyboard, KeyboardEvent, Platform, AppState, AppStateStatus } from 'react-native';
+import { useKeyboardState } from 'react-native-keyboard-controller';
 
+/**
+ * Hook that tracks keyboard visibility and height using react-native-keyboard-controller.
+ * Unlike RN core Keyboard events, this does NOT trigger falsely when
+ * iOS notification center or control center is pulled down.
+ */
 export function useKeyboard() {
-    const [keyboardVisible, setKeyboardVisible] = useState(false);
-    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const isVisible = useKeyboardState(state => state.isVisible);
+    const height = useKeyboardState(state => state.height);
 
-    useEffect(() => {
-        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-        const onKeyboardShow = (e: KeyboardEvent) => {
-            setKeyboardVisible(true);
-            setKeyboardHeight(e.endCoordinates.height);
-        };
-
-        const onKeyboardHide = () => {
-            setKeyboardVisible(false);
-            setKeyboardHeight(0);
-        };
-
-        const showSubscription = Keyboard.addListener(showEvent, onKeyboardShow);
-        const hideSubscription = Keyboard.addListener(hideEvent, onKeyboardHide);
-
-        // Reset keyboard state when app goes to background to prevent "jump" issues on return
-        const handleAppStateChange = (nextAppState: AppStateStatus) => {
-            if (nextAppState !== 'active') {
-                setKeyboardVisible(false);
-                setKeyboardHeight(0);
-            }
-        };
-
-        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
-
-        return () => {
-            showSubscription.remove();
-            hideSubscription.remove();
-            appStateSubscription.remove();
-        };
-    }, []);
-
-    return { keyboardVisible, keyboardHeight };
+    return {
+        keyboardVisible: isVisible,
+        keyboardHeight: height,
+    };
 }

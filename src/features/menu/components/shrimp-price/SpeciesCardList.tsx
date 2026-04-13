@@ -58,7 +58,7 @@ const SpeciesCard: React.FC<SpeciesCardProps> = ({
             onPress={() => onSelectSpecies(species)}
             style={[
                 styles.speciesCardContainer,
-                { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
+                { backgroundColor: theme.background, borderColor: theme.defaultBorder },
                 isSelected && styles.speciesCardSelected,
             ]}
         >

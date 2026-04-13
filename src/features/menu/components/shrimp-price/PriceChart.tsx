@@ -216,7 +216,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ data, theme }) => {
                                     cx={pt.x}
                                     cy={pt.y}
                                     r={3}
-                                    fill={theme.backgroundPrimary}
+                                    fill={theme.background}
                                     stroke={theme.primary}
                                     strokeWidth={1.5}
                                 />
@@ -246,7 +246,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ data, theme }) => {
                                 chartStyles.tooltip,
                                 tooltipStyle,
                                 {
-                                    backgroundColor: theme.backgroundPrimary,
+                                    backgroundColor: theme.background,
                                     borderColor: theme.border,
                                 },
                             ]}
@@ -267,7 +267,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ data, theme }) => {
                                     {
                                         right: padding.right - 10,
                                         top: getY(actualData[actualData.length - 1].value) - 40,
-                                        backgroundColor: theme.blue[50],
+                                        backgroundColor: theme.backgroundTertiary,
                                     },
                                 ]}
                             >
