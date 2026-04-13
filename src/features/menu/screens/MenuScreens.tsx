@@ -119,7 +119,7 @@ export const MenuScreens: React.FC = () => {
         },
         {
             id: 'shrimp-price',
-            title: 'Tin tức và Giá cả',
+            title: 'Tin tức và giá cả',
             Icon: ChartBarIcon,
             onPress: () => navigation.navigate('ShrimpPrice' as never),
         },

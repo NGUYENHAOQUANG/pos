@@ -4,6 +4,7 @@ import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import FirebaseCore
 import FirebaseMessaging
+import AVFoundation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -27,6 +28,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   ) -> Bool {
     // Configure Firebase
     FirebaseApp.configure()
+
+    // Configure WebRTC Audio for Loudspeaker
+    let rtcConfig = RTCAudioSessionConfiguration.webRTC()
+    rtcConfig.category = AVAudioSession.Category.playAndRecord.rawValue
+    let options: AVAudioSession.CategoryOptions = [.defaultToSpeaker, .allowBluetoothA2DP, .allowBluetoothHFP]
+    rtcConfig.categoryOptions = options
+    rtcConfig.mode = AVAudioSession.Mode.videoChat.rawValue
+    RTCAudioSessionConfiguration.setWebRTC(rtcConfig)
 
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)

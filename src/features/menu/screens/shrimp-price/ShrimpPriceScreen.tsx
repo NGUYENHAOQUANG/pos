@@ -17,14 +17,19 @@ import { SpeciesCardList } from '@/features/menu/components/shrimp-price/Species
 import { SizePriceSection } from '@/features/menu/components/shrimp-price/SizePriceSection';
 import { NewsSection } from '@/features/menu/components/shrimp-price/NewsSection';
 import { AllShrimpList } from '@/features/menu/components/shrimp-price/AllShrimpList';
+import { ShrimpMarquee } from '@/features/menu/components/shrimp-price/ShrimpMarquee';
 
-const TABS = ['Giá tôm', 'Tin tức thị trường', 'Thức ăn và thuốc'];
+const TABS = ['Giá tôm thị trường', 'Tin tức nổi bật', 'Thức ăn và thuốc'];
 const HEADING_TABS = TABS.map(tab => ({ key: tab, label: tab }));
 
 export const ShrimpPriceScreen: React.FC = () => {
     const theme = useAppTheme();
     const { data: shrimpPrices, isLoading, error, refetch, isRefetching } = useShrimpPrice();
-    const { data: newsData = [], isLoading: newsLoading, error: newsError } = useNews('Tin tức');
+    const {
+        data: newsData = [],
+        isLoading: newsLoading,
+        error: newsError,
+    } = useNews('Tin tức nổi bật');
 
     // Group items by "Tôm thẻ", "Tôm sú", "Khác"
     const groupedShrimps = useMemo(() => {
@@ -49,9 +54,12 @@ export const ShrimpPriceScreen: React.FC = () => {
         return groups;
     }, [shrimpPrices]);
 
-    const speciesNames = Object.keys(groupedShrimps).filter(k => groupedShrimps[k].length > 0);
+    const speciesNames = useMemo(
+        () => Object.keys(groupedShrimps).filter(k => groupedShrimps[k].length > 0),
+        [groupedShrimps]
+    );
 
-    const [activeTab, setActiveTab] = useState('Giá tôm');
+    const [activeTab, setActiveTab] = useState('Giá tôm thị trường');
     const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
     const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
 
@@ -81,7 +89,7 @@ export const ShrimpPriceScreen: React.FC = () => {
     }, [selectedSizeShrimp]);
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+        <View style={[styles.container, { backgroundColor: theme.backgroundPrimary }]}>
             <HeaderSection title="Tin tức và Giá cả" />
 
             {/* TABS */}
@@ -94,12 +102,27 @@ export const ShrimpPriceScreen: React.FC = () => {
                 />
             </View>
 
+            <ShrimpMarquee data={shrimpPrices ?? []} theme={theme} />
+
             {activeTab === 'Thức ăn và thuốc' ? (
-                <WebView
-                    source={{ uri: 'https://mebieco.vn/#thuc-an-va-thuoc' }}
-                    style={[styles.webview, { backgroundColor: theme.backgroundSecondary }]}
-                    showsVerticalScrollIndicator={false}
-                />
+                <View style={styles.webviewContainer}>
+                    <WebView
+                        source={{ uri: 'https://mebieco.vn/#thuc-an-va-thuoc' }}
+                        style={[styles.webview, { backgroundColor: theme.backgroundPrimary }]}
+                        showsVerticalScrollIndicator={false}
+                        startInLoadingState={true}
+                        renderLoading={() => (
+                            <View
+                                style={[
+                                    styles.webviewLoading,
+                                    { backgroundColor: theme.backgroundPrimary },
+                                ]}
+                            >
+                                <Loading size="large" />
+                            </View>
+                        )}
+                    />
+                </View>
             ) : (
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
@@ -126,7 +149,7 @@ export const ShrimpPriceScreen: React.FC = () => {
                         </View>
                     ) : (
                         <>
-                            {activeTab === 'Giá tôm' && (
+                            {activeTab === 'Giá tôm thị trường' && (
                                 <View>
                                     {/* Species Cards */}
                                     <SpeciesCardList
@@ -152,7 +175,7 @@ export const ShrimpPriceScreen: React.FC = () => {
                                             style={[
                                                 styles.sectionContainer,
                                                 {
-                                                    backgroundColor: theme.backgroundPrimary,
+                                                    backgroundColor: theme.background,
                                                     borderColor: theme.defaultBorder,
                                                 },
                                             ]}
@@ -181,7 +204,7 @@ export const ShrimpPriceScreen: React.FC = () => {
                                 </View>
                             )}
 
-                            {activeTab === 'Tin tức thị trường' && (
+                            {activeTab === 'Tin tức nổi bật' && (
                                 <NewsSection
                                     newsData={newsData}
                                     isLoading={newsLoading}
@@ -204,8 +227,17 @@ const styles = StyleSheet.create({
     tabsContainer: {
         paddingBottom: 8,
     },
+    webviewContainer: {
+        flex: 1,
+    },
     webview: {
         flex: 1,
+    },
+    webviewLoading: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
     },
     scrollContent: {
         paddingBottom: 40,
