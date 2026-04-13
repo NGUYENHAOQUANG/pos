@@ -13,8 +13,9 @@ const getChartTheme = (theme: any) => ({
     orange: '#f97316',
     forecast: '#F59E0B',
 });
-import { CHART_HEIGHT, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
+import { CHART_HEIGHT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
 import { FeedProdChartDataPoint } from '../../types/feeding-production';
+import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
 
 interface ChartProps {
     chartWidth: number;
@@ -186,6 +187,13 @@ export const Chart: React.FC<ChartProps> = ({
         Y_MAX_CHART1,
         getYAxisLabels,
     } = processedData;
+
+    const PADDING_LEFT = calculateDynamicYAxisWidth(
+        getYAxisLabels(),
+        val => (Math.round(val * 100) / 100).toString(),
+        12,
+        16
+    );
 
     // Helper functions
     const INNER_PADDING_LEFT = 18; // Khoảng cách từ trục Y đến điểm dữ liệu đầu tiên
