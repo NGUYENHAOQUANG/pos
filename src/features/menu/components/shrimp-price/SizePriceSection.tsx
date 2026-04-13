@@ -26,7 +26,7 @@ export const SizePriceSection: React.FC<SizePriceSectionProps> = ({
         <View
             style={[
                 styles.sectionContainer,
-                { backgroundColor: theme.backgroundPrimary, borderColor: theme.defaultBorder },
+                { backgroundColor: theme.background, borderColor: theme.defaultBorder },
             ]}
         >
             <View style={styles.sectionHeader}>
@@ -84,7 +84,7 @@ export const SizePriceSection: React.FC<SizePriceSectionProps> = ({
                                 style={[
                                     styles.sizeCard,
                                     {
-                                        backgroundColor: theme.backgroundPrimary,
+                                        backgroundColor: theme.background,
                                         borderColor: theme.defaultBorder,
                                     },
                                 ]}
