@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { RTCPeerConnection, RTCSessionDescription, MediaStream } from 'react-native-webrtc';
+import { NativeModules, Platform } from 'react-native';
+
+const { AudioRouteModule } = NativeModules;
 
 export const useWebRTCStream = (url: string) => {
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -76,6 +79,9 @@ export const useWebRTCStream = (url: string) => {
                             setStatusText('Đã kết nối luồng video');
                             setProgress(100);
                             setIsConnected(true);
+                            if (Platform.OS === 'android' && AudioRouteModule) {
+                                AudioRouteModule.setSpeakerphoneOn(true);
+                            }
                             break;
                         case 'disconnected':
                         case 'failed':
@@ -143,6 +149,9 @@ export const useWebRTCStream = (url: string) => {
         return () => {
             isMounted = false;
             clearFakeProgress();
+            if (Platform.OS === 'android' && AudioRouteModule) {
+                AudioRouteModule.setSpeakerphoneOn(false);
+            }
             if (peerConnection.current) {
                 peerConnection.current.close();
                 peerConnection.current = null;
