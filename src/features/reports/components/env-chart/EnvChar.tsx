@@ -8,6 +8,7 @@ import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-nativ
 import * as shape from 'd3-shape';
 
 import { typography } from '@/styles/typography';
+import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
 import { TooltipEnvChart } from './TooltipEnvChart';
 import {
     EnvChartSeries,
@@ -108,6 +109,49 @@ export default function EnvChar({
         []
     );
 
+    // Custom Y-Axis Logic - Always show exactly 6 ticks
+    const TICK_COUNT = 6;
+    const vals = allPoints.map(d => d.value);
+    let yDomain = [0, 10];
+    let yTicks: number[] = [0, 2, 4, 6, 8, 10];
+
+    if (vals.length > 0) {
+        // Y-axis always starts from 0
+        const minVal = 0;
+        let maxVal = Math.max(...vals);
+
+        // Handle edge case: all values are 0
+        if (maxVal === 0) {
+            maxVal = 10;
+        }
+
+        // Calculate a nice step that produces exactly 6 ticks (5 intervals)
+        const rawRange = maxVal - minVal;
+        const rawStep = rawRange / (TICK_COUNT - 1);
+
+        // Round step up to a "nice" number (finer steps to avoid overshooting)
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+        const normalized = rawStep / magnitude;
+        let niceStep: number;
+        if (normalized <= 1) niceStep = 1 * magnitude;
+        else if (normalized <= 1.5) niceStep = 1.5 * magnitude;
+        else if (normalized <= 2) niceStep = 2 * magnitude;
+        else if (normalized <= 2.5) niceStep = 2.5 * magnitude;
+        else if (normalized <= 5) niceStep = 5 * magnitude;
+        else niceStep = 10 * magnitude;
+
+        // Round start down and generate exactly 6 ticks
+        const start = Math.floor(minVal / niceStep) * niceStep;
+
+        yTicks = [];
+        for (let i = 0; i < TICK_COUNT; i++) {
+            const v = start + i * niceStep;
+            yTicks.push(Math.round(v * 100) / 100);
+        }
+
+        yDomain = [yTicks[0], yTicks[yTicks.length - 1]];
+    }
+
     const [layout, setLayout] = useState({ width: 0, height: 0 });
 
     // Shared Values for Gestures
@@ -115,7 +159,9 @@ export default function EnvChar({
     const savedTranslateX = useSharedValue(0);
 
     // Derived dimensions
-    const CHART_LEFT_PADDING = 60;
+    const CHART_LEFT_PADDING = calculateDynamicYAxisWidth(yTicks, val =>
+        Number.isInteger(val) ? val.toString() : val.toFixed(1)
+    );
     const CHART_RIGHT_PADDING = 30; // half label width to prevent clipping at edge
     const MIN_DATE_SPACING = 15; // px per day interval
     const chartAreaWidth = Math.max(0, layout.width);
@@ -194,49 +240,6 @@ export default function EnvChar({
         range: [CHART_LEFT_PADDING, contentWidth - CHART_RIGHT_PADDING],
     });
 
-    // Custom Y-Axis Logic - Always show exactly 6 ticks
-    const TICK_COUNT = 6;
-    const vals = allPoints.map(d => d.value);
-    let yDomain = [0, 10];
-    let yTicks: number[] = [0, 2, 4, 6, 8, 10];
-
-    if (vals.length > 0) {
-        // Y-axis always starts from 0
-        const minVal = 0;
-        let maxVal = Math.max(...vals);
-
-        // Handle edge case: all values are 0
-        if (maxVal === 0) {
-            maxVal = 10;
-        }
-
-        // Calculate a nice step that produces exactly 6 ticks (5 intervals)
-        const rawRange = maxVal - minVal;
-        const rawStep = rawRange / (TICK_COUNT - 1);
-
-        // Round step up to a "nice" number (finer steps to avoid overshooting)
-        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-        const normalized = rawStep / magnitude;
-        let niceStep: number;
-        if (normalized <= 1) niceStep = 1 * magnitude;
-        else if (normalized <= 1.5) niceStep = 1.5 * magnitude;
-        else if (normalized <= 2) niceStep = 2 * magnitude;
-        else if (normalized <= 2.5) niceStep = 2.5 * magnitude;
-        else if (normalized <= 5) niceStep = 5 * magnitude;
-        else niceStep = 10 * magnitude;
-
-        // Round start down and generate exactly 6 ticks
-        const start = Math.floor(minVal / niceStep) * niceStep;
-
-        yTicks = [];
-        for (let i = 0; i < TICK_COUNT; i++) {
-            const v = start + i * niceStep;
-            yTicks.push(Math.round(v * 100) / 100);
-        }
-
-        yDomain = [yTicks[0], yTicks[yTicks.length - 1]];
-    }
-
     const scaleY = scaleLinear({
         domain: yDomain,
         range: [height - 30, 10],
@@ -309,25 +312,6 @@ export default function EnvChar({
             style={[styles.container, { backgroundColor: theme.background }]}
             onLayout={onLayout}
         >
-            {/* Y Axis Labels (Absolute overlay) */}
-            <View style={styles.yAxisOverlay} pointerEvents="none">
-                {yTicks.map((val, i) => (
-                    <Text
-                        key={i}
-                        style={[
-                            styles.axisLabel,
-                            {
-                                color: theme.textSecondary,
-                                position: 'absolute',
-                                top: scaleY(val) - 10,
-                            },
-                        ]}
-                    >
-                        {Number.isInteger(val) ? val : val.toFixed(1)}
-                    </Text>
-                ))}
-            </View>
-
             <View style={styles.chartArea}>
                 <GestureDetector gesture={composed}>
                     <View style={{ flex: 1 }}>
@@ -409,6 +393,26 @@ export default function EnvChar({
                 </GestureDetector>
             </View>
 
+            {/* Y Axis Labels (Absolute overlay) */}
+            <View style={[styles.yAxisOverlay, { width: CHART_LEFT_PADDING }]} pointerEvents="none">
+                <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.background }]} />
+                {yTicks.map((val, i) => (
+                    <Text
+                        key={i}
+                        style={[
+                            styles.axisLabel,
+                            {
+                                color: theme.textSecondary,
+                                position: 'absolute',
+                                top: scaleY(val) - 10,
+                            },
+                        ]}
+                    >
+                        {Number.isInteger(val) ? val : val.toFixed(1)}
+                    </Text>
+                ))}
+            </View>
+
             {/* Tooltip rendered outside chartArea to avoid overflow:hidden clipping */}
             <TooltipEnvChart
                 visible={selectedIndex !== null && !!selectedDate}
@@ -432,7 +436,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: 0,
         top: 0,
-        width: 30,
+        width: 30, // Updated dynamically inline in render
         height: '100%',
         zIndex: 10,
     },
