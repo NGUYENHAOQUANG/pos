@@ -1,10 +1,9 @@
 import { NewsItem } from '@/features/menu/types/news.types';
 
-/** Map tab label to RSS feed URL */
 const RSS_URLS: Record<string, string> = {
     'Tất cả': 'https://tepbac.com/feeds/news/moi.xml',
-    'Tin tức nổi bật': 'https://tepbac.com/feeds/news.xml',
-    'Kỹ thuật': 'https://tepbac.com/feeds/technical.xml',
+    'Tin tức nổi bật': 'https://tepbac.com/feeds/news/moi.xml',
+    'Kỹ thuật': 'https://tepbac.com/feeds/news/moi.xml',
 };
 
 const DEFAULT_RSS_URL = RSS_URLS['Tất cả'];
@@ -63,7 +62,7 @@ const parseRssItem = (itemXml: string, index: number): NewsItem | null => {
     const pubDate = extractTag(itemXml, 'pubDate');
 
     return {
-        id: `news-${index}-${Date.now()}`,
+        id: `news-${index}-${link.replace(/\W/g, '').slice(-20)}`,
         title: stripCdata(title),
         link,
         summary: extractDescription(itemXml),
@@ -72,28 +71,41 @@ const parseRssItem = (itemXml: string, index: number): NewsItem | null => {
     };
 };
 
+const FETCH_TIMEOUT_MS = 10_000; // 10 seconds
+
 /**
  * Fetch and parse news data from tepbac.com RSS feeds.
  */
 export const fetchNewsData = async (type: string): Promise<NewsItem[]> => {
     const url = RSS_URLS[type] ?? DEFAULT_RSS_URL;
 
-    const response = await fetch(url, { headers: FETCH_HEADERS });
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(url, {
+            headers: FETCH_HEADERS,
+            signal: controller.signal,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const xml = await response.text();
+        const results: NewsItem[] = [];
+
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        let match: RegExpExecArray | null;
+        let index = 0;
+
+        while ((match = itemRegex.exec(xml)) !== null) {
+            const item = parseRssItem(match[1], index++);
+            if (item) results.push(item);
+        }
+
+        return results;
+    } finally {
+        clearTimeout(timeoutId);
     }
-
-    const xml = await response.text();
-    const results: NewsItem[] = [];
-
-    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-    let match: RegExpExecArray | null;
-    let index = 0;
-
-    while ((match = itemRegex.exec(xml)) !== null) {
-        const item = parseRssItem(match[1], index++);
-        if (item) results.push(item);
-    }
-
-    return results;
 };

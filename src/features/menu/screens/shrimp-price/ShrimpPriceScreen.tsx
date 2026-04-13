@@ -54,7 +54,10 @@ export const ShrimpPriceScreen: React.FC = () => {
         return groups;
     }, [shrimpPrices]);
 
-    const speciesNames = Object.keys(groupedShrimps).filter(k => groupedShrimps[k].length > 0);
+    const speciesNames = useMemo(
+        () => Object.keys(groupedShrimps).filter(k => groupedShrimps[k].length > 0),
+        [groupedShrimps]
+    );
 
     const [activeTab, setActiveTab] = useState('Giá tôm thị trường');
     const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
@@ -102,11 +105,24 @@ export const ShrimpPriceScreen: React.FC = () => {
             <ShrimpMarquee data={shrimpPrices ?? []} theme={theme} />
 
             {activeTab === 'Thức ăn và thuốc' ? (
-                <WebView
-                    source={{ uri: 'https://mebieco.vn/#thuc-an-va-thuoc' }}
-                    style={[styles.webview, { backgroundColor: theme.backgroundPrimary }]}
-                    showsVerticalScrollIndicator={false}
-                />
+                <View style={styles.webviewContainer}>
+                    <WebView
+                        source={{ uri: 'https://mebieco.vn/#thuc-an-va-thuoc' }}
+                        style={[styles.webview, { backgroundColor: theme.backgroundPrimary }]}
+                        showsVerticalScrollIndicator={false}
+                        startInLoadingState={true}
+                        renderLoading={() => (
+                            <View
+                                style={[
+                                    styles.webviewLoading,
+                                    { backgroundColor: theme.backgroundPrimary },
+                                ]}
+                            >
+                                <Loading size="large" />
+                            </View>
+                        )}
+                    />
+                </View>
             ) : (
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
@@ -211,8 +227,17 @@ const styles = StyleSheet.create({
     tabsContainer: {
         paddingBottom: 8,
     },
+    webviewContainer: {
+        flex: 1,
+    },
     webview: {
         flex: 1,
+    },
+    webviewLoading: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
     },
     scrollContent: {
         paddingBottom: 40,
