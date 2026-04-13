@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -11,6 +11,8 @@ import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
@@ -37,6 +39,11 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
+    const insets = useSafeAreaInsets();
+    const stickyOffset = useMemo(
+        () => ({ closed: -(Math.max(insets.bottom, 16) + 16), opened: 0 }),
+        [insets.bottom]
+    );
     const {
         control,
         handleSubmit,
@@ -222,11 +229,14 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                 </ScrollView>
 
                 {/* Footer Button */}
-                <ButtonBar
-                    mode="single"
-                    primaryTitle="Tiếp tục"
-                    onPrimaryPress={handleSubmit(onSubmit)}
-                />
+                <KeyboardStickyView offset={stickyOffset} style={styles.footer}>
+                    <ButtonBar
+                        mode="single"
+                        primaryTitle="Tiếp tục"
+                        onPrimaryPress={handleSubmit(onSubmit)}
+                        containerStyle={{ paddingBottom: 0, paddingTop: 0 }}
+                    />
+                </KeyboardStickyView>
             </View>
         </View>
     );
@@ -303,5 +313,9 @@ const getStyles = (theme: Colors) =>
             fontSize: 15,
             color: theme.text,
             flex: 1,
+        },
+        footer: {
+            paddingTop: spacing.xs,
+            paddingBottom: spacing.md,
         },
     });

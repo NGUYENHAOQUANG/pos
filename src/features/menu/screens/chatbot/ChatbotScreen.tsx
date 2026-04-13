@@ -112,6 +112,7 @@ export const ChatbotScreen: React.FC = () => {
                 },
             ]}
             behavior="padding"
+            keyboardVerticalOffset={-(Math.max(16, insets.bottom + 4) - 12)}
         >
             {/* Header */}
             <HeaderSection
