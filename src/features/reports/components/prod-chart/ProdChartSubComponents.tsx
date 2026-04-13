@@ -9,6 +9,7 @@ import {
     ProdVisualChartProps,
     ProdChartGroupData,
 } from '../../types/production-distribution';
+import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -239,6 +240,10 @@ export const VisualChart = React.memo(
         const theme = useAppTheme();
         const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+        const dynamicAutoWidth = useMemo(() => {
+            return calculateDynamicYAxisWidth(yLabels, val => String(val), 12, 10);
+        }, [yLabels]);
+
         const columnWidth = useMemo(() => {
             const maxItems = data.reduce((max, g) => Math.max(max, g.items.length), 0);
             if (viewMode === 'doc') {
@@ -295,7 +300,11 @@ export const VisualChart = React.memo(
 
         return (
             <View style={chartInnerStyles.mainArea}>
-                <View style={[chartInnerStyles.yAxisContainer, { height }]}>{yAxisElements}</View>
+                <View
+                    style={[chartInnerStyles.yAxisContainer, { height, width: dynamicAutoWidth }]}
+                >
+                    {yAxisElements}
+                </View>
 
                 <ScrollView
                     horizontal
@@ -506,7 +515,6 @@ const chartInnerStyles = StyleSheet.create({
         paddingRight: spacing.md,
     },
     yAxisContainer: {
-        width: 45,
         position: 'relative',
         marginRight: spacing.xs,
     },

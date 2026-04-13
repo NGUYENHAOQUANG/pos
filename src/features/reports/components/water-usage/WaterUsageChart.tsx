@@ -3,7 +3,6 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 
-import { colors } from '@/styles/colors';
 import { useAppTheme } from '@/styles/themeContext';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
@@ -12,10 +11,10 @@ import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import DropIcon from '@/assets/Icon/IconReport/Drop.svg';
 import { useWaterUsageStats } from '../../hooks/useWaterUsageStats';
 import { scaleLinear, formatNumberVietnamese, parseWaterUsageData } from './waterUsageHelpers';
+import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
 import { typography } from '@/styles/typography';
 
 const CHART_HEIGHT = 400;
-const PADDING_LEFT = 85;
 const PADDING_TOP = 20;
 const PADDING_BOTTOM = 40;
 const DRAW_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -43,6 +42,8 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
     }, [statsData]);
 
     const { totalWaterSupplied, bars, yMax, yTicks } = parsedData;
+
+    const PADDING_LEFT = calculateDynamicYAxisWidth(yTicks, formatNumberVietnamese);
 
     // Simple layout: fixed width per bar, evenly spaced
     const BAR_WIDTH = 32;
@@ -173,11 +174,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
                                                     y={yTop}
                                                     width={BAR_WIDTH}
                                                     height={h}
-                                                    fill={
-                                                        theme.isDark
-                                                            ? colors.orange[900]
-                                                            : colors.orange[600]
-                                                    }
+                                                    fill="#FD6900"
                                                     rx={2}
                                                     ry={2}
                                                 />

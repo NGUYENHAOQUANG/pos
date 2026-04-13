@@ -7,7 +7,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAppTheme } from '@/styles/themeContext';
 import { useChatbotStyles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 interface ChatbotInputToolbarProps {
     onSend: (text: string) => void;
@@ -21,7 +20,6 @@ export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
     const theme = useAppTheme();
     const styles = useChatbotStyles();
     const insets = useSafeAreaInsets();
-    const { keyboardVisible } = useKeyboard();
 
     const [text, setText] = useState('');
 
@@ -32,7 +30,7 @@ export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
         }
     }, [text, onSend]);
 
-    const paddingBottom = keyboardVisible ? 12 : Math.max(16, insets.bottom + 4);
+    const paddingBottom = Math.max(16, insets.bottom + 4);
     const hasText = text.trim().length > 0;
 
     return (

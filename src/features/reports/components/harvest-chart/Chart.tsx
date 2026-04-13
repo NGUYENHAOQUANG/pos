@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { useAppTheme } from '@/styles/themeContext';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
-import { colors, typography } from '@/styles';
+import { typography } from '@/styles';
 import { HarvestChartData } from '@/features/reports/types/harvest-stats';
+import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
 export type { HarvestChartData };
 
 interface ChartProps {
@@ -54,7 +55,9 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Dimensions
     const PADDING_TOP = 20;
     const PADDING_BOTTOM = 25; // space for x-axis labels
-    const PADDING_LEFT = 50;
+    const PADDING_LEFT = calculateDynamicYAxisWidth(yAxisLabels, value =>
+        value % 1 === 0 ? value.toString() : value.toFixed(1).replace('.', ',')
+    );
     const PADDING_RIGHT = 10;
 
     // Use dynamic width to prevent squishing when data is large
@@ -84,40 +87,6 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     return (
         <View style={styles.chartContainer}>
             <View style={{ position: 'relative', width: '100%' }}>
-                {/* Sticky Y Axis Panel */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        height: chartHeight - PADDING_BOTTOM + 20, // ensure label visibility
-                        width: PADDING_LEFT,
-                        zIndex: 10,
-                    }}
-                    pointerEvents="none"
-                >
-                    <Svg width={PADDING_LEFT} height={chartHeight} style={{ overflow: 'visible' }}>
-                        {/* Y Axis Labels */}
-                        {yAxisLabels.map(value => {
-                            const y = getY(value);
-                            return (
-                                <SvgText
-                                    key={`y-label-${value}`}
-                                    x={16}
-                                    y={y + 4} // Optical vertical alignment
-                                    fill={theme.textSecondary}
-                                    fontSize={12}
-                                    textAnchor="start"
-                                >
-                                    {value % 1 === 0
-                                        ? value.toString()
-                                        : value.toFixed(1).replace('.', ',')}
-                                </SvgText>
-                            );
-                        })}
-                    </Svg>
-                </View>
-
                 {/* Scrollable Bars Area */}
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <Svg width={actualWidth} height={chartHeight}>
@@ -151,9 +120,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                         y={y}
                                         width={barWidth}
                                         height={barHeight}
-                                        fill={
-                                            theme.isDark ? colors.orange[900] : colors.orange[600]
-                                        }
+                                        fill="#FD6900"
                                         rx={2}
                                         ry={2}
                                     />
@@ -185,6 +152,43 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                         })}
                     </Svg>
                 </ScrollView>
+
+                {/* Sticky Y Axis Panel */}
+                <View
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        height: chartHeight - PADDING_BOTTOM + 20, // ensure label visibility
+                        width: PADDING_LEFT,
+                        zIndex: 10,
+                    }}
+                    pointerEvents="none"
+                >
+                    <View
+                        style={[StyleSheet.absoluteFill, { backgroundColor: theme.background }]}
+                    />
+                    <Svg width={PADDING_LEFT} height={chartHeight} style={{ overflow: 'visible' }}>
+                        {/* Y Axis Labels */}
+                        {yAxisLabels.map(value => {
+                            const y = getY(value);
+                            return (
+                                <SvgText
+                                    key={`y-label-${value}`}
+                                    x={16}
+                                    y={y + 4} // Optical vertical alignment
+                                    fill={theme.textSecondary}
+                                    fontSize={12}
+                                    textAnchor="start"
+                                >
+                                    {value % 1 === 0
+                                        ? value.toString()
+                                        : value.toFixed(1).replace('.', ',')}
+                                </SvgText>
+                            );
+                        })}
+                    </Svg>
+                </View>
             </View>
         </View>
     );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { DeleteAccountInputStep } from '@/features/menu/components/delete-account/DeleteAccountInputStep';
 import { DeleteAccountOtpStep } from '@/features/menu/components/delete-account/DeleteAccountOtpStep';
@@ -41,7 +41,7 @@ export const DeleteAccountForm: React.FC<DeleteAccountFormProps> = ({
     const styles = getStyles(theme);
 
     return (
-        <KeyboardAvoidingView behavior="padding" style={styles.container}>
+        <SafeAreaView edges={['top']} style={styles.container}>
             <HeaderSection title="Xoá tài khoản" onBack={onBack} />
 
             <View style={styles.content}>
@@ -73,7 +73,7 @@ export const DeleteAccountForm: React.FC<DeleteAccountFormProps> = ({
                 onConfirm={onConfirmDelete}
                 showSuccessToast={false}
             />
-        </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
