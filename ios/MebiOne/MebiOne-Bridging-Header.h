@@ -4,3 +4,5 @@
 //
 
 #import <react-native-orientation-locker/Orientation.h>
+#import <WebRTC/RTCAudioSession.h>
+#import <WebRTC/RTCAudioSessionConfiguration.h>

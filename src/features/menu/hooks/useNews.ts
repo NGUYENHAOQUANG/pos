@@ -4,23 +4,29 @@ import { fetchNewsData } from '@/features/menu/services/newsService';
 import { NewsItem } from '@/features/menu/types/news.types';
 
 const CACHE_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
-const CACHE_PREFIX = 'MEBI_NEWS_CACHE_';
+const CACHE_PREFIX = 'MEBI_NEWS_CACHE_V2_';
 
 interface CachedNewsData {
     timestamp: number;
     data: NewsItem[];
 }
 
-/** Load cached news data. Returns null if expired */
+/** Load cached news data. Returns null if expired or corrupted */
 const loadCachedNews = async (cacheKey: string): Promise<NewsItem[] | null> => {
     const raw = await AsyncStorage.getItem(cacheKey);
     if (!raw) return null;
 
-    const parsed: CachedNewsData = JSON.parse(raw);
-    const isExpired = Date.now() - parsed.timestamp > CACHE_DURATION_MS;
+    try {
+        const parsed: CachedNewsData = JSON.parse(raw);
+        const isExpired = Date.now() - parsed.timestamp > CACHE_DURATION_MS;
 
-    if (isExpired || parsed.data.length === 0) return null;
-    return parsed.data;
+        if (isExpired || !parsed.data || parsed.data.length === 0) return null;
+        return parsed.data;
+    } catch {
+        // Remove corrupted cache entry to prevent repeated failures
+        await AsyncStorage.removeItem(cacheKey);
+        return null;
+    }
 };
 
 /** Save news data to AsyncStorage cache */
@@ -46,7 +52,7 @@ export const useNews = (activeTab: string) => {
             return freshData;
         },
         staleTime: CACHE_DURATION_MS,
-        // Skip fetch for non-news tabs
-        enabled: activeTab !== 'Giá tôm',
+        // Only fetch when news tab is active
+        enabled: activeTab === 'Tin tức nổi bật',
     });
 };
