@@ -252,7 +252,6 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                         selectedTab={selectedTab}
                         onTabSelect={handleTabSelect}
                         containerStyle={styles.headingBar}
-                        spreadTabs
                     />
                 )}
 
@@ -329,7 +328,6 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     selectedTab={selectedTab}
                     onTabSelect={handleTabSelect}
                     containerStyle={styles.headingBar}
-                    spreadTabs
                 />
             )}
 

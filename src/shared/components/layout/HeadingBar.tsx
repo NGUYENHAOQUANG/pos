@@ -40,8 +40,6 @@ export interface HeadingBarProps {
     onTabSelect: (tab: string) => void;
     containerStyle?: StyleProp<ViewStyle>;
     flexTabs?: boolean;
-    /** Spread tabs evenly but still allow horizontal scroll on small screens */
-    spreadTabs?: boolean;
 }
 
 export const HeadingBar: React.FC<HeadingBarProps> = ({
@@ -50,10 +48,7 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
     onTabSelect,
     containerStyle,
     flexTabs = false,
-    spreadTabs = false,
 }) => {
-    // Track container width for spreadTabs calculation
-    const [containerWidth, setContainerWidth] = useState(0);
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
@@ -62,10 +57,6 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
     const indicatorX = useSharedValue(0);
     const indicatorWidth = useSharedValue(0);
     const [isReady, setIsReady] = useState(false);
-
-    const handleLayout = useCallback((event: LayoutChangeEvent) => {
-        setContainerWidth(event.nativeEvent.layout.width);
-    }, []);
 
     // Measure each tab's layout
     const handleTabLayout = useCallback((key: string, event: LayoutChangeEvent) => {
@@ -96,23 +87,12 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
         width: indicatorWidth.value,
     }));
 
-    // Calculate min width per tab when spreadTabs is enabled
-    // Subtract padding (4px each side = 8px total) from container width
-    const tabMinWidth =
-        spreadTabs && containerWidth > 0 && tabs.length > 0
-            ? (containerWidth - 8) / tabs.length
-            : 0;
-
     const renderTabs = tabs.map(tab => {
         const isSelected = selectedTab === tab.key;
         return (
             <TouchableOpacity
                 key={tab.key}
-                style={[
-                    styles.tab,
-                    flexTabs && { flex: 1 },
-                    spreadTabs && tabMinWidth > 0 && { minWidth: tabMinWidth },
-                ]}
+                style={[styles.tab, flexTabs ? { flex: 1 } : { flexGrow: 1, flexShrink: 0 }]}
                 onPress={() => {
                     haptics.light();
                     onTabSelect(tab.key);
@@ -130,7 +110,7 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
     return (
         <View style={containerStyle}>
             {/* Outer grey pill - provides background color and pill shape */}
-            <View style={styles.backgroundWrapper} onLayout={spreadTabs ? handleLayout : undefined}>
+            <View style={styles.backgroundWrapper}>
                 {/* Inner clip view - clips scrollable tab content to pill shape */}
                 <View style={styles.scrollClip}>
                     {flexTabs ? (
@@ -145,11 +125,7 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={[
-                                styles.scrollContent,
-                                spreadTabs && { flexGrow: 1 },
-                            ]}
-                            style={styles.scrollView}
+                            contentContainerStyle={[styles.scrollContent, { flexGrow: 1 }]}
                         >
                             {/* Sliding indicator inside ScrollView content */}
                             {isReady && (
@@ -180,9 +156,6 @@ const getStyles = (theme: Colors) =>
             height: 36,
             borderRadius: borderRadius.full,
             overflow: 'hidden',
-        },
-        scrollView: {
-            flexGrow: 0,
         },
         scrollContent: {
             flexDirection: 'row',
