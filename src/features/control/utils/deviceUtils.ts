@@ -7,6 +7,7 @@ const FeederIcon = require('@/assets/Icon/IconDevices/Feeder.png');
 const OxyIcon = require('@/assets/Icon/IconDevices/Oxy.png');
 const SyphonIcon = require('@/assets/Icon/IconDevices/Syphon.png');
 const PumpIcon = require('@/assets/Icon/IconDevices/Pump.png');
+const WrapperIcon = require('@/assets/Icon/IconDevices/wrapper.png');
 
 export const getDeviceIcon = (type: string): ImageSourcePropType => {
     switch (type) {
@@ -20,6 +21,8 @@ export const getDeviceIcon = (type: string): ImageSourcePropType => {
             return SyphonIcon as ImageSourcePropType;
         case 'pump':
             return PumpIcon as ImageSourcePropType;
+        case 'wrapper':
+            return WrapperIcon as ImageSourcePropType;
         default:
             return FanIcon as ImageSourcePropType;
     }

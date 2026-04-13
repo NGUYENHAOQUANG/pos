@@ -7,7 +7,7 @@ import { DeviceData as MenuDeviceData } from '@/features/menu/types/menu.types';
 export interface IControlDevice {
     id: string; // Device ID
     name: string; // Device Name
-    type: 'feeder' | 'fan' | 'oxy' | 'syphon'; // Device Type
+    type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' | 'wrapper'; // Device Type
     pondId: string; // Pond
     farmId: string; // Farm ID
     connectDate: string; // Connection Date
@@ -1365,6 +1365,7 @@ export const MOCK_PONDS: Pond[] = [
             oxy: { active: 0, warning: 0, inactive: 0 },
             syphon: { active: 0, warning: 0, inactive: 0 },
             pump: { active: 0, warning: 0, inactive: 1 },
+            wrapper: { active: 0, warning: 0, inactive: 0 },
         },
     },
     {
@@ -1400,6 +1401,7 @@ export const MOCK_PONDS: Pond[] = [
             oxy: { active: 0, warning: 0, inactive: 0 },
             syphon: { active: 0, warning: 0, inactive: 0 },
             pump: { active: 0, warning: 0, inactive: 1 },
+            wrapper: { active: 0, warning: 0, inactive: 0 },
         },
     },
     {
@@ -1442,6 +1444,7 @@ export const MOCK_PONDS: Pond[] = [
             oxy: { active: 0, warning: 0, inactive: 0 },
             syphon: { active: 0, warning: 0, inactive: 0 },
             pump: { active: 0, warning: 0, inactive: 2 },
+            wrapper: { active: 0, warning: 0, inactive: 0 },
         },
     },
     {
@@ -1484,6 +1487,7 @@ export const MOCK_PONDS: Pond[] = [
             oxy: { active: 0, warning: 0, inactive: 0 },
             syphon: { active: 0, warning: 0, inactive: 0 },
             pump: { active: 0, warning: 0, inactive: 2 },
+            wrapper: { active: 0, warning: 0, inactive: 0 },
         },
     },
     {
@@ -1505,6 +1509,7 @@ export const MOCK_PONDS: Pond[] = [
             oxy: { active: 0, warning: 0, inactive: 0 },
             syphon: { active: 0, warning: 0, inactive: 0 },
             pump: { active: 0, warning: 0, inactive: 1 },
+            wrapper: { active: 0, warning: 0, inactive: 0 },
         },
     },
 ];
