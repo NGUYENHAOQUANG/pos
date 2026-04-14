@@ -11,6 +11,8 @@ import { spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ScaleStatus } from './ScaleCard';
 import { ScrollView } from 'react-native-gesture-handler';
+import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
+import WarningCircleIcon from '@/assets/Icon/WarningCircle.svg';
 
 export interface ScaleActionBottomSheetProps {
     visible: boolean;
@@ -126,9 +128,9 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
             case ScaleStatus.EMPTY:
                 return (
                     <View style={[styles.alertBox, styles.alertBoxEmpty]}>
-                        <Ionicons
-                            name="alert-circle"
-                            size={20}
+                        <WarningCircleIcon
+                            width={20}
+                            height={20}
                             color={theme.yellow[600]}
                             style={styles.alertIcon}
                         />
@@ -143,9 +145,9 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
             case ScaleStatus.WAITING:
                 return (
                     <View style={[styles.alertBox, styles.alertBoxYellow]}>
-                        <Ionicons
-                            name="alert-circle"
-                            size={20}
+                        <WarningCircleIcon
+                            width={20}
+                            height={20}
                             color={theme.yellow[600]}
                             style={styles.alertIcon}
                         />
@@ -161,9 +163,9 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
             case ScaleStatus.READY:
                 return (
                     <View style={[styles.alertBox, styles.alertBoxRed]}>
-                        <Ionicons
-                            name="alert-circle"
-                            size={20}
+                        <WarningCircleIcon
+                            width={20}
+                            height={20}
                             color={theme.red[600]}
                             style={styles.alertIcon}
                         />
@@ -180,9 +182,9 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
             case ScaleStatus.DISCONNECTED:
                 return (
                     <View style={[styles.alertBox, styles.alertBoxRed]}>
-                        <Ionicons
-                            name="alert-circle"
-                            size={20}
+                        <WarningCircleIcon
+                            width={20}
+                            height={20}
                             color={theme.red[600]}
                             style={styles.alertIcon}
                         />
@@ -208,13 +210,13 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                         hai:
                     </Text>
                     <View style={styles.actionListItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#158C4A" />
+                        <CheckCircleIcon width={20} height={20} />
                         <Text style={styles.actionListText}>
                             Chờ ổn định <Text style={styles.actionListArrow}>→</Text> rồi xác nhận
                         </Text>
                     </View>
                     <View style={styles.actionListItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#158C4A" />
+                        <CheckCircleIcon width={20} height={20} />
                         <Text style={styles.actionListText}>
                             Bỏ hàng khỏi cân <Text style={styles.actionListArrow}>→</Text> cân về
                             Trống <Text style={styles.actionListArrow}>→</Text> thu hồi
@@ -229,14 +231,14 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                 <View style={styles.actionListContainer}>
                     <Text style={styles.actionListTitle}>Thao tác cần</Text>
                     <View style={styles.actionListItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#158C4A" />
+                        <CheckCircleIcon width={20} height={20} />
                         <Text style={styles.actionListText}>
                             Xác nhận mẻ #5 <Text style={styles.actionListArrow}>→</Text>{' '}
                             {weight.toFixed(1)} kg
                         </Text>
                     </View>
                     <View style={styles.actionListItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#158C4A" />
+                        <CheckCircleIcon width={20} height={20} />
                         <Text style={styles.actionListText}>
                             Hủy mẻ #5 (cân về trạng thái Trống)
                         </Text>
