@@ -23,7 +23,6 @@ import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { spacing } from '@/styles/spacing';
-import { FarmData } from '@/features/farm/types/farm.types';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -62,14 +61,7 @@ export const ReportsScreen = () => {
     }, [queryClient]);
 
     const handleRightPress = () => {
-        const farmData: FarmData = {
-            id: selectedFarm.id.toString(),
-            name: selectedFarm.label,
-            code: selectedFarm.value,
-            area: '',
-            address: '',
-        };
-        navigation.navigate('FarmInfo', { farm: farmData });
+        navigation.navigate('NotificationList');
     };
 
     const renderAoVeoContent = () => (

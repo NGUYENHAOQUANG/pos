@@ -88,6 +88,7 @@ import { ShrimpPriceScreen } from '@/features/menu/screens/shrimp-price/ShrimpPr
 
 // Notifications
 import { useNotificationSetup } from '@/features/notifications';
+import { NotificationListScreen } from '@/features/notifications/screens/NotificationListScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
@@ -279,6 +280,7 @@ export type AppStackParamList = {
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
     Chatbot: undefined;
     Ingest: undefined;
+    NotificationList: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -413,6 +415,7 @@ export const AppStack: React.FC = () => {
                 <Stack.Screen name="Chatbot" component={ChatbotScreen} />
                 <Stack.Screen name="Ingest" component={IngestScreen} />
                 <Stack.Screen name="ShrimpPrice" component={ShrimpPriceScreen} />
+                <Stack.Screen name="NotificationList" component={NotificationListScreen} />
             </Stack.Navigator>
 
             {/* Chatbot FAB - overlays all screens */}
