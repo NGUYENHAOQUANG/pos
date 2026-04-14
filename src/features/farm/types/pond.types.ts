@@ -47,7 +47,7 @@ export interface PondData {
     pondPhase?: string;
     status?: string | PondStatus;
     pondCategoryId?: string;
-    type: PondType;
+    type?: PondType;
     zoneId?: string;
     farmCode?: string;
     zone?: string;
@@ -61,6 +61,7 @@ export interface PondData {
     editor?: ICreatorEditor | null;
     pondCategoryName?: string;
     cyclePond?: CyclePond | null;
+    canStockTransfer?: boolean;
 }
 
 export enum PondStatus {
@@ -81,6 +82,7 @@ export interface GetPondsParams {
     Page?: number;
     PageSize?: number;
     OrderBy?: string;
+    CanStockTransfer?: boolean;
 }
 
 export type GetPondsResponse = IApiResponse<IPaginate<PondData>>;

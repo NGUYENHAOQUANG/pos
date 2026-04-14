@@ -3,7 +3,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { farmKeys } from './farmKeys';
 import { APP_CONFIG } from '@/shared/constants';
-import { PondData, PondStatus } from '@/features/farm/types/pond.types';
+import { PondData, PondStatus, GetPondsParams } from '@/features/farm/types/pond.types';
 
 export const usePondsByZone = (zoneId: string | null, status?: PondStatus | null) => {
     const key = farmKeys.ponds.byZone(zoneId || 'all');
@@ -81,15 +81,16 @@ export const usePondDetail = (zoneId: string, pondId: string) => {
     return query;
 };
 
-export const useAllPondsByZone = (zoneId: string) => {
+export const useAllPondsByZone = (zoneId: string, params: GetPondsParams = {}) => {
     return useQuery({
-        queryKey: [...farmKeys.ponds.byZone(zoneId || 'all'), 'all-pages'],
+        queryKey: [...farmKeys.ponds.byZone(zoneId || 'all'), 'all-pages', params],
         queryFn: async () => {
             if (!zoneId) return [];
 
             const pageSize = APP_CONFIG.MAX_PAGE_SIZE;
 
             const firstResponse = await pondApi.getPondsByZone(zoneId, {
+                ...params,
                 PageSize: pageSize,
                 Page: 1,
             });
@@ -104,6 +105,7 @@ export const useAllPondsByZone = (zoneId: string) => {
                 const responses = await Promise.all(
                     remainingPages.map(page =>
                         pondApi.getPondsByZone(zoneId, {
+                            ...params,
                             PageSize: pageSize,
                             Page: page,
                         })
