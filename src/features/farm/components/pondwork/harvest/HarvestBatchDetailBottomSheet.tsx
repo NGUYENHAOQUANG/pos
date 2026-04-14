@@ -42,15 +42,15 @@ export const HarvestBatchDetailBottomSheet: React.FC<HarvestBatchDetailBottomShe
                 <View style={styles.content}>
                     {/* Header */}
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Mẻ #{batchNumber}</Text>
-                        <View style={styles.headerRight}>
+                        <View style={styles.headerLeft}>
+                            <Text style={styles.headerTitle}>Mẻ #{batchNumber}</Text>
                             <View style={styles.statusBadge}>
                                 <Text style={styles.statusBadgeText}>Hoàn tất</Text>
                             </View>
-                            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                                <Ionicons name="close" size={24} color={theme.textTertiary} />
-                            </TouchableOpacity>
                         </View>
+                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                            <Ionicons name="close" size={24} color={theme.textTertiary} />
+                        </TouchableOpacity>
                     </View>
 
                     <View style={styles.successContainer}>
@@ -110,7 +110,7 @@ const getStyles = (theme: Colors) =>
             alignItems: 'center',
             justifyContent: 'space-between',
         },
-        headerRight: {
+        headerLeft: {
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.sm,
@@ -125,13 +125,13 @@ const getStyles = (theme: Colors) =>
             paddingVertical: 4,
             borderRadius: 100,
             borderWidth: 1,
-            borderColor: '#A8E3C1',
-            backgroundColor: theme.background,
+            borderColor: theme.green[200],
+            backgroundColor: theme.green[50],
         },
         statusBadgeText: {
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '500',
-            color: '#158C4A',
+            color: theme.green[600],
         },
         closeButton: {
             padding: 4,
@@ -144,10 +144,10 @@ const getStyles = (theme: Colors) =>
             gap: 8,
         },
         successInfoCard: {
-            backgroundColor: theme.background,
+            backgroundColor: theme.backgroundSecondary,
             borderRadius: 12,
             borderWidth: 1,
-            borderColor: theme.defaultBorder,
+            borderColor: theme.border,
             padding: 12,
             width: '100%',
             gap: spacing.sm,

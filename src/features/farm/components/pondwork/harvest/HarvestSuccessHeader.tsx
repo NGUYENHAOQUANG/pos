@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
+import CheckCircleIcon from '@/assets/Icon/IconFarm/CheckCircle.svg';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 

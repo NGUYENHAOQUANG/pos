@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
+import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { spacing } from '@/styles';
@@ -17,23 +18,32 @@ export interface ScaleCardProps {
     title: string;
     status: ScaleStatus;
     weight: number | null;
-    showTopWeight?: boolean;
     onConfirmPress?: () => void;
     onPress?: () => void;
-    onPressChevron?: () => void;
 }
 
 export const ScaleCard: React.FC<ScaleCardProps> = ({
     title,
     status,
     weight,
-    showTopWeight,
     onConfirmPress,
     onPress,
-    onPressChevron,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
+
+    const [isToggled, setIsToggled] = React.useState(
+        status === ScaleStatus.READY || status === ScaleStatus.WAITING
+    );
+
+    // Sync state if parent status changes
+    React.useEffect(() => {
+        setIsToggled(status === ScaleStatus.READY || status === ScaleStatus.WAITING);
+    }, [status]);
+
+    const handleToggle = (val: boolean) => {
+        setIsToggled(val);
+    };
 
     const getStatusProps = () => {
         switch (status) {
@@ -83,48 +93,15 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
                 <View style={styles.scaleInfoContainer}>
                     <View style={styles.scaleTitleRow}>
                         <Text style={styles.scaleTitle}>{title}</Text>
-                        {onPressChevron ? (
-                            <TouchableOpacity
-                                style={styles.chevronContainer}
-                                onPress={onPressChevron}
-                            >
-                                {showTopWeight && (
-                                    <>
-                                        <Text style={styles.scaleWeightTopValue}>
-                                            {displayWeight}
-                                        </Text>
-                                        <Text style={styles.scaleWeightTopUnit}> kg</Text>
-                                    </>
-                                )}
-                                <Text
-                                    style={[
-                                        styles.chevronIcon,
-                                        showTopWeight ? { marginLeft: 8 } : undefined,
-                                    ]}
-                                >
-                                    ▸
-                                </Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <View style={styles.chevronContainer}>
-                                {showTopWeight && (
-                                    <>
-                                        <Text style={styles.scaleWeightTopValue}>
-                                            {displayWeight}
-                                        </Text>
-                                        <Text style={styles.scaleWeightTopUnit}> kg</Text>
-                                    </>
-                                )}
-                                <Text
-                                    style={[
-                                        styles.chevronIcon,
-                                        showTopWeight ? { marginLeft: 8 } : undefined,
-                                    ]}
-                                >
-                                    ▸
-                                </Text>
+                        <View style={styles.chevronContainer}>
+                            <View style={styles.toggleWrapper}>
+                                <ButtonDevices
+                                    value={isToggled}
+                                    onValueChange={handleToggle}
+                                    trackColor={theme.warning}
+                                />
                             </View>
-                        )}
+                        </View>
                     </View>
                     <View style={[styles.statusBadge, statusProps.style]}>
                         <Text style={statusProps.textStyle}>{statusProps.text}</Text>
@@ -188,6 +165,11 @@ const getStyles = (theme: Colors) =>
         chevronContainer: {
             flexDirection: 'row',
             alignItems: 'center',
+            height: 24,
+        },
+        toggleWrapper: {
+            justifyContent: 'center',
+            alignItems: 'flex-end',
         },
         scaleWeightTopValue: {
             fontSize: 16,
@@ -198,10 +180,6 @@ const getStyles = (theme: Colors) =>
             fontSize: 13,
             color: theme.textSecondary,
         },
-        chevronIcon: {
-            fontSize: 20,
-            color: theme.textSecondary,
-        },
         statusBadge: {
             paddingHorizontal: 8,
             paddingVertical: 2,
@@ -210,29 +188,29 @@ const getStyles = (theme: Colors) =>
             borderWidth: 1,
         },
         statusReady: {
-            backgroundColor: '#E5F7ED',
-            borderColor: '#A8E3C1',
+            backgroundColor: theme.green[50],
+            borderColor: theme.green[200],
         },
         statusReadyText: {
-            color: '#158C4A',
+            color: theme.green[600],
             fontSize: 12,
             fontWeight: '500',
         },
         statusWaiting: {
-            backgroundColor: '#FFF4E5',
-            borderColor: '#FFD3A3',
+            backgroundColor: theme.yellow[50],
+            borderColor: theme.yellow[200],
         },
         statusWaitingText: {
-            color: '#D97706',
+            color: theme.yellow[600],
             fontSize: 12,
             fontWeight: '500',
         },
         statusDisconnected: {
-            backgroundColor: '#FFF0F0',
-            borderColor: '#FFD6D6',
+            backgroundColor: theme.red[50],
+            borderColor: theme.red[200],
         },
         statusDisconnectedText: {
-            color: '#DC2626',
+            color: theme.red[600],
             fontSize: 12,
             fontWeight: '500',
         },
@@ -255,12 +233,13 @@ const getStyles = (theme: Colors) =>
             alignItems: 'baseline',
         },
         scaleWeightValue: {
-            fontSize: 20,
-            fontWeight: '600',
+            fontSize: 16,
+            fontWeight: '500',
             color: theme.text,
         },
         scaleWeightUnit: {
-            fontSize: 14,
+            fontSize: 12,
+            fontWeight: '400',
             color: theme.textSecondary,
         },
     });

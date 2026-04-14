@@ -10,6 +10,7 @@ import { ScaleCard, ScaleStatus } from '@/features/farm/components/pondwork/harv
 import { AddScaleBottomSheet } from '@/features/farm/components/pondwork/harvest/AddScaleBottomSheet';
 import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { ScaleActionBottomSheet } from '@/features/farm/components/pondwork/harvest/ScaleActionBottomSheet';
+import { EmergencyRevokeSuccessBottomSheet } from '@/features/farm/components/pondwork/harvest/EmergencyRevokeSuccessBottomSheet';
 
 export const ScaleListScreen: React.FC = () => {
     const theme = useAppTheme();
@@ -19,11 +20,16 @@ export const ScaleListScreen: React.FC = () => {
     const [isAddScaleModalVisible, setIsAddScaleModalVisible] = useState(false);
 
     // Scale action modal state
-    const [selectedScaleStatus, setSelectedScaleStatus] = useState<ScaleStatus | null>(null);
+    const [selectedScale, setSelectedScale] = useState<{
+        id: string;
+        title: string;
+        status: ScaleStatus;
+    } | null>(null);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
+    const [isEmergencySuccessVisible, setIsEmergencySuccessVisible] = useState(false);
 
-    const handlePressChevron = (status: ScaleStatus) => {
-        setSelectedScaleStatus(status);
+    const handlePressChevron = (scale: { id: string; title: string; status: ScaleStatus }) => {
+        setSelectedScale(scale);
         setIsActionModalVisible(true);
     };
 
@@ -47,9 +53,7 @@ export const ScaleListScreen: React.FC = () => {
                             status={scale.status}
                             weight={scale.weight}
                             onConfirmPress={() => {}}
-                            onPress={() => {}}
-                            onPressChevron={() => handlePressChevron(scale.status)}
-                            showTopWeight={scale.status === ScaleStatus.WAITING}
+                            onPress={() => handlePressChevron(scale)}
                         />
                     ))}
                 </View>
@@ -77,7 +81,18 @@ export const ScaleListScreen: React.FC = () => {
             <ScaleActionBottomSheet
                 visible={isActionModalVisible}
                 onClose={() => setIsActionModalVisible(false)}
-                scaleStatus={selectedScaleStatus}
+                scaleStatus={selectedScale?.status!}
+                scaleName={selectedScale?.title}
+                onRevokeEmergency={() => {
+                    setIsActionModalVisible(false);
+                    setTimeout(() => setIsEmergencySuccessVisible(true), 500);
+                }}
+            />
+
+            <EmergencyRevokeSuccessBottomSheet
+                visible={isEmergencySuccessVisible}
+                onClose={() => setIsEmergencySuccessVisible(false)}
+                scaleName={selectedScale?.title || ''}
             />
         </View>
     );

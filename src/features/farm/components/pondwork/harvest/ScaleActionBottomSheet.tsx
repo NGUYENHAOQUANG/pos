@@ -5,6 +5,7 @@ import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomShe
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { Button } from '@/shared/components/buttons/Button';
 import { useAppTheme } from '@/styles/themeContext';
+import { RequiredDot } from '@/shared/components/forms/Input';
 import { Colors } from '@/styles/colors';
 import { spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -124,15 +125,15 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
         switch (scaleStatus) {
             case ScaleStatus.EMPTY:
                 return (
-                    <View style={[styles.alertBox, styles.alertBoxYellow]}>
+                    <View style={[styles.alertBox, styles.alertBoxEmpty]}>
                         <Ionicons
                             name="alert-circle"
                             size={20}
-                            color="#D97706"
+                            color={theme.yellow[600]}
                             style={styles.alertIcon}
                         />
                         <View style={styles.alertTextContainer}>
-                            <Text style={styles.alertTextYellow}>
+                            <Text style={styles.alertTextEmpty}>
                                 Sau thu hồi, cân sẽ ngắt khỏi phiên{'\n'}
                                 Các mẻ đã xác nhận vẫn được giữ nguyên trong lịch sử
                             </Text>
@@ -145,7 +146,7 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                         <Ionicons
                             name="alert-circle"
                             size={20}
-                            color="#D97706"
+                            color={theme.yellow[600]}
                             style={styles.alertIcon}
                         />
                         <View style={styles.alertTextContainer}>
@@ -163,7 +164,7 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                         <Ionicons
                             name="alert-circle"
                             size={20}
-                            color="#DC2626"
+                            color={theme.red[600]}
                             style={styles.alertIcon}
                         />
                         <View style={styles.alertTextContainer}>
@@ -182,7 +183,7 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                         <Ionicons
                             name="alert-circle"
                             size={20}
-                            color="#DC2626"
+                            color={theme.red[600]}
                             style={styles.alertIcon}
                         />
                         <View style={styles.alertTextContainer}>
@@ -251,9 +252,10 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
         if (scaleStatus === ScaleStatus.EMPTY || scaleStatus === ScaleStatus.DISCONNECTED) {
             return (
                 <View style={styles.reasonContainer}>
-                    <Text style={styles.reasonLabel}>
-                        Lý do thu hồi <Text style={styles.errorText}>*</Text>
-                    </Text>
+                    <View style={styles.reasonLabelWrapper}>
+                        <Text style={styles.reasonLabel}>Lý do thu hồi</Text>
+                        <RequiredDot />
+                    </View>
                     <TextInput
                         style={styles.textInput}
                         placeholder="Nhập lý do thu hồi"
@@ -377,29 +379,29 @@ const getStyles = (theme: Colors) =>
             borderWidth: 1,
         },
         statusReady: {
-            backgroundColor: '#E5F7ED',
-            borderColor: '#A8E3C1',
+            backgroundColor: theme.green[50],
+            borderColor: theme.green[200],
         },
         statusReadyText: {
-            color: '#158C4A',
+            color: theme.green[600],
             fontSize: 12,
             fontWeight: '500',
         },
         statusWaiting: {
-            backgroundColor: '#FFF4E5',
-            borderColor: '#FFD3A3',
+            backgroundColor: theme.yellow[50],
+            borderColor: theme.yellow[200],
         },
         statusWaitingText: {
-            color: '#D97706',
+            color: theme.yellow[600],
             fontSize: 12,
             fontWeight: '500',
         },
         statusDisconnected: {
-            backgroundColor: '#FFF0F0',
-            borderColor: '#FFD6D6',
+            backgroundColor: theme.red[50],
+            borderColor: theme.red[200],
         },
         statusDisconnectedText: {
-            color: '#DC2626',
+            color: theme.red[600],
             fontSize: 12,
             fontWeight: '500',
         },
@@ -418,7 +420,7 @@ const getStyles = (theme: Colors) =>
             padding: 12,
             borderWidth: 1,
             borderColor: theme.defaultBorder,
-            marginBottom: 16,
+            marginBottom: 6,
         },
         infoRow: {
             flexDirection: 'row',
@@ -435,7 +437,7 @@ const getStyles = (theme: Colors) =>
             color: theme.text,
         },
         errorText: {
-            color: '#DC2626',
+            color: theme.red[600],
         },
         alertBox: {
             flexDirection: 'row',
@@ -445,13 +447,21 @@ const getStyles = (theme: Colors) =>
             marginBottom: 16,
             alignItems: 'flex-start',
         },
+        alertBoxEmpty: {
+            backgroundColor: theme.background,
+            borderColor: theme.defaultBorder,
+        },
+        alertBoxGreen: {
+            backgroundColor: theme.green[50],
+            borderColor: theme.green[200],
+        },
         alertBoxYellow: {
-            backgroundColor: '#FFFAEB',
-            borderColor: '#FDE68A',
+            backgroundColor: theme.yellow[50],
+            borderColor: theme.yellow[200],
         },
         alertBoxRed: {
-            backgroundColor: '#FEF2F2',
-            borderColor: '#FECACA',
+            backgroundColor: theme.red[50],
+            borderColor: theme.red[200],
         },
         alertIcon: {
             marginRight: 8,
@@ -460,14 +470,28 @@ const getStyles = (theme: Colors) =>
         alertTextContainer: {
             flex: 1,
         },
+        alertTextEmpty: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.text,
+            lineHeight: 20,
+        },
+        alertTextGreen: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.green[600],
+            lineHeight: 20,
+        },
         alertTextYellow: {
             fontSize: 14,
-            color: '#D97706',
+            fontWeight: '500',
+            color: theme.yellow[600],
             lineHeight: 20,
         },
         alertTextRed: {
             fontSize: 14,
-            color: '#DC2626',
+            fontWeight: '500',
+            color: theme.red[600],
             lineHeight: 20,
         },
         actionListContainer: {
@@ -495,11 +519,15 @@ const getStyles = (theme: Colors) =>
         reasonContainer: {
             marginBottom: 8,
         },
+        reasonLabelWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 8,
+        },
         reasonLabel: {
             fontSize: 14,
             fontWeight: '500',
             color: theme.text,
-            marginBottom: 8,
         },
         textInput: {
             borderWidth: 1,

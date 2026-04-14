@@ -13,6 +13,8 @@ import { Button } from '@/shared/components/buttons/Button';
 import { HarvestSummaryCards } from './HarvestSummaryCards';
 import { ScaleCard, ScaleStatus } from './ScaleCard';
 import { ScaleActionBottomSheet } from './ScaleActionBottomSheet';
+import { EmergencyRevokeSuccessBottomSheet } from './EmergencyRevokeSuccessBottomSheet';
+import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 
 export interface HarvestScaleTabProps {
     onNavigateToHistory?: () => void;
@@ -35,6 +37,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     // Scale action modal state
     const [selectedScaleStatus, setSelectedScaleStatus] = useState<ScaleStatus | null>(null);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
+    const [isEmergencySuccessVisible, setIsEmergencySuccessVisible] = useState(false);
 
     const handlePressChevron = (status: ScaleStatus) => {
         setSelectedScaleStatus(status);
@@ -76,7 +79,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                             status={ScaleStatus.READY}
                             weight={65.6}
                             onConfirmPress={() => setIsConfirmModalVisible(true)}
-                            onPressChevron={() => handlePressChevron(ScaleStatus.READY)}
+                            onPress={() => handlePressChevron(ScaleStatus.READY)}
                         />
 
                         {/* Scale Card 2: Chờ ổn định */}
@@ -84,12 +87,11 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                             title="Cân 02 — Sân B"
                             status={ScaleStatus.WAITING}
                             weight={65.6}
-                            showTopWeight={true}
                             onConfirmPress={() => setIsConfirmModalVisible(true)}
-                            onPressChevron={() => handlePressChevron(ScaleStatus.WAITING)}
+                            onPress={() => handlePressChevron(ScaleStatus.WAITING)}
                         />
                     </View>
-                    <View style={{ marginTop: spacing.md }}>
+                    <View style={{ marginTop: 16 }}>
                         <Button
                             title="Thêm cân"
                             variant="outline"
@@ -140,9 +142,11 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                 onAddScale={_scaleId => {
                     // Cần có setTimeout để đợi animation đóng của bottom sheet
                     setTimeout(() => {
+                        setIsAddScaleModalVisible(false);
                         if (onNavigateToAllScales) {
                             onNavigateToAllScales();
                         }
+                        setTimeout(() => AppToast(TOAST_MESSAGES_CONFIG.SCALE.ADD_SUCCESS), 300);
                     }, 100);
                 }}
             />
@@ -160,7 +164,17 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
             <ScaleActionBottomSheet
                 visible={isActionModalVisible}
                 onClose={() => setIsActionModalVisible(false)}
-                scaleStatus={selectedScaleStatus}
+                scaleStatus={selectedScaleStatus!}
+                onRevokeEmergency={() => {
+                    setIsActionModalVisible(false);
+                    setTimeout(() => setIsEmergencySuccessVisible(true), 500);
+                }}
+            />
+
+            <EmergencyRevokeSuccessBottomSheet
+                visible={isEmergencySuccessVisible}
+                onClose={() => setIsEmergencySuccessVisible(false)}
+                scaleName="Cân 04 — Sân D"
             />
         </View>
     );
@@ -196,7 +210,7 @@ const getStyles = (theme: Colors) =>
             gap: spacing.sm,
         },
         sectionTitle: {
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: '600',
             color: theme.text,
         },
@@ -219,6 +233,7 @@ const getStyles = (theme: Colors) =>
         },
         badgeText: {
             fontSize: 12,
+            fontWeight: '500',
             color: theme.text,
         },
         seeAllText: {
@@ -228,7 +243,7 @@ const getStyles = (theme: Colors) =>
         },
         scaleCardSection: {
             gap: spacing.sm,
-            paddingVertical: 12,
+            paddingTop: 12,
         },
         scaleCard: {
             backgroundColor: theme.background,

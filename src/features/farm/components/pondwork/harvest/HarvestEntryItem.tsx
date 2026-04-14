@@ -117,19 +117,20 @@ const getStyles = (theme: Colors) =>
             paddingVertical: 4,
             borderRadius: 100,
             borderWidth: 1,
-            borderColor: '#A8E3C1', // Green border
-            backgroundColor: theme.background,
+            borderColor: theme.green[200],
+            backgroundColor: theme.green[50],
         },
         statusBadgeText: {
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '500',
-            color: '#158C4A', // Green text
+            color: theme.green[600],
         },
         statusDeletedBadge: {
-            borderColor: '#FFC7C7', // Red border
+            borderColor: theme.red[200],
+            backgroundColor: theme.red[50],
         },
         statusDeletedText: {
-            color: theme.error || '#FF3B30',
+            color: theme.error || theme.red[500],
         },
         errorText: {
             color: theme.error || '#FF3B30',

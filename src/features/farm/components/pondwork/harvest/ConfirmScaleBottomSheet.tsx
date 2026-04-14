@@ -61,15 +61,15 @@ export const ConfirmScaleBottomSheet: React.FC<ConfirmScaleBottomSheetProps> = (
                 <View style={[styles.content, isConfirmed && { paddingBottom: 0 }]}>
                     {/* Header */}
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>{scaleName}</Text>
-                        <View style={styles.headerRight}>
+                        <View style={styles.headerLeft}>
+                            <Text style={styles.headerTitle}>{scaleName}</Text>
                             <View style={styles.statusBadge}>
                                 <Text style={styles.statusBadgeText}>Sẵn sàng XN</Text>
                             </View>
-                            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                                <Ionicons name="close" size={24} color={theme.textTertiary} />
-                            </TouchableOpacity>
                         </View>
+                        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                            <Ionicons name="close" size={24} color={theme.textTertiary} />
+                        </TouchableOpacity>
                     </View>
 
                     {isConfirmed ? (
@@ -151,7 +151,7 @@ const getStyles = (theme: Colors) =>
             alignItems: 'center',
             justifyContent: 'space-between',
         },
-        headerRight: {
+        headerLeft: {
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.sm,
@@ -166,13 +166,13 @@ const getStyles = (theme: Colors) =>
             paddingVertical: 4,
             borderRadius: 100,
             borderWidth: 1,
-            borderColor: '#A8E3C1',
-            backgroundColor: '#E5F7ED',
+            borderColor: theme.green[200],
+            backgroundColor: theme.green[50],
         },
         statusBadgeText: {
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: '500',
-            color: '#158C4A',
+            color: theme.green[600],
         },
         closeButton: {
             padding: 4,
