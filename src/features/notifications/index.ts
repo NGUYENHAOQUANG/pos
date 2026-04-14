@@ -3,6 +3,11 @@
  */
 export { useNotificationSetup } from './hooks/useNotificationSetup';
 export {
+    useNotifications,
+    useRegisterDeviceToken,
+    useMarkNotificationAsRead,
+} from './hooks/useNotifications';
+export {
     useNotificationStore,
     selectFcmToken,
     selectHasPermission,
@@ -20,4 +25,4 @@ export {
     unsubscribeFromTopic,
     onTokenRefresh,
 } from './services/notificationService';
-export { registerDeviceToken, unregisterDeviceToken } from './services/deviceTokenApi';
+export { registerDeviceToken } from './api/notification.api';

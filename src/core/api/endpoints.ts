@@ -263,4 +263,9 @@ export const API_ENDPOINTS = {
         CHAT: '/api/v1/chat',
         INGEST: '/api/v1/ingest',
     },
+    NOTIFICATION: {
+        DEVICE_TOKEN: '/notification/device-token',
+        LIST: '/notification',
+        READ: (id: string) => `/notification/${id}/read`,
+    },
 } as const;

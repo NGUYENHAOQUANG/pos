@@ -16,7 +16,7 @@ import {
     initializeNotificationChannels,
     displayForegroundNotification,
 } from '@/features/notifications/services/notificationService';
-import { registerDeviceToken } from '@/features/notifications/services/deviceTokenApi';
+import { useRegisterDeviceToken } from '@/features/notifications/hooks/useNotifications';
 import {
     useNotificationStore,
     selectFcmToken,
@@ -70,22 +70,20 @@ export function useNotificationSetup(): void {
     // Ref to prevent double-init
     const isInitialized = useRef(false);
 
+    const { mutateAsync: registerDeviceToken } = useRegisterDeviceToken();
+
     /**
      * Register the token with backend, retrying if needed
      */
     const registerToken = useCallback(
         async (token: string) => {
-            try {
-                const result = await registerDeviceToken(token);
-                if (result.success) {
-                    setTokenRegistered(true);
-                    console.log('[FCM] Token registered with backend');
-                }
-            } catch (error) {
-                console.error('[FCM] Failed to register token with backend:', error);
+            const result = await registerDeviceToken(token);
+            if (result?.success) {
+                setTokenRegistered(true);
+                console.log('[FCM] Token registered with backend');
             }
         },
-        [setTokenRegistered]
+        [setTokenRegistered, registerDeviceToken]
     );
 
     // ─── Step 1: Initialize channels, permissions, and get token ───
