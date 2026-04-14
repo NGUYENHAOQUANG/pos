@@ -23,7 +23,7 @@ import { useCameras } from '@/features/control/hooks/useCameras';
 import { checkNetworkForHD } from '@/shared/utils/networkUtils';
 import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
 import FullscreenIcon from '@/assets/Icon/IconDevices/Fullscreen.svg';
-import PlayButtonIcon from '@/assets/Icon/IconDevices/Playbutton.svg';
+// import PlayButtonIcon from '@/assets/Icon/IconDevices/Playbutton.svg';
 import { RTCView } from 'react-native-webrtc';
 import { useWebRTCStream } from '@/features/control/screens/camera/hooks/useWebRTCStream';
 
@@ -208,14 +208,11 @@ export const CameraDetailScreen: React.FC = () => {
                             </View>
                         </View>
 
-                        {/* Center Play Button indicator */}
+                        {/* Center Loading indicator */}
                         {isOnline && !isConnected && (
                             <View style={styles.playButton} pointerEvents="none">
-                                {localStreamUrl ? (
-                                    <ActivityIndicator size="large" color="#FFF" />
-                                ) : (
-                                    <PlayButtonIcon width={44} height={44} />
-                                )}
+                                <ActivityIndicator size="large" color="#FFF" />
+                                {/* <PlayButtonIcon width={44} height={44} /> */}
                             </View>
                         )}
 
