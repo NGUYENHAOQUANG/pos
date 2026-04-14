@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
@@ -29,7 +29,6 @@ interface MaterialSelectionBoxProps {
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
     groupTypes?: MaterialGroupType[];
     specificType?: SpecificType;
-    /** Show required dot (*) next to title. Default: true */
     isRequired?: boolean;
 }
 
@@ -47,7 +46,6 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     const [searchText, setSearchText] = useState('');
     const debouncedSearchText = useDebounce(searchText, 500);
 
-    // Fetch material groups to resolve groupTypes → UUIDs
     const { data: materialGroups = [] } = useMaterialGroups();
 
     const materialGroupIds = useMemo(() => {
@@ -61,7 +59,6 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
             .map(g => String(g.id));
     }, [groupTypes, materialGroups]);
 
-    // Fetch materials with API-level filtering + search
     const {
         materials: allMaterials,
         isLoading,
@@ -74,7 +71,6 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
         specificType,
     });
 
-    // Exclude already selected materials
     const availableMaterials = useMemo(() => {
         return allMaterials.filter(
             (m: IMaterial) => !selectedMaterials.some(sm => sm.material.id === m.id)
@@ -92,23 +88,66 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
         setSearchText('');
     }, []);
 
+    const [displayQuantities, setDisplayQuantities] = useState<Record<string, string>>({});
+
+    const materialIds = useMemo(
+        () => selectedMaterials.map(m => m.material.id).join(','),
+        [selectedMaterials]
+    );
+
     const handleRemoveMaterial = (index: number) => {
+        const removedItem = selectedMaterials[index];
+        if (removedItem) {
+            setDisplayQuantities(prev => {
+                const next = { ...prev };
+                delete next[removedItem.material.id];
+                return next;
+            });
+        }
         onMaterialsChange(selectedMaterials.filter((_, i) => i !== index));
     };
 
-    // Handle inline quantity change on material card
-    const handleQuantityChange = (index: number, text: string) => {
-        // Sử dụng bộ lọc format chuẩn của hệ thống: maxDecimalPlaces = 5, maxIntegerPlaces = 15
-        let sanitized = InputFilters.decimal(text, 5, 15);
+    useEffect(() => {
+        setDisplayQuantities(prev => {
+            const next = { ...prev };
+            selectedMaterials.forEach(item => {
+                const key = item.material.id;
+                if (next[key] === undefined) {
+                    next[key] = String(item.quantity);
+                }
+            });
+            return next;
+        });
+        // materialIds is a stable proxy for selectedMaterials identity
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [materialIds]);
 
-        // Hack type: Lưu chuỗi vào type number để bảo tồn dấu "." khi user gõ "1."
-        const quantityToSave = sanitized as unknown as number;
+    const handleQuantityChange = useCallback(
+        (index: number, text: string, materialId: string) => {
+            const sanitized = InputFilters.decimal(text, 5, 15);
 
-        const updated = selectedMaterials.map((item, i) =>
-            i === index ? { ...item, quantity: quantityToSave } : item
-        );
-        onMaterialsChange(updated);
-    };
+            setDisplayQuantities(prev => ({ ...prev, [materialId]: sanitized }));
+
+            const parsed = parseFloat(sanitized);
+            const quantityToSave = isNaN(parsed) ? 0 : parsed;
+
+            const updated = selectedMaterials.map((item, i) =>
+                i === index ? { ...item, quantity: quantityToSave } : item
+            );
+            onMaterialsChange(updated);
+        },
+        [selectedMaterials, onMaterialsChange]
+    );
+
+    const handleQuantityBlur = useCallback(
+        (index: number, materialId: string) => {
+            const item = selectedMaterials[index];
+            if (item) {
+                setDisplayQuantities(prev => ({ ...prev, [materialId]: String(item.quantity) }));
+            }
+        },
+        [selectedMaterials]
+    );
 
     return (
         <>
@@ -120,35 +159,52 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                     </View>
                 }
             >
-                {/* Material Cards - only render when has items */}
                 {selectedMaterials.length > 0 && (
                     <View style={styles.materialCardsContainer}>
-                        {selectedMaterials.map((item, index) => (
-                            <View key={`${item.material.id}-${index}`} style={styles.materialCard}>
-                                <Text style={styles.materialName} numberOfLines={1}>
-                                    {item.material.name}
-                                </Text>
-                                <View style={styles.materialActions}>
-                                    <View style={styles.quantityBox}>
-                                        <TextInput
-                                            style={styles.quantityInput}
-                                            value={String(item.quantity)}
-                                            onChangeText={text => handleQuantityChange(index, text)}
-                                            selectTextOnFocus
-                                        />
-                                        <Text style={styles.unitText} numberOfLines={1}>
-                                            {item.unit}
-                                        </Text>
+                        {selectedMaterials.map((item, index) => {
+                            const key = item.material.id;
+                            return (
+                                <View key={key} style={styles.materialCard}>
+                                    <Text style={styles.materialName} numberOfLines={1}>
+                                        {item.material.name}
+                                    </Text>
+                                    <View style={styles.materialActions}>
+                                        <View style={styles.quantityBox}>
+                                            <TextInput
+                                                style={styles.quantityInput}
+                                                value={
+                                                    displayQuantities[key] ?? String(item.quantity)
+                                                }
+                                                onChangeText={text =>
+                                                    handleQuantityChange(
+                                                        index,
+                                                        text,
+                                                        item.material.id
+                                                    )
+                                                }
+                                                onBlur={() =>
+                                                    handleQuantityBlur(index, item.material.id)
+                                                }
+                                                selectTextOnFocus
+                                            />
+                                            <Text style={styles.unitText} numberOfLines={1}>
+                                                {item.unit}
+                                            </Text>
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={() => handleRemoveMaterial(index)}
+                                            style={styles.deleteButton}
+                                        >
+                                            <DeleteIcon
+                                                width={18}
+                                                height={18}
+                                                color={theme.error}
+                                            />
+                                        </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity
-                                        onPress={() => handleRemoveMaterial(index)}
-                                        style={styles.deleteButton}
-                                    >
-                                        <DeleteIcon width={18} height={18} color={theme.error} />
-                                    </TouchableOpacity>
                                 </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </View>
                 )}
 

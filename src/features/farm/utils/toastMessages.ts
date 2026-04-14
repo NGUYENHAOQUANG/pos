@@ -269,10 +269,18 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
             text1: 'Vui lòng chọn thời gian',
             visibilityTime: 3000,
         });
-    } else {
+    } else if (errors.materials) {
+        // Individual material item errors (e.g. quantity < 0.0001)
         Toast.show({
             type: 'error',
             text1: 'Số lượng vật tư phải lớn hơn 0',
+            visibilityTime: 3000,
+        });
+    } else {
+        // Generic fallback for any other field errors
+        Toast.show({
+            type: 'error',
+            text1: 'Vui lòng kiểm tra lại thông tin',
             visibilityTime: 3000,
         });
     }
