@@ -11,7 +11,7 @@ import Toast from 'react-native-toast-message';
 import { MOCK_PONDS } from '@/features/control/data/devicesData';
 
 // ==========================================
-// 🚧 [TODO]: XÓA BIẾN NÀY KHI CÓ API THIẾT BỊ NHÁ THẬT
+// [TODO]: XÓA BIẾN NÀY KHI CÓ API THIẾT BỊ NHÁ THẬT
 // Biến tạm để lưu trạng thái bật/tắt của thiết bị mock,
 // giúp Switch trên UI có thể thay đổi hợp lệ mà không bị "giật" lại.
 let MOCK_WRAPPER_IS_ON = true;
