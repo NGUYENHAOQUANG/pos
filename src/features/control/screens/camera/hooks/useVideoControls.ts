@@ -20,9 +20,9 @@ interface UseVideoControlsReturn {
  * including auto-hide timer and fade animations.
  */
 export const useVideoControls = (): UseVideoControlsReturn => {
-    const [showControls, setShowControls] = useState(true);
+    const [showControls, setShowControls] = useState(false);
     const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const controlsOpacity = useSharedValue(1);
+    const controlsOpacity = useSharedValue(0);
 
     const controlsAnimatedStyle = useAnimatedStyle(() => ({
         opacity: controlsOpacity.value,
@@ -57,13 +57,12 @@ export const useVideoControls = (): UseVideoControlsReturn => {
         }
     }, [showControls, controlsOpacity, showControlsUI]);
 
-    // Start initial hide timer on mount
+    // Cleanup timer on unmount
     useEffect(() => {
-        startHideTimer();
         return () => {
             if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
         };
-    }, [startHideTimer]);
+    }, []);
 
     return {
         showControls,

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { spacing, borderRadius } from '@/styles';
@@ -7,27 +7,45 @@ import { useAppTheme } from '@/styles/themeContext';
 import { colors, Colors } from '@/styles/colors';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
+import { RTCView } from 'react-native-webrtc';
+import { useWebRTCStream } from '@/features/control/screens/camera/hooks/useWebRTCStream';
+import { useIsFocused } from '@react-navigation/native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_HORIZONTAL_PADDING = spacing.md * 2;
-const CARD_WIDTH = SCREEN_WIDTH - CARD_HORIZONTAL_PADDING;
-const CARD_HEIGHT = CARD_WIDTH * 0.56; // ~16:9 aspect ratio
+const HORIZONTAL_PADDING = 16; // spacing.md on each side
+const GRID_GAP = 8; // gap between two columns
+const CARD_WIDTH = SCREEN_WIDTH - HORIZONTAL_PADDING * 2;
+const GRID_CARD_WIDTH = Math.floor((SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - GRID_GAP) / 2);
 
 interface CameraCardProps {
     camera: CameraItem;
     onPress: (camera: CameraItem) => void;
+    isGrid?: boolean;
 }
 
-export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
+export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress, isGrid }) => {
     const theme = useAppTheme();
     const themedStyles = getStyles(theme);
     const isOnline = camera.status === 'On';
-    const [isImageLoaded, setIsImageLoaded] = useState(false);
+    const isFocused = useIsFocused();
+
+    // Only attempt WebRTC if online, URL exists, and the screen is actually visible
+    const shouldFetchWebRTC = isOnline && !!camera.liveUrl && isFocused;
+    const { stream, isConnected } = useWebRTCStream(shouldFetchWebRTC ? camera.liveUrl! : '');
+
+    const adjustedWidth = isGrid ? GRID_CARD_WIDTH : CARD_WIDTH;
+    const adjustedHeight = adjustedWidth * 0.65;
+
+    const dynamicContainerStyle = {
+        width: adjustedWidth,
+        height: adjustedHeight,
+        marginBottom: isGrid ? 0 : spacing.sm,
+    };
 
     const getStatusProps = () => {
         switch (camera.status) {
             case 'On':
-                return { text: 'Trực tuyến', dotStyle: themedStyles.onlineDot };
+                return { text: 'Online', dotStyle: themedStyles.onlineDot };
             case 'Off':
                 return { text: 'Offline', dotStyle: themedStyles.offlineDot };
             case 'Fault':
@@ -40,38 +58,37 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     };
 
     const statusProps = getStatusProps();
-    const hasSnapshot = !!camera.snapshotUrl;
+    const hasLiveUrl = !!camera.liveUrl;
 
-    // Show skeleton while snapshot is loading
-    if (hasSnapshot && !isImageLoaded) {
+    // Show skeleton while connecting to WebRTC stream
+    if (hasLiveUrl && isOnline && !isConnected) {
+        const skeletonColor = theme.isDark ? theme.background : theme.gray[200];
+
         return (
-            <View style={styles.container}>
-                {/* Skeleton placeholder while image loads */}
-                <Skeleton width={CARD_WIDTH} height={CARD_HEIGHT} borderRadius={borderRadius.md} />
+            <View style={[styles.container, dynamicContainerStyle]}>
+                {/* Skeleton placeholder while stream connects */}
+                <Skeleton
+                    width={adjustedWidth}
+                    height={adjustedHeight}
+                    borderRadius={borderRadius.md}
+                    backgroundColor={skeletonColor}
+                />
 
                 {/* Badge skeletons at bottom-left */}
                 <View style={styles.placeholderBadgesRow}>
                     <Skeleton
                         width={120}
-                        height={28}
-                        borderRadius={20}
-                        backgroundColor={theme.gray[300]}
+                        height={16}
+                        borderRadius={4}
+                        backgroundColor={skeletonColor}
                     />
                     <Skeleton
                         width={150}
-                        height={28}
-                        borderRadius={20}
-                        backgroundColor={theme.gray[300]}
+                        height={16}
+                        borderRadius={4}
+                        backgroundColor={skeletonColor}
                     />
                 </View>
-
-                {/* Hidden image to trigger onLoad */}
-                <Image
-                    source={{ uri: camera.snapshotUrl! }}
-                    style={styles.hiddenImage}
-                    onLoad={() => setIsImageLoaded(true)}
-                    onError={() => setIsImageLoaded(true)}
-                />
             </View>
         );
     }
@@ -81,35 +98,36 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             activeOpacity={0.85}
             disabled={!isOnline}
             onPress={() => onPress(camera)}
-            style={styles.container}
+            style={[styles.container, dynamicContainerStyle]}
         >
-            {/* Snapshot preview or placeholder background */}
+            {/* Live WebRTC preview or placeholder background */}
             <View style={themedStyles.placeholderBg}>
-                {hasSnapshot ? (
-                    // Snapshot image from server
-                    <Image
-                        source={{ uri: camera.snapshotUrl! }}
+                {hasLiveUrl && stream ? (
+                    // Live RTC view from stream
+                    <RTCView
+                        streamURL={stream.toURL()}
                         style={styles.snapshotImage}
-                        resizeMode="cover"
+                        objectFit="cover"
+                        zOrder={0}
                     />
                 ) : (
                     // Fallback placeholder SVG (no snapshot available)
                     <VideoPlayerBg
-                        width={CARD_WIDTH}
-                        height={CARD_HEIGHT}
+                        width={adjustedWidth}
+                        height={adjustedHeight}
                         preserveAspectRatio="xMidYMid slice"
                         color={theme.isDark ? theme.border : colors.gray[300]}
                     />
                 )}
 
-                {/* Camera code + camera name badges */}
+                {/* Camera name and SN overlaid natively over image */}
                 <View style={styles.placeholderBadgesRow}>
-                    <View style={styles.placeholderBadge}>
-                        <Text style={styles.placeholderBadgeText}>{camera.deviceSn}</Text>
-                    </View>
-                    <View style={styles.placeholderBadge}>
-                        <Text style={styles.placeholderBadgeText}>{camera.name}</Text>
-                    </View>
+                    <Text style={styles.placeholderBadgeText} numberOfLines={1}>
+                        {camera.modelCode}
+                    </Text>
+                    <Text style={styles.placeholderBadgeText} numberOfLines={1}>
+                        {camera.name}
+                    </Text>
                 </View>
             </View>
 
@@ -125,39 +143,28 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
 // Static styles
 const styles = StyleSheet.create({
     container: {
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
         borderRadius: borderRadius.md,
         overflow: 'hidden',
-        marginBottom: spacing.sm,
-        alignSelf: 'center',
     },
     snapshotImage: {
         width: '100%',
         height: '100%',
     },
-    hiddenImage: {
-        width: 0,
-        height: 0,
-        position: 'absolute',
-    },
     placeholderBadgesRow: {
         position: 'absolute',
-        bottom: spacing.sm + 2,
-        left: spacing.sm + 2,
-        flexDirection: 'row',
-        gap: 8,
-    },
-    placeholderBadge: {
-        backgroundColor: 'rgba(102, 112, 133, 0.7)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
+        bottom: spacing.sm,
+        left: spacing.sm,
+        right: spacing.sm,
+        flexDirection: 'column',
+        gap: 2,
     },
     placeholderBadgeText: {
         color: '#FFFFFF',
         fontSize: 12,
         fontWeight: '500',
+        textShadowColor: 'rgba(0, 0, 0, 0.7)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 3,
     },
     statusBadge: {
         position: 'absolute',

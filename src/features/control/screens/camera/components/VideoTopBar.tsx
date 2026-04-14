@@ -12,6 +12,8 @@ interface VideoTopBarProps {
     onClose: () => void;
     /** Whether it is HD stream */
     isHd?: boolean;
+    /** Camera ID (deviceCode) */
+    deviceCode?: string;
 }
 
 /**
@@ -28,16 +30,20 @@ export const VideoTopBar: React.FC<VideoTopBarProps> = ({
     <View style={styles.topBar} pointerEvents="box-none">
         <View style={styles.badgesRow}>
             <View style={styles.badge}>
-                <Text style={styles.badgeText}>{pondName}</Text>
+                <Text style={styles.badgeText} numberOfLines={1}>
+                    {pondName}
+                </Text>
             </View>
-            {cameraName !== pondName && (
-                <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{cameraName}</Text>
-                </View>
-            )}
+            <View style={styles.badge}>
+                <Text style={styles.badgeText} numberOfLines={1}>
+                    {cameraName}
+                </Text>
+            </View>
             {isHd !== undefined && (
                 <View style={[styles.badge, styles.hdBadge]}>
-                    <Text style={styles.badgeText}>{isHd ? 'HD' : 'SD'}</Text>
+                    <Text style={styles.badgeText} numberOfLines={1}>
+                        {isHd ? 'HD' : 'SD'}
+                    </Text>
                 </View>
             )}
         </View>
@@ -60,12 +66,15 @@ const styles = StyleSheet.create({
     badgesRow: {
         flexDirection: 'row',
         gap: 8,
+        flexShrink: 1,
+        paddingRight: 8,
     },
     badge: {
         backgroundColor: colors.overlayBadge,
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
+        flexShrink: 1,
     },
     hdBadge: {
         backgroundColor: colors.overlayBadge, // Can be specialized if needed
