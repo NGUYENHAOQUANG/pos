@@ -12,6 +12,7 @@ import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-she
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { SpecificType } from '@/features/material/types/warehouse.types';
 import { RequiredDot } from '@/shared/components/forms/Input';
+import { InputFilters } from '@/shared/regex';
 import { useFilteredWarehouseMaterials } from '@/features/farm/hooks/useFilteredWarehouseMaterials';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useDebounce } from '@/shared/hooks/useDebounce';
@@ -97,27 +98,14 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 
     // Handle inline quantity change on material card
     const handleQuantityChange = (index: number, text: string) => {
-        let sanitized = text.replace(/[^0-9.]/g, '');
-        const parts = sanitized.split('.');
-        if (parts.length > 2) {
-            sanitized = parts[0] + '.' + parts.slice(1).join('');
-        }
-        if (sanitized.length > 7) {
-            sanitized = sanitized.substring(0, 7);
-        }
+        // Sử dụng bộ lọc format chuẩn của hệ thống: maxDecimalPlaces = 5, maxIntegerPlaces = 15
+        let sanitized = InputFilters.decimal(text, 5, 15);
 
-        // If user typed just a dot, treat it as 0
-        if (sanitized === '.') {
-            sanitized = '0';
-        }
-
-        let numericValue = sanitized === '' ? 0 : Number(sanitized);
-        if (Number.isNaN(numericValue)) {
-            numericValue = 0;
-        }
+        // Hack type: Lưu chuỗi vào type number để bảo tồn dấu "." khi user gõ "1."
+        const quantityToSave = sanitized as unknown as number;
 
         const updated = selectedMaterials.map((item, i) =>
-            i === index ? { ...item, quantity: numericValue } : item
+            i === index ? { ...item, quantity: quantityToSave } : item
         );
         onMaterialsChange(updated);
     };
@@ -146,7 +134,6 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                             style={styles.quantityInput}
                                             value={String(item.quantity)}
                                             onChangeText={text => handleQuantityChange(index, text)}
-                                            keyboardType="decimal-pad"
                                             selectTextOnFocus
                                         />
                                         <Text style={styles.unitText} numberOfLines={1}>
