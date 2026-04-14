@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     RefreshControl,
+    ScrollView,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -21,6 +22,7 @@ import {
 import { INotification } from '@/features/notifications/types/notification.types';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { NotificationSkeleton } from '@/features/notifications/components/NotificationSkeleton';
 
 export const NotificationListScreen: React.FC = () => {
     const theme = useAppTheme();
@@ -121,11 +123,7 @@ export const NotificationListScreen: React.FC = () => {
 
     const renderEmpty = () => {
         if (isLoading) {
-            return (
-                <View style={{ paddingTop: spacing.xl }}>
-                    <ActivityIndicator size="large" color={theme.primaryOrange} />
-                </View>
-            );
+            return <NotificationSkeleton />;
         }
         return <EmptyStateCard message="Bạn không có thông báo nào." />;
     };
@@ -134,30 +132,42 @@ export const NotificationListScreen: React.FC = () => {
         <View style={styles.container}>
             <HeaderSection title="Thông báo" onBack={() => navigation.goBack()} />
 
-            <FlatList
-                data={notifications}
-                keyExtractor={item => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={[
-                    styles.listContent,
-                    notifications.length === 0 && { flex: 1, justifyContent: 'center' },
-                ]}
-                showsVerticalScrollIndicator={false}
-                ListFooterComponent={renderFooter}
-                ListEmptyComponent={renderEmpty}
-                onEndReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) {
-                        fetchNextPage();
+            {isLoading || isRefetching ? (
+                <ScrollView
+                    style={{ flex: 1 }}
+                    refreshControl={
+                        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
                     }
-                }}
-                onEndReachedThreshold={0.5}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isRefetching && !isFetchingNextPage}
-                        onRefresh={refetch}
-                    />
-                }
-            />
+                >
+                    <NotificationSkeleton />
+                </ScrollView>
+            ) : (
+                <FlatList
+                    data={notifications}
+                    keyExtractor={item => item.id}
+                    renderItem={renderItem}
+                    contentContainerStyle={[
+                        styles.listContent,
+                        notifications.length === 0 &&
+                            !isLoading && { flex: 1, justifyContent: 'center' },
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                    ListFooterComponent={renderFooter}
+                    ListEmptyComponent={renderEmpty}
+                    onEndReached={() => {
+                        if (hasNextPage && !isFetchingNextPage) {
+                            fetchNextPage();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefetching && !isFetchingNextPage}
+                            onRefresh={refetch}
+                        />
+                    }
+                />
+            )}
         </View>
     );
 };

@@ -23,6 +23,8 @@ import {
     selectIsTokenRegistered,
 } from '@/features/notifications/store/notificationStore';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { notificationKeys } from '@/features/notifications/hooks/useNotifications';
 
 /**
  * Handle notification tap navigation based on payload data
@@ -60,6 +62,7 @@ function handleNotificationNavigation(
  * Should be called ONCE at the top level of the authenticated app.
  */
 export function useNotificationSetup(): void {
+    const queryClient = useQueryClient();
     const navigation = useNavigation();
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     const fcmToken = useNotificationStore(selectFcmToken);
@@ -148,10 +151,13 @@ export function useNotificationSetup(): void {
 
             // Display as local notification via Notifee
             await displayForegroundNotification(remoteMessage);
+
+            // Invalidate queries to fetch the newly arrived notification
+            queryClient.invalidateQueries({ queryKey: notificationKeys.all });
         });
 
         return unsubscribe;
-    }, [isAuthenticated]);
+    }, [isAuthenticated, queryClient]);
 
     // ─── Step 5: Background-opened + Quit-opened handlers ───
     useEffect(() => {
