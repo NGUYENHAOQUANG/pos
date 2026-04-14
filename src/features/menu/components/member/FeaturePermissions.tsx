@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { spacing, borderRadius } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
@@ -319,7 +319,7 @@ const getStyles = (theme: Colors) =>
             marginTop: spacing.sm,
             borderWidth: 1,
             borderColor: theme.border,
-            borderRadius: borderRadius.sm,
+            borderRadius: 12,
             overflow: 'hidden',
         },
         tableInner: {
