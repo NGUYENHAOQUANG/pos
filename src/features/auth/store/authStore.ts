@@ -10,7 +10,6 @@ import { Storage } from '@/core/services/storage.service';
 import { authApi } from '@/features/auth/api/authApi';
 import { decodeToken } from '@/core/utils/jwt';
 import { useNotificationStore } from '@/features/notifications/store/notificationStore';
-import { unregisterDeviceToken } from '@/features/notifications/api/notification.api';
 import {
     AuthUser,
     LoginCredentials,
@@ -165,14 +164,8 @@ export const useAuthStore = create<AuthState>()(
             logout: async () => {
                 const refreshToken = get().refreshToken;
                 const fcmToken = useNotificationStore.getState().fcmToken;
-                if (fcmToken) {
-                    unregisterDeviceToken(fcmToken).catch(err =>
-                        console.error('Failed to unregister FCM token:', err)
-                    );
-                }
                 useNotificationStore.getState().resetNotificationState();
 
-                // Clear state IMMEDIATELY to update UI and prevent interceptors from thinking we are logged in
                 set({
                     user: null,
                     token: null,
@@ -185,7 +178,11 @@ export const useAuthStore = create<AuthState>()(
 
                 try {
                     if (refreshToken) {
-                        await authApi.logout(refreshToken);
+                        await authApi.logout({
+                            refreshToken,
+                            logoutAllDevices: false,
+                            fcmToken: fcmToken || undefined,
+                        });
                     }
                 } catch (error) {
                     console.error('Logout API failed:', error);
