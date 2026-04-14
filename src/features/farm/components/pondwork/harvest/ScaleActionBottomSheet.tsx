@@ -513,10 +513,7 @@ const getStyles = (theme: Colors) =>
         },
         footer: {
             paddingHorizontal: spacing.md,
-            paddingTop: spacing.md,
             paddingBottom: spacing.xl,
-            borderTopWidth: 1,
-            borderTopColor: theme.defaultBorder,
         },
         buttonRow: {
             flexDirection: 'row',
