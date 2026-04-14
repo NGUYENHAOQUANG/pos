@@ -18,12 +18,12 @@ export const useDryRenovations = (pondId: string, params?: IDryRenovationParams)
 };
 
 export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationParams) => {
-    const { data, isLoading, error, refetch } = useDryRenovations(pondId, params);
+    const { data, isFetching, error, refetch } = useDryRenovations(pondId, params);
 
     const rawItems = data?.data?.items || [];
     const jobs: JobExecution[] = dryRenovationLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useCreateDryRenovation = () => {

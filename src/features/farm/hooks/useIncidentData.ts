@@ -83,11 +83,11 @@ export const useIncidentList = (pondId: string, params?: GetIncidentListParams) 
 };
 
 export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParams) => {
-    const { data, isLoading, error, refetch, isRefetching } = useIncidentList(pondId, params);
+    const { data, isFetching, error, refetch, isRefetching } = useIncidentList(pondId, params);
 
     const rawItems: IncidentListItem[] = data?.data?.items ?? [];
 
     const jobs: JobExecution[] = incidentLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch, isRefetching };
+    return { jobs, isLoading: isFetching, error, refetch, isRefetching };
 };

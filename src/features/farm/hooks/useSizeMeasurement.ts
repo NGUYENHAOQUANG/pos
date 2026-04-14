@@ -21,12 +21,12 @@ export const useSizeMeasurementsAsJobs = (
     pondId: string | undefined,
     params?: ISizeMeasurementParams
 ) => {
-    const { data, isLoading, error, refetch } = useSizeMeasurements(pondId || '', params);
+    const { data, isFetching, error, refetch } = useSizeMeasurements(pondId || '', params);
 
     const rawItems = data?.data?.items || [];
     const jobs: JobExecution[] = sizeMeasurementLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useSizeMeasurement = (pondId: string, id: string) => {

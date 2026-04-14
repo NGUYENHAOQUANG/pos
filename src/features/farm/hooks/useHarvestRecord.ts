@@ -25,7 +25,12 @@ export const useHarvestRecords = (pondId: string, params?: IHarvestRecordParams)
  * @param params - Optional filter (CreateAtFrom, CreateAtTo, ...); PageSize defaults to 1000.
  */
 export const useHarvestRecordsAsJobs = (pondId: string, params?: IHarvestRecordParams) => {
-    const { data, isLoading, error, refetch } = useHarvestRecords(pondId, {
+    const {
+        data,
+        isLoading: isFetching,
+        error,
+        refetch,
+    } = useHarvestRecords(pondId, {
         PageSize: 1000,
         ...params,
     });
@@ -34,7 +39,7 @@ export const useHarvestRecordsAsJobs = (pondId: string, params?: IHarvestRecordP
 
     const jobs: JobExecution[] = harvestLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useHarvestRecord = (pondId: string, id: string) => {

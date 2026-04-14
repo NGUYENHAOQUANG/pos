@@ -43,7 +43,12 @@ export const useWaterTreatmentDetail = (pondId: string | undefined, id: string |
 
 /** Fetch & transform water treatment records to JobExecution[] for LogScreen */
 export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTreatmentParams) => {
-    const { data: listData, isLoading, error, refetch } = useWaterTreatmentRecords(pondId, params);
+    const {
+        data: listData,
+        isLoading: isFetching,
+        error,
+        refetch,
+    } = useWaterTreatmentRecords(pondId, params);
 
     // Extract items from API response
     const responseData = listData?.data;
@@ -53,7 +58,7 @@ export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTr
 
     const jobs: JobExecution[] = waterTreatmentLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 // --- Mutation Hooks ---
