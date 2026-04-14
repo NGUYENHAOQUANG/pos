@@ -1,74 +1,192 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { spacing, typography, borderRadius } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import DeleteIcon from '@/assets/Icon/Delete.svg';
-import { RadioButton } from '@/shared/components/forms/RadioButton';
-import { RequiredDot } from '@/shared/components/forms/Input';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
+import { RequiredDot } from '@/shared/components/forms/Input';
+import { IRole } from '@/features/menu/types/member.types';
+import { PERMISSION_GROUPS, PERMISSION_COLUMNS } from '@/features/menu/constants/member.constants';
 
 interface FeaturePermissionsProps {
-    managementLevel: 'farm' | 'pond';
-    onManagementLevelChange: (level: 'farm' | 'pond') => void;
+    selectedRoles: string[]; // Use role IDs
+    onRolesChange: (roles: string[]) => void;
+    availableRoles: IRole[];
     selectedPermissions: string[];
     onPermissionsChange: (permissions: string[]) => void;
-    selectedUnitIds: string[];
-    onUnitsChange: (ids: string[]) => void;
-    onAddUnitPress: () => void;
     disabled?: boolean;
-    availableUnits: { id: string; name: string }[];
 }
 
-const PERMISSIONS = [
-    { id: 'member_management', label: 'Quản lý thành viên' },
-    { id: 'task_execution', label: 'Thực hiện tác vụ/công việc' },
-    { id: 'iot_control', label: 'Điều khiển thiết bị IoT' },
-    { id: 'material_management', label: 'Quản Lý Vật Tư' },
-];
+const FeatureGroup = React.memo(
+    ({
+        group,
+        selectedPermissions = [],
+        onTogglePermission,
+        onToggleGroup,
+        disabled,
+    }: {
+        group: (typeof PERMISSION_GROUPS)[0];
+        selectedPermissions: string[];
+        onTogglePermission: (id: string) => void;
+        onToggleGroup: (groupId: string, checked: boolean) => void;
+        disabled?: boolean;
+    }) => {
+        const theme = useAppTheme();
+        const styles = getStyles(theme);
+
+        const hasAnySelection = useMemo(() => {
+            return group.items.some(item =>
+                PERMISSION_COLUMNS.some(col =>
+                    selectedPermissions.includes(`${item.id}_${col.key}`)
+                )
+            );
+        }, [group, selectedPermissions]);
+
+        return (
+            <View style={styles.groupContainer}>
+                <View style={styles.groupHeader}>
+                    <Checkbox
+                        label={group.name}
+                        checked={hasAnySelection}
+                        onToggle={() => onToggleGroup(group.id, !hasAnySelection)}
+                        disabled={disabled}
+                        labelStyle={styles.checkboxLabel}
+                        activeColor={theme.primaryOrange}
+                    />
+                </View>
+
+                {hasAnySelection && (
+                    <View style={styles.tableContainer}>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            bounces={false}
+                            overScrollMode="never"
+                        >
+                            <View style={styles.tableInner}>
+                                <View style={styles.tableHead}>
+                                    <View style={styles.colName} />
+                                    {PERMISSION_COLUMNS.map(col => (
+                                        <View key={col.key} style={styles.colCheck}>
+                                            <Text style={styles.tableHeadText}>{col.label}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+
+                                {group.items.map((item, index) => {
+                                    const isLast = index === group.items.length - 1;
+
+                                    return (
+                                        <View
+                                            key={item.id}
+                                            style={[styles.tableRow, isLast && styles.tableRowLast]}
+                                        >
+                                            <View style={styles.colName}>
+                                                <Text style={styles.rowLabelText}>{item.name}</Text>
+                                            </View>
+                                            {PERMISSION_COLUMNS.map(col => {
+                                                const permId = `${item.id}_${col.key}`;
+                                                return (
+                                                    <View key={col.key} style={styles.colCheck}>
+                                                        <Checkbox
+                                                            checked={selectedPermissions.includes(
+                                                                permId
+                                                            )}
+                                                            onToggle={() =>
+                                                                onTogglePermission(permId)
+                                                            }
+                                                            disabled={disabled}
+                                                            style={styles.centerCheckbox}
+                                                            activeColor={theme.primaryOrange}
+                                                        />
+                                                    </View>
+                                                );
+                                            })}
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        </ScrollView>
+                    </View>
+                )}
+            </View>
+        );
+    }
+);
+
+const ALL_PERMISSION_KEYS = PERMISSION_GROUPS.reduce((acc, group) => {
+    const groupKeys = group.items.reduce((itemAcc, item) => {
+        const itemKeys = PERMISSION_COLUMNS.map(col => `${item.id}_${col.key}`);
+        return itemAcc.concat(itemKeys);
+    }, [] as string[]);
+    return acc.concat(groupKeys);
+}, [] as string[]);
 
 export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
-    managementLevel,
-    onManagementLevelChange,
-    selectedPermissions,
-    onPermissionsChange,
-    selectedUnitIds,
-    onUnitsChange,
-    onAddUnitPress,
+    selectedRoles = [],
+    onRolesChange = () => {},
+    availableRoles = [],
+    selectedPermissions = [],
+    onPermissionsChange = () => {},
     disabled = false,
-    availableUnits,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
-    const isAllSelected = selectedPermissions.length === PERMISSIONS.length;
+    const isAllSelected = selectedPermissions.length === ALL_PERMISSION_KEYS.length;
 
-    const togglePermission = (id: string) => {
+    const toggleRole = useCallback(
+        (roleId: string) => {
+            if (disabled) return;
+            const nextRoles = selectedRoles.includes(roleId)
+                ? selectedRoles.filter(id => id !== roleId)
+                : [...selectedRoles, roleId];
+            onRolesChange(nextRoles);
+        },
+        [disabled, selectedRoles, onRolesChange]
+    );
+
+    const togglePermission = useCallback(
+        (permId: string) => {
+            if (disabled) return;
+            const nextPerms = selectedPermissions.includes(permId)
+                ? selectedPermissions.filter(id => id !== permId)
+                : [...selectedPermissions, permId];
+            onPermissionsChange(nextPerms);
+        },
+        [disabled, selectedPermissions, onPermissionsChange]
+    );
+
+    const toggleGroup = useCallback(
+        (groupId: string, selectAll: boolean) => {
+            if (disabled) return;
+            const group = PERMISSION_GROUPS.find(g => g.id === groupId);
+            if (!group) return;
+
+            // Trích xuất list key quyền thuộc riêng biệt group này
+            const groupKeys = group.items.reduce((acc, item) => {
+                const itemKeys = PERMISSION_COLUMNS.map(col => `${item.id}_${col.key}`);
+                return acc.concat(itemKeys);
+            }, [] as string[]);
+
+            if (selectAll) {
+                // Nạp thêm toàn bộ key của group vào danh sách đã chọn (dùng Set để chống trùng)
+                const nextPerms = Array.from(new Set([...selectedPermissions, ...groupKeys]));
+                onPermissionsChange(nextPerms);
+            } else {
+                // Bóc tách vứt bỏ toàn bộ key của group khỏi danh sách
+                const nextPerms = selectedPermissions.filter(id => !groupKeys.includes(id));
+                onPermissionsChange(nextPerms);
+            }
+        },
+        [disabled, selectedPermissions, onPermissionsChange]
+    );
+
+    const toggleAll = useCallback(() => {
         if (disabled) return;
-        if (selectedPermissions.includes(id)) {
-            onPermissionsChange(selectedPermissions.filter(p => p !== id));
-        } else {
-            onPermissionsChange([...selectedPermissions, id]);
-        }
-    };
-
-    const toggleAll = () => {
-        if (disabled) return;
-        if (isAllSelected) {
-            onPermissionsChange([]);
-        } else {
-            onPermissionsChange(PERMISSIONS.map(p => p.id));
-        }
-    };
-
-    const handleRemoveUnit = (idToRemove: string) => {
-        if (disabled) return;
-        onUnitsChange(selectedUnitIds.filter(id => id !== idToRemove));
-    };
-
-    const selectedUnits = availableUnits.filter(item => selectedUnitIds.includes(item.id));
+        onPermissionsChange(isAllSelected ? [] : ALL_PERMISSION_KEYS);
+    }, [disabled, isAllSelected, onPermissionsChange]);
 
     return (
         <View style={styles.container}>
@@ -78,80 +196,31 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
             </View>
 
             <View style={[styles.content, disabled && styles.disabledContent]}>
-                {/* Management Level Section */}
+                {/* Roles Selection */}
                 <View style={styles.section}>
-                    <View style={[styles.fieldLabelWrapper, { marginBottom: spacing.md }]}>
-                        <Text style={styles.fieldLabelText}>Chọn cấp quản lý</Text>
+                    <View style={styles.fieldLabelWrapper}>
+                        <Text style={styles.fieldLabelText}>Chọn chức vụ</Text>
                         <RequiredDot />
                     </View>
-                    <RadioButton
-                        options={[
-                            { label: 'Cấp trại nuôi', value: 'farm' },
-                            { label: 'Cấp ao nuôi', value: 'pond' },
-                        ]}
-                        value={managementLevel}
-                        onValueChange={onManagementLevelChange as any}
-                        disabled={disabled}
-                    />
-                </View>
-
-                {/* Work Unit Section */}
-                <View style={[styles.section, { marginBottom: spacing.md }]}>
-                    <View style={[styles.rowBetween, { marginBottom: spacing.md }]}>
-                        <View style={styles.fieldLabelWrapper}>
-                            <Text style={styles.fieldLabelText}>Đơn vị công tác</Text>
-                            <RequiredDot />
-                        </View>
-                        {!disabled && (
-                            <TouchableOpacity onPress={onAddUnitPress} style={styles.addUnitButton}>
-                                <Ionicons name="add" size={16} color={theme.primary} />
-                                <Text style={styles.addUnitText}>Thêm đơn vị</Text>
-                            </TouchableOpacity>
-                        )}
-                        {disabled && (
-                            <View style={[styles.addUnitButton, styles.disabledElement]}>
-                                <Ionicons name="add" size={16} color={theme.textSecondary} />
-                                <Text style={[styles.addUnitText, { color: theme.textSecondary }]}>
-                                    Thêm đơn vị
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-                    <View style={styles.selectedUnitsList}>
-                        {selectedUnits.map(unit => (
-                            <View key={unit.id} style={styles.selectedUnitItem}>
-                                <Text style={styles.selectedUnitText}>{unit.name}</Text>
-                                {!disabled && (
-                                    <TouchableOpacity
-                                        onPress={() => handleRemoveUnit(unit.id)}
-                                        style={styles.deleteButton}
-                                    >
-                                        <DeleteIcon width={16} height={16} />
-                                    </TouchableOpacity>
-                                )}
-                                {disabled && (
-                                    <View
-                                        style={[
-                                            styles.deleteButton,
-                                            styles.disabledElement,
-                                            { backgroundColor: theme.gray[100] },
-                                        ]}
-                                    >
-                                        <DeleteIcon
-                                            width={16}
-                                            height={16}
-                                            color={theme.textSecondary}
-                                        />
-                                    </View>
-                                )}
-                            </View>
+                    <View style={styles.rolesList}>
+                        {availableRoles.map(role => (
+                            <Checkbox
+                                key={role.id}
+                                label={role.name}
+                                checked={selectedRoles.includes(role.id)}
+                                onToggle={() => toggleRole(role.id)}
+                                disabled={disabled}
+                                style={styles.marginBotCheckBox}
+                                labelStyle={styles.checkboxLabel}
+                                activeColor={theme.primaryOrange}
+                            />
                         ))}
                     </View>
                 </View>
 
-                {/* Permissions Section */}
-                <View style={[styles.section, { marginBottom: 0 }]}>
-                    <View style={[styles.rowBetween, { marginBottom: spacing.md }]}>
+                {/* Operations Layer */}
+                <View style={styles.sectionNoBot}>
+                    <View style={styles.rowBetween}>
                         <View style={styles.fieldLabelWrapper}>
                             <Text style={styles.fieldLabelText}>Quyền thao tác</Text>
                             <RequiredDot />
@@ -161,32 +230,22 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                             checked={isAllSelected}
                             onToggle={toggleAll}
                             disabled={disabled}
-                            labelStyle={styles.checkboxText}
-                            //activeColor={theme.primaryOrange}
+                            labelStyle={styles.checkboxLabel}
+                            activeColor={theme.primaryOrange}
                         />
                     </View>
 
-                    <View style={styles.permissionsList}>
-                        {PERMISSIONS.filter(p => {
-                            if (managementLevel === 'pond') {
-                                return ['task_execution', 'iot_control'].includes(p.id);
-                            }
-                            return true;
-                        }).map(permission => {
-                            const isSelected = selectedPermissions.includes(permission.id);
-                            return (
-                                <Checkbox
-                                    key={permission.id}
-                                    label={permission.label}
-                                    checked={isSelected}
-                                    onToggle={() => togglePermission(permission.id)}
-                                    disabled={disabled}
-                                    style={styles.permissionItem}
-                                    labelStyle={styles.permissionText}
-                                    //activeColor={theme.primaryOrange}
-                                />
-                            );
-                        })}
+                    <View style={styles.matrixContainer}>
+                        {PERMISSION_GROUPS.map(group => (
+                            <FeatureGroup
+                                key={group.id}
+                                group={group}
+                                selectedPermissions={selectedPermissions}
+                                onTogglePermission={togglePermission}
+                                onToggleGroup={toggleGroup}
+                                disabled={disabled}
+                            />
+                        ))}
                     </View>
                 </View>
             </View>
@@ -214,80 +273,101 @@ const getStyles = (theme: Colors) =>
         content: {
             padding: spacing.md,
         },
-        disabledContent: {
-            // opacity: 0.7, // Removed to ensure headers are dark
-        },
+        disabledContent: {},
         section: {
             marginBottom: spacing.md,
+        },
+        sectionNoBot: {
+            marginBottom: 0,
         },
         fieldLabelWrapper: {
             flexDirection: 'row',
             alignItems: 'center',
+            marginBottom: spacing.sm,
         },
         fieldLabelText: {
-            fontSize: typography.fontSize.sm,
-            fontWeight: typography.fontWeight.medium,
+            fontWeight: '500',
+            fontSize: 14,
+            lineHeight: 20,
+            letterSpacing: 0,
             color: theme.text,
         },
-
         rowBetween: {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
+            marginBottom: spacing.sm,
         },
-        addUnitButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-        },
-        addUnitText: {
-            color: theme.primary,
-            fontSize: 14,
+        checkboxLabel: {
             fontWeight: '400',
-        },
-        checkboxText: {
             fontSize: 16,
+            lineHeight: 20,
+            letterSpacing: 0,
+            textAlignVertical: 'center',
             color: theme.text,
         },
-        permissionsList: {
+        rolesList: {
             gap: spacing.md,
         },
-        permissionItem: {
-            flex: 1,
+        marginBotCheckBox: {},
+        matrixContainer: {
+            gap: spacing.md,
         },
-        permissionText: {
-            fontSize: 14,
-            color: theme.text,
-        },
-        selectedUnitsList: {
-            gap: spacing.sm,
-        },
-        selectedUnitItem: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: spacing.sm,
-            paddingHorizontal: spacing.md,
-            backgroundColor: theme.white,
-            borderRadius: 12,
+        groupContainer: {},
+        groupHeader: {},
+        tableContainer: {
+            marginTop: spacing.sm,
             borderWidth: 1,
             borderColor: theme.border,
+            borderRadius: borderRadius.sm,
+            overflow: 'hidden',
         },
-        selectedUnitText: {
+        tableInner: {
+            minWidth: '100%',
+        },
+        tableHead: {
+            flexDirection: 'row',
+            backgroundColor: theme.backgroundSecondary,
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+        },
+        tableHeadText: {
+            fontWeight: '500',
             fontSize: 16,
+            lineHeight: 20,
+            letterSpacing: 0,
+            textAlign: 'center',
+            color: theme.textSecondary,
+        },
+        tableRow: {
+            flexDirection: 'row',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.backgroundSecondary,
+            alignItems: 'center',
+        },
+        tableRowLast: {
+            borderBottomWidth: 0,
+        },
+        colName: {
+            width: 180,
+            paddingLeft: spacing.md,
+            justifyContent: 'center',
+        },
+        rowLabelText: {
+            fontWeight: '500',
+            fontSize: 14,
+            lineHeight: 20,
+            letterSpacing: 0,
             color: theme.text,
         },
-        deleteButton: {
-            width: 32,
-            height: 32,
-            justifyContent: 'center',
+        colCheck: {
+            width: 70,
             alignItems: 'center',
-            borderRadius: borderRadius.full,
-            borderWidth: 1,
-            borderColor: theme.borderDark,
-            backgroundColor: theme.white,
+            justifyContent: 'center',
         },
-        disabledElement: {
-            // opacity: 0.5, // Removed to keep text dark
+        centerCheckbox: {
+            alignSelf: 'center',
         },
     });
