@@ -178,6 +178,12 @@ export const TOAST_MESSAGES_CONFIG = {
             text1: 'Không thể thay đổi lịch trình đã hoạt động',
         },
     },
+    SCALE: {
+        ADD_SUCCESS: {
+            type: 'success',
+            text1: 'Thêm cân thành công',
+        },
+    },
 } as const;
 
 /**
@@ -196,9 +202,6 @@ export const getHarvestSuccessMessage = (harvestType?: string): string => {
     }
 };
 
-/**
- * Show success toast message for adding a job
- */
 export const showAddJobSuccessToast = (jobType: JobType) => {
     const message = TOAST_MESSAGES_CONFIG.JOB[jobType]?.add || 'Đã thêm thành công';
     Toast.show({

@@ -34,6 +34,7 @@ import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDet
 import { PondCycleListScreen } from '@/features/farm/screens/pond-cycle-list/PondCycleListScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pond-log/measure-shrimp-size-log/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pond-work/measure-shrimp-size-form/MeasureShrimpSizeScreen';
+import { ScaleListScreen } from '@/features/farm/screens/pond-work/scale-list/ScaleListScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/pond-work/handle-problem-form/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/pond-log/handle-problem-log/HandleProblemLogScreen';
 import { FeedingLogScreens } from '@/features/farm/screens/pond-log/feed-log/FeedingLogScreens';
@@ -183,6 +184,7 @@ export type AppStackParamList = {
     };
     TransferLog: { pond: PondData };
     HarvestFormScreen: { pond: PondData; itemToEdit?: JobExecution };
+    ScaleListScreen: undefined;
     HarvestLog: { pond: PondData };
     CycleDetailScreen: { pondId: string; zoneId: string; warehouseId: string; cycleId: string };
     PondCycleListScreen: { pondId: string; zoneId: string; warehouseId: string };
@@ -344,6 +346,7 @@ export const AppStack: React.FC = () => {
                 <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
                 <Stack.Screen name="StockTransferFormScreen" component={StockTransferFormScreen} />
                 <Stack.Screen name="HarvestFormScreen" component={HarvestFormScreen} />
+                <Stack.Screen name="ScaleListScreen" component={ScaleListScreen} />
                 <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
                 <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
                 <Stack.Screen name="PondCycleListScreen" component={PondCycleListScreen} />
