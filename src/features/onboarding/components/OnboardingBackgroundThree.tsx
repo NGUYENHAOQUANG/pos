@@ -64,7 +64,7 @@ export default function OnboardingBackgroundThree() {
                                     {
                                         id: 'temp',
                                         label: 'Nhiệt độ',
-                                        value: '2,450',
+                                        value: '30 °C',
                                         iconName: 'thermometer',
                                         iconColor: colors.red[900],
                                     },

@@ -9,10 +9,11 @@ import {
     Dimensions,
     Keyboard,
     Platform,
-    KeyboardAvoidingView,
     FlatList,
     ActivityIndicator,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, spacing, typography } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
@@ -55,6 +56,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
+    const insets = useSafeAreaInsets();
 
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const [selectedMaterial, setSelectedMaterial] = useState<IMaterial | undefined>();
@@ -312,12 +314,14 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                 {currentView === 'form' ? (
                     <KeyboardAvoidingView
                         style={styles.overlay}
-                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        behavior="padding"
+                        keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
                     >
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <Animated.View
                                 style={[
                                     styles.container,
+                                    { paddingBottom: Math.max(insets.bottom + 16, 24) },
                                     { transform: [{ translateY: slideAnim }] },
                                 ]}
                             >
@@ -326,19 +330,24 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                         </TouchableWithoutFeedback>
                     </KeyboardAvoidingView>
                 ) : (
-                    <View style={styles.overlay}>
+                    <KeyboardAvoidingView
+                        style={styles.overlay}
+                        behavior="padding"
+                        keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
+                    >
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <Animated.View
                                 style={[
                                     styles.container,
                                     styles.containerProduct,
+                                    { paddingBottom: Math.max(insets.bottom + 16, 24) },
                                     { transform: [{ translateY: slideAnim }] },
                                 ]}
                             >
                                 {renderProductContent()}
                             </Animated.View>
                         </TouchableWithoutFeedback>
-                    </View>
+                    </KeyboardAvoidingView>
                 )}
             </TouchableWithoutFeedback>
         </Modal>
