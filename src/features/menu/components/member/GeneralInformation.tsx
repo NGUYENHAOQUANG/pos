@@ -1,19 +1,16 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { borderRadius, spacing, typography } from '@/styles';
+import { borderRadius, spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { Input, RequiredDot } from '@/shared/components/forms/Input';
-import { RadioButton } from '@/shared/components/forms/RadioButton';
+import { Input } from '@/shared/components/forms/Input';
 
 interface GeneralInformationProps {
     name: string;
     onNameChange: (text: string) => void;
     contact: string;
     onContactChange: (text: string) => void;
-    role: 'staff' | 'manager';
-    onRoleChange: (role: 'staff' | 'manager') => void;
     disabled?: boolean;
 }
 
@@ -22,8 +19,6 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     onNameChange,
     contact,
     onContactChange,
-    role,
-    onRoleChange,
     disabled = false,
 }) => {
     const theme = useAppTheme();
@@ -45,7 +40,6 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     value={name}
                     onChangeText={onNameChange}
                     placeholder="Tên"
-                    containerStyle={styles.inputContainer}
                     inputContainerStyle={disabled ? styles.inputDisabled : undefined}
                     editable={!disabled}
                     disabled={disabled}
@@ -58,29 +52,10 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     value={contact}
                     onChangeText={onContactChange}
                     placeholder="Số điện thoại hoặc Email"
-                    containerStyle={styles.inputContainer}
                     inputContainerStyle={disabled ? styles.inputDisabled : undefined}
                     editable={!disabled}
                     disabled={disabled}
                 />
-
-                {/* Role Selection (Radio) */}
-                <View style={styles.roleContainer}>
-                    <View style={styles.fieldLabelWrapper}>
-                        <Text style={styles.fieldLabelText}>Chọn chức vụ</Text>
-                        <RequiredDot />
-                    </View>
-
-                    <RadioButton
-                        options={[
-                            { label: 'Nhân viên', value: 'staff' },
-                            { label: 'Quản lý', value: 'manager' },
-                        ]}
-                        value={role}
-                        onValueChange={onRoleChange as any}
-                        disabled={disabled}
-                    />
-                </View>
             </View>
         </View>
     );
@@ -106,27 +81,11 @@ const getStyles = (theme: Colors) =>
         },
         content: {
             padding: spacing.md,
+            paddingBottom: 0,
         },
         disabledContent: {
             // opacity: 0.6, // Removed to keep text dark
         },
-        inputContainer: {
-            marginBottom: spacing.lg,
-        },
-        roleContainer: {
-            marginBottom: 0,
-        },
-        fieldLabelWrapper: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: spacing.md,
-        },
-        fieldLabelText: {
-            fontSize: typography.fontSize.sm,
-            fontWeight: typography.fontWeight.medium,
-            color: theme.text,
-        },
-
         inputDisabled: {
             backgroundColor: theme.gray[200],
         },

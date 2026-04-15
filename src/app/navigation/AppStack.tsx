@@ -68,8 +68,8 @@ import { InformationFormScreen } from '@/features/menu/screens/informationForm/I
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
-import { MemberManagementScreens } from '@/features/menu/screens/member/MemberManagementScreens';
-import { AddMemberScreens } from '@/features/menu/screens/member/AddMemberScreens';
+import { MemberManagementScreens } from '@/features/menu/screens/member-list/MemberManagementScreens';
+import { AddMemberScreens } from '@/features/menu/screens/member-form/AddMemberScreens';
 import { DeviceManagement } from '@/features/menu/screens/devices/DeviceManagement';
 import { AddDeviceScreens } from '@/features/menu/screens/devices/AddDeviceScreens';
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';

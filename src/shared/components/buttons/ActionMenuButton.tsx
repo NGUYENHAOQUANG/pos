@@ -119,9 +119,11 @@ const getStyles = (theme: Colors) =>
         },
         menuText: {
             fontSize: 14,
+            fontWeight: '500',
             color: theme.text,
         },
         deleteText: {
+            fontWeight: '500',
             color: theme.error,
         },
     });
