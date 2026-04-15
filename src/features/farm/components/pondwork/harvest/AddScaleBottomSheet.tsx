@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 import { useAppTheme } from '@/styles/themeContext';
@@ -7,35 +7,27 @@ import { Colors } from '@/styles/colors';
 import { spacing } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useAvailableScales } from '@/features/farm/hooks/useScales';
+import { IScale } from '@/features/farm/types/scale.types';
 
 export interface AddScaleBottomSheetProps {
     visible: boolean;
     onClose: () => void;
     onAddScale?: (scaleId: string) => void;
+    zoneId?: string;
 }
-
-const MOCK_SCALES = [
-    {
-        id: '1',
-        title: 'Cân 03 — Sân C',
-        subtitle: 'SCD-003 · Mạch 03',
-    },
-    {
-        id: '2',
-        title: 'Cân 03 — Sân C',
-        subtitle: 'SCD-003 · Mạch 03',
-    },
-];
 
 export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
     visible,
     onClose,
     onAddScale,
+    zoneId,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
     const [selectedScaleId, setSelectedScaleId] = useState<string | null>(null);
+    const { items: scales, isLoading } = useAvailableScales(zoneId);
 
     const handleAdd = () => {
         if (selectedScaleId && onAddScale) {
@@ -43,6 +35,34 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
         }
         onClose();
         setTimeout(() => setSelectedScaleId(null), 300);
+    };
+
+    const renderScaleItem = (scale: IScale) => {
+        const isSelected = selectedScaleId === scale.id;
+        return (
+            <TouchableOpacity
+                key={scale.id}
+                style={[styles.scaleItem, isSelected && styles.scaleItemActive]}
+                onPress={() => setSelectedScaleId(scale.id)}
+            >
+                <Image
+                    source={require('@/assets/Icon/IconDevices/icon_weight_scale.png')}
+                    style={styles.scaleItemImage}
+                    resizeMode="contain"
+                />
+                <View style={styles.scaleItemInfo}>
+                    <Text style={styles.scaleItemTitle}>
+                        {scale.name} — {scale.zoneName}
+                    </Text>
+                    <Text style={styles.scaleItemSubtitle}>
+                        {scale.code} · {scale.type}
+                    </Text>
+                </View>
+                <View style={[styles.radioCircle, isSelected && styles.radioCircleActive]}>
+                    {isSelected && <View style={styles.radioInnerCircle} />}
+                </View>
+            </TouchableOpacity>
+        );
     };
 
     return (
@@ -65,39 +85,17 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
 
                         {/* List of Scales */}
                         <View style={styles.listContainer}>
-                            {MOCK_SCALES.map(scale => {
-                                const isSelected = selectedScaleId === scale.id;
-                                return (
-                                    <TouchableOpacity
-                                        key={scale.id}
-                                        style={[
-                                            styles.scaleItem,
-                                            isSelected && styles.scaleItemActive,
-                                        ]}
-                                        onPress={() => setSelectedScaleId(scale.id)}
-                                    >
-                                        <Image
-                                            source={require('@/assets/Icon/IconDevices/icon_weight_scale.png')}
-                                            style={styles.scaleItemImage}
-                                            resizeMode="contain"
-                                        />
-                                        <View style={styles.scaleItemInfo}>
-                                            <Text style={styles.scaleItemTitle}>{scale.title}</Text>
-                                            <Text style={styles.scaleItemSubtitle}>
-                                                {scale.subtitle}
-                                            </Text>
-                                        </View>
-                                        <View
-                                            style={[
-                                                styles.radioCircle,
-                                                isSelected && styles.radioCircleActive,
-                                            ]}
-                                        >
-                                            {isSelected && <View style={styles.radioInnerCircle} />}
-                                        </View>
-                                    </TouchableOpacity>
-                                );
-                            })}
+                            {isLoading ? (
+                                <ActivityIndicator
+                                    size="small"
+                                    color={theme.primary}
+                                    style={styles.loader}
+                                />
+                            ) : scales.length === 0 ? (
+                                <Text style={styles.emptyText}>Không có cân khả dụng</Text>
+                            ) : (
+                                scales.map(renderScaleItem)
+                            )}
                         </View>
                     </View>
                 </View>
@@ -208,5 +206,14 @@ const getStyles = (theme: Colors) =>
         buttonBar: {
             borderTopWidth: 0,
             paddingTop: spacing.sm,
+        },
+        loader: {
+            paddingVertical: spacing.lg,
+        },
+        emptyText: {
+            fontSize: 14,
+            color: theme.textSecondary,
+            textAlign: 'center',
+            paddingVertical: spacing.lg,
         },
     });

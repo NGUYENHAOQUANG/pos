@@ -155,6 +155,10 @@ export const API_ENDPOINTS = {
     CYCLE: {
         LIST: '/cycle',
     },
+    SCALE: {
+        LIST: '/scale',
+        DETAIL: (id: string) => `/scale/${id}`,
+    },
     // Materials
     MATERIAL: {
         LIST: '/material',
