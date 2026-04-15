@@ -138,6 +138,11 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         }
     }, []);
 
+    // Cancel lockout when user manually drags the scroll view
+    const handleScrollBeginDrag = useCallback(() => {
+        lastTabPressTime.current = 0;
+    }, []);
+
     // On scroll, detect visible section and update tab
     const handleScroll = useCallback(
         (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -336,6 +341,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                 contentContainerStyle={[styles.content, { paddingBottom: bottomBarHeight + 40 }]}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 onScroll={handleScroll}
+                onScrollBeginDrag={handleScrollBeginDrag}
                 scrollEventThrottle={16}
             >
                 {/* Device Sections grouped by type */}

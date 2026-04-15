@@ -15,7 +15,8 @@ export const useChatbotStyles = () => {
             StyleSheet.create({
                 container: {
                     flex: 1,
-                    backgroundColor: theme.background,
+                    // Matches gradient average — prevents white flash before shader mounts
+                    backgroundColor: '#D4CFEA',
                 },
 
                 // Header
@@ -88,7 +89,7 @@ export const useChatbotStyles = () => {
                 // Chat
                 chatContainer: {
                     flex: 1,
-                    backgroundColor: theme.background,
+                    backgroundColor: 'transparent',
                     paddingTop: 16,
                 },
 
@@ -103,73 +104,6 @@ export const useChatbotStyles = () => {
                     marginRight: 4,
                 },
 
-                // Input Toolbar (icon + pill layout)
-                inputToolbar: {
-                    flexDirection: 'row',
-                    alignItems: 'flex-end',
-                    backgroundColor: theme.background,
-                    paddingHorizontal: 16,
-                    paddingTop: 12,
-                    paddingBottom: 16,
-                    gap: 8,
-                },
-                quickSheetButton: {
-                    width: 48,
-                    height: 48,
-                    borderRadius: 32,
-                    borderWidth: 1,
-                    borderColor: theme.border,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                },
-                inputPrimary: {
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'flex-end',
-                    backgroundColor: theme.background,
-                    borderRadius: 32,
-                    borderWidth: 1,
-                    borderColor: theme.border,
-                    paddingLeft: 8,
-                    paddingRight: 4,
-                    minHeight: 48,
-                    maxHeight: 140,
-                    overflow: 'hidden',
-                },
-                composerInput: {
-                    flex: 1,
-                    backgroundColor: 'transparent',
-                    borderRadius: 0,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    fontSize: 15,
-                    color: theme.text,
-                    minHeight: 44,
-                    maxHeight: 120,
-                    borderWidth: 0,
-                    textAlignVertical: 'center',
-                },
-                // Send button (inside pill)
-                sendContainer: {
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingRight: 4,
-                    marginBottom: 0,
-                    paddingVertical: 5,
-                    alignSelf: 'flex-end',
-                },
-                sendButton: {
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: theme.primaryOrange,
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    alignItems: 'center',
-                },
-                sendButtonDisabled: {
-                    backgroundColor: 'transparent',
-                },
                 quickReplyStyle: {
                     paddingVertical: 10,
                     paddingHorizontal: 16,

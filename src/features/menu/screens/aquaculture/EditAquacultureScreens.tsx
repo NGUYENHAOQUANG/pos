@@ -14,7 +14,6 @@ import {
 } from '@/features/menu/components/aquaculture/AquacultureForm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
-import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useZones } from '@/features/farm/hooks/useZones';
 import { useSeasonDetail } from '@/features/menu/hooks/useSeasons';
@@ -43,20 +42,12 @@ export const EditAquacultureScreens: React.FC = () => {
     const [formHasChanges, setFormHasChanges] = useState(false);
     const theme = useAppTheme();
     const styles = getStyles(theme);
-
-    // ================================================================
-    // Data Fetching (TanStack Query)
-    // ================================================================
     const { data: zones = [] } = useZones();
     const { data: aquaculture, isLoading: isFetchingDetail } = useSeasonDetail(
         initialAquaculture.zoneId,
         initialAquaculture.id,
         initialAquaculture
     );
-
-    // ================================================================
-    // Mutations
-    // ================================================================
     const updateSeasonMutation = useUpdateSeason();
     const deleteSeasonMutation = useDeleteSeason();
     const closeSeasonMutation = useCloseSeason();
@@ -65,10 +56,6 @@ export const EditAquacultureScreens: React.FC = () => {
         updateSeasonMutation.isPending ||
         deleteSeasonMutation.isPending ||
         closeSeasonMutation.isPending;
-
-    // ================================================================
-    // Mapped Data (useMemo to prevent unnecessary re-renders)
-    // ================================================================
     const zoneOptions = useMemo(() => {
         return zones.map(z => ({
             id: z.id.toString(),
@@ -80,10 +67,6 @@ export const EditAquacultureScreens: React.FC = () => {
         if (!aquaculture) return undefined;
         return aquacultureService.mapDetailToForm(aquaculture);
     }, [aquaculture]);
-
-    // ================================================================
-    // Tab bar visibility
-    // ================================================================
     useFocusEffect(
         React.useCallback(() => {
             const timeout = setTimeout(() => {
@@ -97,9 +80,6 @@ export const EditAquacultureScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    // ================================================================
-    // Handlers
-    // ================================================================
     const handleSubmit = useCallback(
         (formData: AquacultureFormValues) => {
             if (!aquaculture?.zoneId) return;
@@ -131,10 +111,6 @@ export const EditAquacultureScreens: React.FC = () => {
         },
         [aquaculture, updateSeasonMutation, navigation]
     );
-
-    const handleDelete = useCallback(() => {
-        setDeleteModalVisible(true);
-    }, []);
 
     const handleConfirmDelete = useCallback(() => {
         if (!aquaculture?.zoneId) return;
@@ -199,12 +175,7 @@ export const EditAquacultureScreens: React.FC = () => {
     return (
         <Loading isLoading={isSubmitting || isFetchingDetail}>
             <View style={styles.container}>
-                <HeaderMenu
-                    title="Chỉnh sửa vụ nuôi"
-                    onBack={handleGoBack}
-                    rightIcon={<DeleteIcon width={20} height={20} color={theme.text} />}
-                    onRightPress={handleDelete}
-                />
+                <HeaderMenu title="Chỉnh sửa vụ nuôi" onBack={handleGoBack} />
 
                 {aquaculture && (
                     <SafeInputLayout extraScrollHeight={150}>

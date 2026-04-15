@@ -26,6 +26,8 @@ interface SettingsState {
     animatedBgType: AnimatedBgType;
     weatherEnabled: boolean;
     chatbotEnabled: boolean;
+    chatbotAnimatedBgEnabled: boolean;
+    chatbotBgPromptDismissCount: number;
     lockMethod: LockMethod;
     autoLockTimeout: AutoLockTimeout;
     pinHash: string | null;
@@ -46,6 +48,8 @@ interface SettingsActions {
     setAnimatedBgType: (type: AnimatedBgType) => void;
     toggleWeather: () => void;
     toggleChatbot: () => void;
+    toggleChatbotAnimatedBg: () => void;
+    incrementChatbotBgPromptDismiss: () => void;
     setLockMethod: (method: LockMethod) => void;
     setAutoLockTimeout: (timeout: AutoLockTimeout) => void;
     setPinHash: (hash: string | null) => void;
@@ -70,6 +74,8 @@ export const useSettingsStore = create<SettingsStore>()(
             animatedBgType: 'bubbles-shader' as AnimatedBgType,
             weatherEnabled: true,
             chatbotEnabled: true,
+            chatbotAnimatedBgEnabled: false,
+            chatbotBgPromptDismissCount: 0,
             lockMethod: 'none' as LockMethod,
             autoLockTimeout: 0 as AutoLockTimeout,
             pinHash: null,
@@ -138,6 +144,16 @@ export const useSettingsStore = create<SettingsStore>()(
             toggleChatbot: () =>
                 set(state => {
                     state.chatbotEnabled = !state.chatbotEnabled;
+                }),
+
+            toggleChatbotAnimatedBg: () =>
+                set(state => {
+                    state.chatbotAnimatedBgEnabled = !state.chatbotAnimatedBgEnabled;
+                }),
+
+            incrementChatbotBgPromptDismiss: () =>
+                set(state => {
+                    state.chatbotBgPromptDismissCount += 1;
                 }),
 
             setLockMethod: (method: LockMethod) =>

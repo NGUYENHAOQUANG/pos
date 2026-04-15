@@ -96,9 +96,18 @@ export const colors = {
         800: '#237804',
     },
     purple: {
-        50: '#F9F0FF',
-        300: '#D3ADF7',
-        600: '#722ED1',
+        25: '#FCFAFF',
+        50: '#F9F5FF',
+        100: '#F4E8FF',
+        200: '#E9D7FE',
+        300: '#D6BBFB',
+        400: '#B692F6',
+        500: '#9E77ED',
+        600: '#7F56D9',
+        700: '#6941C6',
+        800: '#53389E',
+        900: '#42307D',
+        950: '#2C1C5F',
     },
     pink: {
         50: '#FFF0F6',
@@ -230,6 +239,15 @@ export const colors = {
     skeleton: {
         base: '#F3F4F6',
         shimmer: 'rgba(255, 255, 255, 0.4)',
+    },
+    // Chatbot glassmorphism colors
+    chatbot: {
+        glassBg: 'rgba(255, 255, 255, 0.55)',
+        glassBorder: 'rgba(255, 255, 255, 0.7)',
+        glassButtonBg: 'rgba(255, 255, 255, 0.4)',
+        glassButtonBorder: 'rgba(255, 255, 255, 0.5)',
+        glassInputBg: 'rgba(255, 255, 255, 0.22)',
+        glassInputBorder: 'rgba(255, 255, 255, 0.58)',
     },
 };
 

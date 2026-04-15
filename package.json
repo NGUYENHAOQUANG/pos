@@ -17,6 +17,7 @@
         "@ant-design/react-native": "^5.4.3",
         "@bottom-tabs/react-navigation": "^1.1.0",
         "@callstack/liquid-glass": "^0.7.1",
+        "@dev-amirzubair/react-native-voice": "^1.0.4",
         "@expo/vector-icons": "^15.0.3",
         "@hookform/resolvers": "^3.3.2",
         "@notifee/react-native": "^9.1.8",

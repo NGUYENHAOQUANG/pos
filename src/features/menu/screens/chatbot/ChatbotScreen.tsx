@@ -2,14 +2,10 @@
  * @file ChatbotScreen.tsx
  */
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { View, Platform, TouchableOpacity, FlatList } from 'react-native';
+import { View, Platform, FlatList } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
-import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
 
 import { IChatMessage } from '@/features/menu/screens/chatbot/types';
 import { ChatBubble } from '@/features/menu/screens/chatbot/components/ChatBubble';
@@ -20,14 +16,14 @@ import { TypingIndicator } from '@/features/menu/screens/chatbot/components/Typi
 import { WelcomeContent } from '@/features/menu/screens/chatbot/components/WelcomeContent';
 import { useChatbot } from '@/features/menu/screens/chatbot/hooks/useChatbot';
 import { useChatbotStyles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
-import { QuickReplyBottomSheet } from '@/features/menu/screens/chatbot/components/QuickReplyBottomSheet';
+
 import { ChatHistoryBottomSheet } from '@/features/menu/screens/chatbot/components/ChatHistoryBottomSheet';
-import { useAppTheme } from '@/styles/themeContext';
+import { ChatbotShaderBackground } from '@/features/menu/screens/chatbot/animation/ChatbotShaderBackground';
+import { ChatbotHeader } from '@/features/menu/screens/chatbot/components/ChatbotHeader';
 
 export const ChatbotScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { userData } = useUserProfile();
-    const theme = useAppTheme();
     const styles = useChatbotStyles();
 
     const {
@@ -44,8 +40,8 @@ export const ChatbotScreen: React.FC = () => {
         currentSessionId,
     } = useChatbot();
 
-    const [showQuickSheet, setShowQuickSheet] = useState(false);
     const [showHistorySheet, setShowHistorySheet] = useState(false);
+    const [resetKey, setResetKey] = useState(0);
     const flatListRef = useRef<FlatList<IChatMessage>>(null);
 
     // Auto-scroll to newest message
@@ -98,103 +94,84 @@ export const ChatbotScreen: React.FC = () => {
     }, [isTyping]);
 
     // Welcome content no message
+    // Wrap handleNewChat to also bump resetKey → force WelcomeContent remount
+    const handleNewChatWithReset = useCallback(() => {
+        handleNewChat();
+        setResetKey(prev => prev + 1);
+    }, [handleNewChat]);
+
     const renderEmptyComponent = useCallback(
-        () => <WelcomeContent userName={userData.name} onSuggestionPress={handleQuickAction} />,
-        [userData.name, handleQuickAction]
+        () => (
+            <WelcomeContent
+                key={resetKey}
+                userName={userData.name}
+                onSuggestionPress={handleQuickAction}
+            />
+        ),
+        [userData.name, handleQuickAction, resetKey]
     );
 
     return (
-        <KeyboardAvoidingView
-            style={[
-                styles.container,
-                {
-                    paddingTop: insets.top,
-                },
-            ]}
-            behavior="padding"
-        >
-            {/* Header */}
-            <HeaderSection
-                includeSafeArea={false}
-                titleAlign="left"
-                containerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 16 }}
-                centerComponent={
-                    <View style={styles.headerCenter}>
-                        <View style={styles.headerAvatarContainer}>
-                            <View style={styles.headerAvatar}>
-                                <BotIcon width={36} height={36} />
-                            </View>
-                            <View style={styles.onlineIndicator} />
-                        </View>
-                        <View style={{ marginLeft: 12 }}>
-                            <Text style={styles.headerTitle}>Mebieco AI</Text>
-                            <Text style={styles.headerSubtitle}>Trợ lý ảo • Thử nghiệm</Text>
-                        </View>
-                    </View>
-                }
-                rightComponent={
-                    <View style={styles.headerRight}>
-                        <View style={styles.betaBadge}>
-                            <Text style={styles.betaText}>BETA</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.historyButton}
-                            onPress={handleNewChat}
-                            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                        >
-                            <Ionicons name="refresh" size={20} color={theme.text} />
-                        </TouchableOpacity>
-                    </View>
-                }
-            />
+        <View style={styles.container}>
+            <ChatbotShaderBackground />
+            <KeyboardAvoidingView
+                style={[
+                    {
+                        flex: 1,
+                        paddingTop: insets.top,
+                    },
+                ]}
+                behavior="padding"
+            >
+                {/* Header */}
+                <ChatbotHeader onNewChat={handleNewChatWithReset} />
 
-            {/* Chat area — FlatList top-to-bottom */}
-            <View style={styles.chatContainer} {...chatPanResponder.panHandlers}>
-                <FlatList
-                    ref={flatListRef}
-                    data={messages}
-                    renderItem={renderItem}
-                    keyExtractor={keyExtractor}
-                    removeClippedSubviews={Platform.OS === 'android'}
-                    maxToRenderPerBatch={15}
-                    windowSize={10}
-                    initialNumToRender={20}
-                    keyboardShouldPersistTaps="handled"
-                    keyboardDismissMode="interactive"
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={
-                        messages.length === 0 ? { flexGrow: 1 } : { paddingVertical: 8 }
-                    }
-                    ListFooterComponent={renderListFooter}
-                    ListEmptyComponent={renderEmptyComponent}
+                {/* Chat area — FlatList top-to-bottom */}
+                <View style={styles.chatContainer} {...chatPanResponder.panHandlers}>
+                    <FlatList
+                        ref={flatListRef}
+                        data={messages}
+                        renderItem={renderItem}
+                        keyExtractor={keyExtractor}
+                        removeClippedSubviews={Platform.OS === 'android'}
+                        maxToRenderPerBatch={8}
+                        windowSize={5}
+                        initialNumToRender={10}
+                        updateCellsBatchingPeriod={100}
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="interactive"
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={
+                            messages.length === 0 ? { flexGrow: 1 } : { paddingVertical: 8 }
+                        }
+                        ListFooterComponent={renderListFooter}
+                        ListEmptyComponent={renderEmptyComponent}
+                    />
+                </View>
+
+                {/* Input Toolbar with inline chips fully managing the flow */}
+                <ChatbotInputToolbar
+                    onSend={onSend}
+                    onQuickAction={handleQuickAction}
+                    resetKey={resetKey}
                 />
-            </View>
 
-            {/* Input Toolbar */}
-            <ChatbotInputToolbar onSend={onSend} setShowQuickSheet={setShowQuickSheet} />
-
-            {/* Quick Reply Bottom Sheet */}
-            <QuickReplyBottomSheet
-                visible={showQuickSheet}
-                onClose={() => setShowQuickSheet(false)}
-                onSelect={handleQuickAction}
-            />
-
-            {/* Chat History Bottom Sheet */}
-            <ChatHistoryBottomSheet
-                visible={showHistorySheet}
-                onClose={() => setShowHistorySheet(false)}
-                sessions={sessions}
-                currentSessionId={currentSessionId}
-                onSelectSession={(id: string) => {
-                    handleSelectSession(id);
-                    setShowHistorySheet(false);
-                }}
-                onNewChat={() => {
-                    handleNewChat();
-                    setShowHistorySheet(false);
-                }}
-            />
-        </KeyboardAvoidingView>
+                {/* Chat History Bottom Sheet */}
+                <ChatHistoryBottomSheet
+                    visible={showHistorySheet}
+                    onClose={() => setShowHistorySheet(false)}
+                    sessions={sessions}
+                    currentSessionId={currentSessionId}
+                    onSelectSession={(id: string) => {
+                        handleSelectSession(id);
+                        setShowHistorySheet(false);
+                    }}
+                    onNewChat={() => {
+                        handleNewChatWithReset();
+                        setShowHistorySheet(false);
+                    }}
+                />
+            </KeyboardAvoidingView>
+        </View>
     );
 };

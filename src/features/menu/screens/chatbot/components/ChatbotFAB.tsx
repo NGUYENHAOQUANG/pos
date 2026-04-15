@@ -1,22 +1,12 @@
-/**
- * @file ChatbotFAB.tsx
- * @description Draggable Floating Action Button for Chatbot
- * - Displays on all screens except Chatbot, Ingest, CameraPlayer
- * - Tap to navigate to Chatbot, drag to reposition, snaps to nearest edge
- * - Drag into dismiss zone (bottom center X icon) to hide the FAB
- * - Shake device to restore the FAB
- * @author Kindy
- */
 import React, { useRef, useCallback, useState, useEffect, memo } from 'react';
 import { StyleSheet, Animated, PanResponder, Dimensions } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { navigate, navigationRef } from '@/app/navigation/NavigationRef';
 import RNShake from 'react-native-shake';
-import BotIcon from '@/assets/Icon/IconMenu/BotIcon.svg';
+import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
 import CloseOutlined from '@/assets/Icon/CloseOutlined.svg';
 import { colors } from '@/styles';
-import { useAppTheme } from '@/styles/themeContext';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
 const HIDDEN_SCREENS = ['Chatbot', 'Ingest', 'CameraPlayer'];
@@ -27,7 +17,6 @@ const DISMISS_ZONE_THRESHOLD = 80;
 
 export const ChatbotFAB = memo(() => {
     const insets = useSafeAreaInsets();
-    const theme = useAppTheme();
     const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
     // Initial position: bottom-right
@@ -36,7 +25,10 @@ export const ChatbotFAB = memo(() => {
 
     const pan = useRef(new Animated.ValueXY({ x: initialX, y: initialY })).current;
     const isDragging = useRef(false);
-    const lastOffset = useRef({ x: initialX, y: initialY });
+    // Stores the absolute position where the current drag started
+    const dragStartPos = useRef({ x: initialX, y: initialY });
+    // Reference to the currently running spring animation so we can stop it
+    const springAnimRef = useRef<Animated.CompositeAnimation | null>(null);
 
     // FAB visibility state
     const [isHidden, setIsHidden] = useState(false);
@@ -76,16 +68,22 @@ export const ChatbotFAB = memo(() => {
         return unsubscribe;
     }, []);
 
+    // Helper: reset FAB to default position (absolute, no offset)
+    const resetToDefaultPosition = useCallback(() => {
+        const resetX = SCREEN_W - FAB_SIZE - EDGE_MARGIN;
+        const resetY = SCREEN_H - FAB_SIZE - 100 - Math.max(insets.bottom, 16);
+        springAnimRef.current?.stop();
+        springAnimRef.current = null;
+        pan.setValue({ x: resetX, y: resetY });
+        dragStartPos.current = { x: resetX, y: resetY };
+    }, [SCREEN_W, SCREEN_H, insets.bottom, pan]);
+
     // Shake to restore FAB
     useEffect(() => {
         const subscription = RNShake.addListener(() => {
             if (isHidden) {
                 setIsHidden(false);
-                const resetX = SCREEN_W - FAB_SIZE - EDGE_MARGIN;
-                const resetY = SCREEN_H - FAB_SIZE - 100 - Math.max(insets.bottom, 16);
-                lastOffset.current = { x: resetX, y: resetY };
-                pan.setValue({ x: resetX, y: resetY });
-                pan.setOffset({ x: 0, y: 0 });
+                resetToDefaultPosition();
                 Toast.show({
                     type: 'success',
                     text1: 'Đã bật lại trợ lý ảo AI',
@@ -95,19 +93,15 @@ export const ChatbotFAB = memo(() => {
         });
 
         return () => subscription.remove();
-    }, [isHidden, SCREEN_W, SCREEN_H, insets.bottom, pan]);
+    }, [isHidden, resetToDefaultPosition]);
 
     // Restore FAB automatically when entering the Chatbot screen manually (e.g. from menu)
     useEffect(() => {
         if (currentRouteName === 'Chatbot' && isHidden) {
             setIsHidden(false);
-            const resetX = SCREEN_W - FAB_SIZE - EDGE_MARGIN;
-            const resetY = SCREEN_H - FAB_SIZE - 100 - Math.max(insets.bottom, 16);
-            lastOffset.current = { x: resetX, y: resetY };
-            pan.setValue({ x: resetX, y: resetY });
-            pan.setOffset({ x: 0, y: 0 });
+            resetToDefaultPosition();
         }
-    }, [currentRouteName, isHidden, SCREEN_W, SCREEN_H, insets.bottom, pan]);
+    }, [currentRouteName, isHidden, resetToDefaultPosition]);
 
     // Use refs for callbacks used inside PanResponder to avoid stale closures
     const dismissZoneXRef = useRef(dismissZoneX);
@@ -181,15 +175,22 @@ export const ChatbotFAB = memo(() => {
             const maxY = SCREEN_H - FAB_SIZE - EDGE_MARGIN - insets.bottom;
             const snapY = Math.max(minY, Math.min(y, maxY));
 
-            lastOffset.current = { x: snapX, y: snapY };
-            pan.setOffset({ x: 0, y: 0 });
-
-            Animated.spring(pan, {
+            // Animate using absolute values — no offset manipulation
+            // useNativeDriver: false ensures JS always has accurate position
+            // for reliable mid-animation grab
+            const anim = Animated.spring(pan, {
                 toValue: { x: snapX, y: snapY },
                 friction: 7,
                 tension: 80,
-                useNativeDriver: true, // Optimized: running snap animation on UI thread
-            }).start();
+                useNativeDriver: false,
+            });
+            springAnimRef.current = anim;
+            anim.start(({ finished }) => {
+                if (finished) {
+                    dragStartPos.current = { x: snapX, y: snapY };
+                    springAnimRef.current = null;
+                }
+            });
         },
         [SCREEN_W, SCREEN_H, insets, pan]
     );
@@ -203,8 +204,16 @@ export const ChatbotFAB = memo(() => {
                 Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5,
             onPanResponderGrant: () => {
                 isDragging.current = false;
-                pan.setOffset(lastOffset.current);
-                pan.setValue({ x: 0, y: 0 });
+                // Stop any running snap-to-edge spring animation immediately
+                if (springAnimRef.current) {
+                    springAnimRef.current.stop();
+                    springAnimRef.current = null;
+                }
+                // Read the current absolute position from the animated value
+                // With useNativeDriver: false, JS value is always accurate
+                pan.stopAnimation(currentValue => {
+                    dragStartPos.current = { x: currentValue.x, y: currentValue.y };
+                });
             },
             onPanResponderMove: (_, gestureState) => {
                 if (Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5) {
@@ -214,25 +223,26 @@ export const ChatbotFAB = memo(() => {
                     }
                 }
 
+                // Absolute position = drag start + gesture delta
+                const currentX = dragStartPos.current.x + gestureState.dx;
+                const currentY = dragStartPos.current.y + gestureState.dy;
+
                 if (isDragging.current) {
-                    const currentX = lastOffset.current.x + gestureState.dx;
-                    const currentY = lastOffset.current.y + gestureState.dy;
                     setIsOverDismissZoneRef.current(isInDismissZoneRef.current(currentX, currentY));
                 }
 
-                pan.x.setValue(gestureState.dx);
-                pan.y.setValue(gestureState.dy);
+                // Set absolute value directly — no offset needed
+                pan.setValue({ x: currentX, y: currentY });
             },
             onPanResponderRelease: (_, gestureState) => {
-                pan.flattenOffset();
-                const finalX = lastOffset.current.x + gestureState.dx;
-                const finalY = lastOffset.current.y + gestureState.dy;
+                const finalX = dragStartPos.current.x + gestureState.dx;
+                const finalY = dragStartPos.current.y + gestureState.dy;
 
                 hideDismissRef.current();
 
                 if (!isDragging.current) {
                     navigate('Chatbot');
-                    lastOffset.current = { x: finalX, y: finalY };
+                    dragStartPos.current = { x: finalX, y: finalY };
                 } else if (isInDismissZoneRef.current(finalX, finalY)) {
                     setIsHidden(true);
                     Toast.show({
@@ -292,13 +302,11 @@ export const ChatbotFAB = memo(() => {
                 style={[
                     styles.fab,
                     {
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
                         transform: [{ translateX: pan.x }, { translateY: pan.y }],
                     },
                 ]}
             >
-                <BotIcon width={44} height={44} />
+                <ChatbotAvatar size={FAB_SIZE} animated />
             </Animated.View>
         </>
     );
@@ -312,11 +320,9 @@ const styles = StyleSheet.create({
         width: FAB_SIZE,
         height: FAB_SIZE,
         borderRadius: FAB_SIZE / 2,
-        backgroundColor: colors.white,
+        overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.gray[200],
         zIndex: 9999,
     },
     dismissZone: {
