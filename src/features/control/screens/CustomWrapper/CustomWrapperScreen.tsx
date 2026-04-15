@@ -19,6 +19,7 @@ import { cameraApi, CameraItem } from '@/features/control/api/cameraApi';
 import { useCameras } from '@/features/control/hooks/useCameras';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { checkNetworkForHD } from '@/shared/utils/networkUtils';
+import { handleError } from '@/shared/utils/errorHandler';
 
 type WrapperAction = 'raise' | 'lower';
 
@@ -30,47 +31,39 @@ export const CustomWrapperScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     const { deviceId: _deviceId, pondName } = route.params;
-
     const [action, setAction] = useState<WrapperAction>('raise');
     const [isExecuting, setIsExecuting] = useState(false);
 
-    // ==========================================
     const { data: cameras = [], isLoading: isLoadingCameras } = useCameras();
 
-    // ==========================================
-    // Lấy camera đầu tiên từ API (bỏ qua camera có tên là 'Default' nếu có)
     const validCamera =
         cameras.find(
             cam =>
-                cam.name?.toLowerCase() !== 'default' && cam.deviceSn?.toLowerCase() !== 'default'
+                cam.name?.toLowerCase() !== 'default' && cam.deviceCode?.toLowerCase() !== 'default'
         ) || cameras[0];
 
-    // Mock data dự phòng trong trường hợp API camera hoàn toàn trống
     const mockFallbackItem: CameraItem = {
-        deviceSn: `CAM-${pondName.replace('Ao ', '')}-A`,
+        deviceCode: `CAM-${pondName.replace('Ao ', '')}-A`,
         name: pondName,
         status: 'On',
-        snapshotUrl: '', // Đã xóa mock thumbnail
+        snapshotUrl: '',
     } as CameraItem;
 
     const activeCamera: CameraItem = validCamera || mockFallbackItem;
 
     const cameraInfo = {
-        code: activeCamera.deviceSn || `CAM-${pondName.replace('Ao ', '')}-A`,
+        code: activeCamera.deviceCode || `CAM-${pondName.replace('Ao ', '')}-A`,
         area: activeCamera.name || pondName,
         status: activeCamera.status === 'On' ? 'Online' : 'Offline',
-        time: pondName, // Vẫn giữ tạm thời gian theo tên Ao vì API camera không trả về "thời gian"
+        time: pondName,
     };
-    // ==========================================
 
-    // Determine wrapper position status
-    const isRaised = false; // Mock: wrapper is currently lowered
+    const isRaised = false;
 
     const statusMessage = isRaised
         ? 'Nhá đang ở vị trí trên mặt ao — sẵn sàng hạ'
         : 'Nhá đang ở vị trí dưới ao — sẵn sàng nâng';
 
-    // Hide tab bar on mount
     React.useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
@@ -81,7 +74,6 @@ export const CustomWrapperScreen: React.FC = () => {
         setIsExecuting(true);
 
         try {
-            // Simulate API call
             await new Promise<void>(resolve => setTimeout(() => resolve(), 1500));
 
             Toast.show({
@@ -92,12 +84,8 @@ export const CustomWrapperScreen: React.FC = () => {
             });
 
             navigation.goBack();
-        } catch {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Không thể gửi lệnh điều khiển',
-            });
+        } catch (err) {
+            handleError(err);
         } finally {
             setIsExecuting(false);
         }
@@ -116,7 +104,6 @@ export const CustomWrapperScreen: React.FC = () => {
                 contentContainerStyle={staticStyles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Camera Preview Card */}
                 {isLoadingCameras ? (
                     <Skeleton
                         width={'100%'}
@@ -130,7 +117,7 @@ export const CustomWrapperScreen: React.FC = () => {
                         onPress={async (camera: CameraItem) => {
                             try {
                                 const isHd = await checkNetworkForHD();
-                                const response = await cameraApi.getStream(camera.deviceSn, isHd);
+                                const response = await cameraApi.getStream(camera.deviceCode, isHd);
                                 const streamData = response.data?.data;
                                 if (!streamData?.url) {
                                     Toast.show({
@@ -144,21 +131,17 @@ export const CustomWrapperScreen: React.FC = () => {
                                 navigation.navigate('CameraPlayer', {
                                     videoUrl: streamData.url,
                                     cameraName: camera.name,
-                                    pondName: camera.name,
+                                    pondName: pondName,
                                     isHd: isHd,
+                                    deviceCode: camera.deviceCode,
                                 });
-                            } catch {
-                                Toast.show({
-                                    type: 'error',
-                                    text1: 'Lỗi',
-                                    text2: 'Không thể kết nối đến camera',
-                                });
+                            } catch (err) {
+                                handleError(err);
                             }
                         }}
                     />
                 )}
 
-                {/* Camera Info Card */}
                 <View style={styles.cameraInfoCard}>
                     <View style={staticStyles.infoItem}>
                         <Text style={styles.infoLabel}>Mã cam</Text>
@@ -203,7 +186,6 @@ export const CustomWrapperScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* Machine Configuration Card */}
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Cấu hình máy</Text>
 
@@ -228,14 +210,12 @@ export const CustomWrapperScreen: React.FC = () => {
                     />
                 </View>
 
-                {/* Status Indicator */}
                 <View style={styles.statusCard}>
                     <CheckCircleFilled width={22} height={22} color={theme.status.activeText} />
                     <Text style={styles.statusText}>{statusMessage}</Text>
                 </View>
             </ScrollView>
 
-            {/* Bottom Action Bar */}
             <ButtonBar
                 mode="double"
                 primaryTitle={isExecuting ? 'Đang xử lý...' : 'Thực hiện hành động'}
@@ -250,7 +230,6 @@ export const CustomWrapperScreen: React.FC = () => {
     );
 };
 
-// Static styles (theme-independent)
 const staticStyles = StyleSheet.create({
     flex1: {
         flex: 1,
@@ -274,7 +253,6 @@ const staticStyles = StyleSheet.create({
     },
 });
 
-// Dynamic styles (theme-dependent)
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
         container: {
