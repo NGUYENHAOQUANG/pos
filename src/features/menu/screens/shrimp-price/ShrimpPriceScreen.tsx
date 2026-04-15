@@ -98,7 +98,6 @@ export const ShrimpPriceScreen: React.FC = () => {
                     tabs={HEADING_TABS}
                     selectedTab={activeTab}
                     onTabSelect={setActiveTab}
-                    spreadTabs={false}
                 />
             </View>
 

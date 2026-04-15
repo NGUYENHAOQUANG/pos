@@ -5,14 +5,17 @@ import { chatbotState } from '@/features/menu/screens/chatbot/services/chatbotSt
 
 export const callBackendAI = async (text: string, sessionId: string = '1'): Promise<AIResponse> => {
     try {
+        const requestBody = {
+            session_id: sessionId,
+            farm_id: chatbotState.selectedZoneId || null,
+            message: text,
+        };
+        console.log('[ChatbotClient] Request body:', JSON.stringify(requestBody, null, 2));
+
         const response = await fetch(`${ENV.CHATBOT_API_URL}${API_ENDPOINTS.CHATBOT.CHAT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                session_id: sessionId,
-                farm_id: chatbotState.selectedZoneId || null,
-                message: text,
-            }),
+            body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {

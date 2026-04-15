@@ -38,7 +38,9 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Ứng dụng cần truy cập mạng nội bộ để xem camera trực tiếp qua giao thức RTSP.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Ứng dụng cần truy cập Microphone để hỗ trợ tính năng truyền âm thanh luồng Camera.</string>
+	<string>Ứng dụng cần truy cập Microphone để hỗ trợ tính năng truyền âm thanh luồng Camera và nhận diện giọng nói.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Ứng dụng cần truy cập Apple Speech Recognition để chuyển đổi giọng nói của bạn thành văn bản.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Ứng dụng cần quyền truy cập Vị trí để hiển thị bản đồ và xác định vị trí hiện tại.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

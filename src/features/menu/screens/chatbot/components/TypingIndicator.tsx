@@ -4,12 +4,11 @@
  */
 import React, { useRef, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
-import { useAppTheme } from '@/styles/themeContext';
-import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
+import { colors } from '@/styles/colors';
+import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
 
 export const TypingIndicator: React.FC = () => {
-    const theme = useAppTheme();
-    const styles = useTypingStyles(theme);
+    const styles = useTypingStyles();
 
     const dot1 = useRef(new Animated.Value(0)).current;
     const dot2 = useRef(new Animated.Value(0)).current;
@@ -63,9 +62,7 @@ export const TypingIndicator: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.botAvatarSmall}>
-                <ChatBotIcon width={32} height={32} />
-            </View>
+            <ChatbotAvatar size={40} />
             <View style={styles.bubble}>
                 <Animated.View style={[styles.dot, dotStyle(dot1)]} />
                 <Animated.View style={[styles.dot, dotStyle(dot2)]} />
@@ -75,7 +72,7 @@ export const TypingIndicator: React.FC = () => {
     );
 };
 
-const useTypingStyles = (theme: any) =>
+const useTypingStyles = () =>
     useMemo(
         () =>
             StyleSheet.create({
@@ -86,18 +83,12 @@ const useTypingStyles = (theme: any) =>
                     paddingBottom: 4,
                     gap: 8,
                 },
-                botAvatarSmall: {
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    backgroundColor: theme.background,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                },
                 bubble: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: theme.backgroundTertiary,
+                    backgroundColor: colors.chatbot.glassBg,
+                    borderWidth: 1,
+                    borderColor: colors.chatbot.glassBorder,
                     borderRadius: 16,
                     paddingHorizontal: 16,
                     paddingVertical: 10,
@@ -107,8 +98,8 @@ const useTypingStyles = (theme: any) =>
                     width: 6,
                     height: 6,
                     borderRadius: 3,
-                    backgroundColor: theme.textSecondary,
+                    backgroundColor: colors.textSecondary,
                 },
             }),
-        [theme]
+        []
     );

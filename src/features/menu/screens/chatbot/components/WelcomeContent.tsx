@@ -1,6 +1,7 @@
 /**
  * @file WelcomeContent.tsx
- * @description Gemini-style welcome screen hiển thị khi chưa có message
+ * @description Welcome screen with new layout: greeting + avatar + suggestion cards.
+ * Light-mode only — no dark mode support.
  */
 import React, { useRef, useEffect, useState } from 'react';
 import {
@@ -10,17 +11,65 @@ import {
     Animated,
     Easing,
     ActivityIndicator,
+    LayoutAnimation,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { WELCOME_SUGGESTIONS } from '@/features/menu/screens/chatbot/constants';
-import { useAppTheme } from '@/styles/themeContext';
+import { colors } from '@/styles/colors';
+import { borderRadius } from '@/styles';
 import { zoneApi } from '@/features/farm/api/zoneApi';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { pondCategoryApi } from '@/features/farm/api/pondCategoryApi';
 import { Zone, PondData } from '@/features/farm/types/farm.types';
 import { PondCategory } from '@/features/farm/types/pond-category.types';
-import ChatBotIcon from '@/assets/Icon/IconMenu/ChatBotIcon.svg';
-import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
+import { chatbotState } from '@/features/menu/screens/chatbot/services/chatbotState';
+import { AnimatedBgTipCard } from '@/features/menu/screens/chatbot/components/AnimatedBgTipCard';
+import ArrowRightIcon from '@/assets/Icon/ArrowRight.svg';
+
+/** Staggered fade-in + slide-up wrapper for list items */
+const STAGGER_DELAY = 60;
+const StaggeredCard: React.FC<{ index: number; children: React.ReactNode }> = ({
+    index,
+    children,
+}) => {
+    const opacity = useRef(new Animated.Value(0)).current;
+    const translateY = useRef(new Animated.Value(12)).current;
+
+    useEffect(() => {
+        const delay = index * STAGGER_DELAY;
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 300,
+                delay,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateY, {
+                toValue: 0,
+                duration: 300,
+                delay,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, [index, opacity, translateY]);
+
+    return (
+        <Animated.View style={{ opacity, transform: [{ translateY }] }}>{children}</Animated.View>
+    );
+};
+
+/**
+ * Get time-based greeting in Vietnamese
+ */
+const getGreeting = (): string => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Chào buổi sáng';
+    if (hour < 18) return 'Chào buổi chiều';
+    return 'Chào buổi tối';
+};
 
 interface WelcomeContentProps {
     userName?: string;
@@ -28,9 +77,6 @@ interface WelcomeContentProps {
 }
 
 export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSuggestionPress }) => {
-    const theme = useAppTheme();
-    const styles = useWelcomeStyles(theme);
-
     // ── States for Onboarding Flow ──
     const [step, setStep] = useState<
         'SUGGESTIONS' | 'SELECT_ZONE' | 'SELECT_CATEGORY' | 'SELECT_POND'
@@ -45,11 +91,27 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
         'POND_STATUS' | 'DEVICE_CONTROL' | 'REPORTS' | null
     >(null);
 
+    // Sync: when zone is cleared from input chip → reset welcome flow
+    // Only reset if we're past zone selection (category/pond requires a zone)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const needsZone = step === 'SELECT_CATEGORY' || step === 'SELECT_POND';
+            if (!chatbotState.selectedZoneId && needsZone) {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setStep('SUGGESTIONS');
+                setSelectedZone(null);
+                setSelectedCategory(null);
+                setActionIntent(null);
+            }
+        }, 500);
+        return () => clearInterval(interval);
+    }, [step]);
+
     // ── Staggered fade-in animations ──
     const greetingOpacity = useRef(new Animated.Value(0)).current;
     const greetingTranslateY = useRef(new Animated.Value(20)).current;
-    const questionOpacity = useRef(new Animated.Value(0)).current;
-    const questionTranslateY = useRef(new Animated.Value(20)).current;
+    const subtitleOpacity = useRef(new Animated.Value(0)).current;
+    const subtitleTranslateY = useRef(new Animated.Value(15)).current;
     const chipAnimations = useRef(
         WELCOME_SUGGESTIONS.map(() => ({
             opacity: new Animated.Value(0),
@@ -76,21 +138,21 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
                     useNativeDriver: true,
                 }),
             ]),
-            // 2. Question text
+            // 2. Subtitle text
             Animated.parallel([
-                Animated.timing(questionOpacity, {
+                Animated.timing(subtitleOpacity, {
                     toValue: 1,
                     duration: 400,
                     useNativeDriver: true,
                 }),
-                Animated.timing(questionTranslateY, {
+                Animated.timing(subtitleTranslateY, {
                     toValue: 0,
                     duration: 400,
                     easing: Easing.out(Easing.cubic),
                     useNativeDriver: true,
                 }),
             ]),
-            // 3. Suggestion chips (staggered)
+            // 3. Suggestion cards (staggered)
             Animated.stagger(
                 100,
                 chipAnimations.map(anim =>
@@ -110,7 +172,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
                 )
             ),
         ]).start();
-    }, [greetingOpacity, greetingTranslateY, questionOpacity, questionTranslateY, chipAnimations]);
+    }, [greetingOpacity, greetingTranslateY, subtitleOpacity, subtitleTranslateY, chipAnimations]);
 
     // ── Onboarding Slide Animation ──
     useEffect(() => {
@@ -162,6 +224,9 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
 
     const handleZonePress = async (zone: Zone) => {
         setSelectedZone(zone);
+        // Sync to chatbotState so API sends correct farm_id
+        chatbotState.selectedZoneId = zone.id;
+        chatbotState.selectedZoneName = zone.name;
         setStep('SELECT_CATEGORY');
         if (categories.length === 0) {
             try {
@@ -242,32 +307,8 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
         }
     };
 
-    const handleBack = () => {
-        if (step === 'SELECT_POND') {
-            setStep('SELECT_CATEGORY');
-        } else if (step === 'SELECT_CATEGORY') {
-            setStep('SELECT_ZONE');
-            setSelectedZone(null);
-            setSelectedCategory(null);
-        } else if (step === 'SELECT_ZONE') {
-            setStep('SUGGESTIONS');
-            setSelectedZone(null);
-        }
-    };
-
     // ── Sub-renders ──
-    const renderHeader = () => {
-        if (step === 'SUGGESTIONS') {
-            return (
-                <View>
-                    <ChatBotIcon width={76} height={76} />
-                    <Text style={[styles.greetingLarge, { textAlign: 'center' }]}>
-                        Tôi có thể giúp gì cho bạn hôm nay?
-                    </Text>
-                </View>
-            );
-        }
-
+    const renderOnboardingHeader = () => {
         const title =
             step === 'SELECT_ZONE'
                 ? 'Chọn trại nuôi'
@@ -276,217 +317,255 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
                 : `Chọn ao trong ${selectedZone?.name}`;
 
         return (
-            <View style={{ gap: 16 }}>
-                <ChatBotIcon width={76} height={76} />
-                <HeaderSection
-                    includeSafeArea={false}
-                    title={title}
-                    titleAlign="left"
-                    titleStyle={styles.greetingLarge}
-                    onBack={handleBack}
-                    containerStyle={{
-                        paddingHorizontal: 0,
-                        paddingBottom: 0,
-                        paddingTop: 0,
-                        backgroundColor: 'transparent',
-                    }}
-                />
+            <View style={{ marginBottom: 16 }}>
+                <Text style={styles.onboardingTitle}>{title}</Text>
             </View>
         );
     };
 
-    const renderContent = () => {
-        if (step === 'SELECT_ZONE' || step === 'SELECT_CATEGORY' || step === 'SELECT_POND') {
-            let data: any[] = [];
-            let emptyText = '';
-            let onPress: (item: any) => void = () => {};
-            let shouldShowLoader = false;
+    const renderOnboardingContent = () => {
+        let data: any[] = [];
+        let emptyText = '';
+        let onPress: (item: any) => void = () => {};
+        let shouldShowLoader = false;
 
-            if (step === 'SELECT_ZONE') {
-                data = zones;
-                emptyText = 'Không có trại nuôi nào.';
-                onPress = handleZonePress;
-                shouldShowLoader = zones.length === 0;
-            } else if (step === 'SELECT_CATEGORY') {
-                data =
-                    categories.length > 0
-                        ? [...categories, { id: 'all_categories', name: 'Tất cả ao' }]
-                        : [];
-                emptyText = 'Không có loại ao nào.';
-                onPress = handleCategoryPress;
-                shouldShowLoader = categories.length === 0;
-            } else {
-                data = ponds.length > 0 ? [...ponds, { id: 'all_ponds', name: 'Tất cả ao' }] : [];
-                emptyText = 'Không có ao nào trong trại này.';
-                onPress = handlePondPress;
-                shouldShowLoader = isFetchingPonds;
-            }
-
-            return (
-                <Animated.View
-                    style={{
-                        width: '100%',
-                        opacity: slideAnimOpacity,
-                        transform: [{ translateX: slideAnimTranslateX }],
-                    }}
-                >
-                    <View style={styles.listContainer}>
-                        {shouldShowLoader ? (
-                            <ActivityIndicator
-                                size="small"
-                                color={theme.info}
-                                style={{ padding: 20 }}
-                            />
-                        ) : data.length === 0 ? (
-                            <Text style={styles.emptyText}>{emptyText}</Text>
-                        ) : (
-                            data.map((item: any) => (
-                                <View key={item.id} style={styles.columnWrapper}>
-                                    <TouchableOpacity
-                                        style={[styles.suggestionChip, styles.onboardingChip]}
-                                        onPress={() => onPress(item)}
-                                    >
-                                        <Text style={styles.suggestionText} numberOfLines={2}>
-                                            {item.name}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ))
-                        )}
-                    </View>
-                </Animated.View>
-            );
+        if (step === 'SELECT_ZONE') {
+            data = zones;
+            emptyText = 'Không có trại nuôi nào.';
+            onPress = handleZonePress;
+            shouldShowLoader = zones.length === 0;
+        } else if (step === 'SELECT_CATEGORY') {
+            data =
+                categories.length > 0
+                    ? [...categories, { id: 'all_categories', name: 'Tất cả ao' }]
+                    : [];
+            emptyText = 'Không có loại ao nào.';
+            onPress = handleCategoryPress;
+            shouldShowLoader = categories.length === 0;
+        } else {
+            data = ponds.length > 0 ? [...ponds, { id: 'all_ponds', name: 'Tất cả ao' }] : [];
+            emptyText = 'Không có ao nào trong trại này.';
+            onPress = handlePondPress;
+            shouldShowLoader = isFetchingPonds;
         }
 
         return (
-            <View style={styles.suggestionsSection}>
-                {WELCOME_SUGGESTIONS.map((item, index) => (
-                    <Animated.View
-                        key={item.id}
-                        style={{
-                            opacity: chipAnimations[index].opacity,
-                            transform: [{ translateY: chipAnimations[index].translateY }],
-                            width: '48%',
-                        }}
-                    >
-                        <TouchableOpacity
-                            style={[styles.suggestionChip, styles.onboardingChip]}
-                            onPress={() => handleSuggestionPress(item)}
-                            activeOpacity={0.7}
-                        >
-                            <Text
-                                style={styles.suggestionText}
-                                numberOfLines={2}
-                                ellipsizeMode="tail"
-                            >
-                                {item.text}
-                            </Text>
-                        </TouchableOpacity>
-                    </Animated.View>
-                ))}
-            </View>
+            <Animated.View
+                style={{
+                    width: '100%',
+                    opacity: slideAnimOpacity,
+                    transform: [{ translateX: slideAnimTranslateX }],
+                }}
+            >
+                <View style={{ width: '100%', paddingBottom: 20 }}>
+                    {shouldShowLoader ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={colors.info}
+                            style={{ padding: 20 }}
+                        />
+                    ) : data.length === 0 ? (
+                        <Text style={styles.emptyText}>{emptyText}</Text>
+                    ) : (
+                        <View style={[styles.cardList, { width: '100%' }]}>
+                            {data.map((item: any, index: number) => (
+                                <StaggeredCard key={item.id} index={index}>
+                                    <TouchableOpacity
+                                        style={styles.suggestionCard}
+                                        onPress={() => onPress(item)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text style={styles.suggestionCardText} numberOfLines={2}>
+                                            {item.name}
+                                        </Text>
+                                        <View style={styles.arrowButton}>
+                                            <ArrowRightIcon
+                                                width={16}
+                                                height={16}
+                                                color={colors.text}
+                                            />
+                                        </View>
+                                    </TouchableOpacity>
+                                </StaggeredCard>
+                            ))}
+                        </View>
+                    )}
+                </View>
+            </Animated.View>
         );
     };
 
+    // ── Onboarding Flow (Zone → Category → Pond) ──
+    if (step !== 'SUGGESTIONS') {
+        return (
+            <View style={styles.wrapper}>
+                <View style={[styles.outerCard, { paddingBottom: 16 }]}>
+                    <View style={styles.greetingSection}>{renderOnboardingHeader()}</View>
+                    {renderOnboardingContent()}
+                </View>
+            </View>
+        );
+    }
+    // ── Main Welcome Layout ──
     return (
         <View style={styles.wrapper}>
-            {/* ── Greeting Section ─── */}
-            <View style={styles.greetingSection}>
-                {step === 'SUGGESTIONS' && (
-                    <Animated.View
-                        style={[
-                            styles.greetingRow,
-                            {
-                                opacity: greetingOpacity,
-                                transform: [{ translateY: greetingTranslateY }],
-                            },
-                        ]}
-                    >
-                        <Text style={styles.greetingSmall}>
-                            Xin chào{userName ? ` ${userName}` : ''}!
-                        </Text>
-                    </Animated.View>
-                )}
-
+            <View style={styles.outerCard}>
+                {/* Greeting row: text left + avatar right */}
                 <Animated.View
-                    style={{
-                        opacity: questionOpacity,
-                        transform: [{ translateY: questionTranslateY }],
-                    }}
+                    style={[
+                        styles.greetingSection,
+                        {
+                            opacity: greetingOpacity,
+                            transform: [{ translateY: greetingTranslateY }],
+                        },
+                    ]}
                 >
-                    {renderHeader()}
+                    <View style={styles.greetingRow}>
+                        <View style={styles.greetingTextContainer}>
+                            <Text style={styles.greetingLarge}>
+                                {getGreeting()},{'\n'}
+                                {userName || 'bạn'}!
+                            </Text>
+                        </View>
+                        <ChatbotAvatar size={64} animated />
+                    </View>
+
+                    {/* Subtitle */}
+                    <Animated.View
+                        style={{
+                            opacity: subtitleOpacity,
+                            transform: [{ translateY: subtitleTranslateY }],
+                        }}
+                    >
+                        <Text style={styles.subtitle}>Bạn cần hỗ trợ gì?</Text>
+                    </Animated.View>
                 </Animated.View>
+
+                {/* Suggestion cards — vertical list */}
+                <View style={styles.cardList}>
+                    {WELCOME_SUGGESTIONS.map((item, index) => (
+                        <Animated.View
+                            key={item.id}
+                            style={{
+                                opacity: chipAnimations[index].opacity,
+                                transform: [{ translateY: chipAnimations[index].translateY }],
+                            }}
+                        >
+                            <TouchableOpacity
+                                style={styles.suggestionCard}
+                                onPress={() => handleSuggestionPress(item)}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.suggestionCardText}>{item.text}</Text>
+                                <View style={styles.arrowButton}>
+                                    <ArrowRightIcon width={16} height={16} color={colors.text} />
+                                </View>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    ))}
+                </View>
             </View>
 
-            {/* ── Dynamic Content ─── */}
-            {renderContent()}
+            {/* Animated Background Tip Card */}
+            <AnimatedBgTipCard />
         </View>
     );
 };
 
-const useWelcomeStyles = (theme: any) =>
-    React.useMemo(
-        () =>
-            StyleSheet.create({
-                wrapper: { flex: 1, paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 },
-                greetingSection: { marginBottom: 40 },
-                greetingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-                greetingSmall: { fontSize: 16, fontWeight: '400', color: theme.textSecondary },
-                greetingLarge: {
-                    fontSize: 24,
-                    fontWeight: '700',
-                    color: theme.text,
-                    letterSpacing: -0.3,
-                },
-                suggestionsSection: {
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    justifyContent: 'space-between',
-                    rowGap: 14,
-                    width: '100%',
-                },
-                listContainer: {
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    justifyContent: 'space-between',
-                    rowGap: 14,
-                    width: '100%',
-                    paddingBottom: 20,
-                },
-                columnWrapper: { width: '48%' },
-                suggestionChip: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingVertical: 14,
-                    paddingHorizontal: 12,
-                    borderRadius: 24,
-                    borderWidth: 1,
-                    borderColor: theme.border,
-                    backgroundColor: theme.backgroundPrimary,
-                    width: '100%',
-                },
-                onboardingChip: { paddingVertical: 14, paddingHorizontal: 12 },
-                suggestionText: {
-                    fontSize: 13,
-                    fontWeight: '500',
-                    color: theme.text,
-                    textAlign: 'center',
-                },
-                loadingContainer: {
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingVertical: 40,
-                },
-                loadingText: { marginTop: 12, fontSize: 14, color: theme.textSecondary },
-                emptyText: {
-                    fontSize: 14,
-                    color: theme.textSecondary,
-                    fontStyle: 'italic',
-                    paddingVertical: 20,
-                    width: '100%',
-                    textAlign: 'center',
-                },
-            }),
-        [theme]
-    );
+const styles = StyleSheet.create({
+    wrapper: {
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingBottom: 24,
+    },
+    outerCard: {
+        backgroundColor: colors.chatbot.glassBg,
+        borderWidth: 1,
+        borderColor: colors.chatbot.glassBorder,
+        borderRadius: borderRadius.md,
+        paddingHorizontal: 20,
+        paddingTop: 24,
+        paddingBottom: 20,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.chatbot.glassButtonBg,
+        borderWidth: 1,
+        borderColor: colors.chatbot.glassButtonBorder,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    greetingSection: {
+        marginBottom: 12,
+    },
+    greetingRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    greetingTextContainer: {
+        flex: 1,
+        marginRight: 16,
+    },
+    greetingLarge: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    subtitle: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.textSecondary,
+        marginTop: 8,
+    },
+    onboardingTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: colors.text,
+    },
+
+    // Suggestion cards — vertical list
+    cardList: {
+        gap: 8,
+    },
+    suggestionCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        borderRadius: borderRadius.md,
+        backgroundColor: colors.chatbot.glassButtonBg,
+        borderWidth: 1,
+        borderColor: colors.chatbot.glassBorder,
+    },
+    suggestionCardText: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.text,
+        flex: 1,
+    },
+    arrowButton: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: colors.chatbot.glassBg,
+        borderWidth: 1,
+        borderColor: colors.chatbot.glassBorder,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    // Onboarding flow styles
+    emptyText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
+        paddingVertical: 20,
+        width: '100%',
+        textAlign: 'center',
+    },
+});

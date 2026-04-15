@@ -193,6 +193,8 @@ export const SettingsScreen: React.FC = () => {
     const toggleWeather = useSettingsStore(s => s.toggleWeather);
     const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
     const toggleChatbot = useSettingsStore(s => s.toggleChatbot);
+    const chatbotAnimatedBgEnabled = useSettingsStore(s => s.chatbotAnimatedBgEnabled);
+    const toggleChatbotAnimatedBg = useSettingsStore(s => s.toggleChatbotAnimatedBg);
     const setLockMethod = useSettingsStore(s => s.setLockMethod);
     const setAutoLockTimeout = useSettingsStore(s => s.setAutoLockTimeout);
     const setThemeMode = useSettingsStore(s => s.setThemeMode);
@@ -369,6 +371,16 @@ export const SettingsScreen: React.FC = () => {
                                 onValueChange={toggleChatbot}
                             />
                         </View>
+                        {chatbotEnabled && (
+                            <View style={styles.card}>
+                                <SettingRow
+                                    title="Nền động Chatbot"
+                                    subtitle="Hiệu ứng nền loang màu chuyển động trên màn hình Chatbot"
+                                    value={chatbotAnimatedBgEnabled}
+                                    onValueChange={toggleChatbotAnimatedBg}
+                                />
+                            </View>
+                        )}
                     </View>
 
                     {/* Security Section */}

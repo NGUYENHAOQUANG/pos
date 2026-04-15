@@ -1,79 +1,146 @@
-/**
- * @file ChatbotInput.tsx
- */
-import React, { useState, useCallback } from 'react';
-import { View, TextInput, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
+import MicrophoneIcon from '@/assets/Icon/IconChatBot/Microphone.svg';
+import SendIcon from '@/assets/Icon/IconChatBot/Send.svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useAppTheme } from '@/styles/themeContext';
-import { useChatbotStyles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/styles/colors';
+import { AudioWaveform } from '@/features/menu/screens/chatbot/components/AudioWaveform';
+import { RainbowGlowBorder } from '@/features/menu/screens/chatbot/components/RainbowGlowBorder';
+import { QuickSuggestionChips } from '@/features/menu/screens/chatbot/components/QuickSuggestionChips';
+import { useChatbotInput } from '@/features/menu/screens/chatbot/hooks/useChatbotInput';
+import { useInputStyles } from '@/features/menu/screens/chatbot/styles/chatbotInputStyles';
 
 interface ChatbotInputToolbarProps {
     onSend: (text: string) => void;
-    setShowQuickSheet: (show: boolean) => void;
+    onQuickAction: (text: string) => void;
+    /** Incremented to force-reset all input state (zone chip, text, flow) */
+    resetKey?: number;
 }
 
 export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
     onSend,
-    setShowQuickSheet,
+    onQuickAction,
+    resetKey,
 }) => {
-    const theme = useAppTheme();
-    const styles = useChatbotStyles();
-    const insets = useSafeAreaInsets();
+    const styles = useInputStyles();
 
-    const [text, setText] = useState('');
+    const {
+        text,
+        setText,
+        step,
+        zones,
+        categories,
+        ponds,
+        isLoading,
+        isListening,
+        volume,
+        activeZoneName,
+        allZones,
+        showZonePicker,
+        hasText,
+        scrollViewRef,
+        toggleListening,
+        handleInitialChipPress,
+        handleZoneSelect,
+        handleCategorySelect,
+        handlePondSelect,
+        handleBack,
+        clearSelectedZone,
+        handleZonePick,
+        handleSend,
+    } = useChatbotInput({ onSend, onQuickAction, resetKey });
 
-    const handleSend = useCallback(() => {
-        if (text.trim().length > 0) {
-            onSend(text.trim());
-            setText('');
-        }
-    }, [text, onSend]);
-
-    const paddingBottom = Math.max(16, insets.bottom + 4);
-    const hasText = text.trim().length > 0;
+    const paddingBottom = 16;
 
     return (
-        <View style={[styles.inputToolbar, { paddingBottom }]}>
-            {/* Quick Sheet Button */}
-            <TouchableOpacity
-                style={styles.quickSheetButton}
-                onPress={() => setShowQuickSheet(true)}
-                activeOpacity={0.7}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-                <Ionicons name="options-outline" size={22} color={theme.textSecondary} />
-            </TouchableOpacity>
+        <View style={[styles.wrapper, { paddingBottom }]}>
+            {/* Quick Suggestion Chips / Zone Picker */}
+            <QuickSuggestionChips
+                step={step}
+                isLoading={isLoading}
+                zones={zones}
+                categories={categories}
+                ponds={ponds}
+                showZonePicker={showZonePicker}
+                activeZoneName={activeZoneName}
+                allZones={allZones}
+                scrollViewRef={scrollViewRef}
+                onChipPress={handleInitialChipPress}
+                onZoneSelect={handleZoneSelect}
+                onCategorySelect={handleCategorySelect}
+                onPondSelect={handlePondSelect}
+                onBack={handleBack}
+                onZonePick={handleZonePick}
+            />
 
-            {/* Input Pill */}
-            <View style={styles.inputPrimary}>
-                <TextInput
-                    style={styles.composerInput}
-                    value={text}
-                    onChangeText={setText}
-                    placeholder="Hỏi Mebieco AI..."
-                    placeholderTextColor={theme.textSecondary}
-                    multiline
-                    returnKeyType="default"
-                    blurOnSubmit={false}
-                />
+            {/* Input Row */}
+            <View style={styles.inputWrapper}>
+                <View style={[styles.inputPrimary, isListening && styles.inputPrimaryListening]}>
+                    {/* Rainbow glow — rendered inside input bounds */}
+                    {isListening && <RainbowGlowBorder volume={volume} />}
 
-                {/* Send Button (inside pill) */}
-                <TouchableOpacity
-                    style={styles.sendContainer}
-                    onPress={handleSend}
-                    disabled={!hasText}
-                    activeOpacity={0.7}
-                >
-                    <View style={[styles.sendButton, !hasText && styles.sendButtonDisabled]}>
-                        <Ionicons
-                            name="send"
-                            size={16}
-                            color={hasText ? theme.textInverse : theme.textSecondary}
-                            style={{ marginLeft: 2 }}
-                        />
+                    <TextInput
+                        style={styles.composerInput}
+                        value={text}
+                        onChangeText={setText}
+                        placeholder="Hỏi về ao, vụ nuôi..."
+                        placeholderTextColor={colors.textSecondary}
+                        multiline
+                        returnKeyType="default"
+                        blurOnSubmit={false}
+                    />
+
+                    <View style={styles.actionButtonsContainer}>
+                        {/* Selected zone chip — inside input */}
+                        {activeZoneName && (
+                            <View style={styles.selectedZoneChip}>
+                                <Text style={styles.selectedZoneText}>{activeZoneName}</Text>
+                                {allZones.length > 1 && (
+                                    <TouchableOpacity
+                                        onPress={clearSelectedZone}
+                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
+                                        <Ionicons
+                                            name="close"
+                                            size={14}
+                                            color={colors.textSecondary}
+                                        />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )}
+
+                        {isListening && <AudioWaveform volume={volume} />}
+                        <TouchableOpacity
+                            style={[
+                                styles.actionButton,
+                                isListening && {
+                                    backgroundColor: 'rgba(255, 60, 60, 0.2)',
+                                    borderColor: 'rgba(255, 60, 60, 0.4)',
+                                },
+                            ]}
+                            activeOpacity={0.7}
+                            onPress={toggleListening}
+                        >
+                            <MicrophoneIcon
+                                width={20}
+                                height={20}
+                                color={isListening ? '#FF453A' : undefined}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.actionButton, !hasText && { opacity: 0.4 }]}
+                            onPress={handleSend}
+                            disabled={!hasText}
+                            activeOpacity={0.7}
+                        >
+                            <SendIcon width={20} height={20} />
+                        </TouchableOpacity>
                     </View>
-                </TouchableOpacity>
+                </View>
             </View>
         </View>
     );

@@ -69,7 +69,6 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
                 tabs={TABS}
                 selectedTab={activeTab}
                 onTabSelect={setActiveTab}
-                spreadTabs
                 containerStyle={styles.headingBar}
             />
 
