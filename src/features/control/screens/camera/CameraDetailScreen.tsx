@@ -363,7 +363,7 @@ const getStyles = (theme: Colors) =>
             flexWrap: 'wrap',
             rowGap: 16,
             borderWidth: 1,
-            borderRadius: borderRadius.lg,
+            borderRadius: 16,
             overflow: 'hidden',
             marginTop: 8,
             paddingVertical: 16,
