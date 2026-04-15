@@ -29,9 +29,9 @@ const useStreamingText = (fullText: string, shouldStream: boolean) => {
         indexRef.current = 0;
         setDisplayed('');
 
-        // Advance ~2 chars every 30ms for natural typing speed
-        const CHARS_PER_TICK = 2;
-        const TICK_INTERVAL = 30; // ms between advances
+        // Advance ~4 chars every 50ms — fewer re-renders, still natural speed
+        const CHARS_PER_TICK = 4;
+        const TICK_INTERVAL = 50; // ms between advances
 
         const tick = (time: number) => {
             if (!lastTimeRef.current) lastTimeRef.current = time;

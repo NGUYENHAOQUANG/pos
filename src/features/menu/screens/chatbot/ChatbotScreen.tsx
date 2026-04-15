@@ -52,8 +52,8 @@ export const ChatbotScreen: React.FC = () => {
     useEffect(() => {
         if (isTyping) {
             const timer = setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
+                flatListRef.current?.scrollToEnd({ animated: false });
+            }, 200);
             return () => clearTimeout(timer);
         }
     }, [isTyping]);
