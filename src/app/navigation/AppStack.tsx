@@ -60,6 +60,8 @@ import { UserManualScreens } from '@/features/control/screens/usermanual/UserMan
 import { GeneralUserManualScreens } from '@/features/control/screens/usermanual/GeneralUserManualScreens';
 import { HistoryActivitieScreens } from '@/features/control/screens/schedule/HistoryActivitieScreens';
 import { VideoPlayerScreen } from '@/features/control/screens/camera/VideoPlayerScreen';
+import { CategoryCameraListScreen } from '@/features/control/screens/camera/CategoryCameraListScreen';
+import { CameraDetailScreen } from '@/features/control/screens/camera/CameraDetailScreen';
 import { CustomWrapperScreen } from '@/features/control/screens/CustomWrapper/CustomWrapperScreen';
 
 // Menu screens
@@ -243,6 +245,14 @@ export type AppStackParamList = {
         cameraName: string;
         pondName: string;
         isHd: boolean;
+        deviceCode: string;
+    };
+    CategoryCameraList: {
+        categoryId: string;
+        categoryName: string;
+    };
+    CameraDetail: {
+        camera: import('@/features/control/api/cameraApi').CameraItem;
     };
 
     // ============== Menu Screens (Tab Bar hidden) ==============
@@ -384,6 +394,8 @@ export const AppStack: React.FC = () => {
                         animation: 'fade',
                     }}
                 />
+                <Stack.Screen name="CategoryCameraList" component={CategoryCameraListScreen} />
+                <Stack.Screen name="CameraDetail" component={CameraDetailScreen} />
 
                 {/* ============== Menu Screens ============== */}
                 <Stack.Screen

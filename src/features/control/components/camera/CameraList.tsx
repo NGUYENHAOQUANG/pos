@@ -1,11 +1,17 @@
-import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import React, { useCallback, useState, useMemo } from 'react';
+import { FlatList, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+import { Text } from '@/shared/components/typography/Text';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { CameraCard } from '@/features/control/components/camera/CameraCard';
 import { CameraSkeleton } from '@/features/control/components/skeleton/CameraSkeleton';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { useCameras } from '@/features/control/hooks/useCameras';
 import { CameraItem } from '@/features/control/api/cameraApi';
+import { CameraFilter } from '@/features/control/components/camera/CameraFilter';
+import { useAppTheme } from '@/styles/themeContext';
 import { spacing } from '@/styles';
 
 interface CameraListProps {
@@ -17,11 +23,126 @@ interface CameraListProps {
  * Fetches data from API via useCameras hook.
  */
 export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
-    const { data: cameras = [], isLoading, refetch, isRefetching } = useCameras();
+    const theme = useAppTheme();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+    const { data: cameras = [], isLoading, isRefetching, refetch } = useCameras();
+
+    // selectedCategory is now string ('all' or category.id)
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
     const handleRefresh = useCallback(() => {
         refetch();
     }, [refetch]);
+
+    // Group cameras into categories
+    const groupedData = useMemo(() => {
+        // Enums matching Category locationCategory
+        const enumTabs = [
+            { id: 'GrowOutPond', name: 'Ao Nuôi' },
+            { id: 'NurseryPond', name: 'Ao Vèo' },
+            { id: 'Infrastructure', name: 'Hạ Tầng' },
+        ];
+
+        let tabsToRender = enumTabs;
+
+        if (selectedCategory !== 'all') {
+            tabsToRender = tabsToRender.filter(c => c.id === selectedCategory);
+        }
+
+        const groups = tabsToRender.map(cat => {
+            const catCameras = cameras.filter(cam => cam.locationCategory === cat.id);
+
+            const uniquePonds = new Set<string>();
+            catCameras.forEach(cam => {
+                uniquePonds.add(cam.pondName || 'Khu vực chưa phân bổ');
+            });
+
+            return {
+                id: cat.id,
+                name: cat.name,
+                cameras: catCameras,
+                pondCount: uniquePonds.size,
+            };
+        });
+
+        // Always hide groups without cameras
+        const activeGroups = groups.filter(g => g.cameras.length > 0);
+
+        // Add 'Khác' category if there are unassigned cameras and 'Tất cả' is active
+        if (selectedCategory === 'all' || selectedCategory === 'other') {
+            const unassigned = cameras.filter(
+                c => c.locationCategory === 'None' || !c.locationCategory
+            );
+
+            if (unassigned.length > 0) {
+                const uniquePonds = new Set<string>();
+                unassigned.forEach(cam => {
+                    uniquePonds.add(cam.pondName || 'Khu vực chưa phân bổ');
+                });
+                activeGroups.push({
+                    id: 'other',
+                    name: 'Khác',
+                    cameras: unassigned,
+                    pondCount: uniquePonds.size,
+                });
+            }
+        }
+
+        return activeGroups;
+    }, [cameras, selectedCategory]);
+
+    const renderHeader = useCallback(() => {
+        return (
+            <CameraFilter
+                cameras={cameras}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+            />
+        );
+    }, [cameras, selectedCategory]);
+
+    const renderCategoryGroup = ({ item: group }: { item: any }) => {
+        return (
+            <View style={styles.groupContainer}>
+                {/* Header Group */}
+                <View style={styles.groupHeader}>
+                    <View style={styles.groupHeaderTitleContainer}>
+                        <Text style={[styles.groupTitle, { color: theme.text }]}>{group.name}</Text>
+                        <Text style={[styles.groupSubtitle, { color: theme.textSecondary }]}>
+                            {group.pondCount} ao - {group.cameras.length} cameras
+                        </Text>
+                    </View>
+                    {group.cameras.length > 0 && (
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => {
+                                navigation.navigate('CategoryCameraList', {
+                                    categoryId: group.id,
+                                    categoryName: group.name,
+                                });
+                            }}
+                        >
+                            <Text style={[styles.seeMoreText, { color: theme.primary }]}>
+                                Xem thêm
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* 2-Column Grid of Cameras (Limited to 2 items in Preview Mode) */}
+                <View style={styles.gridContainer}>
+                    {group.cameras.slice(0, 2).map((cam: CameraItem) => (
+                        <CameraCard
+                            key={cam.deviceCode}
+                            camera={cam}
+                            onPress={onCameraPress}
+                            isGrid
+                        />
+                    ))}
+                </View>
+            </View>
+        );
+    };
 
     if (isLoading) {
         return <CameraSkeleton />;
@@ -29,33 +150,67 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
 
     return (
         <FlatList
-            data={cameras}
-            keyExtractor={item => item.deviceSn}
-            renderItem={({ item }) => <CameraCard camera={item} onPress={onCameraPress} />}
+            style={{ flex: 1 }}
+            data={groupedData}
+            keyExtractor={item => item.id}
+            renderItem={renderCategoryGroup}
             contentContainerStyle={[
                 styles.listContent,
-                cameras.length === 0 && styles.emptyContent,
+                groupedData.length === 0 && styles.emptyContent,
             ]}
             showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
             refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />}
-            ListEmptyComponent={<EmptyStateCard message="Chưa có camera nào được kết nối" />}
+            ListEmptyComponent={
+                <EmptyStateCard
+                    message={`Chưa có Camera nào được thiết lập\nVui lòng liên hệ để được thiết lập camera`}
+                />
+            }
+            ListHeaderComponent={renderHeader}
         />
     );
 };
 
 const styles = StyleSheet.create({
     listContent: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.sm,
+        paddingTop: 10,
         paddingBottom: 100,
-    },
-    separator: {
-        height: 4,
     },
     emptyContent: {
         flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+    },
+    groupContainer: {
+        marginBottom: 26,
+        paddingHorizontal: spacing.md,
+    },
+    groupHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginBottom: 4,
+    },
+    groupHeaderTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        gap: 8,
+    },
+    groupTitle: {
+        fontSize: 18,
+        fontWeight: 600,
+    },
+    groupSubtitle: {
+        fontSize: 14,
+        fontWeight: 400,
+        paddingBottom: 1, // Visual align with title
+    },
+    seeMoreText: {
+        fontSize: 14,
+        fontWeight: '500',
+        paddingBottom: 1,
+    },
+    gridContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        rowGap: 8,
     },
 });

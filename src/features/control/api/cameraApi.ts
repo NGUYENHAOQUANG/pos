@@ -4,10 +4,16 @@ import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
 // ===== Response Interfaces =====
 
+export type CameraLocationCategory = 'None' | 'GrowOutPond' | 'NurseryPond' | 'Infrastructure';
+export type CameraType = 'General' | 'FeedingTray' | 'Security' | (string & {});
+
 /** Single camera item from GET /camera */
 export interface CameraItem {
     id: string;
-    deviceSn: string;
+    zoneId: string | null;
+    pondId: string | null;
+    pondName: string | null;
+    deviceCode: string;
     name: string;
     status: string;
     ipAddress: string;
@@ -15,7 +21,9 @@ export interface CameraItem {
     /** Snapshot image URL (webp) for preview thumbnail */
     snapshotUrl: string | null;
     modelCode: string;
-    streamUrl: string | null;
+    liveUrl: string | null;
+    locationCategory: CameraLocationCategory;
+    cameraType: CameraType;
 }
 
 /** Camera stream data from GET /camera/{sn}/stream */
@@ -45,7 +53,7 @@ export const cameraApi = {
         return apiClient.get<CameraListResponse>(API_ENDPOINTS.CAMERA.LIST);
     },
 
-    /** Get stream URL for a specific camera by serial number */
+    /** Get stream URL for a specific camera by serial number (sn) */
     getStream: (sn: string, isHd: boolean) => {
         return apiClient.get<CameraStreamResponse>(API_ENDPOINTS.CAMERA.STREAM(sn, isHd));
     },
