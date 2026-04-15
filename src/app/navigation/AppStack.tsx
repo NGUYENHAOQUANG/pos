@@ -59,6 +59,7 @@ import { UserManualScreens } from '@/features/control/screens/usermanual/UserMan
 import { GeneralUserManualScreens } from '@/features/control/screens/usermanual/GeneralUserManualScreens';
 import { HistoryActivitieScreens } from '@/features/control/screens/schedule/HistoryActivitieScreens';
 import { VideoPlayerScreen } from '@/features/control/screens/camera/VideoPlayerScreen';
+import { CustomWrapperScreen } from '@/features/control/screens/CustomWrapper/CustomWrapperScreen';
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
@@ -225,6 +226,11 @@ export type AppStackParamList = {
         pondName: string;
         pondId: string;
     };
+    CustomWrapper: {
+        deviceId: string;
+        pondName: string;
+        pondId: string;
+    };
     Schedule: { pondName: string };
     History: { pondName: string };
     UserManual: undefined;
@@ -360,6 +366,7 @@ export const AppStack: React.FC = () => {
                     component={CustomFeedingMachine}
                     options={{ gestureEnabled: false }}
                 />
+                <Stack.Screen name="CustomWrapper" component={CustomWrapperScreen} />
                 <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
                 <Stack.Screen name="History" component={HistoryActivitieScreens} />
                 <Stack.Screen name="UserManual" component={UserManualScreens} />

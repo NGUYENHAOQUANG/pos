@@ -10,6 +10,13 @@ import {
 import Toast from 'react-native-toast-message';
 import { MOCK_PONDS } from '@/features/control/data/devicesData';
 
+// ==========================================
+// [TODO]: XÓA BIẾN NÀY KHI CÓ API THIẾT BỊ NHÁ THẬT
+// Biến tạm để lưu trạng thái bật/tắt của thiết bị mock,
+// giúp Switch trên UI có thể thay đổi hợp lệ mà không bị "giật" lại.
+let MOCK_WRAPPER_IS_ON = true;
+// ==========================================
+
 // ===== Helper Functions =====
 
 /** Calculate device stats for pond summary card */
@@ -20,6 +27,7 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
         oxy: { active: 0, warning: 0, inactive: 0 },
         syphon: { active: 0, warning: 0, inactive: 0 },
         pump: { active: 0, warning: 0, inactive: 0 },
+        wrapper: { active: 0, warning: 0, inactive: 0 },
     };
 
     devices.forEach(device => {
@@ -43,7 +51,7 @@ const mapApiDeviceToDeviceData = (
     item: DeviceItem,
     unhealthyDeviceIds?: Set<string>
 ): DeviceData => {
-    let type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' = 'feeder';
+    let type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' | 'wrapper' = 'feeder';
     switch (item.deviceType) {
         case 'Syphon':
             type = 'syphon';
@@ -202,8 +210,24 @@ export const useDevices = () => {
                 });
             }
 
+            const builtPonds = buildPondsFromApi(hubs, devices, unhealthyDeviceIds);
+
+            // Inject mock wrapper devices to Ao N01 for demo
+            const targetPond = builtPonds.find(p => p.name === 'Ao N01' || p.name === 'Ao 1');
+            if (targetPond) {
+                targetPond.devices.push({
+                    id: 'mock-wrapper-1',
+                    name: 'Aquafan Pro 50',
+                    type: 'wrapper',
+                    mode: EControlMode.MANUAL,
+                    isOn: MOCK_WRAPPER_IS_ON,
+                });
+                targetPond.deviceStats = calculatePondStats(targetPond.devices);
+            }
+
             const allPonds = [
-                ...buildPondsFromApi(hubs, devices, unhealthyDeviceIds),
+                //...buildPondsFromApi(hubs, devices, unhealthyDeviceIds),
+                ...builtPonds,
                 ...MOCK_PONDS,
             ];
             return sortPondsByCategory(allPonds);
@@ -221,7 +245,23 @@ export const useToggleDevice = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ deviceId }: { deviceId: string; pondId: string; isOn: boolean }) => {
+        mutationFn: async ({
+            deviceId,
+            isOn,
+        }: {
+            deviceId: string;
+            pondId: string;
+            isOn: boolean;
+        }) => {
+            // ==========================================
+            // [TODO]: XÓA ĐOẠN BYPASS NÀY KHI CÓ THIẾT BỊ THẬT TỪ BACKEND
+            if (deviceId.startsWith('mock-wrapper')) {
+                MOCK_WRAPPER_IS_ON = isOn; // Lưu trạng thái ảo
+                await new Promise<void>(resolve => setTimeout(() => resolve(), 500)); // Giả lập chờ 500ms
+                return {} as any;
+            }
+            // ==========================================
+
             return deviceApi.toggleDevice({ deviceId });
         },
         onError: _err => {
@@ -315,10 +355,10 @@ export const useConnectDevice = () => {
         const currentData = queryClient.getQueryData<Pond[]>(controlKeys.devices.list());
         if (!currentData) return;
 
-        // Device Map for Codes 1-6
+        // Device Map for Codes 1-8
         const typeMap: Record<
             string,
-            { type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump'; defaultName: string }
+            { type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' | 'wrapper'; defaultName: string }
         > = {
             '1': { type: 'feeder' as const, defaultName: 'Máy cho ăn tự động A1' },
             '2': { type: 'syphon' as const, defaultName: 'Hệ thống Xiphong X1' },
@@ -327,6 +367,7 @@ export const useConnectDevice = () => {
             '5': { type: 'oxy' as const, defaultName: 'Máy thổi khí Oxy 1' },
             '6': { type: 'syphon' as const, defaultName: 'Hệ thống Xiphong X2' },
             '7': { type: 'pump' as const, defaultName: 'Máy bơm B1' },
+            '8': { type: 'wrapper' as const, defaultName: 'Thiết bị nhá N1' },
         };
 
         let config = typeMap[code];

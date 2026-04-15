@@ -88,8 +88,10 @@ export const useUpdateWaterTreatment = () => {
             id: string;
             data: UpdateWaterTreatmentCommand;
         }) => waterTreatmentApi.update(pondId, id, data),
-        onSuccess: (_, { pondId }) => {
+        onSuccess: (_, { pondId, id }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
+            // Invalidate detail cache so re-opening the form shows fresh data
+            queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.detail(id) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
             // Invalidate report charts
@@ -105,8 +107,10 @@ export const useDeleteWaterTreatment = () => {
     return useMutation({
         mutationFn: ({ pondId, id }: { pondId: string; id: string }) =>
             waterTreatmentApi.delete(pondId, id),
-        onSuccess: (_, { pondId }) => {
+        onSuccess: (_, { pondId, id }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
+            // Remove stale detail cache after deletion
+            queryClient.removeQueries({ queryKey: farmKeys.waterTreatment.detail(id) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
             // Invalidate report charts

@@ -60,6 +60,10 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         () => allDevices.filter(d => d.type === 'pump'),
         [allDevices]
     );
+    const wrapperDevices = React.useMemo(
+        () => allDevices.filter(d => d.type === 'wrapper'),
+        [allDevices]
+    );
 
     const [refreshing, setRefreshing] = useState(false);
     const [selectedTab, setSelectedTab] = useState('feeder');
@@ -106,9 +110,10 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
             { key: 'oxy', title: 'Máy Oxy', devices: oxyDevices },
             { key: 'syphon', title: 'Syphon', devices: syphonDevices },
             { key: 'pump', title: 'Máy bơm', devices: pumpDevices },
+            { key: 'wrapper', title: 'Thiết bị nhá', devices: wrapperDevices },
         ];
         return allSections.filter(s => s.devices.length > 0);
-    }, [feeders, fans, oxyDevices, syphonDevices, pumpDevices]);
+    }, [feeders, fans, oxyDevices, syphonDevices, pumpDevices, wrapperDevices]);
 
     // HeadingBar tabs from available sections
     const headingTabs = React.useMemo(
@@ -173,7 +178,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         [deviceSections]
     );
 
-    // Show Custom Feeding Machine Screen
+    // Show Custom Feeding Machine Screen or Custom Wrapper Screen
     const handleSettingsPress = React.useCallback(
         (id: string) => {
             const selectedDevice = allDevices.find(d => d.id === id);
@@ -182,6 +187,16 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                 Toast.show({
                     type: 'error',
                     text1: 'Không thể cấu hình thiết bị này',
+                });
+                return;
+            }
+
+            // Navigate to wrapper-specific screen
+            if (selectedDevice?.type === 'wrapper') {
+                navigation.navigate('CustomWrapper', {
+                    deviceId: id,
+                    pondName,
+                    pondId: currentPond?.id || '',
                 });
                 return;
             }
