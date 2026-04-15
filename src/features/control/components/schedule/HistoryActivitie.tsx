@@ -11,9 +11,11 @@ const FanIcon = require('@/assets/Icon/IconDevices/Fan.png');
 const FeederIcon = require('@/assets/Icon/IconDevices/Feeder.png');
 const OxyIcon = require('@/assets/Icon/IconDevices/Oxy.png');
 const SyphonIcon = require('@/assets/Icon/IconDevices/Syphon.png');
+const PumpIcon = require('@/assets/Icon/IconDevices/Pump.png');
+const WrapperIcon = require('@/assets/Icon/IconDevices/wrapper.png');
 
 // Device types
-type DeviceType = 'fan' | 'feeder' | 'oxy' | 'syphon';
+type DeviceType = 'fan' | 'feeder' | 'oxy' | 'syphon' | 'pump' | 'wrapper';
 
 // Control mode types for background colors
 type ControlMode = 'remote' | 'schedule' | 'local';
@@ -47,6 +49,8 @@ const DEVICE_ICONS: Record<DeviceType, ImageSourcePropType> = {
     feeder: FeederIcon as ImageSourcePropType,
     oxy: OxyIcon as ImageSourcePropType,
     syphon: SyphonIcon as ImageSourcePropType,
+    pump: PumpIcon as ImageSourcePropType,
+    wrapper: WrapperIcon as ImageSourcePropType,
 };
 
 // Generate time slots from 00:00 to 24:00 with 15 min intervals

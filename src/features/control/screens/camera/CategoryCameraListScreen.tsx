@@ -44,12 +44,9 @@ export const CategoryCameraListScreen: React.FC = () => {
         return cameras.filter(cam => cam.locationCategory === categoryId);
     }, [cameras, categoryId]);
 
-    // Check if the current category is an "Ao Nuôi" equivalent using precise API definition ('GrowOutPond')
-    const isAoNuoi = categoryId === 'GrowOutPond';
-
-    // Grouping & Filtering Logic specifically for Ao Nuôi
+    // Grouping & Filtering Logic for all categories
     const filterPairs = useMemo(() => {
-        if (!isAoNuoi || !categoryCameras.length) return [];
+        if (!categoryCameras.length) return [];
 
         // 1. Group by exact Pond Name
         const groupsMap = new Map<string, CameraItem[]>();
@@ -81,7 +78,7 @@ export const CategoryCameraListScreen: React.FC = () => {
             });
         }
         return pairs;
-    }, [categoryCameras, isAoNuoi]);
+    }, [categoryCameras]);
 
     const [selectedPairIndex, setSelectedPairIndex] = useState(0);
 
@@ -98,8 +95,8 @@ export const CategoryCameraListScreen: React.FC = () => {
                 transparent={false}
             />
 
-            {/* Sub-Filter System for Ao Nuôi Only */}
-            {isAoNuoi && filterPairs.length > 0 && (
+            {/* Sub-Filter System for categories with multiple ponds */}
+            {filterPairs.length > 0 && (
                 <View>
                     <ScrollView
                         horizontal
@@ -143,7 +140,7 @@ export const CategoryCameraListScreen: React.FC = () => {
             )}
 
             {/* List Configuration based on Mode */}
-            {isAoNuoi && filterPairs.length > 0 ? (
+            {filterPairs.length > 0 ? (
                 <ScrollView
                     style={{ flex: 1 }}
                     contentContainerStyle={styles.groupedListContent}
@@ -157,13 +154,13 @@ export const CategoryCameraListScreen: React.FC = () => {
                             <Text style={[styles.pondSectionTitle, { color: theme.text }]}>
                                 {pondGroup.pondName}
                             </Text>
-                            <View style={styles.pondGridContent}>
+                            <View style={styles.pondListContent}>
                                 {pondGroup.cameras.map(cam => (
                                     <CameraCard
                                         key={cam.deviceCode}
                                         camera={cam}
                                         onPress={handleCameraPress}
-                                        isGrid={true}
+                                        isGrid={false}
                                     />
                                 ))}
                             </View>
@@ -175,14 +172,12 @@ export const CategoryCameraListScreen: React.FC = () => {
                     contentContainerStyle={styles.listContent}
                     data={categoryCameras}
                     keyExtractor={item => item.deviceCode}
-                    numColumns={2}
-                    columnWrapperStyle={styles.columnWrapper}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
                     }
                     renderItem={({ item }) => (
-                        <CameraCard camera={item} onPress={handleCameraPress} isGrid={true} />
+                        <CameraCard camera={item} onPress={handleCameraPress} isGrid={false} />
                     )}
                 />
             )}
@@ -233,10 +228,8 @@ const styles = StyleSheet.create({
         fontWeight: 600,
         marginBottom: 4,
     },
-    pondGridContent: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        rowGap: 8,
+    pondListContent: {
+        flexDirection: 'column',
+        gap: 0,
     },
 });
