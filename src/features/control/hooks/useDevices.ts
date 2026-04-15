@@ -186,7 +186,7 @@ const sortPondsByCategory = (ponds: Pond[]): Pond[] => {
  * Fetch DeviceHubs + Devices from API, then group devices into Ponds.
  * Returns Pond[] with devices mapped via hub linkage.
  */
-export const useDevices = () => {
+export const useDevices = (options?: { refetchInterval?: number | false }) => {
     return useQuery({
         queryKey: controlKeys.devices.list(),
         queryFn: async (): Promise<Pond[]> => {
@@ -233,7 +233,7 @@ export const useDevices = () => {
             return sortPondsByCategory(allPonds);
         },
         staleTime: 1000 * 10,
-        refetchInterval: 10000,
+        refetchInterval: options?.refetchInterval !== undefined ? options.refetchInterval : 10000,
     });
 };
 
