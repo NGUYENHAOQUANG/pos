@@ -4,8 +4,9 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Rect, Path, Text as SvgText } from 'react-native-svg';
 import { colors } from '@/styles';
-import { PADDING_LEFT, PADDING_TOP } from '@/features/reports/components/profit-chart/chartData';
+import { PADDING_TOP } from '@/features/reports/components/profit-chart/chartData';
 import { ProfitStatsByDate } from '@/features/reports/types/profit-stats';
+import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
 
 // ---------- constants ----------
 const BAR_COLORS = {
@@ -130,6 +131,8 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
     // CHART RENDERING
     // ====================================================================
     const { TOTAL_DAYS, DAY_MARKS, DAY_LABELS, barData, Y_MAX, getYAxisLines } = processedData;
+
+    const PADDING_LEFT = calculateDynamicYAxisWidth(getYAxisLines(), formatAxisValue, 12, 16);
 
     const MIN_DAY_WIDTH = 40;
     const actualChartWidth = Math.max(chartWidth, TOTAL_DAYS * MIN_DAY_WIDTH);

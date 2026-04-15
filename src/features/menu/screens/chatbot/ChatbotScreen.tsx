@@ -1,12 +1,8 @@
-/**
- * @file ChatbotScreen.tsx
- */
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { View, Platform, FlatList } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { IChatMessage } from '@/features/menu/screens/chatbot/types';
 import { ChatBubble } from '@/features/menu/screens/chatbot/components/ChatBubble';
 import { ChatbotInputToolbar } from '@/features/menu/screens/chatbot/components/ChatbotInput';
@@ -16,7 +12,6 @@ import { TypingIndicator } from '@/features/menu/screens/chatbot/components/Typi
 import { WelcomeContent } from '@/features/menu/screens/chatbot/components/WelcomeContent';
 import { useChatbot } from '@/features/menu/screens/chatbot/hooks/useChatbot';
 import { useChatbotStyles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
-
 import { ChatHistoryBottomSheet } from '@/features/menu/screens/chatbot/components/ChatHistoryBottomSheet';
 import { ChatbotShaderBackground } from '@/features/menu/screens/chatbot/animation/ChatbotShaderBackground';
 import { ChatbotHeader } from '@/features/menu/screens/chatbot/components/ChatbotHeader';

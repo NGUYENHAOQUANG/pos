@@ -119,6 +119,18 @@ export const useChatbotStyles = () => {
                     fontWeight: '500',
                     color: theme.text,
                 },
+
+                // Disclaimer — absolute at bottom, no layout impact
+                disclaimer: {
+                    position: 'absolute' as const,
+                    bottom: 4,
+                    left: 0,
+                    right: 0,
+                    textAlign: 'center' as const,
+                    fontSize: 11,
+                    color: theme.textSecondary,
+                    paddingHorizontal: 16,
+                },
             }),
         [theme]
     );

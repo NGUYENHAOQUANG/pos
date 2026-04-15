@@ -10,7 +10,6 @@ import { useProfitStats } from '@/features/reports/hooks/useProfitStats';
 import {
     CHART_WIDTH,
     CHART_HEIGHT,
-    PADDING_LEFT,
     PADDING_RIGHT,
     PADDING_TOP,
     PADDING_BOTTOM,
@@ -65,7 +64,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
 
     const statsData = response?.data;
 
-    const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
+    const chartWidth = CHART_WIDTH - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
     return (

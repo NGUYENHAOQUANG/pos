@@ -6,8 +6,6 @@ import MicrophoneIcon from '@/assets/Icon/IconChatBot/Microphone.svg';
 import SendIcon from '@/assets/Icon/IconChatBot/Send.svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles/colors';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useKeyboard } from '@/shared/hooks/useKeyboard';
 import { AudioWaveform } from '@/features/menu/screens/chatbot/components/AudioWaveform';
 import { RainbowGlowBorder } from '@/features/menu/screens/chatbot/components/RainbowGlowBorder';
 import { QuickSuggestionChips } from '@/features/menu/screens/chatbot/components/QuickSuggestionChips';
@@ -27,8 +25,6 @@ export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
     resetKey,
 }) => {
     const styles = useInputStyles();
-    const insets = useSafeAreaInsets();
-    const { keyboardVisible } = useKeyboard();
 
     const {
         text,
@@ -56,7 +52,7 @@ export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
         handleSend,
     } = useChatbotInput({ onSend, onQuickAction, resetKey });
 
-    const paddingBottom = keyboardVisible ? 12 : Math.max(16, insets.bottom + 4);
+    const paddingBottom = 16;
 
     return (
         <View style={[styles.wrapper, { paddingBottom }]}>
@@ -146,11 +142,6 @@ export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
                     </View>
                 </View>
             </View>
-
-            {/* Disclaimer */}
-            <Text style={styles.disclaimer}>
-                Mebieco ChatBot là AI và có thể mắc sai sót. Vui lòng kiểm tra
-            </Text>
         </View>
     );
 };
