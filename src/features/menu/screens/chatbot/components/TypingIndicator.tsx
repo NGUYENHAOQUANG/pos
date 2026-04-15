@@ -62,7 +62,7 @@ export const TypingIndicator: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <ChatbotAvatar size={40} />
+            <ChatbotAvatar size={40} animated />
             <View style={styles.bubble}>
                 <Animated.View style={[styles.dot, dotStyle(dot1)]} />
                 <Animated.View style={[styles.dot, dotStyle(dot2)]} />

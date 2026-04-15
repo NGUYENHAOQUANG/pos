@@ -13,7 +13,7 @@ import { RouteProp, useNavigation, useRoute, useIsFocused } from '@react-navigat
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import Toast from 'react-native-toast-message';
-import { spacing, borderRadius } from '@/styles';
+import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Text } from '@/shared/components/typography/Text';
@@ -211,7 +211,7 @@ export const CameraDetailScreen: React.FC = () => {
                         {/* Center Loading indicator */}
                         {isOnline && !isConnected && (
                             <View style={styles.playButton} pointerEvents="none">
-                                <ActivityIndicator size="large" color="#FFF" />
+                                <ActivityIndicator size="large" color={theme.white} />
                                 {/* <PlayButtonIcon width={44} height={44} /> */}
                             </View>
                         )}
@@ -288,7 +288,7 @@ const getStyles = (theme: Colors) =>
         videoPreview: {
             width: VIDEO_WIDTH,
             height: VIDEO_HEIGHT,
-            borderRadius: borderRadius.lg,
+            borderRadius: 16,
             overflow: 'hidden',
             position: 'relative',
         },
@@ -313,7 +313,7 @@ const getStyles = (theme: Colors) =>
         liveBadge: {
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: '#EF4444',
+            backgroundColor: theme.red[500],
             paddingHorizontal: 8,
             paddingVertical: 4,
             borderRadius: 6,
@@ -323,21 +323,21 @@ const getStyles = (theme: Colors) =>
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: '#FFFFFF',
+            backgroundColor: theme.white,
         },
         liveBadgeText: {
-            color: '#FFFFFF',
+            color: theme.white,
             fontSize: 10,
             fontWeight: '800',
         },
         infoBadge: {
-            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            backgroundColor: theme.cameraOverlay,
             paddingHorizontal: 10,
             paddingVertical: 4,
             borderRadius: 16,
         },
         infoBadgeText: {
-            color: '#FFFFFF',
+            color: theme.white,
             fontSize: 12,
             fontWeight: '500',
         },
@@ -354,7 +354,7 @@ const getStyles = (theme: Colors) =>
             width: 40,
             height: 40,
             borderRadius: 20,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backgroundColor: theme.cameraIconBg,
             justifyContent: 'center',
             alignItems: 'center',
         },
