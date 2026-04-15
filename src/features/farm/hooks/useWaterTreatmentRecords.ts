@@ -43,7 +43,12 @@ export const useWaterTreatmentDetail = (pondId: string | undefined, id: string |
 
 /** Fetch & transform water treatment records to JobExecution[] for LogScreen */
 export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTreatmentParams) => {
-    const { data: listData, isLoading, error, refetch } = useWaterTreatmentRecords(pondId, params);
+    const {
+        data: listData,
+        isLoading: isFetching,
+        error,
+        refetch,
+    } = useWaterTreatmentRecords(pondId, params);
 
     // Extract items from API response
     const responseData = listData?.data;
@@ -53,7 +58,7 @@ export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTr
 
     const jobs: JobExecution[] = waterTreatmentLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 // --- Mutation Hooks ---
@@ -88,8 +93,10 @@ export const useUpdateWaterTreatment = () => {
             id: string;
             data: UpdateWaterTreatmentCommand;
         }) => waterTreatmentApi.update(pondId, id, data),
-        onSuccess: (_, { pondId }) => {
+        onSuccess: (_, { pondId, id }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
+            // Invalidate detail cache so re-opening the form shows fresh data
+            queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.detail(id) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
             // Invalidate report charts
@@ -105,8 +112,10 @@ export const useDeleteWaterTreatment = () => {
     return useMutation({
         mutationFn: ({ pondId, id }: { pondId: string; id: string }) =>
             waterTreatmentApi.delete(pondId, id),
-        onSuccess: (_, { pondId }) => {
+        onSuccess: (_, { pondId, id }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
+            // Remove stale detail cache after deletion
+            queryClient.removeQueries({ queryKey: farmKeys.waterTreatment.detail(id) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
             // Invalidate report charts

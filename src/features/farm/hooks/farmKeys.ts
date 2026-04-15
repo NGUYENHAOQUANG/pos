@@ -130,4 +130,10 @@ export const farmKeys = {
     ai: {
         all: () => [...farmKeys.all, 'ai'] as const,
     },
+    scales: {
+        all: () => [...farmKeys.all, 'scales'] as const,
+        list: (params?: unknown) =>
+            [...farmKeys.scales.all(), 'list', ...(params ? [params] : [])] as const,
+        detail: (id: string) => [...farmKeys.scales.all(), 'detail', id] as const,
+    },
 };

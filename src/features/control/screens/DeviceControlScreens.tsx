@@ -21,7 +21,12 @@ import {
 import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
+import {
+    useNavigation,
+    useScrollToTop,
+    useFocusEffect,
+    useIsFocused,
+} from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { useDevices } from '@/features/control/hooks/useDevices';
@@ -84,7 +89,10 @@ export const DeviceControlScreens = () => {
     }, [pondsData]);
 
     // Device Data from React Query (API)
-    const { data: devicePonds = [], isRefetching: isRefetchingDevices } = useDevices();
+    const isFocused = useIsFocused();
+    const { data: devicePonds = [], isRefetching: isRefetchingDevices } = useDevices({
+        refetchInterval: isFocused ? 10000 : false,
+    });
 
     // Map zones to FarmLocation format
     const farmLocations: FarmLocation[] = useMemo(() => {

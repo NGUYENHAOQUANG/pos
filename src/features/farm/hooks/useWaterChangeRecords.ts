@@ -22,13 +22,7 @@ export const useWaterSupplyRecords = (pondId: string, params?: IWaterSupplyParam
 
 export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSupplyParams) => {
     // 1. Fetch List keys
-    const {
-        data: listData,
-        isLoading,
-        isFetching,
-        error,
-        refetch,
-    } = useWaterSupplyRecords(pondId, params);
+    const { data: listData, isFetching, error, refetch } = useWaterSupplyRecords(pondId, params);
 
     // 2. Determine IDs to fetch details for
     const responseData = listData?.data;
@@ -39,7 +33,7 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
     // Count daily items
     const jobs: JobExecution[] = waterChangeLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, isFetching, error, refetch };
+    return { jobs, isLoading: isFetching, isFetching, error, refetch };
 };
 
 export const useCreateWaterSupplyRecord = () => {

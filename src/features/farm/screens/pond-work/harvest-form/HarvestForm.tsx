@@ -1,30 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import { useForm, Controller } from 'react-hook-form';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
+import { useForm } from 'react-hook-form';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import {
-    GeneralInfoBox,
-    GeneralInfoBoxType,
-} from '@/features/farm/components/pondwork/GeneralInfoBox';
-import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
-
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
-import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { HarvestOverviewTab } from '@/features/farm/components/pondwork/harvest/HarvestOverviewTab';
+import { HarvestScaleTab } from '@/features/farm/components/pondwork/harvest/HarvestScaleTab';
+import { HarvestHistoryTab } from '@/features/farm/components/pondwork/harvest/HarvestHistoryTab';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import {
     HarvestFormData,
     harvestFormSchema,
     getHarvestTypeDisplay,
-    getHarvestTypeFromDisplay,
 } from '@/features/farm/schemas/harvestFormSchema';
 import { handleHarvestFormError } from '@/features/farm/utils/toastMessages';
+
+export enum HarvestFormTab {
+    OVERVIEW = 'overview',
+    SCALE = 'scale',
+    HISTORY = 'history',
+}
 
 export interface HarvestFormProps {
     initialData: HarvestFormData;
@@ -47,6 +50,7 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
     onBack,
     onCancel,
 }) => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const theme = useAppTheme();
     const styles = getStyles(theme);
     const {
@@ -66,6 +70,7 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
     }, [initialData, reset]);
 
     const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+    const [selectedTab, setSelectedTab] = useState<HarvestFormTab>(HarvestFormTab.OVERVIEW);
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -122,81 +127,41 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
                 }
             />
 
-            {/* Content */}
-            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={150}>
-                <Controller
-                    name="harvestType"
-                    control={control}
-                    render={({ field }) => (
-                        <GeneralInfoBox
-                            type={GeneralInfoBoxType.HARVEST}
-                            date={selectedDate}
-                            onDateChange={setSelectedDate}
-                            activityLabel="Chọn loại thu hoạch"
-                            activityOptions={harvestTypeOptions}
-                            selectedActivity={getHarvestTypeDisplay(field.value)}
-                            onSelectActivity={value => {
-                                field.onChange(getHarvestTypeFromDisplay(value));
-                            }}
-                            disabledDate={true}
-                        />
-                    )}
-                />
-
-                <Controller
-                    name="totalWeightKg"
-                    control={control}
-                    render={({ field: { value: yieldValue, onChange: onYieldChange } }) => (
-                        <Controller
-                            name="shrimpSize"
-                            control={control}
-                            render={({ field: { value: sizeValue, onChange: onSizeChange } }) => (
-                                <Controller
-                                    name="referencePrice"
-                                    control={control}
-                                    render={({
-                                        field: { value: priceValue, onChange: onPriceChange },
-                                    }) => (
-                                        <HarvestDataBox
-                                            yieldAmount={yieldValue || ''}
-                                            onYieldAmountChange={onYieldChange}
-                                            shrimpSize={sizeValue || ''}
-                                            onShrimpSizeChange={onSizeChange}
-                                            referencePrice={priceValue || ''}
-                                            onReferencePriceChange={onPriceChange}
-                                        />
-                                    )}
-                                />
-                            )}
-                        />
-                    )}
-                />
-
-                <Controller
-                    name="notes"
-                    control={control}
-                    render={({ field: { value, onChange } }) => (
-                        <SelectionNotesBox notes={value || ''} onNotesChange={onChange} />
-                    )}
-                />
-            </SafeInputLayout>
-
-            {/* Footer Buttons */}
-            <View style={styles.footer}>
-                <ButtonBarFarm
-                    primaryTitle={
-                        isEditMode
-                            ? 'Cập nhật thông tin'
-                            : harvestTypeDisplay === 'Thu hết'
-                            ? 'Thu hoạch hết'
-                            : 'Lưu thông tin'
-                    }
-                    secondaryTitle="Huỷ"
-                    primaryDisabled={isSubmitting || (isEditMode && !isDirty)}
-                    onPrimaryPress={handleSavePress}
-                    onSecondaryPress={onCancel}
+            <View style={styles.headingBarContainer}>
+                <HeadingBar
+                    tabs={[
+                        { key: HarvestFormTab.OVERVIEW, label: 'Tổng quan' },
+                        { key: HarvestFormTab.SCALE, label: 'Cân điện tử' },
+                        { key: HarvestFormTab.HISTORY, label: 'Lịch sử cân' },
+                    ]}
+                    selectedTab={selectedTab}
+                    onTabSelect={key => setSelectedTab(key as HarvestFormTab)}
+                    spreadTabs
                 />
             </View>
+
+            {/* Content Tabs */}
+            {selectedTab === HarvestFormTab.OVERVIEW && (
+                <HarvestOverviewTab
+                    control={control}
+                    selectedDate={selectedDate}
+                    setSelectedDate={setSelectedDate}
+                    harvestTypeOptions={harvestTypeOptions}
+                    isEditMode={isEditMode}
+                    isSubmitting={isSubmitting}
+                    isDirty={isDirty}
+                    harvestTypeDisplay={harvestTypeDisplay}
+                    onSavePress={handleSavePress}
+                    onCancel={onCancel}
+                />
+            )}
+            {selectedTab === HarvestFormTab.SCALE && (
+                <HarvestScaleTab
+                    onNavigateToHistory={() => setSelectedTab(HarvestFormTab.HISTORY)}
+                    onNavigateToAllScales={() => navigation.navigate('ScaleListScreen')}
+                />
+            )}
+            {selectedTab === HarvestFormTab.HISTORY && <HarvestHistoryTab />}
 
             {/* Confirmation Modal for full harvest */}
             <ConfirmationModalUI
@@ -227,14 +192,8 @@ const getStyles = (theme: Colors) =>
             flex: 1,
             backgroundColor: theme.backgroundPrimary,
         },
-        scrollContent: {
-            padding: 0,
-            paddingBottom: 100,
-            gap: 8,
-        },
-        footer: {
-            backgroundColor: theme.background,
-            borderTopWidth: 1,
-            borderTopColor: theme.defaultBorder,
+        headingBarContainer: {
+            paddingTop: 8,
+            paddingBottom: 12,
         },
     });

@@ -178,6 +178,12 @@ export const TOAST_MESSAGES_CONFIG = {
             text1: 'Không thể thay đổi lịch trình đã hoạt động',
         },
     },
+    SCALE: {
+        ADD_SUCCESS: {
+            type: 'success',
+            text1: 'Thêm cân thành công',
+        },
+    },
 } as const;
 
 /**
@@ -196,9 +202,6 @@ export const getHarvestSuccessMessage = (harvestType?: string): string => {
     }
 };
 
-/**
- * Show success toast message for adding a job
- */
 export const showAddJobSuccessToast = (jobType: JobType) => {
     const message = TOAST_MESSAGES_CONFIG.JOB[jobType]?.add || 'Đã thêm thành công';
     Toast.show({
@@ -269,10 +272,18 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
             text1: 'Vui lòng chọn thời gian',
             visibilityTime: 3000,
         });
-    } else {
+    } else if (errors.materials) {
+        // Individual material item errors (e.g. quantity < 0.0001)
         Toast.show({
             type: 'error',
             text1: 'Số lượng vật tư phải lớn hơn 0',
+            visibilityTime: 3000,
+        });
+    } else {
+        // Generic fallback for any other field errors
+        Toast.show({
+            type: 'error',
+            text1: 'Vui lòng kiểm tra lại thông tin',
             visibilityTime: 3000,
         });
     }

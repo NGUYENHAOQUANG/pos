@@ -1,6 +1,6 @@
 import { useAppTheme } from '@/styles/themeContext';
 import React from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 import { spacing } from '@/styles';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 
@@ -55,36 +55,67 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     };
 
     return (
-        <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            style={[styles.container, { backgroundColor: theme.background }]}
-        >
-            {items.map(item => (
-                <PondIndexCard
-                    key={item.id}
-                    item={item}
-                    variant={cardVariant}
-                    onPress={onToggleFilter ? () => onToggleFilter(item.id) : undefined}
-                    isActive={activeFilters ? activeFilters[item.id] !== false : true}
-                    tooltipValue={getTooltipValue(item.id)}
-                />
-            ))}
-        </ScrollView>
+        <View style={styles.wrapper}>
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                style={[styles.container, { backgroundColor: theme.background }]}
+            >
+                {items.map(item => (
+                    <PondIndexCard
+                        key={item.id}
+                        item={item}
+                        variant={cardVariant}
+                        onPress={onToggleFilter ? () => onToggleFilter(item.id) : undefined}
+                        isActive={activeFilters ? activeFilters[item.id] !== false : true}
+                        tooltipValue={getTooltipValue(item.id)}
+                    />
+                ))}
+            </ScrollView>
+
+            {/* Masks to visualy clip the scroll horizontally at the exact 16px padding edge, while leaving overflow: visible vertically for the tooltips */}
+            <View
+                style={[styles.maskLeft, { backgroundColor: theme.background }]}
+                pointerEvents="none"
+            />
+            <View
+                style={[styles.maskRight, { backgroundColor: theme.background }]}
+                pointerEvents="none"
+            />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    wrapper: {
+        position: 'relative',
+        zIndex: 10,
+    },
     container: {
         flexGrow: 0,
         overflow: 'visible',
-        zIndex: 10,
     },
     scrollContent: {
         flexDirection: 'row',
         gap: 4,
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
+    },
+    maskLeft: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: spacing.md,
+        zIndex: 20,
+    },
+    maskRight: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: spacing.md,
+        zIndex: 20,
     },
 });

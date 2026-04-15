@@ -14,8 +14,8 @@ import {
     subscribeToTopic as firebaseSubscribeToTopic,
     unsubscribeFromTopic as firebaseUnsubscribeFromTopic,
     AuthorizationStatus,
+    FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging';
-import type { RemoteMessage } from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, AndroidStyle } from '@notifee/react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
 
@@ -92,7 +92,9 @@ export function onTokenRefresh(callback: (token: string) => void): () => void {
  * @param callback - Called when a message arrives while app is in foreground
  * @returns Unsubscribe function
  */
-export function onForegroundMessage(callback: (message: RemoteMessage) => void): () => void {
+export function onForegroundMessage(
+    callback: (message: FirebaseMessagingTypes.RemoteMessage) => void
+): () => void {
     const messaging = getMessaging();
     return onMessage(messaging, callback);
 }
@@ -102,7 +104,9 @@ export function onForegroundMessage(callback: (message: RemoteMessage) => void):
  * @param callback - Called with the message that was tapped
  * @returns Unsubscribe function
  */
-export function onNotificationOpenedApp(callback: (message: RemoteMessage) => void): () => void {
+export function onNotificationOpenedApp(
+    callback: (message: FirebaseMessagingTypes.RemoteMessage) => void
+): () => void {
     const messaging = getMessaging();
     return firebaseOnNotificationOpenedApp(messaging, callback);
 }
@@ -111,7 +115,7 @@ export function onNotificationOpenedApp(callback: (message: RemoteMessage) => vo
  * Check if app was opened from a notification when it was in quit state
  * @returns The remote message or null
  */
-export async function getInitialNotification(): Promise<RemoteMessage | null> {
+export async function getInitialNotification(): Promise<FirebaseMessagingTypes.RemoteMessage | null> {
     const messaging = getMessaging();
     return firebaseGetInitialNotification(messaging);
 }
@@ -120,7 +124,9 @@ export async function getInitialNotification(): Promise<RemoteMessage | null> {
  * Display a remote FCM message as a local notification via Notifee
  * (Useful for foreground messages that won't auto-display)
  */
-export async function displayForegroundNotification(remoteMessage: RemoteMessage): Promise<void> {
+export async function displayForegroundNotification(
+    remoteMessage: FirebaseMessagingTypes.RemoteMessage
+): Promise<void> {
     const title = remoteMessage.notification?.title ?? 'Thông báo mới';
     const body = remoteMessage.notification?.body ?? '';
 

@@ -51,12 +51,12 @@ export const useSiphonDetail = (pondId?: string, siphonId?: string) => {
 };
 
 export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) => {
-    const { data, isLoading, error, refetch } = useSiphonRecords(pondId, params);
+    const { data, isFetching, error, refetch } = useSiphonRecords(pondId, params);
 
     const rawItems: ISiphonRecord[] = data?.data?.items || [];
     const jobs: JobExecution[] = siphonLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 export const useCreateSiphonRecord = () => {
     const queryClient = useQueryClient();

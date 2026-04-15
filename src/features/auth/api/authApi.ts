@@ -42,8 +42,12 @@ export const authApi = {
         return data;
     },
 
-    logout: async (refreshToken: string): Promise<void> => {
-        await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+    logout: async (payload: {
+        refreshToken: string;
+        logoutAllDevices?: boolean;
+        fcmToken?: string;
+    }): Promise<void> => {
+        await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, payload);
     },
 
     refreshToken: async (refreshToken: string): Promise<AuthResponse> => {

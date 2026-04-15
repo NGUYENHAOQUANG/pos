@@ -25,6 +25,7 @@ export interface PondDeviceStats {
     oxy: DeviceStat;
     syphon: DeviceStat;
     pump: DeviceStat;
+    wrapper: DeviceStat;
 }
 
 // Feeding Machine Specific Types
@@ -48,7 +49,7 @@ export interface DeviceData {
     mode: EControlMode;
     isOn: boolean;
     errorMessage?: string;
-    type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump';
+    type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' | 'wrapper';
     farmId?: string; // Add farmId for filtering
 
     // Extended properties for persistence

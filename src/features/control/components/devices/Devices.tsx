@@ -46,6 +46,8 @@ const getDeviceTypeLabel = (type: string): string => {
             return 'Syphon';
         case 'pump':
             return 'Máy bơm';
+        case 'wrapper':
+            return 'Thiết bị nhá';
         default:
             return type;
     }

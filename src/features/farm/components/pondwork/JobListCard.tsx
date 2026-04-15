@@ -12,6 +12,7 @@ interface JobData {
     title?: string;
     data?: string;
     items?: JobExecution[];
+    isLoading?: boolean;
 }
 
 interface JobListCardProps {
@@ -21,10 +22,6 @@ interface JobListCardProps {
     onEditJobItem?: (type: JobType, item: JobExecution) => void;
 }
 
-/**
- * Container component that wraps multiple JobCards in a white card
- * with optional date header inside the card
- */
 export const JobListCard: React.FC<JobListCardProps> = ({
     jobs,
     onPressJob,
@@ -50,6 +47,7 @@ export const JobListCard: React.FC<JobListCardProps> = ({
                         title={job.title}
                         data={job.data}
                         items={job.items}
+                        isLoading={job.isLoading}
                         onPress={() => onPressJob?.(job.type)}
                         onPressAdd={() => onPressAddJob?.(job.type)}
                         onEditItem={item => onEditJobItem?.(job.type, item)}
@@ -62,9 +60,7 @@ export const JobListCard: React.FC<JobListCardProps> = ({
 
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
-        container: {
-            // Removed white background to show individual job cards directly on screen background
-        },
+        container: {},
         listContainer: {
             paddingTop: spacing.sm,
             paddingHorizontal: 16,

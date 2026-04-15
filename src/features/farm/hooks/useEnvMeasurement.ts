@@ -132,7 +132,11 @@ export const useEnvMeasurementsAsJobs = (pondId: string, params?: IEnvMeasuremen
     }, [params]);
 
     // 2. Fetch data
-    const { data: response, isLoading, refetch } = useEnvMeasurements(pondId, queryParams);
+    const {
+        data: response,
+        isLoading: isFetching,
+        refetch,
+    } = useEnvMeasurements(pondId, queryParams);
 
     const { metricTypes } = useEnvironmentInit();
 
@@ -141,5 +145,5 @@ export const useEnvMeasurementsAsJobs = (pondId: string, params?: IEnvMeasuremen
         return envMeasurementLogService.mapRecordsToJobs(rawItems, metricTypes);
     }, [response?.data?.items, metricTypes]);
 
-    return { jobs, isLoading, refetch };
+    return { jobs, isLoading: isFetching, refetch };
 };

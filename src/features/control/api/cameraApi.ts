@@ -5,7 +5,7 @@ import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 // ===== Response Interfaces =====
 
 export type CameraLocationCategory = 'None' | 'GrowOutPond' | 'NurseryPond' | 'Infrastructure';
-export type CameraType = 'General' | 'FeedingTray' | 'Security';
+export type CameraType = 'General' | 'FeedingTray' | 'Security' | (string & {});
 
 /** Single camera item from GET /camera */
 export interface CameraItem {

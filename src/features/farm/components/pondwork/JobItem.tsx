@@ -23,6 +23,7 @@ import {
 } from '@/assets/icons';
 import Warning from '@/assets/Icon/Warning.svg';
 import PlusBlack from '@/assets/Icon/PlusBlack.svg';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
 
 export type JobType =
     | 'FEED'
@@ -114,6 +115,7 @@ interface JobCardProps {
     title?: string;
     data?: string;
     items?: JobExecution[];
+    isLoading?: boolean;
     onPress?: () => void;
     onPressAdd?: () => void;
     onEditItem?: (item: JobExecution) => void;
@@ -124,6 +126,7 @@ export const JobCard: React.FC<JobCardProps> = ({
     title,
     data = 'Chưa có dữ liệu.',
     items,
+    isLoading = false,
     onPress,
     onPressAdd,
     onEditItem,
@@ -174,11 +177,35 @@ export const JobCard: React.FC<JobCardProps> = ({
             </TouchableOpacity>
             <View style={styles.divider} />
             <View style={styles.body}>
-                {hasItems ? (
+                {isLoading ? (
                     <View style={styles.listContent}>
-                        {/* Always show total count */}
+                        <Skeleton
+                            width={60}
+                            height={16}
+                            borderRadius={4}
+                            style={{ marginBottom: 4 }}
+                        />
+                        {(items && items.length > 0 ? items.slice(0, 3) : [1, 2]).map(
+                            (_, index, arr) => (
+                                <React.Fragment key={index}>
+                                    <View style={styles.itemRow}>
+                                        <Skeleton
+                                            width={index === 1 ? '50%' : '70%'}
+                                            height={20}
+                                            borderRadius={4}
+                                        />
+                                        <Skeleton width={24} height={24} borderRadius={12} />
+                                    </View>
+                                    {arr.length > 1 && index < arr.length - 1 && (
+                                        <View style={styles.itemDivider} />
+                                    )}
+                                </React.Fragment>
+                            )
+                        )}
+                    </View>
+                ) : hasItems ? (
+                    <View style={styles.listContent}>
                         <Text style={styles.countText}>{items.length} lượt</Text>
-                        {/* Show only the first 3 items (latest ones) */}
                         {items.slice(0, 3).map((item, index, arr) => (
                             <React.Fragment key={item.id || index}>
                                 <View style={styles.itemRow}>

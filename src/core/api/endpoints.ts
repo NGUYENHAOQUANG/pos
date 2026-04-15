@@ -20,6 +20,15 @@ export const API_ENDPOINTS = {
         PROFILE: '/auth/me',
         UPDATE_PROFILE: '/auth/profile',
     },
+    MEMBER: {
+        LIST: '/auth/users',
+        DETAIL: (id: string) => `/auth/users/${id}`,
+        CREATE: '/auth/users',
+        UPDATE: (id: string) => `/auth/users/${id}`,
+        DELETE: (id: string) => `/auth/users/${id}`,
+        UPDATE_STATUS: (id: string) => `/auth/users/${id}/status`,
+        ROLES: '/auth/admin/roles',
+    },
     CAMERA: {
         LIST: '/camera',
         STREAM: (sn: string, isHd: boolean) => `/camera/${sn}/stream?isHd=${isHd}`,
@@ -155,6 +164,10 @@ export const API_ENDPOINTS = {
     CYCLE: {
         LIST: '/cycle',
     },
+    SCALE: {
+        LIST: '/scale',
+        DETAIL: (id: string) => `/scale/${id}`,
+    },
     // Materials
     MATERIAL: {
         LIST: '/material',
@@ -262,5 +275,10 @@ export const API_ENDPOINTS = {
     CHATBOT: {
         CHAT: '/api/v1/chat',
         INGEST: '/api/v1/ingest',
+    },
+    NOTIFICATION: {
+        DEVICE_TOKEN: '/notification/device-token',
+        LIST: '/notification',
+        READ: (id: string) => `/notification/${id}/read`,
     },
 } as const;

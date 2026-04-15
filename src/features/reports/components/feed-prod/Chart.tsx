@@ -192,7 +192,7 @@ export const Chart: React.FC<ChartProps> = ({
         getYAxisLabels(),
         val => (Math.round(val * 100) / 100).toString(),
         12,
-        16
+        24 // Tối ưu: Dựa vào bề ngang con số lớn nhất + margin 24px để tạo khoảng lấp cắt (overlay) tinh gọn vừa đủ
     );
 
     // Helper functions

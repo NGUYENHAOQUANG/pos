@@ -34,6 +34,7 @@ import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDet
 import { PondCycleListScreen } from '@/features/farm/screens/pond-cycle-list/PondCycleListScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pond-log/measure-shrimp-size-log/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pond-work/measure-shrimp-size-form/MeasureShrimpSizeScreen';
+import { ScaleListScreen } from '@/features/farm/screens/pond-work/scale-list/ScaleListScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/pond-work/handle-problem-form/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/pond-log/handle-problem-log/HandleProblemLogScreen';
 import { FeedingLogScreens } from '@/features/farm/screens/pond-log/feed-log/FeedingLogScreens';
@@ -61,6 +62,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 import { VideoPlayerScreen } from '@/features/control/screens/camera/VideoPlayerScreen';
 import { CategoryCameraListScreen } from '@/features/control/screens/camera/CategoryCameraListScreen';
 import { CameraDetailScreen } from '@/features/control/screens/camera/CameraDetailScreen';
+import { CustomWrapperScreen } from '@/features/control/screens/CustomWrapper/CustomWrapperScreen';
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
@@ -68,8 +70,8 @@ import { InformationFormScreen } from '@/features/menu/screens/informationForm/I
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
-import { MemberManagementScreens } from '@/features/menu/screens/member/MemberManagementScreens';
-import { AddMemberScreens } from '@/features/menu/screens/member/AddMemberScreens';
+import { MemberManagementScreens } from '@/features/menu/screens/member-list/MemberManagementScreens';
+import { AddMemberScreens } from '@/features/menu/screens/member-form/AddMemberScreens';
 import { DeviceManagement } from '@/features/menu/screens/devices/DeviceManagement';
 import { AddDeviceScreens } from '@/features/menu/screens/devices/AddDeviceScreens';
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
@@ -90,6 +92,7 @@ import { ShrimpPriceScreen } from '@/features/menu/screens/shrimp-price/ShrimpPr
 
 // Notifications
 import { useNotificationSetup } from '@/features/notifications';
+import { NotificationListScreen } from '@/features/notifications/screens/NotificationListScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
@@ -184,6 +187,7 @@ export type AppStackParamList = {
     };
     TransferLog: { pond: PondData };
     HarvestFormScreen: { pond: PondData; itemToEdit?: JobExecution };
+    ScaleListScreen: undefined;
     HarvestLog: { pond: PondData };
     CycleDetailScreen: { pondId: string; zoneId: string; warehouseId: string; cycleId: string };
     PondCycleListScreen: { pondId: string; zoneId: string; warehouseId: string };
@@ -223,6 +227,11 @@ export type AppStackParamList = {
     ConnectDevice: { pondName: string };
     CustomFeedingMachine: {
         initialMode: 'manual' | 'schedule';
+        deviceId: string;
+        pondName: string;
+        pondId: string;
+    };
+    CustomWrapper: {
         deviceId: string;
         pondName: string;
         pondId: string;
@@ -289,6 +298,7 @@ export type AppStackParamList = {
     PinSetup: { mode?: 'create' | 'change' | 'disable' | 'remove' };
     Chatbot: undefined;
     Ingest: undefined;
+    NotificationList: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -348,6 +358,7 @@ export const AppStack: React.FC = () => {
                 <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
                 <Stack.Screen name="StockTransferFormScreen" component={StockTransferFormScreen} />
                 <Stack.Screen name="HarvestFormScreen" component={HarvestFormScreen} />
+                <Stack.Screen name="ScaleListScreen" component={ScaleListScreen} />
                 <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
                 <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
                 <Stack.Screen name="PondCycleListScreen" component={PondCycleListScreen} />
@@ -370,6 +381,7 @@ export const AppStack: React.FC = () => {
                     component={CustomFeedingMachine}
                     options={{ gestureEnabled: false }}
                 />
+                <Stack.Screen name="CustomWrapper" component={CustomWrapperScreen} />
                 <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
                 <Stack.Screen name="History" component={HistoryActivitieScreens} />
                 <Stack.Screen name="UserManual" component={UserManualScreens} />
@@ -425,6 +437,7 @@ export const AppStack: React.FC = () => {
                 <Stack.Screen name="Chatbot" component={ChatbotScreen} />
                 <Stack.Screen name="Ingest" component={IngestScreen} />
                 <Stack.Screen name="ShrimpPrice" component={ShrimpPriceScreen} />
+                <Stack.Screen name="NotificationList" component={NotificationListScreen} />
             </Stack.Navigator>
 
             {/* Chatbot FAB - overlays all screens */}
