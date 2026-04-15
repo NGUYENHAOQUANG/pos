@@ -14,7 +14,12 @@ import { handleError } from '@/shared/utils/errorHandler';
  * Hook to fetch shrimp health checks as JobExecution list (for cards)
  */
 export const useShrimpHealthChecksAsJobs = (pondId: string, params?: IShrimpHealthListParams) => {
-    const { data, isLoading, error, refetch } = useQuery({
+    const {
+        data,
+        isLoading: isFetching,
+        error,
+        refetch,
+    } = useQuery({
         queryKey: [...farmKeys.shrimpHealthChecks.byPond(pondId), params],
         queryFn: async () => {
             if (!pondId) {
@@ -33,7 +38,7 @@ export const useShrimpHealthChecksAsJobs = (pondId: string, params?: IShrimpHeal
         pondId: pondId, // enforce pondId
     }));
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useCreateShrimpHealthCheck = () => {

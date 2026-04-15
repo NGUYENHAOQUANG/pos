@@ -18,12 +18,12 @@ export const useCleanRenovations = (pondId: string, params?: ICleanRenovationPar
 };
 
 export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovationParams) => {
-    const { data, isLoading, error, refetch } = useCleanRenovations(pondId, params);
+    const { data, isFetching, error, refetch } = useCleanRenovations(pondId, params);
 
     const rawItems = data?.data?.items || [];
     const jobs: JobExecution[] = cleanRenovationLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useCreateCleanRenovation = () => {

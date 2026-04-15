@@ -30,7 +30,7 @@ export const useStockTransfers = (pondId: string, params?: GetStockTransfersPara
 };
 
 export const useStockTransfersAsJobs = (pondId: string, params?: GetStockTransfersParams) => {
-    const { data, isLoading, error, refetch } = useStockTransfers(pondId, params);
+    const { data, isFetching, error, refetch } = useStockTransfers(pondId, params);
 
     const jobs = useMemo((): JobExecution[] => {
         if (!data?.items) return [];
@@ -46,7 +46,7 @@ export const useStockTransfersAsJobs = (pondId: string, params?: GetStockTransfe
         });
     }, [data]);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useStockTransferDetail = (pondId: string, id: string) => {

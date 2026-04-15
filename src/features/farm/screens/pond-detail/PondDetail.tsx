@@ -57,7 +57,6 @@ export const PondDetail: React.FC<PondDetailProps> = ({
     setSelectedTab,
     isLoading,
     isLoadingCycle,
-    isRefetchingCycles,
     refreshing,
     onRefresh,
     currentCycle,
@@ -124,7 +123,7 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                             />
                         }
                     >
-                        {isLoading || isRefetchingCycles ? (
+                        {isLoading || isLoadingCycle || refreshing ? (
                             <PondJobSkeleton />
                         ) : (
                             <>

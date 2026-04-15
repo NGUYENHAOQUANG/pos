@@ -38,7 +38,9 @@ export const StockTransferFormScreen: React.FC = () => {
 
     const { pondId, cycleId, warehouseId } = route.params || {};
 
-    const { data: pondsByZoneData } = useAllPondsByZone(zoneId!);
+    const { data: pondsByZoneData } = useAllPondsByZone(zoneId!, {
+        CanStockTransfer: true,
+    });
     const { data: categoriesResponse } = usePondCategories();
     const { data: sizeMeasurementsData, isLoading: isSizeMeasurementsLoading } =
         useSizeMeasurements(pondId);

@@ -1,5 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    FlatList,
+    ActivityIndicator,
+    TouchableOpacity,
+    ScrollView,
+} from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
@@ -7,6 +16,7 @@ import { Colors } from '@/styles/colors';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { WorkLogSkeleton } from '@/features/farm/components/skeleton/WorkLogSkeleton';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
@@ -36,19 +46,25 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+    const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isRefetching } =
         usePondRecordGroups(pond?.id || '', {
             startDate,
             endDate,
             operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
         });
 
+    const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const onRefresh = useCallback(async () => {
         setIsRefreshing(true);
-        await refetch();
-        setIsRefreshing(false);
-    }, [refetch]);
+        try {
+            await queryClient.invalidateQueries({
+                queryKey: farmKeys.pondRecords.list(pond?.id || ''),
+            });
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [queryClient, pond?.id]);
 
     const handleLoadMore = useCallback(() => {
         if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -167,10 +183,15 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 </View>
             </View>
 
-            {isLoading && !hasData ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={theme.primary} />
-                </View>
+            {isLoading || (isRefetching && isRefreshing) || (hasData && isRefetching) ? (
+                <ScrollView
+                    style={{ flex: 1 }}
+                    refreshControl={
+                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+                    }
+                >
+                    <WorkLogSkeleton />
+                </ScrollView>
             ) : hasData ? (
                 <FlatList
                     data={groupedLogs}

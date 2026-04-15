@@ -24,13 +24,13 @@ export const useFeedingRecords = (pondId: string, params?: FeedingRecordListPara
 };
 
 export const useFeedingRecordsAsJobs = (pondId: string, params?: FeedingRecordListParams) => {
-    const { data, isLoading, error, refetch } = useFeedingRecords(pondId, params);
+    const { data, isFetching, error, refetch } = useFeedingRecords(pondId, params);
 
     const rawItems: FeedingRecordItem[] = data?.data?.items ?? [];
 
     const jobs: JobExecution[] = feedingLogService.mapRecordsToJobs(rawItems);
 
-    return { jobs, isLoading, error, refetch };
+    return { jobs, isLoading: isFetching, error, refetch };
 };
 
 export const useCreateFeedingRecord = () => {

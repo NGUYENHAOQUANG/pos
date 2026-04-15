@@ -8,7 +8,8 @@ import { spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import DeleteBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
 import { IconError } from '@/assets/icons';
-import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { DropdownPondItem } from '@/features/farm/components/DropdownPondItem';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { Input, RequiredDot } from '@/shared/components/forms/Input';
 
@@ -41,6 +42,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
+
     // Calculate total quantity from all rows
     const totalQuantity = useMemo(() => {
         return receivingPonds.reduce((sum, pond) => {
@@ -190,16 +192,13 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                                     </View>
                                 )}
                                 <View style={{ position: 'relative', zIndex: 10 }}>
-                                    <DropDownButtonBasic
-                                        data={availableOptions}
-                                        value={availableOptions.find(
-                                            o => String(o.id) === pond.receivingPond
-                                        )}
-                                        onSelect={item => {
-                                            handleReceivingPondSelect(pond.id, String(item.id));
+                                    <DropdownPondItem
+                                        value={pond.receivingPond}
+                                        onChange={id => {
+                                            handleReceivingPondSelect(pond.id, id);
                                         }}
-                                        placeholder="Chọn"
-                                        showIcon={false}
+                                        placeholder="Chọn "
+                                        options={availableOptions}
                                     />
                                 </View>
                             </View>

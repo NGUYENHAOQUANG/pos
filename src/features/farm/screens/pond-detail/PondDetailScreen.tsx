@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
@@ -41,6 +42,7 @@ type ScreenRouteProp = RouteProp<AppStackParamList, 'PondDetail'>;
 export const PondDetailScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
+    const queryClient = useQueryClient();
     const { pondId, zoneId } = route.params || {};
 
     useEffect(() => {
@@ -66,18 +68,24 @@ export const PondDetailScreen: React.FC = () => {
         return pondListService.mapPondsWithCategories([pondFromApi], categories)[0] || pondFromApi;
     }, [pondFromApi, categories]);
 
-    const { jobs: apiMeasureSizeJobs } = useSizeMeasurementsAsJobs(pondId);
-    const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pondId);
-    const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pondId);
-    const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pondId);
-    const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pondId);
-    const { jobs: apiCleanRenovationJobs } = useCleanRenovationsAsJobs(pondId);
-    const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pondId);
-    const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pondId);
-    const { jobs: apiWaterTreatmentJobs } = useWaterTreatmentRecordsAsJobs(pondId);
-    const { jobs: apiFeedingJobs } = useFeedingRecordsAsJobs(pondId);
-    const { jobs: apiHarvestJobs } = useHarvestRecordsAsJobs(pondId);
-    const { jobs: apiTransferJobs } = useStockTransfersAsJobs(pondId);
+    const { jobs: apiMeasureSizeJobs, isLoading: isLoadingMeasureSize } =
+        useSizeMeasurementsAsJobs(pondId);
+    const { jobs: apiShrimpInspectionJobs, isLoading: isLoadingShrimpInspection } =
+        useShrimpHealthChecksAsJobs(pondId);
+    const { jobs: apiSiphonJobs, isLoading: isLoadingSiphon } = useSiphonRecordsAsJobs(pondId);
+    const { jobs: apiEnvJobs, isLoading: isLoadingEnv } = useEnvMeasurementsAsJobs(pondId);
+    const { jobs: apiIncidentJobs, isLoading: isLoadingIncident } = useIncidentsAsJobs(pondId);
+    const { jobs: apiCleanRenovationJobs, isLoading: isLoadingCleanRenovation } =
+        useCleanRenovationsAsJobs(pondId);
+    const { jobs: apiDryRenovationJobs, isLoading: isLoadingDryRenovation } =
+        useDryRenovationsAsJobs(pondId);
+    const { jobs: apiWaterSupplyJobs, isLoading: isLoadingWaterSupply } =
+        useWaterSupplyRecordsAsJobs(pondId);
+    const { jobs: apiWaterTreatmentJobs, isLoading: isLoadingWaterTreatment } =
+        useWaterTreatmentRecordsAsJobs(pondId);
+    const { jobs: apiFeedingJobs, isLoading: isLoadingFeeding } = useFeedingRecordsAsJobs(pondId);
+    const { jobs: apiHarvestJobs, isLoading: isLoadingHarvest } = useHarvestRecordsAsJobs(pondId);
+    const { jobs: apiTransferJobs, isLoading: isLoadingTransfer } = useStockTransfersAsJobs(pondId);
 
     let pondTypeId: string | null = null;
     if (pond?.type) {
@@ -111,7 +119,29 @@ export const PondDetailScreen: React.FC = () => {
             [JOB_TYPES.TRANSFER_POND]: apiTransferJobs,
         };
 
-        return pondDetailService.mapJobsWithPriorities(pondOperations, apiItemsByJobType);
+        const loadingByJobType: Partial<Record<JobType, boolean>> = {
+            [JOB_TYPES.FEED]: isLoadingFeeding,
+            [JOB_TYPES.MEASURE_SIZE]: isLoadingMeasureSize,
+            [JOB_TYPES.SHRIMP_INSPECTION]: isLoadingShrimpInspection,
+            [JOB_TYPES.SIPHON]: isLoadingSiphon,
+            [JOB_TYPES.ENVIRONMENT]: isLoadingEnv,
+            [JOB_TYPES.TROUBLESHOOTING]: isLoadingIncident,
+            [JOB_TYPES.CLEAN_POND]: isLoadingCleanRenovation,
+            [JOB_TYPES.SUN_DRY_POND]: isLoadingDryRenovation,
+            [JOB_TYPES.WATER_CHANGE]: isLoadingWaterSupply,
+            [JOB_TYPES.WATER_TREATMENT]: isLoadingWaterTreatment,
+            [JOB_TYPES.HARVEST]: isLoadingHarvest,
+            [JOB_TYPES.TRANSFER_POND]: isLoadingTransfer,
+        };
+
+        return pondDetailService
+            .mapJobsWithPriorities(pondOperations, apiItemsByJobType)
+            .map(job => {
+                return {
+                    ...job,
+                    isLoading: loadingByJobType[job.type as JobType] || false,
+                };
+            });
     }, [
         pondTypeId,
         pondOperations,
@@ -127,6 +157,18 @@ export const PondDetailScreen: React.FC = () => {
         apiWaterTreatmentJobs,
         apiHarvestJobs,
         apiTransferJobs,
+        isLoadingFeeding,
+        isLoadingMeasureSize,
+        isLoadingShrimpInspection,
+        isLoadingSiphon,
+        isLoadingEnv,
+        isLoadingIncident,
+        isLoadingCleanRenovation,
+        isLoadingDryRenovation,
+        isLoadingWaterSupply,
+        isLoadingWaterTreatment,
+        isLoadingHarvest,
+        isLoadingTransfer,
     ]);
 
     const warehouseId = useFarmStore(state => state.currentWarehouseId);
@@ -164,13 +206,16 @@ export const PondDetailScreen: React.FC = () => {
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            await refetchCycles();
+            await Promise.all([
+                refetchCycles(),
+                queryClient.invalidateQueries(), // Invalidate all active queries to force refetching everything
+            ]);
         } catch (error) {
             console.error('Refresh failed:', error);
         } finally {
             setRefreshing(false);
         }
-    }, [refetchCycles]);
+    }, [refetchCycles, queryClient]);
 
     const handleTransferPond = useCallback(() => {
         if (!pond || !pond.id) return;

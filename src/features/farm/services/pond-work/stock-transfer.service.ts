@@ -31,6 +31,14 @@ export const stockTransferService = {
         return allPonds
             .filter(p => {
                 if (p.id === currentPondId) return false;
+
+                // Exclude ponds that already have an active cycle
+                if (p.cyclePond != null) return false;
+
+                if (typeof p.canStockTransfer === 'boolean') {
+                    return p.canStockTransfer;
+                }
+
                 const typeName = getPondTypeName(p);
                 return typeName ? allowedTypes.includes(typeName) : false;
             })

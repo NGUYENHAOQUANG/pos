@@ -98,5 +98,6 @@ export const usePondRecordGroups = (
         fetchNextPage: query.fetchNextPage,
         hasNextPage: query.hasNextPage ?? false,
         isFetchingNextPage: query.isFetchingNextPage,
+        isRefetching: query.isRefetching,
     };
 };
