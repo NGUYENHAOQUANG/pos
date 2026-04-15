@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useNavigation } from '@react-navigation/native';
@@ -36,27 +36,21 @@ export const CustomWrapperScreen: React.FC = () => {
 
     const { data: cameras = [], isLoading: isLoadingCameras } = useCameras();
 
-    const validCamera =
-        cameras.find(
-            cam =>
-                cam.name?.toLowerCase() !== 'default' && cam.deviceCode?.toLowerCase() !== 'default'
-        ) || cameras[0];
+    // Filter cameras by pond, prioritize FeedingTray type for wrapper device
+    const activeCamera = useMemo(() => {
+        const pondCameras = cameras.filter(cam => cam.pondName === pondName);
+        return pondCameras.find(cam => cam.cameraType === 'FeedingTray') ?? pondCameras[0] ?? null;
+    }, [cameras, pondName]);
 
-    const mockFallbackItem: CameraItem = {
-        deviceCode: `CAM-${pondName.replace('Ao ', '')}-A`,
-        name: pondName,
-        status: 'On',
-        snapshotUrl: '',
-    } as CameraItem;
-
-    const activeCamera: CameraItem = validCamera || mockFallbackItem;
-
-    const cameraInfo = {
-        code: activeCamera.deviceCode || `CAM-${pondName.replace('Ao ', '')}-A`,
-        area: activeCamera.name || pondName,
-        status: activeCamera.status === 'On' ? 'Online' : 'Offline',
-        time: pondName,
-    };
+    const cameraInfo = useMemo(() => {
+        if (!activeCamera) return null;
+        return {
+            code: activeCamera.deviceCode,
+            area: activeCamera.name || pondName,
+            status: activeCamera.status === 'On' ? 'Online' : 'Offline',
+            time: pondName,
+        };
+    }, [activeCamera, pondName]);
 
     const isRaised = false;
 
@@ -75,7 +69,6 @@ export const CustomWrapperScreen: React.FC = () => {
 
         try {
             await new Promise<void>(resolve => setTimeout(() => resolve(), 1500));
-
             Toast.show({
                 type: 'success',
                 text1: 'Thành công',
@@ -91,6 +84,35 @@ export const CustomWrapperScreen: React.FC = () => {
         }
     }, [action, isExecuting, navigation]);
 
+    const handleCameraPress = useCallback(
+        async (camera: CameraItem) => {
+            try {
+                const isHd = await checkNetworkForHD();
+                const response = await cameraApi.getStream(camera.deviceCode, isHd);
+                const streamData = response.data?.data;
+                if (!streamData?.url) {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Lỗi',
+                        text2: 'Không lấy được URL stream',
+                    });
+                    return;
+                }
+
+                navigation.navigate('CameraPlayer', {
+                    videoUrl: streamData.url,
+                    cameraName: camera.name,
+                    pondName: pondName,
+                    isHd: isHd,
+                    deviceCode: camera.deviceCode,
+                });
+            } catch (err) {
+                handleError(err);
+            }
+        },
+        [navigation, pondName]
+    );
+
     const handleCancel = useCallback(() => {
         navigation.goBack();
     }, [navigation]);
@@ -104,7 +126,7 @@ export const CustomWrapperScreen: React.FC = () => {
                 contentContainerStyle={staticStyles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {isLoadingCameras ? (
+                {isLoadingCameras || !activeCamera ? (
                     <Skeleton
                         width={'100%'}
                         height={200}
@@ -112,79 +134,54 @@ export const CustomWrapperScreen: React.FC = () => {
                         style={{ marginBottom: spacing.sm }}
                     />
                 ) : (
-                    <CameraCard
-                        camera={activeCamera}
-                        onPress={async (camera: CameraItem) => {
-                            try {
-                                const isHd = await checkNetworkForHD();
-                                const response = await cameraApi.getStream(camera.deviceCode, isHd);
-                                const streamData = response.data?.data;
-                                if (!streamData?.url) {
-                                    Toast.show({
-                                        type: 'error',
-                                        text1: 'Lỗi',
-                                        text2: 'Không lấy được URL stream',
-                                    });
-                                    return;
-                                }
-
-                                navigation.navigate('CameraPlayer', {
-                                    videoUrl: streamData.url,
-                                    cameraName: camera.name,
-                                    pondName: pondName,
-                                    isHd: isHd,
-                                    deviceCode: camera.deviceCode,
-                                });
-                            } catch (err) {
-                                handleError(err);
-                            }
-                        }}
-                    />
+                    <CameraCard camera={activeCamera} onPress={handleCameraPress} />
                 )}
 
-                <View style={styles.cameraInfoCard}>
-                    <View style={staticStyles.infoItem}>
-                        <Text style={styles.infoLabel}>Mã cam</Text>
-                        <Text style={styles.infoValue}>{cameraInfo.code}</Text>
-                    </View>
-                    <View style={staticStyles.infoItem}>
-                        <Text style={styles.infoLabel}>Khu vực</Text>
-                        <Text style={styles.infoValue}>{cameraInfo.area}</Text>
-                    </View>
-                    <View style={staticStyles.infoItem}>
-                        <Text style={styles.infoLabel}>Trạng thái</Text>
-                        <View style={staticStyles.statusRow}>
-                            <View
-                                style={[
-                                    staticStyles.statusDot,
-                                    {
-                                        backgroundColor:
-                                            cameraInfo.status === 'Online'
-                                                ? theme.status.activeText
-                                                : theme.status.warningText,
-                                    },
-                                ]}
-                            />
-                            <Text
-                                style={[
-                                    styles.statusOnlineText,
-                                    {
-                                        color:
-                                            cameraInfo.status === 'Online'
-                                                ? theme.status.activeText
-                                                : theme.status.warningText,
-                                    },
-                                ]}
-                            >
-                                {cameraInfo.status}
-                            </Text>
+                {cameraInfo && (
+                    <View style={styles.cameraInfoCard}>
+                        <View style={staticStyles.infoItem}>
+                            <Text style={styles.infoLabel}>Mã cam</Text>
+                            <Text style={styles.infoValue}>{cameraInfo.code}</Text>
+                        </View>
+                        <View style={staticStyles.infoItem}>
+                            <Text style={styles.infoLabel}>Khu vực</Text>
+                            <Text style={styles.infoValue}>{cameraInfo.area}</Text>
+                        </View>
+                        <View style={staticStyles.infoItem}>
+                            <Text style={styles.infoLabel}>Trạng thái</Text>
+                            <View style={staticStyles.statusRow}>
+                                <View
+                                    style={[
+                                        staticStyles.statusDot,
+                                        {
+                                            backgroundColor:
+                                                cameraInfo.status === 'Online'
+                                                    ? theme.status.activeText
+                                                    : theme.status.warningText,
+                                        },
+                                    ]}
+                                />
+                                <Text
+                                    style={[
+                                        styles.statusOnlineText,
+                                        {
+                                            color:
+                                                cameraInfo.status === 'Online'
+                                                    ? theme.status.activeText
+                                                    : theme.status.warningText,
+                                        },
+                                    ]}
+                                >
+                                    {cameraInfo.status}
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={staticStyles.infoItem}>
+                            <Text style={styles.infoLabel}>Thời gian</Text>
+                            <Text style={styles.infoValue}>{cameraInfo.time}</Text>
                         </View>
                     </View>
-                    <View style={staticStyles.infoItem}>
-                        <Text style={styles.infoLabel}>Thời gian</Text>
-                        <Text style={styles.infoValue}>{cameraInfo.time}</Text>
-                    </View>
-                </View>
+                )}
 
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Cấu hình máy</Text>
