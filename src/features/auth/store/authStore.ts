@@ -10,7 +10,7 @@ import { Storage } from '@/core/services/storage.service';
 import { authApi } from '@/features/auth/api/authApi';
 import { decodeToken } from '@/core/utils/jwt';
 import { useNotificationStore } from '@/features/notifications/store/notificationStore';
-import { unregisterDeviceToken } from '@/features/notifications/services/deviceTokenApi';
+import { unregisterDeviceToken } from '@/features/notifications/api/notification.api';
 import {
     AuthUser,
     LoginCredentials,

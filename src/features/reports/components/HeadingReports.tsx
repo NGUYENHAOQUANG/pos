@@ -32,6 +32,7 @@ export const HeadingReports = ({
     farmData,
     selectedFarm,
     onSelectFarm,
+    onRightPress,
     // pondTypeData and selectedPondType are hidden in the new UI but kept in props for state compatibility
     pondData,
     selectedPond,
@@ -59,8 +60,7 @@ export const HeadingReports = ({
                         styles.notificationButton,
                         { backgroundColor: theme.background, borderColor: theme.borderDark },
                     ]}
-                    // TODO: Navigate to notification screen
-                    onPress={() => {}}
+                    onPress={onRightPress}
                 >
                     <Ionicons name="notifications-outline" size={20} color={theme.text} />
                 </TouchableOpacity>
