@@ -21,6 +21,11 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { cameraApi } from '@/features/control/api/cameraApi';
 import { useCameras } from '@/features/control/hooks/useCameras';
 import { checkNetworkForHD } from '@/shared/utils/networkUtils';
+import {
+    getLocationCategoryName,
+    getCameraStatusColor,
+    getCameraStatusText,
+} from '@/features/control/utils/cameraUtils';
 import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
 import FullscreenIcon from '@/assets/Icon/IconDevices/Fullscreen.svg';
 // import PlayButtonIcon from '@/assets/Icon/IconDevices/Playbutton.svg';
@@ -118,34 +123,6 @@ export const CameraDetailScreen: React.FC = () => {
         }
     };
 
-    const getStatusColor = () => {
-        switch (camera.status) {
-            case 'On':
-                return theme.green[600];
-            case 'Off':
-                return theme.red[600];
-            case 'Fault':
-                return theme.orange[600];
-            default:
-                return theme.red[600];
-        }
-    };
-
-    const getStatusText = () => {
-        switch (camera.status) {
-            case 'On':
-                return 'Online';
-            case 'Off':
-                return 'Offline';
-            case 'Fault':
-                return 'Kết nối thất bại';
-            case 'Connecting':
-                return 'Đang kết nối';
-            default:
-                return camera.status || 'Offline';
-        }
-    };
-
     return (
         <View style={[styles.container, { backgroundColor: theme.backgroundPrimary }]}>
             <HeaderSection title={camera.name} onBack={() => navigation.goBack()} />
@@ -201,10 +178,12 @@ export const CameraDetailScreen: React.FC = () => {
                                 </View>
                             )}
                             <View style={styles.infoBadge}>
-                                <Text style={styles.infoBadgeText}>{camera.pondName}</Text>
+                                <Text style={styles.infoBadgeText}>{camera.deviceCode}</Text>
                             </View>
                             <View style={styles.infoBadge}>
-                                <Text style={styles.infoBadgeText}>{camera.name}</Text>
+                                <Text style={styles.infoBadgeText}>
+                                    {getLocationCategoryName(camera.locationCategory)}
+                                </Text>
                             </View>
                         </View>
 
@@ -237,7 +216,7 @@ export const CameraDetailScreen: React.FC = () => {
                                 numberOfLines={1}
                                 adjustsFontSizeToFit
                             >
-                                {camera.modelCode}
+                                {camera.deviceCode}
                             </Text>
                         </View>
                         <View style={[styles.infoColumn, { width: '35%', paddingLeft: 8 }]}>
@@ -258,11 +237,21 @@ export const CameraDetailScreen: React.FC = () => {
                                 <View
                                     style={[
                                         styles.statusDot,
-                                        { backgroundColor: getStatusColor() },
+                                        {
+                                            backgroundColor: getCameraStatusColor(
+                                                camera.status,
+                                                theme
+                                            ),
+                                        },
                                     ]}
                                 />
-                                <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                                    {getStatusText()}
+                                <Text
+                                    style={[
+                                        styles.statusText,
+                                        { color: getCameraStatusColor(camera.status, theme) },
+                                    ]}
+                                >
+                                    {getCameraStatusText(camera.status)}
                                 </Text>
                             </View>
                         </View>
