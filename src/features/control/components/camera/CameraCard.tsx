@@ -133,7 +133,7 @@ export const CameraCard: React.FC<CameraCardProps> = ({
                 {/* Camera name and SN overlaid natively over image */}
                 <View style={styles.placeholderBadgesRow}>
                     <Text style={styles.placeholderBadgeText} numberOfLines={1}>
-                        {camera.modelCode}
+                        {camera.deviceCode}
                     </Text>
                     <Text style={styles.placeholderBadgeText} numberOfLines={1}>
                         {camera.name}

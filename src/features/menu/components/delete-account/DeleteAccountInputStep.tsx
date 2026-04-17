@@ -234,7 +234,11 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                         mode="single"
                         primaryTitle="Tiếp tục"
                         onPrimaryPress={handleSubmit(onSubmit)}
-                        containerStyle={{ paddingBottom: 0, paddingTop: 0 }}
+                        containerStyle={{
+                            paddingBottom: 0,
+                            paddingTop: 0,
+                            backgroundColor: theme.backgroundPrimary,
+                        }}
                     />
                 </KeyboardStickyView>
             </View>
@@ -317,5 +321,6 @@ const getStyles = (theme: Colors) =>
         footer: {
             paddingTop: spacing.xs,
             paddingBottom: spacing.md,
+            backgroundColor: theme.backgroundPrimary,
         },
     });
