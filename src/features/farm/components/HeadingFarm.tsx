@@ -4,6 +4,8 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { PondData, PondType } from '@/features/farm/types/farm.types';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
+import { useIsOnboardingActive } from '@/features/walkthrough/store/useOnboardingStore';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 export interface TabItem {
     key: string;
@@ -61,6 +63,23 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
     ];
 
     const tabs = customTabs || (tabType === 'pond-detail' ? pondDetailTabs : dashboardTabs);
+    const isOnboardingActive = useIsOnboardingActive();
+    const showTabOnboarding = tabType === 'dashboard' && isOnboardingActive;
+
+    const headingBar = (
+        <View collapsable={false} style={{ width: '100%' }}>
+            <HeadingBar
+                tabs={tabs}
+                selectedTab={selectedTab}
+                onTabSelect={onTabSelect}
+                flexTabs={fullWidth}
+                containerStyle={{
+                    paddingBottom: 16,
+                    paddingTop: tabType === 'dashboard' ? 0 : 16,
+                }}
+            />
+        </View>
+    );
 
     return (
         <View>
@@ -81,16 +100,13 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
                     menuOptions={menuOptions}
                 />
             )}
-            <HeadingBar
-                tabs={tabs}
-                selectedTab={selectedTab}
-                onTabSelect={onTabSelect}
-                flexTabs={fullWidth}
-                containerStyle={{
-                    paddingBottom: 16,
-                    paddingTop: tabType === 'dashboard' ? 0 : 16,
-                }}
-            />
+            {showTabOnboarding ? (
+                <OnboardingStep step="STATUS_TABS" wrapperStyle={{ width: '100%' }}>
+                    {headingBar}
+                </OnboardingStep>
+            ) : (
+                headingBar
+            )}
         </View>
     );
 };

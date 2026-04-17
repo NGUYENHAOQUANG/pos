@@ -33,6 +33,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 
 interface ProfileCardProps {
     onPress: () => void;
@@ -87,6 +88,7 @@ export const MenuScreens: React.FC = () => {
     };
 
     const logout = useAuthStore(state => state.logout);
+    const { resetOnboarding } = useOnboardingStore();
 
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
@@ -153,6 +155,24 @@ export const MenuScreens: React.FC = () => {
             title: 'Cài đặt',
             Icon: GearIcon,
             onPress: () => navigation.navigate('Settings'),
+        },
+        {
+            id: 'tutorial-farm',
+            title: 'Hướng dẫn sử dụng Trại nuôi',
+            Icon: ArticleIcon,
+            onPress: () => {
+                resetOnboarding('farm');
+                navigation.navigate('Farm' as never);
+            },
+        },
+        {
+            id: 'tutorial-material',
+            title: 'Hướng dẫn Kho Vật tư',
+            Icon: ArticleIcon,
+            onPress: () => {
+                resetOnboarding('material');
+                navigation.navigate('Material' as never);
+            },
         },
     ];
 

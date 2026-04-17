@@ -16,6 +16,7 @@ import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpP
 import { useWeatherForecast } from '@/features/weather/hooks/useWeatherForecast';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 import { useWeatherStore } from '@/features/weather/store/weatherStore';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -102,6 +103,24 @@ export const ShrimpPondListScreens: React.FC = () => {
             }
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);
+
+    const { hasCompletedFarm, startOnboarding, _hasHydrated } = useOnboardingStore();
+    useEffect(() => {
+        const isReadyToStart = _hasHydrated && !isLoadingZones && !!selectedZoneId && !isLoadingAll;
+        if (isReadyToStart && !hasCompletedFarm) {
+            const timer = setTimeout(() => {
+                startOnboarding('farm');
+            }, 500); // Add a small delay for better UX
+            return () => clearTimeout(timer);
+        }
+    }, [
+        _hasHydrated,
+        hasCompletedFarm,
+        isLoadingZones,
+        selectedZoneId,
+        isLoadingAll,
+        startOnboarding,
+    ]);
 
     const farmOptions: DropDownItem[] = useMemo(
         () => pondListService.mapZonesToOptions(zones),

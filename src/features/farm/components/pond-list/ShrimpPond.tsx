@@ -14,6 +14,7 @@ import {
     ActionMenuItem,
     ActionMenuPosition,
 } from '@/shared/components/buttons/ActionMenuButton';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 // Old imports — kept for reference
 // import { useCurrentShrimpBreed } from '@/features/material/hooks/useShrimpSeeds';
@@ -44,6 +45,10 @@ interface ShrimpPondProps {
     status?: TagStatus;
     pondId?: string;
     cyclePond?: CyclePond | null;
+    /** Whether to show onboarding spotlight on the detail button */
+    showOnboardingDetail?: boolean;
+    /** Callback for navigating to pond detail (used by onboarding onNext) */
+    onDetailNavigate?: () => void;
 }
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
@@ -59,6 +64,8 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     status,
     pondId,
     cyclePond,
+    showOnboardingDetail,
+    onDetailNavigate,
 }) => {
     const typeValue = typeof type === 'string' ? type : type?.name;
 
@@ -217,13 +224,27 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                 <>
                     <View style={styles.divider} />
                     <View style={styles.footer}>
-                        <TouchableOpacity
-                            style={styles.detailButton}
-                            onPress={onDetailPress}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.detailButtonText}>Xem chi tiết</Text>
-                        </TouchableOpacity>
+                        {showOnboardingDetail ? (
+                            <OnboardingStep step="VIEW_DETAIL" onNext={onDetailNavigate}>
+                                <View collapsable={false} style={{ width: '100%' }}>
+                                    <TouchableOpacity
+                                        style={styles.detailButton}
+                                        onPress={onDetailPress}
+                                        activeOpacity={1}
+                                    >
+                                        <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </OnboardingStep>
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.detailButton}
+                                onPress={onDetailPress}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </>
             )}

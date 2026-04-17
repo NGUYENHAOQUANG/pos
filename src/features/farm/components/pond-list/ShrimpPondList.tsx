@@ -10,6 +10,8 @@ import { ShrimpPond } from '@/features/farm/components/pond-list/ShrimpPond';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { PondData } from '@/features/farm/types/farm.types';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
+import { useIsOnboardingActive } from '@/features/walkthrough/store/useOnboardingStore';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface ShrimpPondListProps {
     data: PondData[];
@@ -44,18 +46,19 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
     ) => {
         const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
         const bottomBarHeight = useBottomTabBarHeight();
+        const isOnboardingActive = useIsOnboardingActive();
+
         const getStatus = (item: PondData): TagStatus | undefined => {
             if (item.status === 'Framing') return 'active';
             if (item.status === 'Available') return 'preparing';
-
             return undefined;
         };
 
-        const renderItem: ListRenderItem<PondData> = ({ item }) => {
+        const renderItem: ListRenderItem<PondData> = ({ item, index }) => {
             const computedStatus = getStatus(item);
             const displayType = item.type!;
 
-            return (
+            const pondComponent = (
                 <ShrimpPond
                     name={item.name}
                     area={
@@ -81,8 +84,17 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                         })
                     }
                     onDetailPress={() => onPondPress?.(item)}
+                    showOnboardingDetail={index === 0 && isOnboardingActive}
+                    onDetailNavigate={() => onPondPress?.(item)}
                 />
             );
+
+            // Wrap only the first pond card with OnboardingStep for POND_CARD step
+            if (index === 0) {
+                return <OnboardingStep step="POND_CARD">{pondComponent}</OnboardingStep>;
+            }
+
+            return pondComponent;
         };
 
         return (
@@ -103,6 +115,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                 ListEmptyComponent={ListEmptyComponent}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
+                scrollEnabled={!isOnboardingActive}
             />
         );
     }
@@ -115,6 +128,7 @@ const styles = StyleSheet.create({
     },
     item: {
         marginBottom: spacing.sm,
+        width: '100%',
     },
     emptyContent: {
         flexGrow: 1,

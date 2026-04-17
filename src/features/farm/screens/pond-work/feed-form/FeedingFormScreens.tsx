@@ -14,6 +14,7 @@ import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import {
     useCreateFeedingRecord,
     useUpdateFeedingRecord,
@@ -331,16 +332,20 @@ export const FeedingFormScreens = () => {
                     </SafeInputLayout>
                 )}
             </View>
-            <ButtonBarFarm
-                primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
-                onPrimaryPress={handlePrimaryPress}
-                onSecondaryPress={() => navigation.goBack()}
-                isLoading={isSavingActively}
-                secondaryDisabled={isSavingActively}
-                primaryDisabled={isSavingActively || (isEditMode && !formHasChanges)}
-                style={{ borderTopWidth: 1, borderTopColor: theme.defaultBorder }}
-            />
+            <OnboardingStep step="SAVE_BUTTON">
+                <View collapsable={false} style={{ width: '100%' }}>
+                    <ButtonBarFarm
+                        primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                        secondaryTitle="Huỷ"
+                        onPrimaryPress={handlePrimaryPress}
+                        onSecondaryPress={() => navigation.goBack()}
+                        isLoading={isSavingActively}
+                        secondaryDisabled={isSavingActively}
+                        primaryDisabled={isSavingActively || (isEditMode && !formHasChanges)}
+                        style={{ borderTopWidth: 1, borderTopColor: theme.defaultBorder }}
+                    />
+                </View>
+            </OnboardingStep>
             {isEditMode && (
                 <ConfirmationModalUI
                     visible={showDeleteModal}
