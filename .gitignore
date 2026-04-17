@@ -93,3 +93,4 @@ package-lock.json
 .agent
 .shared
 android/gradle.properties
+patches/@react-native+gradle-plugin+0.82.1.patch
