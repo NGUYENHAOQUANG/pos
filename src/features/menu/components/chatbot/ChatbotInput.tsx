@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Platform, Keyboard } from 'react-native';
 import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { Text } from '@/shared/components/typography/Text';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MicrophoneIcon from '@/assets/Icon/IconChatBot/Microphone.svg';
 import SendIcon from '@/assets/Icon/IconChatBot/Send.svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -52,7 +53,26 @@ export const ChatbotInputToolbar: React.FC<ChatbotInputToolbarProps> = ({
         handleSend,
     } = useChatbotInput({ onSend, onQuickAction, resetKey });
 
-    const paddingBottom = 16;
+    const insets = useSafeAreaInsets();
+    const [isKeyboardOpen, setIsKeyboardOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+        const showSubscription = Keyboard.addListener(showEvent, () => setIsKeyboardOpen(true));
+        const hideSubscription = Keyboard.addListener(hideEvent, () => setIsKeyboardOpen(false));
+
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove();
+        };
+    }, []);
+
+    // Loại bỏ đệm an toàn khi mở bàn phím để input box ép sát vào bàn phím giống hệt bản cũ
+    const paddingBottom = isKeyboardOpen
+        ? 16
+        : Math.max(16, insets.bottom + (Platform.OS === 'android' ? 8 : 0));
 
     return (
         <View style={[styles.wrapper, { paddingBottom }]}>

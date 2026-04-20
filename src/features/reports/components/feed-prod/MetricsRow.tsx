@@ -73,16 +73,6 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
                     />
                 ))}
             </ScrollView>
-
-            {/* Masks to visualy clip the scroll horizontally at the exact 16px padding edge, while leaving overflow: visible vertically for the tooltips */}
-            <View
-                style={[styles.maskLeft, { backgroundColor: theme.background }]}
-                pointerEvents="none"
-            />
-            <View
-                style={[styles.maskRight, { backgroundColor: theme.background }]}
-                pointerEvents="none"
-            />
         </View>
     );
 };
@@ -91,31 +81,17 @@ const styles = StyleSheet.create({
     wrapper: {
         position: 'relative',
         zIndex: 10,
+        overflow: 'hidden',
+        paddingBottom: 80,
+        marginBottom: -80,
+        marginHorizontal: spacing.md,
     },
     container: {
         flexGrow: 0,
-        overflow: 'visible',
     },
     scrollContent: {
         flexDirection: 'row',
-        gap: 4,
-        paddingHorizontal: spacing.md,
+        gap: 8,
         paddingVertical: spacing.sm,
-    },
-    maskLeft: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        width: spacing.md,
-        zIndex: 20,
-    },
-    maskRight: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: spacing.md,
-        zIndex: 20,
     },
 });

@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 import { borderRadius } from '@/styles';
@@ -20,36 +21,8 @@ export const AnimatedBgTipCard: React.FC = () => {
     // Local state — X button hides for current session only
     const [hiddenThisSession, setHiddenThisSession] = useState(false);
 
-    const opacity = useRef(new Animated.Value(0)).current;
-    const translateY = useRef(new Animated.Value(10)).current;
-
     // Show when: not enabled, not permanently dismissed, not hidden this session
     const shouldShow = !isEnabled && dismissCount < MAX_DISMISS_COUNT && !hiddenThisSession;
-
-    useEffect(() => {
-        if (shouldShow) {
-            // Reset animation values when showing again
-            opacity.setValue(0);
-            translateY.setValue(10);
-            // Delay entrance so it appears after suggestion cards
-            const timer = setTimeout(() => {
-                Animated.parallel([
-                    Animated.timing(opacity, {
-                        toValue: 1,
-                        duration: 400,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(translateY, {
-                        toValue: 0,
-                        duration: 400,
-                        easing: Easing.out(Easing.cubic),
-                        useNativeDriver: true,
-                    }),
-                ]).start();
-            }, 800);
-            return () => clearTimeout(timer);
-        }
-    }, [shouldShow, opacity, translateY]);
 
     // X button — hide for this session only (will show again next visit)
     const handleClose = useCallback(() => {
@@ -78,13 +51,9 @@ export const AnimatedBgTipCard: React.FC = () => {
 
     return (
         <Animated.View
-            style={[
-                styles.card,
-                {
-                    opacity,
-                    transform: [{ translateY }],
-                },
-            ]}
+            entering={FadeInDown.delay(600).duration(500).springify()}
+            exiting={FadeOut.duration(200)}
+            style={styles.card}
         >
             {/* Close button (X) — top right */}
             <TouchableOpacity

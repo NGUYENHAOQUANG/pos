@@ -6,7 +6,10 @@ import Svg, { Line, Rect, Path, Text as SvgText } from 'react-native-svg';
 import { colors } from '@/styles';
 import { PADDING_TOP } from '@/features/reports/components/profit-chart/chartData';
 import { ProfitStatsByDate } from '@/features/reports/types/profit-stats';
-import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
+import {
+    calculateDynamicYAxisWidth,
+    calculateFlexibleXLabels,
+} from '@/features/reports/utils/chartHelpers';
 
 // ---------- constants ----------
 const BAR_COLORS = {
@@ -269,42 +272,53 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                 />
                             )}
 
-                            {/* X-axis tick marks */}
-                            {DAY_MARKS.map(day => {
-                                const x = getX(day);
-                                const axisY = getY(-Y_MAX);
+                            {/* X-axis tick marks + labels — flexible visibility */}
+                            {(() => {
+                                const { visibleIndices } = calculateFlexibleXLabels({
+                                    totalPoints: DAY_MARKS.length,
+                                    availableWidth: actualChartWidth,
+                                });
                                 return (
-                                    <Line
-                                        key={`x-tick-${day}`}
-                                        x1={x}
-                                        y1={axisY}
-                                        x2={x}
-                                        y2={axisY + 8}
-                                        stroke={theme.textSecondary}
-                                        strokeOpacity={0.25}
-                                        strokeWidth={0.5}
-                                    />
-                                );
-                            })}
+                                    <>
+                                        {DAY_MARKS.map((day, index) => {
+                                            if (!visibleIndices.has(index)) return null;
+                                            const x = getX(day);
+                                            const axisY = getY(-Y_MAX);
+                                            return (
+                                                <Line
+                                                    key={`x-tick-${day}`}
+                                                    x1={x}
+                                                    y1={axisY}
+                                                    x2={x}
+                                                    y2={axisY + 8}
+                                                    stroke={theme.textSecondary}
+                                                    strokeOpacity={0.25}
+                                                    strokeWidth={0.5}
+                                                />
+                                            );
+                                        })}
 
-                            {/* X-axis labels */}
-                            {DAY_MARKS.map((day, index) => {
-                                const x = getX(day);
-                                const axisY = getY(-Y_MAX);
-                                const y = axisY + 20;
-                                return (
-                                    <SvgText
-                                        key={`x-label-${day}-${index}`}
-                                        x={x}
-                                        y={y}
-                                        fill={theme.textSecondary}
-                                        fontSize={10}
-                                        textAnchor="middle"
-                                    >
-                                        {DAY_LABELS[index]}
-                                    </SvgText>
+                                        {DAY_MARKS.map((day, index) => {
+                                            if (!visibleIndices.has(index)) return null;
+                                            const x = getX(day);
+                                            const axisY = getY(-Y_MAX);
+                                            const y = axisY + 20;
+                                            return (
+                                                <SvgText
+                                                    key={`x-label-${day}-${index}`}
+                                                    x={x}
+                                                    y={y}
+                                                    fill={theme.textSecondary}
+                                                    fontSize={10}
+                                                    textAnchor="middle"
+                                                >
+                                                    {DAY_LABELS[index]}
+                                                </SvgText>
+                                            );
+                                        })}
+                                    </>
                                 );
-                            })}
+                            })()}
 
                             {/* Selected bar highlight line */}
                             {selectedBarIndex !== null && (
