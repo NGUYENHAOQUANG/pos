@@ -162,6 +162,7 @@ export default function EnvChar({
     const CHART_LEFT_PADDING = calculateDynamicYAxisWidth(yTicks, val =>
         Number.isInteger(val) ? val.toString() : val.toFixed(1)
     );
+    const CHART_INNER_LEFT_PADDING = 30; // half label width to prevent clipping at left edge
     const CHART_RIGHT_PADDING = 30; // half label width to prevent clipping at edge
     const MIN_DATE_SPACING = 15; // px per day interval
     const chartAreaWidth = Math.max(0, layout.width);
@@ -174,12 +175,16 @@ export default function EnvChar({
     // Use xAxis length for total points
     const pointsCount = xAxisDates.length;
     const contentWidth =
-        (pointsCount - 1) * MIN_DATE_SPACING + CHART_LEFT_PADDING + CHART_RIGHT_PADDING;
+        (pointsCount - 1) * MIN_DATE_SPACING +
+        CHART_LEFT_PADDING +
+        CHART_INNER_LEFT_PADDING +
+        CHART_RIGHT_PADDING;
 
     // Spacing between consecutive date points on the x-axis (must match scaleX range)
     const pointSpacing =
         pointsCount > 1
-            ? (contentWidth - CHART_LEFT_PADDING - CHART_RIGHT_PADDING) / (pointsCount - 1)
+            ? (contentWidth - CHART_LEFT_PADDING - CHART_INNER_LEFT_PADDING - CHART_RIGHT_PADDING) /
+              (pointsCount - 1)
             : chartAreaWidth;
 
     const maxTranslateX = 0;
@@ -210,7 +215,9 @@ export default function EnvChar({
     const tap = Gesture.Tap().onEnd(e => {
         const internalX = e.x - translateX.value;
         // Map tap x to nearest date index using actual point spacing
-        const index = Math.round((internalX - CHART_LEFT_PADDING) / pointSpacing);
+        const index = Math.round(
+            (internalX - (CHART_LEFT_PADDING + CHART_INNER_LEFT_PADDING)) / pointSpacing
+        );
 
         if (index >= 0 && index < pointsCount) {
             runOnJS(setSelectedIndex)(index);
@@ -237,7 +244,7 @@ export default function EnvChar({
 
     const scaleX = scaleTime({
         domain: [minDate, maxDate],
-        range: [CHART_LEFT_PADDING, contentWidth - CHART_RIGHT_PADDING],
+        range: [CHART_LEFT_PADDING + CHART_INNER_LEFT_PADDING, contentWidth - CHART_RIGHT_PADDING],
     });
 
     const scaleY = scaleLinear({

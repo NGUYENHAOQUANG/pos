@@ -13,7 +13,7 @@ import { RouteProp, useNavigation, useRoute, useIsFocused } from '@react-navigat
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import Toast from 'react-native-toast-message';
-import { spacing, borderRadius } from '@/styles';
+import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Text } from '@/shared/components/typography/Text';
@@ -21,6 +21,11 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { cameraApi } from '@/features/control/api/cameraApi';
 import { useCameras } from '@/features/control/hooks/useCameras';
 import { checkNetworkForHD } from '@/shared/utils/networkUtils';
+import {
+    getLocationCategoryName,
+    getCameraStatusColor,
+    getCameraStatusText,
+} from '@/features/control/utils/cameraUtils';
 import VideoPlayerBg from '@/assets/Icon/IconDevices/VideoPlayer.svg';
 import FullscreenIcon from '@/assets/Icon/IconDevices/Fullscreen.svg';
 // import PlayButtonIcon from '@/assets/Icon/IconDevices/Playbutton.svg';
@@ -118,34 +123,6 @@ export const CameraDetailScreen: React.FC = () => {
         }
     };
 
-    const getStatusColor = () => {
-        switch (camera.status) {
-            case 'On':
-                return theme.green[600];
-            case 'Off':
-                return theme.red[600];
-            case 'Fault':
-                return theme.orange[600];
-            default:
-                return theme.red[600];
-        }
-    };
-
-    const getStatusText = () => {
-        switch (camera.status) {
-            case 'On':
-                return 'Online';
-            case 'Off':
-                return 'Offline';
-            case 'Fault':
-                return 'Kết nối thất bại';
-            case 'Connecting':
-                return 'Đang kết nối';
-            default:
-                return camera.status || 'Offline';
-        }
-    };
-
     return (
         <View style={[styles.container, { backgroundColor: theme.backgroundPrimary }]}>
             <HeaderSection title={camera.name} onBack={() => navigation.goBack()} />
@@ -201,17 +178,19 @@ export const CameraDetailScreen: React.FC = () => {
                                 </View>
                             )}
                             <View style={styles.infoBadge}>
-                                <Text style={styles.infoBadgeText}>{camera.pondName}</Text>
+                                <Text style={styles.infoBadgeText}>{camera.deviceCode}</Text>
                             </View>
                             <View style={styles.infoBadge}>
-                                <Text style={styles.infoBadgeText}>{camera.name}</Text>
+                                <Text style={styles.infoBadgeText}>
+                                    {getLocationCategoryName(camera.locationCategory)}
+                                </Text>
                             </View>
                         </View>
 
                         {/* Center Loading indicator */}
                         {isOnline && !isConnected && (
                             <View style={styles.playButton} pointerEvents="none">
-                                <ActivityIndicator size="large" color="#FFF" />
+                                <ActivityIndicator size="large" color={theme.white} />
                                 {/* <PlayButtonIcon width={44} height={44} /> */}
                             </View>
                         )}
@@ -237,7 +216,7 @@ export const CameraDetailScreen: React.FC = () => {
                                 numberOfLines={1}
                                 adjustsFontSizeToFit
                             >
-                                {camera.modelCode}
+                                {camera.deviceCode}
                             </Text>
                         </View>
                         <View style={[styles.infoColumn, { width: '35%', paddingLeft: 8 }]}>
@@ -258,11 +237,21 @@ export const CameraDetailScreen: React.FC = () => {
                                 <View
                                     style={[
                                         styles.statusDot,
-                                        { backgroundColor: getStatusColor() },
+                                        {
+                                            backgroundColor: getCameraStatusColor(
+                                                camera.status,
+                                                theme
+                                            ),
+                                        },
                                     ]}
                                 />
-                                <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                                    {getStatusText()}
+                                <Text
+                                    style={[
+                                        styles.statusText,
+                                        { color: getCameraStatusColor(camera.status, theme) },
+                                    ]}
+                                >
+                                    {getCameraStatusText(camera.status)}
                                 </Text>
                             </View>
                         </View>
@@ -288,7 +277,7 @@ const getStyles = (theme: Colors) =>
         videoPreview: {
             width: VIDEO_WIDTH,
             height: VIDEO_HEIGHT,
-            borderRadius: borderRadius.lg,
+            borderRadius: 16,
             overflow: 'hidden',
             position: 'relative',
         },
@@ -313,7 +302,7 @@ const getStyles = (theme: Colors) =>
         liveBadge: {
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: '#EF4444',
+            backgroundColor: theme.red[500],
             paddingHorizontal: 8,
             paddingVertical: 4,
             borderRadius: 6,
@@ -323,21 +312,21 @@ const getStyles = (theme: Colors) =>
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: '#FFFFFF',
+            backgroundColor: theme.white,
         },
         liveBadgeText: {
-            color: '#FFFFFF',
+            color: theme.white,
             fontSize: 10,
             fontWeight: '800',
         },
         infoBadge: {
-            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            backgroundColor: theme.cameraOverlay,
             paddingHorizontal: 10,
             paddingVertical: 4,
             borderRadius: 16,
         },
         infoBadgeText: {
-            color: '#FFFFFF',
+            color: theme.white,
             fontSize: 12,
             fontWeight: '500',
         },
@@ -354,7 +343,7 @@ const getStyles = (theme: Colors) =>
             width: 40,
             height: 40,
             borderRadius: 20,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backgroundColor: theme.cameraIconBg,
             justifyContent: 'center',
             alignItems: 'center',
         },

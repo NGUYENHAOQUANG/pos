@@ -1,5 +1,13 @@
-import React, { useRef, useCallback, useState, useEffect, memo } from 'react';
-import { StyleSheet, Animated, PanResponder, Dimensions } from 'react-native';
+import React, { useCallback, useState, useEffect, memo } from 'react';
+import { StyleSheet, Dimensions } from 'react-native';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+    withTiming,
+    runOnJS,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { navigate, navigationRef } from '@/app/navigation/NavigationRef';
@@ -15,6 +23,13 @@ const EDGE_MARGIN = 12;
 const DISMISS_ZONE_SIZE = 64;
 const DISMISS_ZONE_THRESHOLD = 80;
 
+// Spring config for snap-to-edge animation
+const SNAP_SPRING_CONFIG = {
+    damping: 15,
+    stiffness: 150,
+    mass: 0.8,
+};
+
 export const ChatbotFAB = memo(() => {
     const insets = useSafeAreaInsets();
     const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -23,29 +38,26 @@ export const ChatbotFAB = memo(() => {
     const initialX = SCREEN_W - FAB_SIZE - EDGE_MARGIN;
     const initialY = SCREEN_H - FAB_SIZE - 100 - Math.max(insets.bottom, 16);
 
-    const pan = useRef(new Animated.ValueXY({ x: initialX, y: initialY })).current;
-    const isDragging = useRef(false);
-    // Stores the absolute position where the current drag started
-    const dragStartPos = useRef({ x: initialX, y: initialY });
-    // Reference to the currently running spring animation so we can stop it
-    const springAnimRef = useRef<Animated.CompositeAnimation | null>(null);
+    // Shared values for FAB position (UI thread)
+    const translateX = useSharedValue(initialX);
+    const translateY = useSharedValue(initialY);
 
-    // FAB visibility state
+    // Context to store position at drag start
+    const contextX = useSharedValue(0);
+    const contextY = useSharedValue(0);
+
+    // Track drag state on UI thread
+    const isDragging = useSharedValue(false);
+
+    // Dismiss zone animation values
+    const dismissOpacity = useSharedValue(0);
+    const dismissScale = useSharedValue(0.5);
+    const isOverDismiss = useSharedValue(false);
+
+    // FAB visibility state (JS thread — controls render)
     const [isHidden, setIsHidden] = useState(false);
     const [showDismissZone, setShowDismissZone] = useState(false);
-
-    // Prevent excessive re-renders by tracking dismiss zone hover state with a ref
-    const [isOverDismissZone, setIsOverDismissZoneState] = useState(false);
-    const isOverDismissZoneRef = useRef(false);
-    const setIsOverDismissZone = useCallback((value: boolean) => {
-        if (isOverDismissZoneRef.current !== value) {
-            isOverDismissZoneRef.current = value;
-            setIsOverDismissZoneState(value);
-        }
-    }, []);
-
-    const dismissZoneOpacity = useRef(new Animated.Value(0)).current;
-    const dismissZoneScale = useRef(new Animated.Value(0.5)).current;
+    const [isOverDismissZone, setIsOverDismissZone] = useState(false);
 
     // Dismiss zone position (bottom center)
     const dismissZoneX = SCREEN_W / 2 - DISMISS_ZONE_SIZE / 2;
@@ -68,15 +80,13 @@ export const ChatbotFAB = memo(() => {
         return unsubscribe;
     }, []);
 
-    // Helper: reset FAB to default position (absolute, no offset)
+    // Helper: reset FAB to default position
     const resetToDefaultPosition = useCallback(() => {
         const resetX = SCREEN_W - FAB_SIZE - EDGE_MARGIN;
         const resetY = SCREEN_H - FAB_SIZE - 100 - Math.max(insets.bottom, 16);
-        springAnimRef.current?.stop();
-        springAnimRef.current = null;
-        pan.setValue({ x: resetX, y: resetY });
-        dragStartPos.current = { x: resetX, y: resetY };
-    }, [SCREEN_W, SCREEN_H, insets.bottom, pan]);
+        translateX.value = resetX;
+        translateY.value = resetY;
+    }, [SCREEN_W, SCREEN_H, insets.bottom, translateX, translateY]);
 
     // Shake to restore FAB
     useEffect(() => {
@@ -103,160 +113,130 @@ export const ChatbotFAB = memo(() => {
         }
     }, [currentRouteName, isHidden, resetToDefaultPosition]);
 
-    // Use refs for callbacks used inside PanResponder to avoid stale closures
-    const dismissZoneXRef = useRef(dismissZoneX);
-    const dismissZoneYRef = useRef(dismissZoneY);
-    dismissZoneXRef.current = dismissZoneX;
-    dismissZoneYRef.current = dismissZoneY;
+    // ── JS callbacks invoked from UI thread via runOnJS ──
 
-    const isInDismissZone = useCallback((fabX: number, fabY: number) => {
+    const showDismiss = useCallback(() => {
+        setShowDismissZone(true);
+    }, []);
+
+    const hideDismiss = useCallback(() => {
+        setShowDismissZone(false);
+        setIsOverDismissZone(false);
+    }, []);
+
+    const updateOverDismissZone = useCallback((value: boolean) => {
+        setIsOverDismissZone(value);
+    }, []);
+
+    const onTap = useCallback(() => {
+        navigate('Chatbot');
+    }, []);
+
+    const onDismiss = useCallback(() => {
+        setIsHidden(true);
+        Toast.show({
+            type: 'success',
+            text1: 'Đã ẩn trợ lý ảo AI',
+            text2: 'Lắc điện thoại để bật lại',
+            visibilityTime: 4000,
+        });
+    }, []);
+
+    // ── Check dismiss zone (UI thread) ──
+    const checkDismissZone = (fabX: number, fabY: number): boolean => {
+        'worklet';
         const fabCenterX = fabX + FAB_SIZE / 2;
         const fabCenterY = fabY + FAB_SIZE / 2;
-        const zoneCenterX = dismissZoneXRef.current + DISMISS_ZONE_SIZE / 2;
-        const zoneCenterY = dismissZoneYRef.current + DISMISS_ZONE_SIZE / 2;
+        const zoneCenterX = dismissZoneX + DISMISS_ZONE_SIZE / 2;
+        const zoneCenterY = dismissZoneY + DISMISS_ZONE_SIZE / 2;
         const distance = Math.sqrt(
             (fabCenterX - zoneCenterX) ** 2 + (fabCenterY - zoneCenterY) ** 2
         );
         return distance < DISMISS_ZONE_THRESHOLD;
-    }, []);
+    };
 
-    const showDismiss = useCallback(() => {
-        setShowDismissZone(true);
-        Animated.parallel([
-            Animated.spring(dismissZoneOpacity, {
-                toValue: 1,
-                friction: 8,
-                useNativeDriver: true,
-            }),
-            Animated.spring(dismissZoneScale, {
-                toValue: 1,
-                friction: 6,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, [dismissZoneOpacity, dismissZoneScale]);
+    // ── Snap to edge (UI thread) ──
+    const snapToEdge = (x: number, y: number) => {
+        'worklet';
+        const snapX =
+            x + FAB_SIZE / 2 < SCREEN_W / 2 ? EDGE_MARGIN : SCREEN_W - FAB_SIZE - EDGE_MARGIN;
 
-    const hideDismiss = useCallback(() => {
-        Animated.parallel([
-            Animated.timing(dismissZoneOpacity, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-            }),
-            Animated.timing(dismissZoneScale, {
-                toValue: 0.5,
-                duration: 200,
-                useNativeDriver: true,
-            }),
-        ]).start(() => {
-            setShowDismissZone(false);
-            setIsOverDismissZone(false);
-        });
-    }, [dismissZoneOpacity, dismissZoneScale, setIsOverDismissZone]);
+        const minY = insets.top + EDGE_MARGIN;
+        const maxY = SCREEN_H - FAB_SIZE - EDGE_MARGIN - insets.bottom;
+        const snapY = Math.max(minY, Math.min(y, maxY));
 
-    // Store callbacks in refs so PanResponder always has latest versions
-    const showDismissRef = useRef(showDismiss);
-    const hideDismissRef = useRef(hideDismiss);
-    const isInDismissZoneRef = useRef(isInDismissZone);
-    const setIsOverDismissZoneRef = useRef(setIsOverDismissZone);
-    const snapToEdgeRef = useRef((_x: number, _y: number) => {});
+        translateX.value = withSpring(snapX, SNAP_SPRING_CONFIG);
+        translateY.value = withSpring(snapY, SNAP_SPRING_CONFIG);
+    };
 
-    showDismissRef.current = showDismiss;
-    hideDismissRef.current = hideDismiss;
-    isInDismissZoneRef.current = isInDismissZone;
-    setIsOverDismissZoneRef.current = setIsOverDismissZone;
-
-    const snapToEdge = useCallback(
-        (x: number, y: number) => {
-            const snapX =
-                x + FAB_SIZE / 2 < SCREEN_W / 2 ? EDGE_MARGIN : SCREEN_W - FAB_SIZE - EDGE_MARGIN;
-
-            const minY = insets.top + EDGE_MARGIN;
-            const maxY = SCREEN_H - FAB_SIZE - EDGE_MARGIN - insets.bottom;
-            const snapY = Math.max(minY, Math.min(y, maxY));
-
-            // Animate using absolute values — no offset manipulation
-            // useNativeDriver: false ensures JS always has accurate position
-            // for reliable mid-animation grab
-            const anim = Animated.spring(pan, {
-                toValue: { x: snapX, y: snapY },
-                friction: 7,
-                tension: 80,
-                useNativeDriver: false,
-            });
-            springAnimRef.current = anim;
-            anim.start(({ finished }) => {
-                if (finished) {
-                    dragStartPos.current = { x: snapX, y: snapY };
-                    springAnimRef.current = null;
-                }
-            });
-        },
-        [SCREEN_W, SCREEN_H, insets, pan]
-    );
-
-    snapToEdgeRef.current = snapToEdge;
-
-    const panResponder = useRef(
-        PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onMoveShouldSetPanResponder: (_, gestureState) =>
-                Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5,
-            onPanResponderGrant: () => {
-                isDragging.current = false;
-                // Stop any running snap-to-edge spring animation immediately
-                if (springAnimRef.current) {
-                    springAnimRef.current.stop();
-                    springAnimRef.current = null;
-                }
-                // Read the current absolute position from the animated value
-                // With useNativeDriver: false, JS value is always accurate
-                pan.stopAnimation(currentValue => {
-                    dragStartPos.current = { x: currentValue.x, y: currentValue.y };
-                });
-            },
-            onPanResponderMove: (_, gestureState) => {
-                if (Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5) {
-                    if (!isDragging.current) {
-                        isDragging.current = true;
-                        showDismissRef.current();
-                    }
-                }
-
-                // Absolute position = drag start + gesture delta
-                const currentX = dragStartPos.current.x + gestureState.dx;
-                const currentY = dragStartPos.current.y + gestureState.dy;
-
-                if (isDragging.current) {
-                    setIsOverDismissZoneRef.current(isInDismissZoneRef.current(currentX, currentY));
-                }
-
-                // Set absolute value directly — no offset needed
-                pan.setValue({ x: currentX, y: currentY });
-            },
-            onPanResponderRelease: (_, gestureState) => {
-                const finalX = dragStartPos.current.x + gestureState.dx;
-                const finalY = dragStartPos.current.y + gestureState.dy;
-
-                hideDismissRef.current();
-
-                if (!isDragging.current) {
-                    navigate('Chatbot');
-                    dragStartPos.current = { x: finalX, y: finalY };
-                } else if (isInDismissZoneRef.current(finalX, finalY)) {
-                    setIsHidden(true);
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Đã ẩn trợ lý ảo AI',
-                        text2: 'Lắc điện thoại để bật lại',
-                        visibilityTime: 4000,
-                    });
-                } else {
-                    snapToEdgeRef.current(finalX, finalY);
-                }
-            },
+    // ── Pan Gesture (runs entirely on UI thread) ──
+    const panGesture = Gesture.Pan()
+        .minDistance(5)
+        .onStart(() => {
+            'worklet';
+            // Save the current position at drag start
+            contextX.value = translateX.value;
+            contextY.value = translateY.value;
+            isDragging.value = false;
         })
-    ).current;
+        .onUpdate(event => {
+            'worklet';
+            const hasMoved = Math.abs(event.translationX) > 5 || Math.abs(event.translationY) > 5;
+
+            if (hasMoved && !isDragging.value) {
+                isDragging.value = true;
+                // Show dismiss zone
+                dismissOpacity.value = withSpring(1, { damping: 10, stiffness: 120 });
+                dismissScale.value = withSpring(1, { damping: 8, stiffness: 100 });
+                runOnJS(showDismiss)();
+            }
+
+            // Update absolute position
+            const currentX = contextX.value + event.translationX;
+            const currentY = contextY.value + event.translationY;
+            translateX.value = currentX;
+            translateY.value = currentY;
+
+            // Check dismiss zone hover
+            if (isDragging.value) {
+                const inZone = checkDismissZone(currentX, currentY);
+                if (inZone !== isOverDismiss.value) {
+                    isOverDismiss.value = inZone;
+                    runOnJS(updateOverDismissZone)(inZone);
+                }
+            }
+        })
+        .onEnd(() => {
+            'worklet';
+            const finalX = translateX.value;
+            const finalY = translateY.value;
+
+            // Hide dismiss zone
+            dismissOpacity.value = withTiming(0, { duration: 200 });
+            dismissScale.value = withTiming(0.5, { duration: 200 });
+            runOnJS(hideDismiss)();
+
+            if (!isDragging.value) {
+                // Was a tap — navigate to Chatbot
+                runOnJS(onTap)();
+            } else if (checkDismissZone(finalX, finalY)) {
+                // Dropped in dismiss zone — hide FAB
+                runOnJS(onDismiss)();
+            } else {
+                // Snap to nearest edge
+                snapToEdge(finalX, finalY);
+            }
+        });
+
+    // ── Animated styles (UI thread) ──
+    const fabAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: translateX.value }, { translateY: translateY.value }],
+    }));
+
+    const dismissZoneAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: dismissOpacity.value,
+        transform: [{ scale: dismissScale.value }],
+    }));
 
     const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
 
@@ -279,12 +259,11 @@ export const ChatbotFAB = memo(() => {
                             width: DISMISS_ZONE_SIZE,
                             height: DISMISS_ZONE_SIZE,
                             borderRadius: DISMISS_ZONE_SIZE / 2,
-                            opacity: dismissZoneOpacity,
-                            transform: [{ scale: dismissZoneScale }],
                             backgroundColor: isOverDismissZone
                                 ? colors.red[500]
                                 : 'rgba(0, 0, 0, 0.6)',
                         },
+                        dismissZoneAnimatedStyle,
                     ]}
                 >
                     <CloseOutlined
@@ -297,17 +276,11 @@ export const ChatbotFAB = memo(() => {
             )}
 
             {/* Draggable FAB */}
-            <Animated.View
-                {...panResponder.panHandlers}
-                style={[
-                    styles.fab,
-                    {
-                        transform: [{ translateX: pan.x }, { translateY: pan.y }],
-                    },
-                ]}
-            >
-                <ChatbotAvatar size={FAB_SIZE} animated />
-            </Animated.View>
+            <GestureDetector gesture={panGesture}>
+                <Animated.View style={[styles.fab, fabAnimatedStyle]}>
+                    <ChatbotAvatar size={FAB_SIZE} animated />
+                </Animated.View>
+            </GestureDetector>
         </>
     );
 });

@@ -4,7 +4,13 @@ import { NativeModules, Platform } from 'react-native';
 
 const { AudioRouteModule } = NativeModules;
 
-export const useWebRTCStream = (url: string) => {
+interface UseWebRTCStreamOptions {
+    /** Whether to receive audio track. Set false for thumbnail previews to save resources. */
+    enableAudio?: boolean;
+}
+
+export const useWebRTCStream = (url: string, options?: UseWebRTCStreamOptions) => {
+    const enableAudio = options?.enableAudio ?? true;
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [statusText, setStatusText] = useState<string>('Khởi tạo...');
@@ -31,7 +37,7 @@ export const useWebRTCStream = (url: string) => {
                     return;
                 }
                 setProgress(prev => {
-                    if (prev >= 99) return 99; // Dừng ở 99% nếu chưa load xong
+                    if (prev >= 99) return 99;
 
                     let increment = 1;
                     if (prev < 60) increment = Math.floor(Math.random() * 10) + 5; // 5-15%
@@ -79,7 +85,7 @@ export const useWebRTCStream = (url: string) => {
                             setStatusText('Đã kết nối luồng video');
                             setProgress(100);
                             setIsConnected(true);
-                            if (Platform.OS === 'android' && AudioRouteModule) {
+                            if (enableAudio && Platform.OS === 'android' && AudioRouteModule) {
                                 AudioRouteModule.setSpeakerphoneOn(true);
                             }
                             break;
@@ -95,7 +101,9 @@ export const useWebRTCStream = (url: string) => {
                     }
                 };
                 pc.addTransceiver('video', { direction: 'recvonly' });
-                pc.addTransceiver('audio', { direction: 'recvonly' });
+                if (enableAudio) {
+                    pc.addTransceiver('audio', { direction: 'recvonly' });
+                }
 
                 // Create offer
                 if (isMounted) setStatusText('Đang tạo Offer...');
@@ -149,7 +157,7 @@ export const useWebRTCStream = (url: string) => {
         return () => {
             isMounted = false;
             clearFakeProgress();
-            if (Platform.OS === 'android' && AudioRouteModule) {
+            if (enableAudio && Platform.OS === 'android' && AudioRouteModule) {
                 AudioRouteModule.setSpeakerphoneOn(false);
             }
             if (peerConnection.current) {
@@ -157,7 +165,7 @@ export const useWebRTCStream = (url: string) => {
                 peerConnection.current = null;
             }
         };
-    }, [url]);
+    }, [url, enableAudio]);
 
     return { stream, error, statusText, isConnected, progress };
 };

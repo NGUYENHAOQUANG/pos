@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useMemo } from 'react';
-import { FlatList, StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useCallback, useState, useMemo, useRef } from 'react';
+import { FlatList, StyleSheet, View, TouchableOpacity, ViewToken } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -29,6 +29,18 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
 
     // selectedCategory is now string ('all' or category.id)
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+    // Track which category groups are currently visible in the viewport
+    const [visibleGroupIds, setVisibleGroupIds] = useState<Set<string>>(new Set());
+
+    const viewabilityConfig = useRef({
+        itemVisiblePercentThreshold: 20, // Consider visible when 20% of group is on screen
+    }).current;
+
+    const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+        const ids = new Set(viewableItems.map(item => item.key as string));
+        setVisibleGroupIds(ids);
+    }).current;
 
     const handleRefresh = useCallback(() => {
         refetch();
@@ -101,48 +113,56 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
         );
     }, [cameras, selectedCategory]);
 
-    const renderCategoryGroup = ({ item: group }: { item: any }) => {
-        return (
-            <View style={styles.groupContainer}>
-                {/* Header Group */}
-                <View style={styles.groupHeader}>
-                    <View style={styles.groupHeaderTitleContainer}>
-                        <Text style={[styles.groupTitle, { color: theme.text }]}>{group.name}</Text>
-                        <Text style={[styles.groupSubtitle, { color: theme.textSecondary }]}>
-                            {group.pondCount} ao - {group.cameras.length} cameras
-                        </Text>
-                    </View>
-                    {group.cameras.length > 0 && (
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => {
-                                navigation.navigate('CategoryCameraList', {
-                                    categoryId: group.id,
-                                    categoryName: group.name,
-                                });
-                            }}
-                        >
-                            <Text style={[styles.seeMoreText, { color: theme.primary }]}>
-                                Xem thêm
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
+    const renderCategoryGroup = useCallback(
+        ({ item: group }: { item: any }) => {
+            const isGroupVisible = visibleGroupIds.has(group.id);
 
-                {/* 2-Column Grid of Cameras (Limited to 2 items in Preview Mode) */}
-                <View style={styles.gridContainer}>
-                    {group.cameras.slice(0, 2).map((cam: CameraItem) => (
-                        <CameraCard
-                            key={cam.deviceCode}
-                            camera={cam}
-                            onPress={onCameraPress}
-                            isGrid
-                        />
-                    ))}
+            return (
+                <View style={styles.groupContainer}>
+                    {/* Header Group */}
+                    <View style={styles.groupHeader}>
+                        <View style={styles.groupHeaderTitleContainer}>
+                            <Text style={[styles.groupTitle, { color: theme.text }]}>
+                                {group.name}
+                            </Text>
+                            <Text style={[styles.groupSubtitle, { color: theme.textSecondary }]}>
+                                {group.pondCount} ao - {group.cameras.length} cameras
+                            </Text>
+                        </View>
+                        {group.cameras.length > 0 && (
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => {
+                                    navigation.navigate('CategoryCameraList', {
+                                        categoryId: group.id,
+                                        categoryName: group.name,
+                                    });
+                                }}
+                            >
+                                <Text style={[styles.seeMoreText, { color: theme.primary }]}>
+                                    Xem thêm
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    {/* 2-Column Grid of Cameras (Limited to 2 items in Preview Mode) */}
+                    <View style={styles.gridContainer}>
+                        {group.cameras.slice(0, 2).map((cam: CameraItem) => (
+                            <CameraCard
+                                key={cam.deviceCode}
+                                camera={cam}
+                                onPress={onCameraPress}
+                                isGrid
+                                isVisible={isGroupVisible}
+                            />
+                        ))}
+                    </View>
                 </View>
-            </View>
-        );
-    };
+            );
+        },
+        [visibleGroupIds, theme, navigation, onCameraPress]
+    );
 
     if (isLoading) {
         return <CameraSkeleton />;
@@ -159,6 +179,8 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
                 groupedData.length === 0 && styles.emptyContent,
             ]}
             showsVerticalScrollIndicator={false}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
             refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />}
             ListEmptyComponent={
                 <EmptyStateCard

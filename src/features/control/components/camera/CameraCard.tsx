@@ -21,20 +21,30 @@ interface CameraCardProps {
     camera: CameraItem;
     onPress: (camera: CameraItem) => void;
     isGrid?: boolean;
+    /** Whether the card is currently visible in the viewport. Controls WebRTC connection lifecycle. */
+    isVisible?: boolean;
 }
 
-export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress, isGrid }) => {
+export const CameraCard: React.FC<CameraCardProps> = ({
+    camera,
+    onPress,
+    isGrid,
+    isVisible = true,
+}) => {
     const theme = useAppTheme();
     const themedStyles = getStyles(theme);
     const isOnline = camera.status === 'On';
     const isFocused = useIsFocused();
 
-    // Only attempt WebRTC if online, URL exists, and the screen is actually visible
-    const shouldFetchWebRTC = isOnline && !!camera.liveUrl && isFocused;
-    const { stream, isConnected } = useWebRTCStream(shouldFetchWebRTC ? camera.liveUrl! : '');
+    // Only attempt WebRTC if online, URL exists, screen is focused, AND card is visible
+    const shouldFetchWebRTC = isOnline && !!camera.liveUrl && isFocused && isVisible;
+    // Disable audio for card previews to reduce CPU/bandwidth
+    const { stream, isConnected } = useWebRTCStream(shouldFetchWebRTC ? camera.liveUrl! : '', {
+        enableAudio: false,
+    });
 
     const adjustedWidth = isGrid ? GRID_CARD_WIDTH : CARD_WIDTH;
-    const adjustedHeight = adjustedWidth * 0.65;
+    const adjustedHeight = adjustedWidth * (9 / 16);
 
     const dynamicContainerStyle = {
         width: adjustedWidth,
@@ -123,7 +133,7 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress, isGrid 
                 {/* Camera name and SN overlaid natively over image */}
                 <View style={styles.placeholderBadgesRow}>
                     <Text style={styles.placeholderBadgeText} numberOfLines={1}>
-                        {camera.modelCode}
+                        {camera.deviceCode}
                     </Text>
                     <Text style={styles.placeholderBadgeText} numberOfLines={1}>
                         {camera.name}
