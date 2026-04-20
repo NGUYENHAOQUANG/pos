@@ -167,6 +167,15 @@ export const API_ENDPOINTS = {
     SCALE: {
         LIST: '/scale',
         DETAIL: (id: string) => `/scale/${id}`,
+        USAGE_STATUS: '/scale/usage-status',
+    },
+    SCALE_RECORD: {
+        LIST: '/scalerecord',
+        START_SESSION: '/scalerecord/start-session',
+        CONFIRM: '/scalerecord/confirm',
+        FINISH_SESSION: '/scalerecord/finish-session',
+        DISCARD: '/scalerecord/discard',
+        SOFT_DELETE: (id: string) => `/scalerecord/${id}/soft-delete`,
     },
     // Materials
     MATERIAL: {

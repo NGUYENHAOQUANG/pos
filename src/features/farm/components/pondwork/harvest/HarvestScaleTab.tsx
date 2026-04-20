@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/shared/components/typography/Text';
@@ -9,21 +9,56 @@ import { AddScaleBottomSheet } from './AddScaleBottomSheet';
 import { ConfirmScaleBottomSheet } from './ConfirmScaleBottomSheet';
 import { HarvestEntryItem } from './HarvestEntryItem';
 import { HarvestBatchDetailBottomSheet } from './HarvestBatchDetailBottomSheet';
+import { EndScaleSessionBottomSheet } from './EndScaleSessionBottomSheet';
+import { DeleteScaleSessionBottomSheet } from './DeleteScaleSessionBottomSheet';
 import { Button } from '@/shared/components/buttons/Button';
 import { HarvestSummaryCards } from './HarvestSummaryCards';
 import { ScaleCard, ScaleStatus } from './ScaleCard';
 import { ScaleActionBottomSheet } from './ScaleActionBottomSheet';
 import { EmergencyRevokeSuccessBottomSheet } from './EmergencyRevokeSuccessBottomSheet';
 import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useScales, useUpdateScaleUsageStatus } from '@/features/farm/hooks/useScales';
+import {
+    useScaleRecords,
+    useConfirmScaleRecord,
+    useFinishScaleSession,
+    useSoftDeleteScaleRecord,
+    useDiscardScaleSession,
+    useStartScaleSession,
+} from '@/features/farm/hooks/useScaleRecord';
+import { ScaleUsageStatus } from '@/features/farm/types/scale.types';
+import {
+    mapToScaleStatus,
+    getScaleDisplayTitle,
+    formatScaleTime,
+    mapScaleRecordToBatchDetail,
+} from '@/features/farm/services/pond-work/scale.service';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { ActivityIndicator } from 'react-native';
+
+import { ScaleSessionAction } from '@/features/farm/types/harvestRecord.types';
 
 export interface HarvestScaleTabProps {
     onNavigateToHistory?: () => void;
     onNavigateToAllScales?: () => void;
+    cycleId?: string;
+    scaleSessionId?: string;
+    recordId?: string;
+    isEditMode?: boolean;
+    onSetScaleSessionId?: (id: string | null, action?: ScaleSessionAction) => void;
+    pondName?: string;
 }
 
 export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     onNavigateToHistory,
     onNavigateToAllScales,
+    cycleId,
+    scaleSessionId,
+    recordId,
+    isEditMode,
+    onSetScaleSessionId,
+    pondName,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -31,17 +66,182 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     const paddingBottom = Math.max(insets.bottom, 12);
 
     const [isAddScaleModalVisible, setIsAddScaleModalVisible] = useState(false);
+    const [isAddingScale, setIsAddingScale] = useState(false);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isBatchDetailVisible, setIsBatchDetailVisible] = useState(false);
 
+    // Confirm scale modal state
+    const [selectedConfirmWeight, setSelectedConfirmWeight] = useState<number>(0);
+    const [selectedConfirmScaleName, setSelectedConfirmScaleName] = useState<string>('Cân');
+    const [selectedConfirmScaleItem, setSelectedConfirmScaleItem] = useState<any>(null);
+
     // Scale action modal state
     const [selectedScaleStatus, setSelectedScaleStatus] = useState<ScaleStatus | null>(null);
+    const [selectedScaleItem, setSelectedScaleItem] = useState<any>(null);
+    const [selectedBatchItem, setSelectedBatchItem] = useState<any>(null);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
+    const [isEndSessionVisible, setIsEndSessionVisible] = useState(false);
     const [isEmergencySuccessVisible, setIsEmergencySuccessVisible] = useState(false);
 
-    const handlePressChevron = (status: ScaleStatus) => {
+    const zoneId = useFarmStore(state => state.selectedZoneId) ?? undefined;
+
+    const { data: scalesData } = useScales({
+        ZoneId: zoneId,
+        UsageStatus: ScaleUsageStatus.Using,
+    });
+    const activeScales = scalesData?.data?.items || [];
+
+    const { data: recordsData, isLoading: isRecordsLoading } = useScaleRecords({
+        SessionId: !isEditMode ? scaleSessionId : undefined,
+        RecordId: isEditMode ? recordId : undefined,
+    });
+    const entries = useMemo(() => recordsData?.data?.items || [], [recordsData?.data?.items]);
+
+    const [isDeleteSessionVisible, setIsDeleteSessionVisible] = useState(false);
+    const { totalWeight, confirmedBatches } = useMemo(() => {
+        const validEntries = entries.filter(entry => entry.status?.toLowerCase() !== 'deleted');
+        const weight = validEntries.reduce((sum, entry) => sum + (entry.weight || 0), 0);
+        return { totalWeight: weight, confirmedBatches: validEntries.length };
+    }, [entries]);
+
+    const { mutateAsync: updateUsageStatus } = useUpdateScaleUsageStatus();
+    const { mutateAsync: confirmRecord } = useConfirmScaleRecord();
+    const { mutateAsync: startSession } = useStartScaleSession();
+    const { mutateAsync: finishSession } = useFinishScaleSession();
+    const { mutateAsync: discardSession } = useDiscardScaleSession();
+
+    const { mutate: deleteRecord, isPending: isDeleting } = useSoftDeleteScaleRecord();
+
+    const handleDeleteBatch = (id: string, onClose: () => void) => {
+        deleteRecord(
+            { id },
+            {
+                onSuccess: () => {
+                    onClose();
+                    AppToast({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đã hủy mẻ cân',
+                    } as any);
+                },
+            }
+        );
+    };
+
+    const handlePressChevron = useCallback((status: ScaleStatus, scaleItem: any) => {
         setSelectedScaleStatus(status);
+        setSelectedScaleItem(scaleItem);
         setIsActionModalVisible(true);
+    }, []);
+
+    const handleScaleToggle = useCallback(
+        (val: boolean, scaleId: string) => {
+            if (!val) {
+                updateUsageStatus({
+                    scaleIds: [scaleId],
+                    status: ScaleUsageStatus.Free,
+                    cycleId: cycleId!,
+                });
+            }
+        },
+        [updateUsageStatus, cycleId]
+    );
+
+    const handleConfirmPress = useCallback((scaleItem: any) => {
+        const randomWeight = +(Math.random() * (30 - 10) + 10).toFixed(1);
+        setSelectedConfirmWeight(randomWeight);
+        setSelectedConfirmScaleItem(scaleItem);
+        setSelectedConfirmScaleName(getScaleDisplayTitle(scaleItem));
+        setIsConfirmModalVisible(true);
+    }, []);
+
+    const handleConfirmAction = async () => {
+        if (!selectedConfirmScaleItem || !scaleSessionId || !cycleId) {
+            throw new Error('Thiếu thông tin để xác nhận');
+        }
+        await confirmRecord({
+            cycleId,
+            scaleId: selectedConfirmScaleItem.id,
+            sessionId: scaleSessionId,
+            weight: selectedConfirmWeight,
+            deviceTimestamp: new Date().toISOString(),
+        });
+    };
+
+    const handleAddScaleSubmit = async (scaleIds: string[]) => {
+        if (!cycleId) return;
+        setIsAddingScale(true);
+        let currentSessionId = scaleSessionId;
+
+        try {
+            if (!currentSessionId) {
+                const data = await startSession({ cycleId });
+                if (data?.data?.sessionId) {
+                    currentSessionId = data.data.sessionId;
+                    onSetScaleSessionId?.(currentSessionId);
+                } else {
+                    setIsAddingScale(false);
+                    return; // failed
+                }
+            }
+
+            await updateUsageStatus({
+                scaleIds: scaleIds,
+                status: ScaleUsageStatus.Using,
+                cycleId: cycleId,
+            });
+
+            setTimeout(() => {
+                setIsAddingScale(false);
+                setIsAddScaleModalVisible(false);
+                if (onNavigateToAllScales) {
+                    onNavigateToAllScales();
+                }
+                setTimeout(() => AppToast(TOAST_MESSAGES_CONFIG.SCALE.ADD_SUCCESS), 300);
+            }, 100);
+        } catch (error) {
+            setIsAddingScale(false);
+            console.log(error);
+        }
+    };
+
+    const handleFinishSession = async () => {
+        if (!scaleSessionId || !cycleId) return;
+        try {
+            await finishSession({
+                sessionId: scaleSessionId,
+                cycleId: cycleId,
+            });
+
+            setIsEndSessionVisible(false);
+
+            if (onNavigateToHistory) {
+                onNavigateToHistory();
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsEndSessionVisible(false);
+            onSetScaleSessionId?.(null, ScaleSessionAction.FINISH);
+        }
+    };
+
+    const handleDeleteSession = async () => {
+        if (!scaleSessionId) return;
+
+        try {
+            await discardSession({ sessionId: scaleSessionId });
+            AppToast({
+                type: 'success',
+                text1: 'Thành công',
+                text2: 'Đã xóa phiên cân',
+            } as any);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsDeleteSessionVisible(false);
+            onSetScaleSessionId?.(null, ScaleSessionAction.DELETE);
+        }
     };
 
     return (
@@ -51,8 +251,8 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                 <HarvestSummaryCards
                     containerStyle={{ marginTop: 0 }}
                     cards={[
-                        { label: 'Tổng sản lượng', value: '65.6', unit: 'kg' },
-                        { label: 'Mẻ xác nhận', value: '4', unit: 'mẻ' },
+                        { label: 'Tổng sản lượng', value: totalWeight.toFixed(1), unit: 'kg' },
+                        { label: 'Mẻ xác nhận', value: confirmedBatches.toString(), unit: 'mẻ' },
                     ]}
                 />
 
@@ -61,10 +261,12 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                     <View style={styles.sectionHeader}>
                         <View style={styles.sectionHeaderLeft}>
                             <Text style={styles.sectionTitle}>Cân đang hoạt động</Text>
-                            <View style={styles.badgeContainer}>
-                                <View style={styles.badgeDot} />
-                                <Text style={styles.badgeText}>2 cân</Text>
-                            </View>
+                            {activeScales.length > 0 && (
+                                <View style={styles.badgeContainer}>
+                                    <View style={styles.badgeDot} />
+                                    <Text style={styles.badgeText}>{activeScales.length} cân</Text>
+                                </View>
+                            )}
                         </View>
                         <TouchableOpacity onPress={onNavigateToAllScales}>
                             <Text style={styles.seeAllText}>Xem tất cả</Text>
@@ -73,23 +275,30 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
 
                     {/* Scale Cards */}
                     <View style={styles.scaleCardSection}>
-                        {/* Scale Card 1: Sẵn sàng cân */}
-                        <ScaleCard
-                            title="Cân 01 — Sân A"
-                            status={ScaleStatus.READY}
-                            weight={65.6}
-                            onConfirmPress={() => setIsConfirmModalVisible(true)}
-                            onPress={() => handlePressChevron(ScaleStatus.READY)}
-                        />
-
-                        {/* Scale Card 2: Chờ ổn định */}
-                        <ScaleCard
-                            title="Cân 02 — Sân B"
-                            status={ScaleStatus.WAITING}
-                            weight={65.6}
-                            onConfirmPress={() => setIsConfirmModalVisible(true)}
-                            onPress={() => handlePressChevron(ScaleStatus.WAITING)}
-                        />
+                        {activeScales.length === 0 ? (
+                            <EmptyStateCard
+                                message="Không có cân đang bận"
+                                style={{ marginVertical: 8 }}
+                            />
+                        ) : (
+                            activeScales.map(scale => {
+                                const status = mapToScaleStatus(
+                                    scale.connectionStatus,
+                                    scale.usageStatus
+                                );
+                                return (
+                                    <ScaleCard
+                                        key={scale.id}
+                                        title={getScaleDisplayTitle(scale)}
+                                        status={status}
+                                        weight={0}
+                                        onConfirmPress={() => handleConfirmPress(scale)}
+                                        onPress={() => handlePressChevron(status, scale)}
+                                        onToggle={val => handleScaleToggle(val, scale.id)}
+                                    />
+                                );
+                            })
+                        )}
                     </View>
                     <View style={{ marginTop: 16 }}>
                         <Button
@@ -113,58 +322,100 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                     </View>
 
                     <View style={styles.entriesList}>
-                        {/* Item 1 */}
-                        <HarvestEntryItem
-                            index="1"
-                            weight={18.1}
-                            subtitle="Cân 01 - 11:06"
-                            onPress={() => setIsBatchDetailVisible(true)}
-                        />
-                        {/* Item 2 */}
-                        <HarvestEntryItem
-                            index="2"
-                            weight={13.1}
-                            subtitle="Cân 02 - 10:58"
-                            showDivider={false}
-                            onPress={() => setIsBatchDetailVisible(true)}
-                        />
+                        {isRecordsLoading ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={theme.primary}
+                                style={{ marginVertical: 24 }}
+                            />
+                        ) : entries.length === 0 ? (
+                            <EmptyStateCard
+                                message="Chưa có lần cân nào"
+                                style={{ marginVertical: 24 }}
+                            />
+                        ) : (
+                            entries.map((entry, index) => {
+                                const isDeleted = entry.status?.toLowerCase() === 'deleted';
+                                const timeStr = entry.deviceTimestamp || entry.createdAt;
+                                const timeFormat = formatScaleTime(timeStr);
+                                return (
+                                    <HarvestEntryItem
+                                        key={entry.id}
+                                        index={entry.batchNo || index + 1}
+                                        weight={entry.weight}
+                                        subtitle={`${entry.scaleName || 'Cân'} - ${timeFormat}`}
+                                        status={isDeleted ? 'deleted' : 'completed'}
+                                        showDivider={index < entries.length - 1}
+                                        onPress={() => {
+                                            setSelectedBatchItem(entry);
+                                            setIsBatchDetailVisible(true);
+                                        }}
+                                    />
+                                );
+                            })
+                        )}
                     </View>
                 </View>
             </ScrollView>
 
-            <View style={[styles.bottomBar, { paddingBottom }]}>
-                <Button title="Kết thúc phiên cân" variant="outline" fullWidth onPress={() => {}} />
-            </View>
+            {entries.length !== 0 && activeScales.length !== 0 && (
+                <View
+                    style={[
+                        styles.bottomBar,
+                        { paddingBottom, flexDirection: 'row', gap: spacing.md },
+                    ]}
+                >
+                    {entries.length !== 0 && (
+                        <Button
+                            title="Xóa phiên cân"
+                            variant="outline"
+                            style={{ flex: 1 }}
+                            onPress={() => setIsDeleteSessionVisible(true)}
+                        />
+                    )}
+                    {activeScales.length !== 0 && (
+                        <Button
+                            title="Kết thúc phiên cân"
+                            variant="outline"
+                            style={{ flex: 1 }}
+                            onPress={() => setIsEndSessionVisible(true)}
+                        />
+                    )}
+                </View>
+            )}
 
             <AddScaleBottomSheet
                 visible={isAddScaleModalVisible}
                 onClose={() => setIsAddScaleModalVisible(false)}
-                onAddScale={_scaleId => {
-                    // Cần có setTimeout để đợi animation đóng của bottom sheet
-                    setTimeout(() => {
-                        setIsAddScaleModalVisible(false);
-                        if (onNavigateToAllScales) {
-                            onNavigateToAllScales();
-                        }
-                        setTimeout(() => AppToast(TOAST_MESSAGES_CONFIG.SCALE.ADD_SUCCESS), 300);
-                    }, 100);
-                }}
+                zoneId={zoneId}
+                isSubmitting={isAddingScale}
+                onAddScale={handleAddScaleSubmit}
+                pondName={pondName}
             />
 
             <ConfirmScaleBottomSheet
                 visible={isConfirmModalVisible}
                 onClose={() => setIsConfirmModalVisible(false)}
+                weight={selectedConfirmWeight}
+                scaleName={selectedConfirmScaleName}
+                batchNumber={confirmedBatches + 1}
+                totalAfterConfirm={totalWeight + selectedConfirmWeight}
+                onConfirm={handleConfirmAction}
             />
 
             <HarvestBatchDetailBottomSheet
                 visible={isBatchDetailVisible}
                 onClose={() => setIsBatchDetailVisible(false)}
+                data={mapScaleRecordToBatchDetail(selectedBatchItem)}
+                onDelete={handleDeleteBatch}
+                isDeleting={isDeleting}
             />
 
             <ScaleActionBottomSheet
                 visible={isActionModalVisible}
                 onClose={() => setIsActionModalVisible(false)}
                 scaleStatus={selectedScaleStatus!}
+                scale={selectedScaleItem}
                 onRevokeEmergency={() => {
                     setIsActionModalVisible(false);
                     setTimeout(() => setIsEmergencySuccessVisible(true), 500);
@@ -175,6 +426,17 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                 visible={isEmergencySuccessVisible}
                 onClose={() => setIsEmergencySuccessVisible(false)}
                 scaleName="Cân 04 — Sân D"
+            />
+            <EndScaleSessionBottomSheet
+                visible={isEndSessionVisible}
+                onClose={() => setIsEndSessionVisible(false)}
+                onConfirm={handleFinishSession}
+            />
+
+            <DeleteScaleSessionBottomSheet
+                visible={isDeleteSessionVisible}
+                onClose={() => setIsDeleteSessionVisible(false)}
+                onConfirm={handleDeleteSession}
             />
         </View>
     );

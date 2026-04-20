@@ -2,6 +2,23 @@ import { IApiResponse, IPaginate, IDocument, ICreatorEditor } from '@/shared/typ
 
 export type HarvestType = 'FullHarvest' | 'PartialHarvest';
 
+export enum HarvestScaleMode {
+    MANUAL = 'MANUAL',
+    AUTO = 'AUTO',
+}
+
+export enum ScaleSessionAction {
+    ACTIVE = 'ACTIVE',
+    FINISH = 'FINISH',
+    DELETE = 'DELETE',
+}
+
+export enum HarvestFilterType {
+    ALL = 'all',
+    COMPLETED = 'completed',
+    DELETED = 'deleted',
+}
+
 export interface IHarvestDetail {
     harvestType: HarvestType;
     totalWeightKg: number;

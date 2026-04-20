@@ -1,7 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { scaleApi } from '@/features/farm/api/scaleApi';
 import { farmKeys } from './farmKeys';
-import { IScaleParams, IScale, ScaleUsageStatus } from '@/features/farm/types/scale.types';
+import {
+    IScaleParams,
+    IScale,
+    ScaleUsageStatus,
+    IUpdateScaleUsageStatusRequest,
+} from '@/features/farm/types/scale.types';
 import { APP_CONFIG } from '@/shared/constants';
 
 export const useScales = (params?: IScaleParams) => {
@@ -29,4 +34,14 @@ export const useAvailableScales = (zoneId?: string) => {
     const items: IScale[] = data?.data?.items ?? [];
 
     return { ...rest, data, items };
+};
+
+export const useUpdateScaleUsageStatus = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: IUpdateScaleUsageStatusRequest) => scaleApi.updateUsageStatus(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: farmKeys.scales.all() });
+        },
+    });
 };

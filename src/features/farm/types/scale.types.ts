@@ -55,3 +55,9 @@ export interface IScaleParams {
 
 export type GetScalesResponse = IApiResponse<IPaginate<IScale>>;
 export type ScaleResponse = IApiResponse<IScale>;
+
+export interface IUpdateScaleUsageStatusRequest {
+    scaleIds: string[];
+    status: ScaleUsageStatus | string;
+    cycleId: string;
+}

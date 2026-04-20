@@ -132,6 +132,11 @@ export const TOAST_MESSAGES_CONFIG = {
             text1: 'Chưa có dữ liệu',
             text2: 'Vui lòng lấy kết quả kiểm tra trước khi xem chi tiết.',
         },
+        NO_SHRIMP_FOUND: {
+            type: 'error',
+            text1: 'Không tìm thấy tôm',
+            text2: 'Vui lòng chụp góc độ khác hoặc ảnh rõ nét hơn và thử lại.',
+        },
     },
     SCHEDULE: {
         MISSING_RUN_TIME: {
@@ -182,6 +187,16 @@ export const TOAST_MESSAGES_CONFIG = {
         ADD_SUCCESS: {
             type: 'success',
             text1: 'Thêm cân thành công',
+        },
+        ACTIVE_SESSION: {
+            type: 'info',
+            text1: 'Phiên cân trước đó đã áp dụng',
+            text2: 'Bạn có thể tiếp tục áp dụng hoặc xoá phiên cân',
+        },
+        NOT_FINISHED: {
+            type: 'error',
+            text1: 'Thao tác không hợp lệ',
+            text2: 'Vui lòng kết thúc phiên cân điện tử trước khi lưu thu hoạch.',
         },
     },
 } as const;

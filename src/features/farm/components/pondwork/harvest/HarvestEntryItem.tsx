@@ -13,6 +13,7 @@ export interface HarvestEntryItemProps {
     status?: 'completed' | 'deleted';
     showDivider?: boolean;
     onPress?: () => void;
+    hideBadge?: boolean;
 }
 
 export const HarvestEntryItem: React.FC<HarvestEntryItemProps> = ({
@@ -23,6 +24,7 @@ export const HarvestEntryItem: React.FC<HarvestEntryItemProps> = ({
     status = 'completed',
     showDivider = true,
     onPress,
+    hideBadge = false,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -61,11 +63,15 @@ export const HarvestEntryItem: React.FC<HarvestEntryItemProps> = ({
                     </View>
                     <Text style={styles.entrySubtitle}>{subtitle}</Text>
                 </View>
-                <View style={[styles.statusBadge, isDeleted && styles.statusDeletedBadge]}>
-                    <Text style={[styles.statusBadgeText, isDeleted && styles.statusDeletedText]}>
-                        {isDeleted ? 'Đã xóa' : 'Hoàn tất'}
-                    </Text>
-                </View>
+                {!hideBadge && (
+                    <View style={[styles.statusBadge, isDeleted && styles.statusDeletedBadge]}>
+                        <Text
+                            style={[styles.statusBadgeText, isDeleted && styles.statusDeletedText]}
+                        >
+                            {isDeleted ? 'Đã xóa' : 'Hoàn tất'}
+                        </Text>
+                    </View>
+                )}
             </TouchableOpacity>
             {showDivider && <View style={styles.entryDivider} />}
         </>
@@ -90,7 +96,6 @@ const getStyles = (theme: Colors) =>
         entryInfo: {
             flex: 1,
             marginHorizontal: spacing.sm,
-            marginVertical: spacing.sm,
             gap: spacing.xs,
         },
         entryWeightContainer: {
@@ -114,7 +119,7 @@ const getStyles = (theme: Colors) =>
         },
         statusBadge: {
             paddingHorizontal: 10,
-            paddingVertical: 4,
+            paddingVertical: 2,
             borderRadius: 100,
             borderWidth: 1,
             borderColor: theme.green[200],

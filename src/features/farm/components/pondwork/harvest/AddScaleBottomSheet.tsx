@@ -9,12 +9,15 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAvailableScales } from '@/features/farm/hooks/useScales';
 import { IScale } from '@/features/farm/types/scale.types';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 export interface AddScaleBottomSheetProps {
     visible: boolean;
     onClose: () => void;
-    onAddScale?: (scaleId: string) => void;
+    onAddScale?: (scaleIds: string[]) => void;
     zoneId?: string;
+    isSubmitting?: boolean;
+    pondName?: string;
 }
 
 export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
@@ -22,28 +25,34 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
     onClose,
     onAddScale,
     zoneId,
+    isSubmitting = false,
+    pondName,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
-    const [selectedScaleId, setSelectedScaleId] = useState<string | null>(null);
+    const [selectedScaleIds, setSelectedScaleIds] = useState<string[]>([]);
     const { items: scales, isLoading } = useAvailableScales(zoneId);
 
     const handleAdd = () => {
-        if (selectedScaleId && onAddScale) {
-            onAddScale(selectedScaleId);
+        if (selectedScaleIds.length > 0 && onAddScale) {
+            onAddScale(selectedScaleIds);
         }
-        onClose();
-        setTimeout(() => setSelectedScaleId(null), 300);
+    };
+
+    const toggleScaleSelection = (id: string) => {
+        setSelectedScaleIds(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
     };
 
     const renderScaleItem = (scale: IScale) => {
-        const isSelected = selectedScaleId === scale.id;
+        const isSelected = selectedScaleIds.includes(scale.id);
         return (
             <TouchableOpacity
                 key={scale.id}
                 style={[styles.scaleItem, isSelected && styles.scaleItemActive]}
-                onPress={() => setSelectedScaleId(scale.id)}
+                onPress={() => toggleScaleSelection(scale.id)}
             >
                 <Image
                     source={require('@/assets/Icon/IconDevices/icon_weight_scale.png')}
@@ -58,8 +67,8 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
                         {scale.code} · {scale.type}
                     </Text>
                 </View>
-                <View style={[styles.radioCircle, isSelected && styles.radioCircleActive]}>
-                    {isSelected && <View style={styles.radioInnerCircle} />}
+                <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
+                    {isSelected && <Ionicons name="checkmark" size={16} color="#FFF" />}
                 </View>
             </TouchableOpacity>
         );
@@ -79,7 +88,7 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
                     <View style={styles.contentContainer}>
                         {/* Subtitle */}
                         <Text style={styles.subtitle}>
-                            Chọn cân kết nối vào Ao 12.{'\n'}
+                            Chọn cân kết nối {pondName ? `vào ${pondName}` : 'để sử dụng'}.{'\n'}
                             Cân đang bận có thể yêu cầu thu hồi.
                         </Text>
 
@@ -92,7 +101,10 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
                                     style={styles.loader}
                                 />
                             ) : scales.length === 0 ? (
-                                <Text style={styles.emptyText}>Không có cân khả dụng</Text>
+                                <EmptyStateCard
+                                    message="Không có thiết bị cân nào"
+                                    style={{ marginTop: 24 }}
+                                />
                             ) : (
                                 scales.map(renderScaleItem)
                             )}
@@ -104,7 +116,8 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
                 <ButtonBarFarm
                     primaryTitle="Thêm cân"
                     onPrimaryPress={handleAdd}
-                    primaryDisabled={!selectedScaleId}
+                    primaryDisabled={selectedScaleIds.length === 0 || isSubmitting}
+                    isLoading={isSubmitting}
                     style={styles.buttonBar}
                 />
             </View>
@@ -184,23 +197,19 @@ const getStyles = (theme: Colors) =>
             fontSize: 14,
             color: theme.textSecondary,
         },
-        radioCircle: {
+        checkbox: {
             width: 24,
             height: 24,
-            borderRadius: 12,
+            borderRadius: 6,
             borderWidth: 2,
             borderColor: theme.defaultBorder,
             alignItems: 'center',
             justifyContent: 'center',
             marginLeft: spacing.sm,
+            backgroundColor: theme.background,
         },
-        radioCircleActive: {
+        checkboxActive: {
             borderColor: theme.primary,
-        },
-        radioInnerCircle: {
-            width: 12,
-            height: 12,
-            borderRadius: 6,
             backgroundColor: theme.primary,
         },
         buttonBar: {
