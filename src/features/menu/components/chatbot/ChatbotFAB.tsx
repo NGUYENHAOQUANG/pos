@@ -169,7 +169,6 @@ export const ChatbotFAB = memo(() => {
         translateY.value = withSpring(snapY, SNAP_SPRING_CONFIG);
     };
 
-    // ── Pan Gesture (runs entirely on UI thread) ──
     const panGesture = Gesture.Pan()
         .minDistance(5)
         .onStart(() => {
@@ -216,17 +215,27 @@ export const ChatbotFAB = memo(() => {
             dismissScale.value = withTiming(0.5, { duration: 200 });
             runOnJS(hideDismiss)();
 
-            if (!isDragging.value) {
-                // Was a tap — navigate to Chatbot
-                runOnJS(onTap)();
-            } else if (checkDismissZone(finalX, finalY)) {
+            if (checkDismissZone(finalX, finalY)) {
                 // Dropped in dismiss zone — hide FAB
                 runOnJS(onDismiss)();
             } else {
                 // Snap to nearest edge
                 snapToEdge(finalX, finalY);
             }
+        })
+        .onFinalize(() => {
+            'worklet';
+            isDragging.value = false;
         });
+
+    const tapGesture = Gesture.Tap()
+        .maxDuration(250)
+        .onEnd(() => {
+            'worklet';
+            runOnJS(onTap)();
+        });
+
+    const composedGesture = Gesture.Exclusive(panGesture, tapGesture);
 
     // ── Animated styles (UI thread) ──
     const fabAnimatedStyle = useAnimatedStyle(() => ({
@@ -276,7 +285,7 @@ export const ChatbotFAB = memo(() => {
             )}
 
             {/* Draggable FAB */}
-            <GestureDetector gesture={panGesture}>
+            <GestureDetector gesture={composedGesture}>
                 <Animated.View style={[styles.fab, fabAnimatedStyle]}>
                     <ChatbotAvatar size={FAB_SIZE} animated />
                 </Animated.View>
