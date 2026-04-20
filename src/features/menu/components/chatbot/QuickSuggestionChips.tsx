@@ -3,11 +3,11 @@ import { View, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-nat
 import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles/colors';
-import { QUICK_REPLIES } from '@/features/menu/screens/chatbot/constants';
+import { QUICK_REPLIES } from '@/features/menu/constants/chatbot.constants';
 import { Zone, PondData } from '@/features/farm/types/farm.types';
 import { PondCategory } from '@/features/farm/types/pond-category.types';
-import { SelectionStep } from '@/features/menu/screens/chatbot/hooks/useChatbotInput';
-import { useInputStyles } from '@/features/menu/screens/chatbot/styles/chatbotInputStyles';
+import { SelectionStep } from '@/features/menu/hooks/useChatbotInput';
+import { useInputStyles } from '@/features/menu/styles/chatbotInputStyles';
 
 interface QuickSuggestionChipsProps {
     step: SelectionStep;

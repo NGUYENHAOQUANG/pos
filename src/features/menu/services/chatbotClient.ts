@@ -1,7 +1,7 @@
 import { ENV } from '@/core/config/env';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { AIResponse } from '@/features/menu/screens/chatbot/types';
-import { chatbotState } from '@/features/menu/screens/chatbot/services/chatbotState';
+import { AIResponse } from '@/features/menu/types/chatbot.types';
+import { chatbotState } from '@/features/menu/services/chatbotState';
 
 export const callBackendAI = async (text: string, sessionId: string = '1'): Promise<AIResponse> => {
     try {

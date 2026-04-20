@@ -11,7 +11,7 @@ import { pondApi } from '@/features/farm/api/pondApi';
 import { pondCategoryApi } from '@/features/farm/api/pondCategoryApi';
 import { Zone, PondData } from '@/features/farm/types/farm.types';
 import { PondCategory } from '@/features/farm/types/pond-category.types';
-import { chatbotState } from '@/features/menu/screens/chatbot/services/chatbotState';
+import { chatbotState } from '@/features/menu/services/chatbotState';
 
 // ── Types ──
 export type ActionIntent = 'POND_STATUS' | 'DEVICE_CONTROL' | 'REPORTS';

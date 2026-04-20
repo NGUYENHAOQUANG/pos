@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ChatbotFAB } from '@/features/menu/screens/chatbot/components/ChatbotFAB';
+import { ChatbotFAB } from '@/features/menu/components/chatbot/ChatbotFAB';
 
 // Main Tabs
 import { MainNavigator } from './MainNavigator';

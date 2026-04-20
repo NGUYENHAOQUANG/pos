@@ -6,11 +6,11 @@ import MicrophoneIcon from '@/assets/Icon/IconChatBot/Microphone.svg';
 import SendIcon from '@/assets/Icon/IconChatBot/Send.svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles/colors';
-import { AudioWaveform } from '@/features/menu/screens/chatbot/components/AudioWaveform';
-import { RainbowGlowBorder } from '@/features/menu/screens/chatbot/components/RainbowGlowBorder';
-import { QuickSuggestionChips } from '@/features/menu/screens/chatbot/components/QuickSuggestionChips';
-import { useChatbotInput } from '@/features/menu/screens/chatbot/hooks/useChatbotInput';
-import { useInputStyles } from '@/features/menu/screens/chatbot/styles/chatbotInputStyles';
+import { AudioWaveform } from '@/features/menu/components/chatbot/AudioWaveform';
+import { RainbowGlowBorder } from '@/features/menu/components/chatbot/RainbowGlowBorder';
+import { QuickSuggestionChips } from '@/features/menu/components/chatbot/QuickSuggestionChips';
+import { useChatbotInput } from '@/features/menu/hooks/useChatbotInput';
+import { useInputStyles } from '@/features/menu/styles/chatbotInputStyles';
 
 interface ChatbotInputToolbarProps {
     onSend: (text: string) => void;

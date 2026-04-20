@@ -11,7 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius } from '@/styles';
 import { colors } from '@/styles/colors';
-import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
+import { ChatbotAvatar } from '@/features/menu/animation/ChatbotAvatar';
 import ArrowsClockwiseIcon from '@/assets/Icon/IconChatBot/ArrowsClockwise.svg';
 
 interface ChatbotHeaderProps {
