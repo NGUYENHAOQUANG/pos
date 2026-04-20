@@ -11,7 +11,10 @@ import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import DropIcon from '@/assets/Icon/IconReport/Drop.svg';
 import { useWaterUsageStats } from '../../hooks/useWaterUsageStats';
 import { scaleLinear, formatNumberVietnamese, parseWaterUsageData } from './waterUsageHelpers';
-import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
+import {
+    calculateDynamicYAxisWidth,
+    calculateFlexibleXLabels,
+} from '@/features/reports/utils/chartHelpers';
 import { typography } from '@/styles/typography';
 
 const CHART_HEIGHT = 400;
@@ -25,6 +28,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
     const chartStyles = useChartStyles();
     const theme = useAppTheme();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [containerWidth, setContainerWidth] = useState(0);
 
     const {
         data: statsData,
@@ -51,7 +55,10 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
     const SCROLL_PAD = 16;
     const SCROLL_PAD_RIGHT = 36;
 
-    const scrollWidth = SCROLL_PAD + bars.length * BAR_STEP + SCROLL_PAD_RIGHT;
+    const rawScrollWidth = SCROLL_PAD + bars.length * BAR_STEP + SCROLL_PAD_RIGHT;
+    // Ensure chart fills at least the visible scroll area; scroll when data is dense
+    const availableScrollWidth = Math.max(0, containerWidth - PADDING_LEFT);
+    const scrollWidth = Math.max(rawScrollWidth, availableScrollWidth);
 
     // Get center X of a bar
     const getBarCenterX = (index: number) => SCROLL_PAD + index * BAR_STEP + BAR_STEP / 2;
@@ -104,7 +111,10 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
                             </Text>
 
                             {/* Chart: fixed Y-axis + scrollable content */}
-                            <View style={styles.chartRow}>
+                            <View
+                                style={styles.chartRow}
+                                onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
+                            >
                                 {/* Fixed Y-axis labels */}
                                 <Svg
                                     width={PADDING_LEFT}
@@ -181,30 +191,38 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId, pondIds, seas
                                             );
                                         })}
 
-                                        {/* X Axis date labels */}
-                                        {bars.map((bar, i) => {
-                                            const cx = getBarCenterX(i);
-                                            return (
-                                                <G key={`x-label-${i}`}>
-                                                    <Line
-                                                        x1={cx}
-                                                        y1={DRAW_HEIGHT + PADDING_TOP}
-                                                        x2={cx}
-                                                        y2={DRAW_HEIGHT + PADDING_TOP + 5}
-                                                        stroke={theme.border}
-                                                    />
-                                                    <SvgText
-                                                        x={cx}
-                                                        y={DRAW_HEIGHT + PADDING_TOP + 20}
-                                                        fontSize={12}
-                                                        fill={theme.textSecondary}
-                                                        textAnchor="middle"
-                                                    >
-                                                        {bar.dateLabel}
-                                                    </SvgText>
-                                                </G>
-                                            );
-                                        })}
+                                        {/* X Axis date labels — flexible visibility */}
+                                        {(() => {
+                                            const { visibleIndices } = calculateFlexibleXLabels({
+                                                totalPoints: bars.length,
+                                                availableWidth: scrollWidth,
+                                            });
+                                            return bars.map((bar, i) => {
+                                                const cx = getBarCenterX(i);
+                                                return (
+                                                    <G key={`x-label-${i}`}>
+                                                        <Line
+                                                            x1={cx}
+                                                            y1={DRAW_HEIGHT + PADDING_TOP}
+                                                            x2={cx}
+                                                            y2={DRAW_HEIGHT + PADDING_TOP + 5}
+                                                            stroke={theme.border}
+                                                        />
+                                                        {visibleIndices.has(i) && (
+                                                            <SvgText
+                                                                x={cx}
+                                                                y={DRAW_HEIGHT + PADDING_TOP + 20}
+                                                                fontSize={12}
+                                                                fill={theme.textSecondary}
+                                                                textAnchor="middle"
+                                                            >
+                                                                {bar.dateLabel}
+                                                            </SvgText>
+                                                        )}
+                                                    </G>
+                                                );
+                                            });
+                                        })()}
                                     </Svg>
                                 </ScrollView>
                             </View>

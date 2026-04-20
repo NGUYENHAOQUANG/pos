@@ -12,16 +12,15 @@ import { BasicDropDownButton } from '../BasicDropDownButton';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
 import { usePondStatusDistribution } from '@/features/reports/hooks/usePondStatusDistribution';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import {
+    calculateFlexibleXLabels,
+    calculateDynamicYAxisWidth,
+} from '@/features/reports/utils/chartHelpers';
 
 // --- CẤU HÌNH ---
 const ITEM_WIDTH = 40;
 const CHART_HEIGHT = 200;
-const Y_AXIS_WIDTH = 35;
 const VERTICAL_PADDING = { top: 20, bottom: 20 };
-
-// CẤU HÌNH TRỤC Y CỐ ĐỊNH THEO THIẾT KẾ
-const FIXED_Y_TICKS = [0, 8, 16, 24, 32, 40];
-const Y_DOMAIN_MAX = 40;
 
 // --- COLORS ---
 const getChartColors = (theme: Colors) => ({
@@ -116,27 +115,55 @@ export const ActivePondChart = ({ zoneId, seasonId }: ActivePondChartProps) => {
     }, [expanded, containerWidth, isApiLoading]);
 
     // --- 3. TÍNH TOÁN D3 ---
-    const { yTicks, xTicks, yScale, chartContentWidth } = useMemo(() => {
+    const { yTicks, xTicks, yScale, chartContentWidth, yAxisWidth } = useMemo(() => {
         if (containerWidth === 0 || processedData.length === 0) {
             return {
                 yTicks: [],
                 xTicks: [],
                 yScale: null,
                 chartContentWidth: 0,
+                yAxisWidth: 35,
             };
         }
 
         const rightPadding = 20;
+
+        // Tính đỉnh cực đại từ tất cả các trạng thái ao để khi chuyển Tab (filter) trục Y không bị nhảy (giật layout)
+        const maxVal = Math.max(
+            ...processedData.map(d => Math.max(d.active, d.prep, d.functional)),
+            0
+        );
+
+        // Chia biểu đồ thành 5 khoảng (6 đường gạch tick)
+        const INTERVALS = 5;
+        const rawStep = (maxVal || 40) / INTERVALS;
+
+        // Làm tròn bước nhảy cho số đẹp
+        let step = rawStep;
+        if (rawStep <= 10) {
+            step = Math.ceil(rawStep);
+        } else if (rawStep <= 100) {
+            step = Math.ceil(rawStep / 5) * 5; // Làm tròn lên đuôi 0 hoặc 5 (e.g. 15, 20)
+        } else if (rawStep <= 1000) {
+            step = Math.ceil(rawStep / 50) * 50; // Làm tròn chẵn 50, 100
+        } else {
+            step = Math.ceil(rawStep / 100) * 100; // Làm tròn lên trăm
+        }
+
+        const yDomainMax = step * INTERVALS;
+        const yTicks = Array.from({ length: INTERVALS + 1 }, (_, i) => i * step);
+
+        // Tính toán chiều rộng động cho trục Y bên trái để chữ số dù to vẫn không bị cắt
+        const yAxisWidth = calculateDynamicYAxisWidth(yTicks, val => val.toString());
+
         const chartContentWidth = Math.max(
-            containerWidth - Y_AXIS_WIDTH,
+            containerWidth - yAxisWidth,
             processedData.length * ITEM_WIDTH + rightPadding
         );
         const chartHeight = CHART_HEIGHT - VERTICAL_PADDING.top - VERTICAL_PADDING.bottom;
 
         // Scale Y
-        const yScale = scaleLinear().domain([0, Y_DOMAIN_MAX]).range([chartHeight, 0]);
-
-        const yTicks = FIXED_Y_TICKS;
+        const yScale = scaleLinear().domain([0, yDomainMax]).range([chartHeight, 0]);
         const xTicks = processedData.map((d, index) => ({
             date: d.date,
             x: index * ITEM_WIDTH + ITEM_WIDTH / 2 + 1,
@@ -147,6 +174,7 @@ export const ActivePondChart = ({ zoneId, seasonId }: ActivePondChartProps) => {
             xTicks,
             yScale,
             chartContentWidth,
+            yAxisWidth,
         };
     }, [containerWidth, processedData]);
 
@@ -264,15 +292,15 @@ export const ActivePondChart = ({ zoneId, seasonId }: ActivePondChartProps) => {
                                     {/* --- CỘT TRÁI: TRỤC Y (CỐ ĐỊNH) --- */}
                                     <View
                                         style={{
-                                            width: Y_AXIS_WIDTH,
+                                            width: yAxisWidth,
                                             backgroundColor: theme.background,
 
                                             zIndex: 2,
                                             // marginTop: 10,
                                         }}
                                     >
-                                        <Svg width={Y_AXIS_WIDTH} height={CHART_HEIGHT}>
-                                            <G x={Y_AXIS_WIDTH} y={VERTICAL_PADDING.top}>
+                                        <Svg width={yAxisWidth} height={CHART_HEIGHT}>
+                                            <G x={yAxisWidth} y={VERTICAL_PADDING.top}>
                                                 {yTicks.map(tick => (
                                                     <SvgText
                                                         key={tick}
@@ -377,27 +405,38 @@ export const ActivePondChart = ({ zoneId, seasonId }: ActivePondChartProps) => {
                                                         strokeWidth={1}
                                                     />
 
-                                                    {xTicks.map((tick, index) => (
-                                                        <G key={index}>
-                                                            <Line
-                                                                x1={tick.x}
-                                                                y1={yScale(0)}
-                                                                x2={tick.x}
-                                                                y2={yScale(0) + 5}
-                                                                stroke={activeChartColors.grid}
-                                                                strokeWidth={1}
-                                                            />
-                                                            <SvgText
-                                                                x={tick.x}
-                                                                y={yScale(0) + 18}
-                                                                fontSize="12"
-                                                                fill={activeChartColors.text}
-                                                                textAnchor="middle"
-                                                            >
-                                                                {formatDate(tick.date)}
-                                                            </SvgText>
-                                                        </G>
-                                                    ))}
+                                                    {(() => {
+                                                        const { visibleIndices } =
+                                                            calculateFlexibleXLabels({
+                                                                totalPoints: xTicks.length,
+                                                                availableWidth: chartContentWidth,
+                                                            });
+                                                        return xTicks.map((tick, index) => (
+                                                            <G key={index}>
+                                                                <Line
+                                                                    x1={tick.x}
+                                                                    y1={yScale(0)}
+                                                                    x2={tick.x}
+                                                                    y2={yScale(0) + 5}
+                                                                    stroke={activeChartColors.grid}
+                                                                    strokeWidth={1}
+                                                                />
+                                                                {visibleIndices.has(index) && (
+                                                                    <SvgText
+                                                                        x={tick.x}
+                                                                        y={yScale(0) + 18}
+                                                                        fontSize="12"
+                                                                        fill={
+                                                                            activeChartColors.text
+                                                                        }
+                                                                        textAnchor="middle"
+                                                                    >
+                                                                        {formatDate(tick.date)}
+                                                                    </SvgText>
+                                                                )}
+                                                            </G>
+                                                        ));
+                                                    })()}
                                                 </G>
                                             </Svg>
                                         </ScrollView>

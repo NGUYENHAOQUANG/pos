@@ -15,7 +15,10 @@ const getChartTheme = (theme: any) => ({
 });
 import { CHART_HEIGHT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
 import { FeedProdChartDataPoint } from '../../types/feeding-production';
-import { calculateDynamicYAxisWidth } from '@/features/reports/utils/chartHelpers';
+import {
+    calculateDynamicYAxisWidth,
+    calculateFlexibleXLabels,
+} from '@/features/reports/utils/chartHelpers';
 
 interface ChartProps {
     chartWidth: number;
@@ -416,25 +419,32 @@ export const Chart: React.FC<ChartProps> = ({
                             />
                         )}
 
-                        {/* X-axis labels - white, DD/MM */}
-                        {DAY_MARKS.map((day, index) => {
-                            const x = getX(day);
-                            const align: 'middle' | 'start' | 'end' = 'middle';
+                        {/* X-axis labels — flexible visibility */}
+                        {(() => {
+                            const { visibleIndices } = calculateFlexibleXLabels({
+                                totalPoints: DAY_MARKS.length,
+                                availableWidth: actualWidth,
+                            });
+                            return DAY_MARKS.map((day, index) => {
+                                if (!visibleIndices.has(index)) return null;
+                                const x = getX(day);
+                                const align: 'middle' | 'start' | 'end' = 'middle';
 
-                            const y = PADDING_TOP + chartHeight + 18;
-                            return (
-                                <SvgText
-                                    key={`x-label-${day}`}
-                                    x={x}
-                                    y={y}
-                                    fill={CHART_THEME.text}
-                                    fontSize={12}
-                                    textAnchor={align}
-                                >
-                                    {DAY_LABELS[index]}
-                                </SvgText>
-                            );
-                        })}
+                                const y = PADDING_TOP + chartHeight + 18;
+                                return (
+                                    <SvgText
+                                        key={`x-label-${day}`}
+                                        x={x}
+                                        y={y}
+                                        fill={CHART_THEME.text}
+                                        fontSize={12}
+                                        textAnchor={align}
+                                    >
+                                        {DAY_LABELS[index]}
+                                    </SvgText>
+                                );
+                            });
+                        })()}
                     </Svg>
                 </ScrollView>
             </View>
