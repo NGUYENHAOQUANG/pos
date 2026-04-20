@@ -36,7 +36,7 @@ export type HarvestFormData = z.infer<typeof harvestFormSchema>;
 /**
  * Helper to map form data to API request
  */
-export const mapFormToApiRequest = (formData: HarvestFormData) => {
+export const mapFormToApiRequest = (formData: HarvestFormData, sessionId?: string | null) => {
     const totalWeightKgStr = formData.totalWeightKg?.trim();
     const shrimpSizeStr = formData.shrimpSize?.trim();
     const referencePriceStr = formData.referencePrice?.trim();
@@ -55,6 +55,7 @@ export const mapFormToApiRequest = (formData: HarvestFormData) => {
     if (shrimpSizeStr) harvest.shrimpSize = parseFloat(shrimpSizeStr);
     if (referencePriceStr) harvest.referencePrice = priceNum;
     if (notesStr) harvest.notes = notesStr;
+    if (sessionId) harvest.sessionId = sessionId;
 
     return {
         value: revenue,

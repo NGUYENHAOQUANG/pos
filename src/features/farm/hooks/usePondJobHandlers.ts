@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { PondData, JOB_TYPES, JobExecution } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
+import { useScaleStore } from '@/features/farm/store/scaleStore';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -14,7 +15,9 @@ export type JobLogHandler = () => void;
 
 interface UsePondJobNavigateHandlersParams {
     pond?: PondData;
+    cycleId?: string;
     handleTransferPond?: JobHandler;
+    handleHarvest?: JobHandler;
 }
 
 /**
@@ -23,7 +26,9 @@ interface UsePondJobNavigateHandlersParams {
  */
 export const usePondJobNavigateHandlers = ({
     pond,
+    cycleId,
     handleTransferPond,
+    handleHarvest,
 }: UsePondJobNavigateHandlersParams): Partial<Record<JobType, JobHandler>> => {
     const navigation = useNavigation<NavigationProp>();
 
@@ -73,8 +78,19 @@ export const usePondJobNavigateHandlers = ({
             },
 
             [JOB_TYPES.HARVEST]: () => {
-                if (!pond) return;
-                navigation.navigate('HarvestFormScreen', { pond });
+                const activeCycleId = cycleId || pond?.cyclePond?.cycleId;
+                if (!pond?.id || !activeCycleId) return;
+
+                useScaleStore.getState().clearManualRecords();
+
+                if (handleHarvest) {
+                    handleHarvest();
+                } else {
+                    navigation.navigate('HarvestFormScreen', {
+                        pondId: pond.id,
+                        cycleId: activeCycleId,
+                    });
+                }
             },
 
             [JOB_TYPES.CLEAN_POND]: () => {
@@ -95,12 +111,13 @@ export const usePondJobNavigateHandlers = ({
                 });
             },
         }),
-        [navigation, pond, handleTransferPond]
+        [navigation, pond, cycleId, handleTransferPond, handleHarvest]
     );
 };
 
 interface UsePondJobEditHandlersParams {
     pond?: PondData;
+    cycleId?: string;
 }
 
 /**
@@ -108,6 +125,7 @@ interface UsePondJobEditHandlersParams {
  */
 export const usePondJobEditHandlers = ({
     pond,
+    cycleId,
 }: UsePondJobEditHandlersParams): Partial<Record<JobType, JobEditHandler>> => {
     const navigation = useNavigation<NavigationProp>();
 
@@ -170,8 +188,16 @@ export const usePondJobEditHandlers = ({
             },
 
             [JOB_TYPES.HARVEST]: item => {
-                if (!pond) return;
-                navigation.navigate('HarvestFormScreen', { pond, itemToEdit: item });
+                const activeCycleId = cycleId || pond?.cyclePond?.cycleId;
+                if (!pond?.id || !activeCycleId) return;
+
+                useScaleStore.getState().clearManualRecords();
+
+                navigation.navigate('HarvestFormScreen', {
+                    pondId: pond.id,
+                    cycleId: activeCycleId,
+                    harvestRecordId: item.id,
+                });
             },
 
             [JOB_TYPES.CLEAN_POND]: item => {
@@ -201,7 +227,7 @@ export const usePondJobEditHandlers = ({
                 });
             },
         }),
-        [navigation, pond]
+        [navigation, pond, cycleId]
     );
 };
 

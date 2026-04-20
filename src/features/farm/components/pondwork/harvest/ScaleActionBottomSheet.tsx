@@ -13,13 +13,14 @@ import { ScaleStatus } from './ScaleCard';
 import { ScrollView } from 'react-native-gesture-handler';
 import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
 import WarningCircleIcon from '@/assets/Icon/WarningCircle.svg';
+import { IScale } from '@/features/farm/types/scale.types';
+import { getScaleDisplayTitle } from '@/features/farm/services/pond-work/scale.service';
 
 export interface ScaleActionBottomSheetProps {
     visible: boolean;
     onClose: () => void;
     scaleStatus: ScaleStatus | null;
-    scaleName?: string;
-    scaleCode?: string;
+    scale?: IScale | null;
     weight?: number;
     completedBatches?: number;
     onRevoke?: (reason: string) => void;
@@ -30,8 +31,7 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
     visible,
     onClose,
     scaleStatus,
-    scaleName = 'Cân 01 — Sân A',
-    scaleCode = 'SCD-001',
+    scale,
     weight = 0,
     completedBatches = 3,
     onRevoke,
@@ -58,6 +58,10 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
     };
 
     if (!scaleStatus) return null;
+
+    const scaleName = scale ? getScaleDisplayTitle(scale) : 'Cân chưa rõ';
+    const shortScaleName = scale?.name || 'Cân';
+    const scaleCode = scale?.code || '---';
 
     const renderHeaderTitle = () => scaleName;
 
@@ -171,9 +175,10 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                         />
                         <View style={styles.alertTextContainer}>
                             <Text style={styles.alertTextRed}>
-                                Cân 02 đang ở trạng thái Sẵn sàng XN với mẻ chưa được xác nhận.
+                                {shortScaleName} đang ở trạng thái Sẵn sàng XN với mẻ chưa được xác
+                                nhận.
                                 {'\n'}
-                                Mẻ #5 chưa được xác nhận ({weight.toFixed(1)} kg){'\n'}
+                                Mẻ chưa được xác nhận ({weight.toFixed(1)} kg){'\n'}
                                 Xác nhận hoặc bỏ mẻ này trước, sau đó mới có thể thu hồi cân
                             </Text>
                         </View>
@@ -190,7 +195,8 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                         />
                         <View style={styles.alertTextContainer}>
                             <Text style={styles.alertTextRed}>
-                                Cân 04 mất kết nối. Bạn có thể thu hồi để giải phóng slot cân.{'\n'}
+                                {shortScaleName} mất kết nối. Bạn có thể thu hồi để giải phóng slot
+                                cân.{'\n'}
                                 Dữ liệu realtime không khả dụng{'\n'}
                                 Thu hồi sẽ được ghi log. Nếu cân kết nối lại sau đó sẽ không còn
                                 trong phiên này.
@@ -233,14 +239,14 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                     <View style={styles.actionListItem}>
                         <CheckCircleIcon width={20} height={20} />
                         <Text style={styles.actionListText}>
-                            Xác nhận mẻ #5 <Text style={styles.actionListArrow}>→</Text>{' '}
+                            Xác nhận mẻ cân <Text style={styles.actionListArrow}>→</Text>{' '}
                             {weight.toFixed(1)} kg
                         </Text>
                     </View>
                     <View style={styles.actionListItem}>
                         <CheckCircleIcon width={20} height={20} />
                         <Text style={styles.actionListText}>
-                            Hủy mẻ #5 (cân về trạng thái Trống)
+                            Hủy mẻ cân (cân về trạng thái Trống)
                         </Text>
                     </View>
                 </View>
@@ -314,7 +320,9 @@ export const ScaleActionBottomSheet: React.FC<ScaleActionBottomSheetProps> = ({
                     {/* Header */}
                     <View style={styles.header}>
                         <View style={styles.headerLeft}>
-                            <Text style={styles.headerTitle}>{renderHeaderTitle()}</Text>
+                            <Text style={styles.headerTitle} numberOfLines={2}>
+                                {renderHeaderTitle()}
+                            </Text>
                             {renderHeaderBadge()}
                         </View>
                         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
@@ -358,13 +366,16 @@ const getStyles = (theme: Colors) =>
         header: {
             flexDirection: 'row',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             marginBottom: spacing.md,
         },
         headerLeft: {
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
+            flexWrap: 'wrap',
             gap: 8,
+            marginRight: spacing.md,
         },
         headerTitle: {
             fontSize: 18,

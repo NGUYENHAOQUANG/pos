@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+import { useCycleDetail } from '@/features/farm/hooks/useCycle';
+
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -11,51 +15,135 @@ import { AddScaleBottomSheet } from '@/features/farm/components/pondwork/harvest
 import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { ScaleActionBottomSheet } from '@/features/farm/components/pondwork/harvest/ScaleActionBottomSheet';
 import { EmergencyRevokeSuccessBottomSheet } from '@/features/farm/components/pondwork/harvest/EmergencyRevokeSuccessBottomSheet';
+import { useScales, useUpdateScaleUsageStatus } from '@/features/farm/hooks/useScales';
+import { IScale, ScaleUsageStatus } from '@/features/farm/types/scale.types';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import {
+    mapToScaleStatus,
+    getScaleDisplayTitle,
+} from '@/features/farm/services/pond-work/scale.service';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
+type ScaleListRouteProp = RouteProp<AppStackParamList, 'ScaleListScreen'>;
 export const ScaleListScreen: React.FC = () => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
     const insets = useSafeAreaInsets();
+    const route = useRoute<ScaleListRouteProp>();
+    const cycleId = route.params?.cycleId;
+    const pondId = route.params?.pondId;
+
+    const { data: cycleData } = useCycleDetail(pondId || '', cycleId || '');
+    const pondName = cycleData?.data?.pond?.name;
 
     const [isAddScaleModalVisible, setIsAddScaleModalVisible] = useState(false);
+    const [isAddingScale, setIsAddingScale] = useState(false);
 
     // Scale action modal state
-    const [selectedScale, setSelectedScale] = useState<{
-        id: string;
-        title: string;
-        status: ScaleStatus;
-    } | null>(null);
+    const [selectedScaleItem, setSelectedScaleItem] = useState<IScale | null>(null);
+    const [selectedScaleStatus, setSelectedScaleStatus] = useState<ScaleStatus | null>(null);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
     const [isEmergencySuccessVisible, setIsEmergencySuccessVisible] = useState(false);
 
-    const handlePressChevron = (scale: { id: string; title: string; status: ScaleStatus }) => {
-        setSelectedScale(scale);
-        setIsActionModalVisible(true);
-    };
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    const mockScales = [
-        { id: '1', title: 'Cân 01 — Sân A', status: ScaleStatus.EMPTY, weight: 0 },
-        { id: '2', title: 'Cân 02 — Sân B', status: ScaleStatus.READY, weight: 18.4 },
-        { id: '3', title: 'Cân 03 — Sân C', status: ScaleStatus.WAITING, weight: 18.4 },
-        { id: '4', title: 'Cân 04 — Sân D', status: ScaleStatus.DISCONNECTED, weight: null },
-    ];
+    const { mutateAsync: updateUsageStatus } = useUpdateScaleUsageStatus();
+
+    const {
+        data: scalesData,
+        isLoading,
+        refetch,
+        isRefetching,
+    } = useScales({
+        ZoneId: selectedZoneId || undefined,
+        UsageStatus: ScaleUsageStatus.Using,
+    });
+
+    const apiScales = scalesData?.data?.items || [];
+
+    const handlePressChevron = useCallback((scale: IScale, status: ScaleStatus) => {
+        setSelectedScaleItem(scale);
+        setSelectedScaleStatus(status);
+        setIsActionModalVisible(true);
+    }, []);
+
+    const handleScaleToggle = useCallback(
+        (val: boolean, scaleId: string) => {
+            if (!val && cycleId) {
+                updateUsageStatus({
+                    scaleIds: [scaleId],
+                    status: ScaleUsageStatus.Free,
+                    cycleId: cycleId,
+                });
+            }
+        },
+        [updateUsageStatus, cycleId]
+    );
+
+    const handleAddScaleSubmit = useCallback(
+        async (scaleIds: string[]) => {
+            try {
+                if (scaleIds.length > 0 && cycleId) {
+                    setIsAddingScale(true);
+                    await updateUsageStatus({
+                        scaleIds,
+                        status: ScaleUsageStatus.Using,
+                        cycleId: cycleId,
+                    });
+                    setIsAddScaleModalVisible(false);
+                    setTimeout(() => AppToast(TOAST_MESSAGES_CONFIG.SCALE.ADD_SUCCESS), 300);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsAddingScale(false);
+            }
+        },
+        [updateUsageStatus, cycleId]
+    );
 
     return (
         <View style={styles.container}>
             <HeaderMeterial title="Tất cả cân" showBackButton />
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefetching}
+                        onRefresh={() => refetch()}
+                        colors={[theme.primary]}
+                    />
+                }
+            >
                 <View style={styles.listContainer}>
-                    {mockScales.map(scale => (
-                        <ScaleCard
-                            key={scale.id}
-                            title={scale.title}
-                            status={scale.status}
-                            weight={scale.weight}
-                            onConfirmPress={() => {}}
-                            onPress={() => handlePressChevron(scale)}
+                    {isLoading && !isRefetching ? (
+                        <ActivityIndicator style={{ marginTop: 24 }} color={theme.primary} />
+                    ) : apiScales.length === 0 ? (
+                        <EmptyStateCard
+                            message="Không có thiết bị cân nào"
+                            style={{ marginTop: 24 }}
                         />
-                    ))}
+                    ) : (
+                        apiScales.map(scale => {
+                            const status = mapToScaleStatus(
+                                scale.connectionStatus,
+                                scale.usageStatus
+                            );
+                            const title = getScaleDisplayTitle(scale);
+                            return (
+                                <ScaleCard
+                                    key={scale.id}
+                                    title={title}
+                                    status={status}
+                                    weight={scale.type === 'Kg500' ? 0 : 0}
+                                    onConfirmPress={() => {}}
+                                    onPress={() => handlePressChevron(scale, status)}
+                                    onToggle={val => handleScaleToggle(val, scale.id)}
+                                />
+                            );
+                        })
+                    )}
                 </View>
             </ScrollView>
 
@@ -71,18 +159,17 @@ export const ScaleListScreen: React.FC = () => {
             <AddScaleBottomSheet
                 visible={isAddScaleModalVisible}
                 onClose={() => setIsAddScaleModalVisible(false)}
-                onAddScale={_scaleId => {
-                    // Logic handle add scale
-                    setIsAddScaleModalVisible(false);
-                    setTimeout(() => AppToast(TOAST_MESSAGES_CONFIG.SCALE.ADD_SUCCESS), 300);
-                }}
+                onAddScale={handleAddScaleSubmit}
+                zoneId={selectedZoneId || undefined}
+                isSubmitting={isAddingScale}
+                pondName={pondName}
             />
 
             <ScaleActionBottomSheet
                 visible={isActionModalVisible}
                 onClose={() => setIsActionModalVisible(false)}
-                scaleStatus={selectedScale?.status!}
-                scaleName={selectedScale?.title}
+                scaleStatus={selectedScaleStatus}
+                scale={selectedScaleItem}
                 onRevokeEmergency={() => {
                     setIsActionModalVisible(false);
                     setTimeout(() => setIsEmergencySuccessVisible(true), 500);
@@ -92,7 +179,7 @@ export const ScaleListScreen: React.FC = () => {
             <EmergencyRevokeSuccessBottomSheet
                 visible={isEmergencySuccessVisible}
                 onClose={() => setIsEmergencySuccessVisible(false)}
-                scaleName={selectedScale?.title || ''}
+                scaleName={selectedScaleItem ? getScaleDisplayTitle(selectedScaleItem) : ''}
             />
         </View>
     );

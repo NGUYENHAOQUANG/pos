@@ -47,11 +47,14 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
             containerStyle={containerStyle}
         >
             <Input
+                disabled
                 label="Sản lượng (kg)"
                 placeholder="Sản lượng (kg)"
                 value={String(yieldAmount)}
                 onChangeText={handleYieldAmountChange}
                 inputFormat={InputFormat.DECIMAL}
+                maxDecimalPlaces={5}
+                maxIntegerPlaces={15}
                 required
                 containerStyle={styles.inputGap}
             />

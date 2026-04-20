@@ -7,34 +7,43 @@ import { Button } from '@/shared/components/buttons/Button';
 import { HarvestSuccessHeader } from './HarvestSuccessHeader';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { spacing } from '@/styles';
+import { BatchDetailViewData } from '@/features/farm/services/pond-work/scale.service';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { spacing } from '@/styles';
 
 export interface HarvestBatchDetailBottomSheetProps {
     visible: boolean;
     onClose: () => void;
-    batchNumber?: number;
-    weight?: number;
-    scaleName?: string;
-    scaleCode?: string;
-    confirmTime?: string;
-    confirmDate?: string;
-    confirmerName?: string;
+    data?: BatchDetailViewData | null;
+    onDelete?: (id: string, onClose: () => void) => void;
+    isDeleting?: boolean;
 }
 
 export const HarvestBatchDetailBottomSheet: React.FC<HarvestBatchDetailBottomSheetProps> = ({
     visible,
     onClose,
-    batchNumber = 5,
-    weight = 18.4,
-    scaleName = 'Cân 01 — Sân A',
-    scaleCode = 'SCD-001',
-    confirmTime = '11:24:05',
-    confirmDate = '09/04/2026',
-    confirmerName = 'Phùng Thanh Độ',
+    data,
+    onDelete,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
+
+    // Default fallback values
+    const batchNumber = data?.batchNumber ?? 5;
+    const weight = data?.weight ?? 18.4;
+    const scaleName = data?.scaleName ?? 'Cân 01 — Sân A';
+    const scaleCode = data?.scaleCode ?? 'SCD-001';
+    const confirmTime = data?.confirmTime ?? '11:24:05';
+    const confirmDate = data?.confirmDate ?? '09/04/2026';
+    const confirmerName = data?.confirmerName ?? 'Phùng Thanh Độ';
+    const status = data?.status ?? 'completed';
+
+    const isDeleted = status === 'deleted';
+
+    const handleDelete = () => {
+        if (!data?.id || !onDelete) return;
+        onDelete(data.id, onClose);
+    };
 
     return (
         <AnimatedBottomSheet visible={visible} onClose={onClose}>
@@ -44,8 +53,21 @@ export const HarvestBatchDetailBottomSheet: React.FC<HarvestBatchDetailBottomShe
                     <View style={styles.header}>
                         <View style={styles.headerLeft}>
                             <Text style={styles.headerTitle}>Mẻ #{batchNumber}</Text>
-                            <View style={styles.statusBadge}>
-                                <Text style={styles.statusBadgeText}>Hoàn tất</Text>
+                            <View
+                                style={[
+                                    styles.statusBadge,
+                                    isDeleted ? styles.statusDeleted : styles.statusCompleted,
+                                ]}
+                            >
+                                <Text
+                                    style={
+                                        isDeleted
+                                            ? styles.statusDeletedText
+                                            : styles.statusCompletedText
+                                    }
+                                >
+                                    {isDeleted ? 'Đã hủy' : 'Hoàn tất'}
+                                </Text>
                             </View>
                         </View>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -78,13 +100,32 @@ export const HarvestBatchDetailBottomSheet: React.FC<HarvestBatchDetailBottomShe
                             <DetailRow label="Người xác nhận:" value={confirmerName} />
                         </View>
 
-                        <View style={styles.bottomBarOutline}>
-                            <Button
-                                variant="outline"
-                                title="Quay lại lịch sử mẻ"
-                                onPress={onClose}
-                                fullWidth
-                            />
+                        <View
+                            style={[
+                                styles.bottomBarOutline,
+                                { gap: spacing.sm, flexDirection: 'row' },
+                            ]}
+                        >
+                            {!isDeleted && onDelete && (
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        variant="outline"
+                                        title="Xoá"
+                                        onPress={handleDelete}
+                                        fullWidth
+                                        style={{ borderColor: theme.red[500] }}
+                                        textStyle={{ color: theme.red[500] }}
+                                    />
+                                </View>
+                            )}
+                            <View style={{ flex: 1 }}>
+                                <Button
+                                    variant={isDeleted ? 'outline' : 'primary'}
+                                    title="Lịch sử cân"
+                                    onPress={onClose}
+                                    fullWidth
+                                />
+                            </View>
                         </View>
                     </View>
                 </View>
@@ -125,13 +166,24 @@ const getStyles = (theme: Colors) =>
             paddingVertical: 4,
             borderRadius: 100,
             borderWidth: 1,
+        },
+        statusCompleted: {
             borderColor: theme.green[200],
             backgroundColor: theme.green[50],
         },
-        statusBadgeText: {
+        statusCompletedText: {
             fontSize: 14,
             fontWeight: '500',
             color: theme.green[600],
+        },
+        statusDeleted: {
+            borderColor: theme.red[200],
+            backgroundColor: theme.red[50],
+        },
+        statusDeletedText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.red[600],
         },
         closeButton: {
             padding: 4,

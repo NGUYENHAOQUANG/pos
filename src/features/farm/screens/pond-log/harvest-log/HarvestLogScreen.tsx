@@ -44,14 +44,21 @@ export const HarvestLogScreen: React.FC = () => {
         metaConverter: (item: JobExecution, meta: HarvestMeta) =>
             convertHarvestMetaToActivityData(item, meta),
         editRoute: 'HarvestFormScreen',
-        getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
+        getEditParams: (pondData, item) => ({
+            pondId: pondData?.id,
+            cycleId: pondData?.cyclePond?.cycleId,
+            harvestRecordId: item.id,
+        }),
     };
 
     const { groupedData } = useLogScreenData(config);
 
     const handleNavigateToCreate = () => {
-        if (pond) {
-            navigation.navigate('HarvestFormScreen', { pond });
+        if (pond?.id && pond?.cyclePond?.cycleId) {
+            navigation.navigate('HarvestFormScreen', {
+                pondId: pond.id,
+                cycleId: pond.cyclePond.cycleId,
+            });
         }
     };
 

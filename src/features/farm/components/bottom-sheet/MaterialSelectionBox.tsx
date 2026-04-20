@@ -195,11 +195,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                             onPress={() => handleRemoveMaterial(index)}
                                             style={styles.deleteButton}
                                         >
-                                            <DeleteIcon
-                                                width={18}
-                                                height={18}
-                                                color={theme.error}
-                                            />
+                                            <DeleteIcon width={18} height={18} color={theme.text} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -246,7 +242,7 @@ const getStyles = (theme: Colors) =>
             borderRadius: 12,
             paddingVertical: spacing.sm,
             paddingHorizontal: spacing.md,
-            backgroundColor: theme.backgroundSecondary,
+            backgroundColor: theme.background,
         },
         materialCardsContainer: {
             gap: 8,

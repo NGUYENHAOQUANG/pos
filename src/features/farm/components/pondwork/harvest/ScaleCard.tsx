@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
@@ -20,6 +20,7 @@ export interface ScaleCardProps {
     weight: number | null;
     onConfirmPress?: () => void;
     onPress?: () => void;
+    onToggle?: (val: boolean) => void;
 }
 
 export const ScaleCard: React.FC<ScaleCardProps> = ({
@@ -28,24 +29,31 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
     weight,
     onConfirmPress,
     onPress,
+    onToggle,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
-    const [isToggled, setIsToggled] = React.useState(
+    const [isToggled, setIsToggled] = useState(
         status === ScaleStatus.READY || status === ScaleStatus.WAITING
     );
 
     // Sync state if parent status changes
-    React.useEffect(() => {
+    useEffect(() => {
         setIsToggled(status === ScaleStatus.READY || status === ScaleStatus.WAITING);
     }, [status]);
 
-    const handleToggle = (val: boolean) => {
-        setIsToggled(val);
-    };
+    const handleToggle = useCallback(
+        (val: boolean) => {
+            setIsToggled(val);
+            if (onToggle) {
+                onToggle(val);
+            }
+        },
+        [onToggle]
+    );
 
-    const getStatusProps = () => {
+    const statusProps = useMemo(() => {
         switch (status) {
             case ScaleStatus.READY:
                 return {
@@ -73,9 +81,8 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
                     textStyle: styles.statusEmptyText,
                 };
         }
-    };
+    }, [status, styles]);
 
-    const statusProps = getStatusProps();
     const displayWeight = weight !== null ? weight.toFixed(1) : '-';
 
     return (
@@ -92,7 +99,9 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
                 />
                 <View style={styles.scaleInfoContainer}>
                     <View style={styles.scaleTitleRow}>
-                        <Text style={styles.scaleTitle}>{title}</Text>
+                        <Text style={styles.scaleTitle} numberOfLines={2}>
+                            {title}
+                        </Text>
                         <View style={styles.chevronContainer}>
                             <View style={styles.toggleWrapper}>
                                 <ButtonDevices
@@ -153,14 +162,16 @@ const getStyles = (theme: Colors) =>
         scaleTitleRow: {
             flexDirection: 'row',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             marginBottom: 4,
         },
         scaleTitle: {
+            flexShrink: 1,
             fontSize: 15,
             fontWeight: '500',
             color: theme.text,
             marginBottom: 4,
+            marginRight: spacing.sm,
         },
         chevronContainer: {
             flexDirection: 'row',

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
@@ -15,13 +15,23 @@ import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { HarvestOverviewTab } from '@/features/farm/components/pondwork/harvest/HarvestOverviewTab';
 import { HarvestScaleTab } from '@/features/farm/components/pondwork/harvest/HarvestScaleTab';
 import { HarvestHistoryTab } from '@/features/farm/components/pondwork/harvest/HarvestHistoryTab';
+import { WaterTreatmentSkeleton } from '@/features/farm/components/skeleton/WaterTreatmentSkeleton';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import {
     HarvestFormData,
     harvestFormSchema,
     getHarvestTypeDisplay,
 } from '@/features/farm/schemas/harvestFormSchema';
-import { handleHarvestFormError } from '@/features/farm/utils/toastMessages';
+import {
+    handleHarvestFormError,
+    AppToast,
+    TOAST_MESSAGES_CONFIG,
+} from '@/features/farm/utils/toastMessages';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useScaleRecords } from '@/features/farm/hooks/useScaleRecord';
+import { useScaleStore } from '@/features/farm/store/scaleStore';
+import { HarvestScaleMode, ScaleSessionAction } from '@/features/farm/types/harvestRecord.types';
+import { InputFilters } from '@/shared/regex';
 
 export enum HarvestFormTab {
     OVERVIEW = 'overview',
@@ -34,10 +44,16 @@ export interface HarvestFormProps {
     initialDate: Date;
     isEditMode: boolean;
     isSubmitting: boolean;
+    isLoading?: boolean;
     onSubmitForm: (data: HarvestFormData) => void;
     onDelete?: () => void;
     onBack: () => void;
     onCancel: () => void;
+    cycleId?: string;
+    scaleMode?: HarvestScaleMode;
+    recordId?: string;
+    pondId?: string;
+    pondName?: string;
 }
 
 export const HarvestForm: React.FC<HarvestFormProps> = ({
@@ -45,10 +61,16 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
     initialDate,
     isEditMode,
     isSubmitting,
+    isLoading,
     onSubmitForm,
     onDelete,
     onBack,
     onCancel,
+    cycleId,
+    scaleMode,
+    recordId,
+    pondId,
+    pondName,
 }) => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const theme = useAppTheme();
@@ -58,13 +80,13 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
         handleSubmit,
         watch,
         reset,
+        setValue,
         formState: { isDirty },
     } = useForm<HarvestFormData>({
         resolver: zodResolver(harvestFormSchema),
         defaultValues: initialData,
     });
 
-    // Reset form when initialData changes (useful when detail query is fetched)
     useEffect(() => {
         reset(initialData);
     }, [initialData, reset]);
@@ -75,13 +97,75 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(isDirty);
+    const scaleSessionCtx = useFarmStore(state =>
+        cycleId ? state.scaleSessions[cycleId] : undefined
+    );
+    const scaleSessionId = scaleSessionCtx?.sessionId;
+    const setScaleSessionId = useFarmStore(state => state.setScaleSessionId);
+
+    const [delayedLoading, setDelayedLoading] = useState(isLoading);
+
+    useEffect(() => {
+        if (isLoading) {
+            setDelayedLoading(true);
+        } else if (delayedLoading) {
+            const timer = setTimeout(() => {
+                setDelayedLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isLoading, delayedLoading]);
+
+    const { data: recordsData } = useScaleRecords({
+        SessionId:
+            !isEditMode && scaleMode !== HarvestScaleMode.MANUAL ? scaleSessionId : undefined,
+        RecordId: isEditMode ? recordId : undefined,
+    });
+    const apiEntries = useMemo(() => recordsData?.data?.items || [], [recordsData?.data?.items]);
+    const manualRecords = useScaleStore(state => state.manualRecords);
+
+    const currentScaleMode = useMemo(() => {
+        if (isEditMode) {
+            return apiEntries.length === 0 ? HarvestScaleMode.MANUAL : HarvestScaleMode.AUTO;
+        }
+        return scaleMode;
+    }, [isEditMode, apiEntries.length, scaleMode]);
+
+    useEffect(() => {
+        if (isEditMode) return;
+
+        let weight = 0;
+        if (currentScaleMode === HarvestScaleMode.MANUAL) {
+            weight = manualRecords.reduce((sum, r) => sum + (r.weight || 0), 0);
+        } else {
+            const validEntries = apiEntries.filter(e => e.status?.toLowerCase() !== 'deleted');
+            weight = validEntries.reduce((sum, e) => sum + (e.weight || 0), 0);
+        }
+
+        let formattedWeight = '';
+        if (weight > 0) {
+            formattedWeight = InputFilters.decimal(String(Number(weight.toFixed(5))), 5, 15);
+        }
+
+        setValue('totalWeightKg', formattedWeight, { shouldValidate: true, shouldDirty: true });
+    }, [currentScaleMode, apiEntries, manualRecords, setValue, isEditMode]);
+
+    const hasActiveSession = scaleMode === HarvestScaleMode.MANUAL ? false : !!scaleSessionId;
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(isDirty || hasActiveSession);
 
     const watchedHarvestType = watch('harvestType');
     const harvestTypeDisplay = getHarvestTypeDisplay(watchedHarvestType);
     const harvestTypeOptions = ['Thu hết', 'Thu tỉa'];
 
     const handleSavePress = () => {
+        if (
+            scaleMode !== HarvestScaleMode.MANUAL &&
+            scaleSessionCtx?.status !== ScaleSessionAction.FINISH
+        ) {
+            AppToast(TOAST_MESSAGES_CONFIG.SCALE.NOT_FINISHED as any);
+            return;
+        }
+
         if (harvestTypeDisplay === 'Thu hết' && !isEditMode) {
             // Validate first, then show confirmation modal
             handleSubmit(() => {
@@ -117,6 +201,48 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
         setDeleteModalVisible(false);
     };
 
+    const handleNavigateToHistory = useCallback(() => {
+        setSelectedTab(HarvestFormTab.HISTORY);
+    }, []);
+
+    const handleNavigateToAllScales = useCallback(() => {
+        if (!cycleId) return;
+        navigation.navigate('ScaleListScreen', { cycleId, pondId });
+    }, [navigation, cycleId, pondId]);
+
+    const handleSetScaleSessionId = useCallback(
+        (id: string | null, action?: ScaleSessionAction) => {
+            if (!cycleId) return;
+
+            if (action === ScaleSessionAction.DELETE) {
+                setScaleSessionId(cycleId, null);
+            } else if (action === ScaleSessionAction.FINISH) {
+                if (id) {
+                    setScaleSessionId(cycleId, id, action);
+                } else if (scaleSessionId) {
+                    setScaleSessionId(cycleId, scaleSessionId, action);
+                }
+            } else {
+                setScaleSessionId(cycleId, id, ScaleSessionAction.ACTIVE);
+            }
+        },
+        [cycleId, scaleSessionId, setScaleSessionId]
+    );
+
+    const tabs = useMemo(() => {
+        const baseTabs = [{ key: HarvestFormTab.OVERVIEW, label: 'Tổng quan' }];
+
+        if (currentScaleMode !== HarvestScaleMode.MANUAL && !isEditMode) {
+            baseTabs.push({ key: HarvestFormTab.SCALE, label: 'Cân điện tử' });
+        }
+
+        if (!isEditMode || currentScaleMode !== HarvestScaleMode.MANUAL) {
+            baseTabs.push({ key: HarvestFormTab.HISTORY, label: 'Lịch sử cân' });
+        }
+
+        return baseTabs;
+    }, [currentScaleMode, isEditMode]);
+
     return (
         <View style={styles.container}>
             <HeaderSection
@@ -127,43 +253,60 @@ export const HarvestForm: React.FC<HarvestFormProps> = ({
                 }
             />
 
-            <View style={styles.headingBarContainer}>
-                <HeadingBar
-                    tabs={[
-                        { key: HarvestFormTab.OVERVIEW, label: 'Tổng quan' },
-                        { key: HarvestFormTab.SCALE, label: 'Cân điện tử' },
-                        { key: HarvestFormTab.HISTORY, label: 'Lịch sử cân' },
-                    ]}
-                    selectedTab={selectedTab}
-                    onTabSelect={key => setSelectedTab(key as HarvestFormTab)}
-                    spreadTabs
-                />
-            </View>
+            {delayedLoading ? (
+                <WaterTreatmentSkeleton />
+            ) : (
+                <>
+                    {tabs.length > 1 && (
+                        <View style={styles.headingBarContainer}>
+                            <HeadingBar
+                                tabs={tabs}
+                                selectedTab={selectedTab}
+                                onTabSelect={key => setSelectedTab(key as HarvestFormTab)}
+                            />
+                        </View>
+                    )}
 
-            {/* Content Tabs */}
-            {selectedTab === HarvestFormTab.OVERVIEW && (
-                <HarvestOverviewTab
-                    control={control}
-                    selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
-                    harvestTypeOptions={harvestTypeOptions}
-                    isEditMode={isEditMode}
-                    isSubmitting={isSubmitting}
-                    isDirty={isDirty}
-                    harvestTypeDisplay={harvestTypeDisplay}
-                    onSavePress={handleSavePress}
-                    onCancel={onCancel}
-                />
+                    {/* Content Tabs */}
+                    {selectedTab === HarvestFormTab.OVERVIEW && (
+                        <HarvestOverviewTab
+                            control={control}
+                            selectedDate={selectedDate}
+                            setSelectedDate={setSelectedDate}
+                            harvestTypeOptions={harvestTypeOptions}
+                            isEditMode={isEditMode}
+                            isSubmitting={isSubmitting}
+                            isDirty={isDirty}
+                            harvestTypeDisplay={harvestTypeDisplay}
+                            onSavePress={handleSavePress}
+                            onCancel={onCancel}
+                        />
+                    )}
+                    {selectedTab === HarvestFormTab.SCALE &&
+                        currentScaleMode !== HarvestScaleMode.MANUAL &&
+                        !isEditMode && (
+                            <HarvestScaleTab
+                                onNavigateToHistory={handleNavigateToHistory}
+                                onNavigateToAllScales={handleNavigateToAllScales}
+                                cycleId={cycleId}
+                                scaleSessionId={scaleSessionId}
+                                recordId={recordId}
+                                isEditMode={isEditMode}
+                                onSetScaleSessionId={handleSetScaleSessionId}
+                                pondName={pondName}
+                            />
+                        )}
+                    {selectedTab === HarvestFormTab.HISTORY && (
+                        <HarvestHistoryTab
+                            scaleMode={currentScaleMode}
+                            scaleSessionId={scaleSessionId}
+                            recordId={recordId}
+                            isEditMode={isEditMode}
+                        />
+                    )}
+                </>
             )}
-            {selectedTab === HarvestFormTab.SCALE && (
-                <HarvestScaleTab
-                    onNavigateToHistory={() => setSelectedTab(HarvestFormTab.HISTORY)}
-                    onNavigateToAllScales={() => navigation.navigate('ScaleListScreen')}
-                />
-            )}
-            {selectedTab === HarvestFormTab.HISTORY && <HarvestHistoryTab />}
 
-            {/* Confirmation Modal for full harvest */}
             <ConfirmationModalUI
                 visible={isConfirmationModalVisible}
                 onConfirm={handleConfirmSave}
