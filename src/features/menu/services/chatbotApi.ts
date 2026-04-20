@@ -4,8 +4,8 @@
  * Acts as a simple relay to the Backend AI where DB logic and NLP is handled.
  */
 
-import { callBackendAI } from '@/features/menu/screens/chatbot/services/chatbotClient';
-import { AIResponse } from '@/features/menu/screens/chatbot/types';
+import { callBackendAI } from '@/features/menu/services/chatbotClient';
+import { AIResponse } from '@/features/menu/types/chatbot.types';
 
 export const sendMessageToAI = async (text: string): Promise<AIResponse> => {
     try {

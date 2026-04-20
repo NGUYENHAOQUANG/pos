@@ -9,7 +9,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { PondStatusData } from '@/features/menu/screens/chatbot/types';
+import { PondStatusData } from '@/features/menu/types/chatbot.types';
 import { useAppTheme } from '@/styles/themeContext';
 import { useMemo } from 'react';
 

@@ -5,7 +5,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
 import { colors } from '@/styles/colors';
-import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
+import { ChatbotAvatar } from '@/features/menu/animation/ChatbotAvatar';
 
 export const TypingIndicator: React.FC = () => {
     const styles = useTypingStyles();

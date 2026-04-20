@@ -280,7 +280,6 @@ export const PersonalInformationScreens: React.FC = () => {
                                             label="Chức vụ"
                                             value={value}
                                             placeholder="Chức vụ"
-                                            required
                                             disabled
                                         />
                                     )}
@@ -294,7 +293,6 @@ export const PersonalInformationScreens: React.FC = () => {
                                             label="Cấp quản lý"
                                             value={value}
                                             placeholder="Ví dụ: Quản lý trại, Quản lý ao"
-                                            required
                                             disabled
                                         />
                                     )}

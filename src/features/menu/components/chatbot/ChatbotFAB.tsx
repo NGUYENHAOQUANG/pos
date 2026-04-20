@@ -12,7 +12,7 @@ import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { navigate, navigationRef } from '@/app/navigation/NavigationRef';
 import RNShake from 'react-native-shake';
-import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
+import { ChatbotAvatar } from '@/features/menu/animation/ChatbotAvatar';
 import CloseOutlined from '@/assets/Icon/CloseOutlined.svg';
 import { colors } from '@/styles';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';

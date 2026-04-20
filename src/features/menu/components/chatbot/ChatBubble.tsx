@@ -2,16 +2,16 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
-import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
+import { ChatbotAvatar } from '@/features/menu/animation/ChatbotAvatar';
 
 import {
     IChatMessage,
     PondStatusData,
     DeviceControlData,
-} from '@/features/menu/screens/chatbot/types';
-import { BOT_USER } from '@/features/menu/screens/chatbot/constants';
-import { PondStatusWidget } from '@/features/menu/screens/chatbot/widgets/PondStatusWidget';
-import { DeviceControlWidget } from '@/features/menu/screens/chatbot/widgets/DeviceControlWidget';
+} from '@/features/menu/types/chatbot.types';
+import { BOT_USER } from '@/features/menu/constants/chatbot.constants';
+import { PondStatusWidget } from '@/features/menu/widgets/PondStatusWidget';
+import { DeviceControlWidget } from '@/features/menu/widgets/DeviceControlWidget';
 
 // ── Streaming text hook — syncs with screen refresh for buttery smooth typing ──
 const useStreamingText = (fullText: string, shouldStream: boolean) => {
