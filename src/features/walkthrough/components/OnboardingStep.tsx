@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleProp, ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle, InteractionManager } from 'react-native';
 import { WalkthroughTooltip } from '@/features/walkthrough/components/WalkthroughTooltip';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 import {
@@ -17,6 +17,8 @@ interface OnboardingStepProps {
     onNext?: () => void;
     /** Optional style override for the tooltip children wrapper */
     wrapperStyle?: StyleProp<ViewStyle>;
+    /** Optional delay (ms) before showing tooltip — use when parent needs scroll time */
+    visibilityDelay?: number;
 }
 
 /**
@@ -34,11 +36,35 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
     children,
     onNext,
     wrapperStyle,
+    visibilityDelay = 0,
 }) => {
     const config: OnboardingStepConfig = APP_STEPS[step];
     const { activeModule, currentStep, nextStep, completeOnboarding } = useOnboardingStore();
 
-    const isVisible = activeModule === config.module && currentStep === config.stepIndex;
+    const isVisibleRaw = activeModule === config.module && currentStep === config.stepIndex;
+    const [isVisible, setIsVisible] = React.useState(false);
+
+    React.useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>;
+        let interactionTask: { cancel: () => void } | null = null;
+
+        if (isVisibleRaw) {
+            interactionTask = InteractionManager.runAfterInteractions(() => {
+                if (visibilityDelay > 0) {
+                    timer = setTimeout(() => setIsVisible(true), visibilityDelay);
+                } else {
+                    setIsVisible(true);
+                }
+            });
+        } else {
+            setIsVisible(false);
+        }
+
+        return () => {
+            if (timer) clearTimeout(timer);
+            if (interactionTask) interactionTask.cancel();
+        };
+    }, [isVisibleRaw, visibilityDelay]);
 
     const handleNext = () => {
         if (config.isLastStep) {

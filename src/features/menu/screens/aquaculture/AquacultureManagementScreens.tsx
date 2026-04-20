@@ -25,6 +25,7 @@ import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBa
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { AppStackParamList } from '@/app/navigation/AppStack';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -173,25 +174,37 @@ export const AquacultureManagementScreens: React.FC = () => {
                 title="Quản lý vụ nuôi"
                 onBack={handleGoBack}
                 rightAction={
-                    <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
-                        <Ionicons name="add" size={24} color={theme.text} />
-                    </TouchableOpacity>
+                    <OnboardingStep step="AQUA_ADD_BUTTON" onNext={handleGoBack}>
+                        <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
+                            <Ionicons name="add" size={24} color={theme.text} />
+                        </TouchableOpacity>
+                    </OnboardingStep>
                 }
             />
 
             {/* Tabs */}
-            <HeadingBar tabs={tabs} selectedTab={selectedTab} onTabSelect={setSelectedTab} />
+            <OnboardingStep step="AQUA_TABS" wrapperStyle={{ borderRadius: 20 }}>
+                <View style={{ width: '100%' }}>
+                    <HeadingBar
+                        tabs={tabs}
+                        selectedTab={selectedTab}
+                        onTabSelect={setSelectedTab}
+                    />
+                </View>
+            </OnboardingStep>
 
             {/* Dropdown Filter Section (White Background) */}
-            <View style={styles.filterSection}>
-                <DropDownButtonBasic
-                    data={zoneOptions}
-                    value={selectedDropdownValue}
-                    onSelect={handleZoneSelect}
-                    height={40}
-                    borderRadius={6}
-                />
-            </View>
+            <OnboardingStep step="AQUA_ZONE_SELECTOR" wrapperStyle={{ borderRadius: 6 }}>
+                <View style={[styles.filterSection, { width: '100%' }]}>
+                    <DropDownButtonBasic
+                        data={zoneOptions}
+                        value={selectedDropdownValue}
+                        onSelect={handleZoneSelect}
+                        height={40}
+                        borderRadius={6}
+                    />
+                </View>
+            </OnboardingStep>
 
             <View style={styles.content}>
                 {showSkeleton ? (

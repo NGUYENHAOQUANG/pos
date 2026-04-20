@@ -59,9 +59,11 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
         </View>
     );
 
+    const isActive = isVisible && isFocused;
+
     return (
         <Tooltip
-            isVisible={isVisible && isFocused}
+            isVisible={isActive}
             content={content}
             placement={placement}
             onClose={NOOP}

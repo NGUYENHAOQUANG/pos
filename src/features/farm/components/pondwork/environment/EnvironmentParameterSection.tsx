@@ -23,6 +23,16 @@ interface EnvironmentParameterSectionProps {
     parameters: EnvironmentParameter[];
     onToggleParameter: (id: string) => void;
     onEdit?: (parameter: EnvironmentParameter) => void;
+    renderCheckbox?: (
+        param: EnvironmentParameter,
+        defaultNode: React.ReactNode,
+        index: number
+    ) => React.ReactNode;
+    renderEditButton?: (
+        param: EnvironmentParameter,
+        defaultNode: React.ReactNode,
+        index: number
+    ) => React.ReactNode;
 }
 
 export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionProps> = ({
@@ -31,6 +41,8 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
     parameters,
     onToggleParameter,
     onEdit,
+    renderCheckbox,
+    renderEditButton,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -45,25 +57,8 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
 
             {/* Parameter Items */}
             <View style={styles.itemsList}>
-                {parameters.map(param => (
-                    <View key={param.id} style={styles.itemCard}>
-                        {/* Checkbox */}
-                        <Checkbox
-                            checked={param.isChecked}
-                            onToggle={() => onToggleParameter(param.id)}
-                            size="md"
-                            activeColor={theme.primaryOrange}
-                        />
-                        {/* Column with title and subtitle */}
-                        <View style={styles.childColumn}>
-                            <Text style={styles.childTitle}>{param.name}</Text>
-                            <View style={styles.subtitleRow}>
-                                <Text style={styles.subtitleLabel}>Giới hạn:</Text>
-                                <Text style={styles.childSubtitle}>{param.limit}</Text>
-                            </View>
-                        </View>
-
-                        {/* Edit Button */}
+                {parameters.map((param, index) => {
+                    const editBtn = (
                         <TouchableOpacity
                             style={styles.editButton}
                             activeOpacity={0.7}
@@ -71,8 +66,38 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
                         >
                             <PencilSimpleLine width={16} height={16} color={theme.textSecondary} />
                         </TouchableOpacity>
-                    </View>
-                ))}
+                    );
+
+                    const checkBoxItem = (
+                        <Checkbox
+                            checked={param.isChecked}
+                            onToggle={() => onToggleParameter(param.id)}
+                            size="md"
+                            activeColor={theme.primaryOrange}
+                        />
+                    );
+
+                    return (
+                        <View key={param.id} style={styles.itemCard}>
+                            {/* Checkbox */}
+                            {renderCheckbox
+                                ? renderCheckbox(param, checkBoxItem, index)
+                                : checkBoxItem}
+
+                            {/* Column with title and subtitle */}
+                            <View style={styles.childColumn}>
+                                <Text style={styles.childTitle}>{param.name}</Text>
+                                <View style={styles.subtitleRow}>
+                                    <Text style={styles.subtitleLabel}>Giới hạn:</Text>
+                                    <Text style={styles.childSubtitle}>{param.limit}</Text>
+                                </View>
+                            </View>
+
+                            {/* Edit Button */}
+                            {renderEditButton ? renderEditButton(param, editBtn, index) : editBtn}
+                        </View>
+                    );
+                })}
             </View>
         </View>
     );
@@ -81,6 +106,7 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
         outerCard: {
+            width: '100%',
             backgroundColor: theme.background,
             borderRadius: 12,
             borderWidth: 1,
@@ -149,6 +175,7 @@ const getStyles = (theme: Colors) =>
             borderRadius: 16,
             borderWidth: 1,
             borderColor: theme.defaultBorder,
+            backgroundColor: theme.background,
             justifyContent: 'center',
             alignItems: 'center',
         },
