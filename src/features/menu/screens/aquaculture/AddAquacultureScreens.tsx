@@ -93,7 +93,7 @@ export const AddAquacultureScreens: React.FC = () => {
 
                 <ButtonBarMenu
                     primaryTitle="Tạo vụ nuôi"
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     onPrimaryPress={handlePrimaryPress}
                     onSecondaryPress={handleGoBack}
                     secondaryType="default"

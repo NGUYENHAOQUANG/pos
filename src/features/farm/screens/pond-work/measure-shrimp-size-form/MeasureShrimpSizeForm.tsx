@@ -280,7 +280,7 @@ export const MeasureShrimpSizeForm: React.FC<MeasureShrimpSizeFormProps> = ({
             <View style={styles.footer}>
                 <ButtonBarFarm
                     primaryTitle={isEditing ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     onPrimaryPress={handleSubmit(onSubmit, onFormError)}
                     onSecondaryPress={onBack}
                     isLoading={isSaving || isUploading}

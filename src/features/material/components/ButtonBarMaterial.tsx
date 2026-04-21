@@ -12,7 +12,7 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = props => {
     return (
         <ButtonBar
             primaryTitle="Gửi Phiếu"
-            secondaryTitle="Huỷ"
+            secondaryTitle="Hủy"
             totalLabel="Tổng tiền:"
             totalValue="0đ"
             {...props}

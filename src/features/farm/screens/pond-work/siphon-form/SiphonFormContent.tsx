@@ -224,7 +224,7 @@ export const SiphonFormContent: React.FC<SiphonFormContentProps> = ({
             <View style={styles.footer}>
                 <ButtonBarFarm
                     primaryTitle={isEditing ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     onPrimaryPress={handleSubmit(onSubmit, handleFormError)}
                     onSecondaryPress={handleCancel}
                     isLoading={isSaving || isUploading}

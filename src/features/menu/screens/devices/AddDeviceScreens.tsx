@@ -199,7 +199,7 @@ export const AddDeviceScreens = () => {
 
             <ButtonBarMenu
                 primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Thêm thiết bị'}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onPrimaryPress={handleSubmit}
                 onSecondaryPress={handleBack}
                 secondaryType="default"

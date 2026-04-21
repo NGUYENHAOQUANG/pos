@@ -451,7 +451,7 @@ export const WaterChangeFormScreen = () => {
             {/* Footer */}
             <ButtonBarFarm
                 primaryTitle={item ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
                 isLoading={isSavingActively || isUploading}

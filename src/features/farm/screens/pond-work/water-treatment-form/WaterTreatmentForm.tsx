@@ -168,7 +168,7 @@ export const WaterTreatmentForm: React.FC<WaterTreatmentFormProps> = ({
 
             <ButtonBarFarm
                 primaryTitle={isEditing ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onPrimaryPress={handleSavePress}
                 onSecondaryPress={onBack}
                 primaryDisabled={isSaving || (isEditing && !hasChanges)}

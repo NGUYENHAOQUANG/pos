@@ -333,7 +333,7 @@ export const FeedingFormScreens = () => {
             </View>
             <ButtonBarFarm
                 primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onPrimaryPress={handlePrimaryPress}
                 onSecondaryPress={() => navigation.goBack()}
                 isLoading={isSavingActively}

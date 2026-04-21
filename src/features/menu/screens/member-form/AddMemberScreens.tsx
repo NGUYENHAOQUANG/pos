@@ -159,7 +159,7 @@ export const AddMemberScreens: React.FC = () => {
                         title="Tạm ngưng tài khoản"
                         message="Bạn có chắc chắn muốn tạm ngưng tài khoản này?"
                         confirmText="Tạm ngưng"
-                        cancelText="Huỷ"
+                        cancelText="Hủy"
                         successMessage="Đã tạm ngưng tài khoản"
                     />
 
@@ -172,7 +172,7 @@ export const AddMemberScreens: React.FC = () => {
                         title="Gửi lại lời mời"
                         message="Bạn có chắc chắn muốn gửi lại lời mời cho thành viên này không?"
                         confirmText="Đồng ý"
-                        cancelText="Huỷ"
+                        cancelText="Hủy"
                         successMessage="Đã gửi lại lời mời thành công"
                     />
 
@@ -183,7 +183,7 @@ export const AddMemberScreens: React.FC = () => {
                         title="Kích hoạt lại"
                         message="Bạn có chắc chắn muốn kích hoạt lại tài khoản này không?"
                         confirmText="Kích hoạt lại"
-                        cancelText="Huỷ"
+                        cancelText="Hủy"
                         successMessage="Đã kích hoạt lại tài khoản thành công"
                     />
                 </>
