@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Dimensions, Animated } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { spacing, borderRadius } from '@/styles';
@@ -69,39 +69,43 @@ export const CameraCard: React.FC<CameraCardProps> = ({
 
     const statusProps = getStatusProps();
     const hasLiveUrl = !!camera.liveUrl;
+    const skeletonColor = theme.isDark ? theme.background : theme.gray[200];
+    const skeletonBadgeColor = theme.isDark ? theme.border : theme.gray[300];
 
-    // Show skeleton while connecting to WebRTC stream
-    if (hasLiveUrl && isOnline && !isConnected) {
-        const skeletonColor = theme.isDark ? theme.background : theme.gray[200];
+    // Animation state for skeleton fade-out
+    const fadeAnim = useRef(new Animated.Value(1)).current;
+    const [isSkeletonVisible, setIsSkeletonVisible] = useState(hasLiveUrl && isOnline);
 
-        return (
-            <View style={[styles.container, dynamicContainerStyle]}>
-                {/* Skeleton placeholder while stream connects */}
-                <Skeleton
-                    width={adjustedWidth}
-                    height={adjustedHeight}
-                    borderRadius={borderRadius.md}
-                    backgroundColor={skeletonColor}
-                />
+    useEffect(() => {
+        let timeoutId: ReturnType<typeof setTimeout>;
 
-                {/* Badge skeletons at bottom-left */}
-                <View style={styles.placeholderBadgesRow}>
-                    <Skeleton
-                        width={120}
-                        height={16}
-                        borderRadius={4}
-                        backgroundColor={skeletonColor}
-                    />
-                    <Skeleton
-                        width={150}
-                        height={16}
-                        borderRadius={4}
-                        backgroundColor={skeletonColor}
-                    />
-                </View>
-            </View>
-        );
-    }
+        if (!hasLiveUrl || !isOnline) {
+            fadeAnim.setValue(0);
+            setIsSkeletonVisible(false);
+            return;
+        }
+
+        if (isConnected) {
+            // WebRTC Connected but first frame usually takes 1-2s to decode depending on network/device
+            // Increase artificial delay to 2500ms to guarantee image is ready before fading
+            timeoutId = setTimeout(() => {
+                Animated.timing(fadeAnim, {
+                    toValue: 0,
+                    duration: 600, // Smooth 0.6s fade
+                    useNativeDriver: true,
+                }).start(() => {
+                    setIsSkeletonVisible(false);
+                });
+            }, 2500); // 2.5s delay to wait for first video frame
+        } else {
+            fadeAnim.setValue(1);
+            setIsSkeletonVisible(true);
+        }
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [isConnected, hasLiveUrl, isOnline, fadeAnim]);
 
     return (
         <TouchableOpacity
@@ -139,6 +143,39 @@ export const CameraCard: React.FC<CameraCardProps> = ({
                         {camera.name}
                     </Text>
                 </View>
+
+                {/* Skeleton Overlay with Fade Out */}
+                {isSkeletonVisible && (
+                    <Animated.View
+                        style={[
+                            StyleSheet.absoluteFillObject,
+                            { opacity: fadeAnim, backgroundColor: skeletonColor },
+                        ]}
+                        pointerEvents="none"
+                    >
+                        <Skeleton
+                            width={adjustedWidth}
+                            height={adjustedHeight}
+                            borderRadius={borderRadius.md}
+                            backgroundColor={skeletonColor}
+                        />
+                        {/* Badge skeletons at bottom-left */}
+                        <View style={styles.placeholderBadgesRow}>
+                            <Skeleton
+                                width={120}
+                                height={16}
+                                borderRadius={4}
+                                backgroundColor={skeletonBadgeColor}
+                            />
+                            <Skeleton
+                                width={150}
+                                height={16}
+                                borderRadius={4}
+                                backgroundColor={skeletonBadgeColor}
+                            />
+                        </View>
+                    </Animated.View>
+                )}
             </View>
 
             {/* Online/Offline indicator */}
@@ -171,10 +208,10 @@ const styles = StyleSheet.create({
     placeholderBadgeText: {
         color: '#FFFFFF',
         fontSize: 12,
-        fontWeight: '500',
-        textShadowColor: 'rgba(0, 0, 0, 0.7)',
+        fontWeight: '600',
+        textShadowColor: 'rgba(0, 0, 0, 0.9)',
         textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 3,
+        textShadowRadius: 4,
     },
     statusBadge: {
         position: 'absolute',
