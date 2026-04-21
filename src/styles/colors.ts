@@ -204,6 +204,13 @@ export const colors = {
         // Other - Gray
         otherText: '#1F2937',
         otherBg: '#F9FAFB',
+        // Scale specific status colors
+        scaleReadyBg: '#E5F7ED',
+        scaleReadyBorder: '#A8E3C1',
+        scaleReadyText: '#158C4A',
+        scaleWaitingBg: '#FFF4E5',
+        scaleWaitingBorder: '#FFD3A3',
+        scaleWaitingText: '#D97706',
     },
 
     // Schedule colors
@@ -311,6 +318,12 @@ export const darkTheme: Colors = {
         warningHighlightText: '#FFC107',
         otherBg: '#1F2937',
         otherText: '#D1D5DB',
+        scaleReadyBg: '#123118',
+        scaleReadyBorder: '#237804',
+        scaleReadyText: '#4CAF50',
+        scaleWaitingBg: '#3B2900',
+        scaleWaitingBorder: '#876800',
+        scaleWaitingText: '#FFC107',
     },
 
     // Schedule colors

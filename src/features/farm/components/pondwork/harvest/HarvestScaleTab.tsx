@@ -5,17 +5,17 @@ import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { spacing } from '@/styles';
-import { AddScaleBottomSheet } from './AddScaleBottomSheet';
-import { ConfirmScaleBottomSheet } from './ConfirmScaleBottomSheet';
-import { HarvestEntryItem } from './HarvestEntryItem';
-import { HarvestBatchDetailBottomSheet } from './HarvestBatchDetailBottomSheet';
-import { EndScaleSessionBottomSheet } from './EndScaleSessionBottomSheet';
-import { DeleteScaleSessionBottomSheet } from './DeleteScaleSessionBottomSheet';
+import { AddScaleBottomSheet } from '@/features/farm/components/pondwork/harvest/AddScaleBottomSheet';
+import { ConfirmScaleBottomSheet } from '@/features/farm/components/pondwork/harvest/ConfirmScaleBottomSheet';
+import { HarvestEntryItem } from '@/features/farm/components/pondwork/harvest/HarvestEntryItem';
+import { HarvestBatchDetailBottomSheet } from '@/features/farm/components/pondwork/harvest/HarvestBatchDetailBottomSheet';
+import { EndScaleSessionBottomSheet } from '@/features/farm/components/pondwork/harvest/EndScaleSessionBottomSheet';
+import { DeleteScaleSessionBottomSheet } from '@/features/farm/components/pondwork/harvest/DeleteScaleSessionBottomSheet';
 import { Button } from '@/shared/components/buttons/Button';
-import { HarvestSummaryCards } from './HarvestSummaryCards';
-import { ScaleCard, ScaleStatus } from './ScaleCard';
-import { ScaleActionBottomSheet } from './ScaleActionBottomSheet';
-import { EmergencyRevokeSuccessBottomSheet } from './EmergencyRevokeSuccessBottomSheet';
+import { HarvestSummaryCards } from '@/features/farm/components/pondwork/harvest/HarvestSummaryCards';
+import { ScaleCard, ScaleStatus } from '@/features/farm/components/pondwork/harvest/ScaleCard';
+import { ScaleActionBottomSheet } from '@/features/farm/components/pondwork/harvest/ScaleActionBottomSheet';
+import { EmergencyRevokeSuccessBottomSheet } from '@/features/farm/components/pondwork/harvest/EmergencyRevokeSuccessBottomSheet';
 import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useScales, useUpdateScaleUsageStatus } from '@/features/farm/hooks/useScales';
@@ -27,7 +27,7 @@ import {
     useDiscardScaleSession,
     useStartScaleSession,
 } from '@/features/farm/hooks/useScaleRecord';
-import { ScaleUsageStatus } from '@/features/farm/types/scale.types';
+import { IScale, ScaleUsageStatus } from '@/features/farm/types/scale.types';
 import {
     mapToScaleStatus,
     getScaleDisplayTitle,
@@ -73,11 +73,11 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     // Confirm scale modal state
     const [selectedConfirmWeight, setSelectedConfirmWeight] = useState<number>(0);
     const [selectedConfirmScaleName, setSelectedConfirmScaleName] = useState<string>('Cân');
-    const [selectedConfirmScaleItem, setSelectedConfirmScaleItem] = useState<any>(null);
+    const [selectedConfirmScaleItem, setSelectedConfirmScaleItem] = useState<IScale | null>(null);
 
     // Scale action modal state
     const [selectedScaleStatus, setSelectedScaleStatus] = useState<ScaleStatus | null>(null);
-    const [selectedScaleItem, setSelectedScaleItem] = useState<any>(null);
+    const [selectedScaleItem, setSelectedScaleItem] = useState<IScale | null>(null);
     const [selectedBatchItem, setSelectedBatchItem] = useState<any>(null);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
     const [isEndSessionVisible, setIsEndSessionVisible] = useState(false);
@@ -88,6 +88,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     const { data: scalesData } = useScales({
         ZoneId: zoneId,
         UsageStatus: ScaleUsageStatus.Using,
+        CurrentCycleId: cycleId,
     });
     const activeScales = scalesData?.data?.items || [];
 
@@ -128,7 +129,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
         );
     };
 
-    const handlePressChevron = useCallback((status: ScaleStatus, scaleItem: any) => {
+    const handlePressChevron = useCallback((status: ScaleStatus, scaleItem: IScale) => {
         setSelectedScaleStatus(status);
         setSelectedScaleItem(scaleItem);
         setIsActionModalVisible(true);
@@ -147,7 +148,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
         [updateUsageStatus, cycleId]
     );
 
-    const handleConfirmPress = useCallback((scaleItem: any) => {
+    const handleConfirmPress = useCallback((scaleItem: IScale) => {
         const randomWeight = +(Math.random() * (30 - 10) + 10).toFixed(1);
         setSelectedConfirmWeight(randomWeight);
         setSelectedConfirmScaleItem(scaleItem);
@@ -171,17 +172,34 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     const handleAddScaleSubmit = async (scaleIds: string[]) => {
         if (!cycleId) return;
         setIsAddingScale(true);
-        let currentSessionId = scaleSessionId;
+        let currentSessionId: string | null = scaleSessionId || null;
 
         try {
             if (!currentSessionId) {
-                const data = await startSession({ cycleId });
-                if (data?.data?.sessionId) {
-                    currentSessionId = data.data.sessionId;
-                    onSetScaleSessionId?.(currentSessionId);
-                } else {
-                    setIsAddingScale(false);
-                    return; // failed
+                try {
+                    const data = await startSession({ cycleId });
+                    if (data?.data?.sessionId) {
+                        currentSessionId = data.data.sessionId;
+                        onSetScaleSessionId?.(currentSessionId);
+                    } else {
+                        setIsAddingScale(false);
+                        return; // failed
+                    }
+                } catch (error: any) {
+                    const errorData = error?.data;
+                    if (error?.statusCode === 409 || errorData?.errorCode === 'ALREADY_EXISTS') {
+                        if (errorData?.data?.sessionId) {
+                            currentSessionId = errorData.data.sessionId;
+                            onSetScaleSessionId?.(currentSessionId);
+                        } else {
+                            setIsAddingScale(false);
+                            return;
+                        }
+                    } else {
+                        setIsAddingScale(false);
+                        console.log(error);
+                        return;
+                    }
                 }
             }
 
@@ -491,7 +509,8 @@ const getStyles = (theme: Colors) =>
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: '#34C759', // Green
+            backgroundColor: theme.success,
+            marginRight: 6,
         },
         badgeText: {
             fontSize: 12,
@@ -500,7 +519,7 @@ const getStyles = (theme: Colors) =>
         },
         seeAllText: {
             fontSize: 14,
-            color: '#007AFF', // Blue link
+            color: theme.info,
             fontWeight: '500',
         },
         scaleCardSection: {
@@ -562,20 +581,20 @@ const getStyles = (theme: Colors) =>
             borderWidth: 1,
         },
         statusReady: {
-            backgroundColor: '#E5F7ED',
-            borderColor: '#A8E3C1',
+            backgroundColor: theme.status.scaleReadyBg,
+            borderColor: theme.status.scaleReadyBorder,
         },
         statusReadyText: {
-            color: '#158C4A',
+            color: theme.status.scaleReadyText,
             fontSize: 12,
             fontWeight: '500',
         },
         statusWaiting: {
-            backgroundColor: '#FFF4E5',
-            borderColor: '#FFD3A3',
+            backgroundColor: theme.status.scaleWaitingBg,
+            borderColor: theme.status.scaleWaitingBorder,
         },
         statusWaitingText: {
-            color: '#D97706',
+            color: theme.status.scaleWaitingText,
             fontSize: 12,
             fontWeight: '500',
         },

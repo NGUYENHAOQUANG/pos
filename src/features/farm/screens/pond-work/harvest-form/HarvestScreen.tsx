@@ -18,7 +18,6 @@ import {
     useDeleteHarvestRecord,
     useHarvestRecord,
 } from '@/features/farm/hooks/useHarvestRecord';
-import { useStartScaleSession } from '@/features/farm/hooks/useScaleRecord';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { harvestService } from '@/features/farm/services/pond-work/harvest.service';
 import { HarvestFormData, getHarvestTypeDisplay } from '@/features/farm/schemas/harvestFormSchema';
@@ -45,7 +44,6 @@ export const HarvestFormScreen: React.FC = () => {
     const createHarvestMutation = useCreateHarvestRecord();
     const updateHarvestMutation = useUpdateHarvestRecord();
     const deleteHarvestMutation = useDeleteHarvestRecord();
-    const { mutate: startSession } = useStartScaleSession();
 
     const { scaleSessionId, setScaleSessionId, selectedZoneId } = useFarmStore(state => ({
         scaleSessionId: cycleId ? state.scaleSessions[cycleId]?.sessionId : undefined,
@@ -81,31 +79,9 @@ export const HarvestFormScreen: React.FC = () => {
                     visibilityTime: 4000,
                     type: 'success',
                 });
-            } else if (cycleId) {
-                startSession(
-                    { cycleId },
-                    {
-                        onSuccess: response => {
-                            if (response.success && response.data?.sessionId) {
-                                setScaleSessionId(cycleId, response.data.sessionId);
-                            }
-                        },
-                        onError: (error: any) => {
-                            const errorData = error?.data;
-                            if (
-                                error?.statusCode === 409 ||
-                                errorData?.errorCode === 'ALREADY_EXISTS'
-                            ) {
-                                if (errorData?.data?.sessionId) {
-                                    setScaleSessionId(cycleId, errorData.data.sessionId);
-                                }
-                            }
-                        },
-                    }
-                );
             }
         }
-    }, [cycleId, isEditMode, scaleMode, scaleSessionId, setScaleSessionId, startSession]);
+    }, [cycleId, isEditMode, scaleMode, scaleSessionId]);
 
     const initialData = useMemo(() => {
         return harvestService.mapRecordToForm(recordDetail);
