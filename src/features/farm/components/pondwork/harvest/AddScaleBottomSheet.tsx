@@ -47,12 +47,20 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
     };
 
     const renderScaleItem = (scale: IScale) => {
+        const disabled = scale.occupiedByUserId != null;
         const isSelected = selectedScaleIds.includes(scale.id);
+        const displayUser = scale.occupiedByUserName || '--';
+
         return (
             <TouchableOpacity
                 key={scale.id}
-                style={[styles.scaleItem, isSelected && styles.scaleItemActive]}
+                style={[
+                    styles.scaleItem,
+                    isSelected && styles.scaleItemActive,
+                    disabled && styles.scaleItemDisabled,
+                ]}
                 onPress={() => toggleScaleSelection(scale.id)}
+                disabled={disabled}
             >
                 <Image
                     source={require('@/assets/Icon/IconDevices/icon_weight_scale.png')}
@@ -66,9 +74,18 @@ export const AddScaleBottomSheet: React.FC<AddScaleBottomSheetProps> = ({
                     <Text style={styles.scaleItemSubtitle}>
                         {scale.code} · {scale.type}
                     </Text>
+                    <Text style={styles.scaleItemSubtitleUser}>
+                        Người sử dụng: <Text style={styles.scaleItemUserText}>{displayUser}</Text>
+                    </Text>
                 </View>
-                <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
-                    {isSelected && <Ionicons name="checkmark" size={16} color="#FFF" />}
+                <View
+                    style={[
+                        styles.checkbox,
+                        isSelected && styles.checkboxActive,
+                        disabled && styles.checkboxDisabled,
+                    ]}
+                >
+                    {isSelected && <Ionicons name="checkmark" size={16} color={theme.white} />}
                 </View>
             </TouchableOpacity>
         );
@@ -189,13 +206,27 @@ const getStyles = (theme: Colors) =>
             gap: 2,
         },
         scaleItemTitle: {
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: '500',
             color: theme.text,
         },
         scaleItemSubtitle: {
-            fontSize: 14,
+            fontSize: 12,
+            fontWeight: '400',
             color: theme.textSecondary,
+        },
+        scaleItemSubtitleUser: {
+            fontSize: 12,
+            fontWeight: '400',
+            color: theme.textSecondary,
+        },
+        scaleItemUserText: {
+            fontWeight: '500',
+            fontSize: 12,
+            color: theme.text,
+        },
+        scaleItemDisabled: {
+            opacity: 0.5,
         },
         checkbox: {
             width: 24,
@@ -211,6 +242,11 @@ const getStyles = (theme: Colors) =>
         checkboxActive: {
             borderColor: theme.primary,
             backgroundColor: theme.primary,
+        },
+        checkboxDisabled: {
+            borderColor: theme.defaultBorder,
+            backgroundColor: theme.backgroundSecondary,
+            borderWidth: 0,
         },
         buttonBar: {
             borderTopWidth: 0,

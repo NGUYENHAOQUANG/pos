@@ -4,7 +4,6 @@ import { farmKeys } from './farmKeys';
 import {
     IScaleParams,
     IScale,
-    ScaleUsageStatus,
     IUpdateScaleUsageStatusRequest,
 } from '@/features/farm/types/scale.types';
 import { APP_CONFIG } from '@/shared/constants';
@@ -13,6 +12,7 @@ export const useScales = (params?: IScaleParams) => {
     return useQuery({
         queryKey: farmKeys.scales.list(params),
         queryFn: () => scaleApi.getAll(params),
+        enabled: !!params?.ZoneId || !!params?.CurrentCycleId,
     });
 };
 
@@ -27,7 +27,6 @@ export const useScaleDetail = (id: string) => {
 export const useAvailableScales = (zoneId?: string) => {
     const { data, ...rest } = useScales({
         ZoneId: zoneId,
-        UsageStatus: ScaleUsageStatus.Free,
         PageSize: APP_CONFIG.MAX_PAGE_SIZE,
     });
 
