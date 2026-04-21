@@ -12,7 +12,6 @@ import Tooltip from 'react-native-walkthrough-tooltip';
 import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { useIsFocused } from '@react-navigation/native';
 
 /** Stable no-op reference to prevent unnecessary re-renders */
 const NOOP = () => {};
@@ -42,7 +41,6 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
-    const isFocused = useIsFocused();
 
     const content = (
         <View style={styles.tooltipContent}>
@@ -59,11 +57,9 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
         </View>
     );
 
-    const isActive = isVisible && isFocused;
-
     return (
         <Tooltip
-            isVisible={isActive}
+            isVisible={isVisible}
             content={content}
             placement={placement}
             onClose={NOOP}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleProp, ViewStyle, InteractionManager } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
 import { WalkthroughTooltip } from '@/features/walkthrough/components/WalkthroughTooltip';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 import {
@@ -46,23 +46,22 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
 
     React.useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
-        let interactionTask: { cancel: () => void } | null = null;
 
         if (isVisibleRaw) {
-            interactionTask = InteractionManager.runAfterInteractions(() => {
-                if (visibilityDelay > 0) {
-                    timer = setTimeout(() => setIsVisible(true), visibilityDelay);
-                } else {
-                    setIsVisible(true);
-                }
-            });
+            // Apply a default minimum delay of 400ms if visibilityDelay is not set.
+            // This safely outlasts the standard ~300ms RN scroll/layout animations,
+            // ensuring the Tooltip correctly measures the mounted and still element.
+            const delay = visibilityDelay > 0 ? visibilityDelay : 400;
+            timer = setTimeout(() => {
+                setIsVisible(true);
+            }, delay);
         } else {
+            // Immediately hide to start unmount process
             setIsVisible(false);
         }
 
         return () => {
             if (timer) clearTimeout(timer);
-            if (interactionTask) interactionTask.cancel();
         };
     }, [isVisibleRaw, visibilityDelay]);
 

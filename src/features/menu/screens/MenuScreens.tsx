@@ -36,7 +36,7 @@ import { useSettingsStore } from '@/features/menu/store/settingsStore';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import { useIsFocused } from '@react-navigation/native';
-import { AppStepKey } from '@/features/walkthrough/constants/onboarding';
+import { AppStepKey, APP_STEPS } from '@/features/walkthrough/constants/onboarding';
 
 interface ProfileCardProps {
     onPress: () => void;
@@ -113,7 +113,11 @@ export const MenuScreens: React.FC = () => {
 
     // Auto-skip ACCOUNT_WEATHER step when weather feature is disabled
     React.useEffect(() => {
-        if (activeModule === 'account' && currentStep === 10 && !weatherEnabled) {
+        if (
+            activeModule === 'account' &&
+            currentStep === APP_STEPS.ACCOUNT_WEATHER.stepIndex &&
+            !weatherEnabled
+        ) {
             nextStep();
         }
     }, [activeModule, currentStep, weatherEnabled, nextStep]);
@@ -122,16 +126,19 @@ export const MenuScreens: React.FC = () => {
     React.useEffect(() => {
         if (activeModule !== 'account' || !scrollViewRef.current) return;
 
-        if (currentStep >= 16) {
+        if (currentStep >= APP_STEPS.ACCOUNT_DELETE_ACCOUNT.stepIndex) {
             // Delete account and Logout are at the very bottom
             scrollViewRef.current?.scrollToEnd({ animated: true });
-        } else if (currentStep >= 14) {
+        } else if (currentStep >= APP_STEPS.ACCOUNT_PRIVACY.stepIndex) {
             // Security section items (Privacy, Terms)
             scrollViewRef.current?.scrollTo({ y: 400, animated: true });
-        } else if (currentStep >= 11) {
+        } else if (currentStep >= APP_STEPS.ACCOUNT_PERSONAL_INFO.stepIndex) {
             // Records section items (Personal Info, Members, Settings)
             scrollViewRef.current?.scrollTo({ y: 200, animated: true });
-        } else if (currentStep <= 1 || currentStep === 9) {
+        } else if (
+            currentStep <= APP_STEPS.ACCOUNT_CYCLE.stepIndex ||
+            currentStep === APP_STEPS.ACCOUNT_SHRIMP_PRICE.stepIndex
+        ) {
             // Profile card, operations section, or returning from sub-screens
             scrollViewRef.current?.scrollTo({ y: 0, animated: true });
         }
