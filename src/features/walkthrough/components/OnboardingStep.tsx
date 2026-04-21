@@ -17,8 +17,6 @@ interface OnboardingStepProps {
     onNext?: () => void;
     /** Optional style override for the tooltip children wrapper */
     wrapperStyle?: StyleProp<ViewStyle>;
-    /** Optional delay (ms) before showing tooltip — use when parent needs scroll time */
-    visibilityDelay?: number;
 }
 
 /**
@@ -36,7 +34,6 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
     children,
     onNext,
     wrapperStyle,
-    visibilityDelay = 0,
 }) => {
     const config: OnboardingStepConfig = APP_STEPS[step];
     const { activeModule, currentStep, nextStep, completeOnboarding } = useOnboardingStore();
@@ -51,7 +48,7 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
             // Apply a default minimum delay of 400ms if visibilityDelay is not set.
             // This safely outlasts the standard ~300ms RN scroll/layout animations,
             // ensuring the Tooltip correctly measures the mounted and still element.
-            const delay = visibilityDelay > 0 ? visibilityDelay : 400;
+            const delay = 400;
             timer = setTimeout(() => {
                 setIsVisible(true);
             }, delay);
@@ -63,7 +60,7 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
         return () => {
             if (timer) clearTimeout(timer);
         };
-    }, [isVisibleRaw, visibilityDelay]);
+    }, [isVisibleRaw]);
 
     const handleNext = () => {
         if (config.isLastStep) {

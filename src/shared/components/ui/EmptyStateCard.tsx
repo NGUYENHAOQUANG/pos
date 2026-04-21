@@ -6,6 +6,7 @@ import { spacing, typography } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
+import PlusIcon from '@/assets/Icon/Plus.svg';
 
 /**
  * Props for the shared EmptyStateCard component
@@ -17,8 +18,6 @@ export interface EmptyStateCardProps {
     description?: string;
     /** Title for the action button */
     buttonTitle?: string;
-    /** Icon for the action button (defaults to 'add') */
-    buttonIcon?: any;
     /** Callback when the action button is pressed */
     onPress?: () => void;
     /** Optional extra style for the action button */
@@ -43,7 +42,6 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     message,
     description,
     buttonTitle,
-    buttonIcon = 'add',
     onPress,
     buttonStyle,
     style,
@@ -62,14 +60,15 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
             {message && <Text style={styles.title}>{message}</Text>}
             {description && <Text style={styles.description}>{description}</Text>}
 
+            {/* Primary action button with Plus icon */}
             {buttonTitle && onPress && (
                 <Button
                     title={buttonTitle}
                     onPress={onPress}
                     variant="primary"
                     size="medium"
-                    iconLeft={buttonIcon}
                     style={StyleSheet.flatten([styles.button, buttonStyle])}
+                    renderLeftIcon={<PlusIcon width={16} height={16} color="white" />}
                 />
             )}
         </View>

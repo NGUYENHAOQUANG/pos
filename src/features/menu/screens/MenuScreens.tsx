@@ -34,9 +34,6 @@ import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserPr
 import { useQueryClient } from '@tanstack/react-query';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
-import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
-import { useIsFocused } from '@react-navigation/native';
-import { AppStepKey, APP_STEPS } from '@/features/walkthrough/constants/onboarding';
 
 interface ProfileCardProps {
     onPress: () => void;
@@ -91,58 +88,7 @@ export const MenuScreens: React.FC = () => {
     };
 
     const logout = useAuthStore(state => state.logout);
-    const {
-        resetOnboarding,
-        startOnboarding,
-        nextStep,
-        hasCompletedAccount,
-        activeModule,
-        currentStep,
-    } = useOnboardingStore();
-    const isFocused = useIsFocused();
-
-    // Auto-start account onboarding
-    React.useEffect(() => {
-        if (isFocused && !hasCompletedAccount && activeModule === 'none') {
-            const timer = setTimeout(() => {
-                startOnboarding('account');
-            }, 500); // Wait for UI to render
-            return () => clearTimeout(timer);
-        }
-    }, [isFocused, hasCompletedAccount, activeModule, startOnboarding]);
-
-    // Auto-skip ACCOUNT_WEATHER step when weather feature is disabled
-    React.useEffect(() => {
-        if (
-            activeModule === 'account' &&
-            currentStep === APP_STEPS.ACCOUNT_WEATHER.stepIndex &&
-            !weatherEnabled
-        ) {
-            nextStep();
-        }
-    }, [activeModule, currentStep, weatherEnabled, nextStep]);
-
-    // Auto-scroll to make the current onboarding target visible
-    React.useEffect(() => {
-        if (activeModule !== 'account' || !scrollViewRef.current) return;
-
-        if (currentStep >= APP_STEPS.ACCOUNT_DELETE_ACCOUNT.stepIndex) {
-            // Delete account and Logout are at the very bottom
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-        } else if (currentStep >= APP_STEPS.ACCOUNT_PRIVACY.stepIndex) {
-            // Security section items (Privacy, Terms)
-            scrollViewRef.current?.scrollTo({ y: 400, animated: true });
-        } else if (currentStep >= APP_STEPS.ACCOUNT_PERSONAL_INFO.stepIndex) {
-            // Records section items (Personal Info, Members, Settings)
-            scrollViewRef.current?.scrollTo({ y: 200, animated: true });
-        } else if (
-            currentStep <= APP_STEPS.ACCOUNT_CYCLE.stepIndex ||
-            currentStep === APP_STEPS.ACCOUNT_SHRIMP_PRICE.stepIndex
-        ) {
-            // Profile card, operations section, or returning from sub-screens
-            scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-        }
-    }, [activeModule, currentStep]);
+    const { resetOnboarding } = useOnboardingStore();
 
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
@@ -160,8 +106,6 @@ export const MenuScreens: React.FC = () => {
             title: 'Quản lý vụ nuôi',
             Icon: SwimmingPoolIcon,
             onPress: () => navigation.navigate('AquacultureManagement'),
-            onboardingStep: 'ACCOUNT_CYCLE' as AppStepKey,
-            onboardingNext: () => navigation.navigate('AquacultureManagement'),
         },
         // {
         //     id: 'device-maintenance',
@@ -174,15 +118,12 @@ export const MenuScreens: React.FC = () => {
             title: 'Thiết lập thông số môi trường',
             Icon: ChartBarIcon,
             onPress: () => navigation.navigate('SettingEnvironment' as any),
-            onboardingStep: 'ACCOUNT_ENVIRONMENT' as AppStepKey,
-            onboardingNext: () => navigation.navigate('SettingEnvironment' as any),
         },
         {
             id: 'shrimp-price',
             title: 'Tin tức và giá cả',
             Icon: ChartBarIcon,
             onPress: () => navigation.navigate('ShrimpPrice' as never),
-            onboardingStep: 'ACCOUNT_SHRIMP_PRICE' as AppStepKey,
         },
         ...(weatherEnabled
             ? [
@@ -191,7 +132,6 @@ export const MenuScreens: React.FC = () => {
                       title: 'Dự báo thời tiết',
                       Icon: WeatherForecastIcon,
                       onPress: () => navigation.navigate('WeatherScreen'),
-                      onboardingStep: 'ACCOUNT_WEATHER' as AppStepKey,
                   },
               ]
             : []),
@@ -203,21 +143,18 @@ export const MenuScreens: React.FC = () => {
             title: 'Thông tin cá nhân',
             Icon: UserIcon,
             onPress: () => navigation.navigate('PersonalInformation'),
-            onboardingStep: 'ACCOUNT_PERSONAL_INFO' as AppStepKey,
         },
         {
             id: 'members',
             title: 'Quản lý thành viên',
             Icon: UsersIcon,
             onPress: () => navigation.navigate('MemberManagement'),
-            onboardingStep: 'ACCOUNT_MEMBERS' as AppStepKey,
         },
         {
             id: 'settings',
             title: 'Cài đặt',
             Icon: GearIcon,
             onPress: () => navigation.navigate('Settings'),
-            onboardingStep: 'ACCOUNT_SETTINGS' as AppStepKey,
         },
         {
             id: 'tutorial-farm',
@@ -237,15 +174,6 @@ export const MenuScreens: React.FC = () => {
                 navigation.navigate('Material' as never);
             },
         },
-        {
-            id: 'tutorial-account',
-            title: 'Hướng dẫn phần Tài khoản',
-            Icon: ArticleIcon,
-            onPress: () => {
-                resetOnboarding('account');
-                navigation.navigate('Menu' as never);
-            },
-        },
     ];
 
     const securityItems: MenuSectionItemData[] = [
@@ -258,7 +186,6 @@ export const MenuScreens: React.FC = () => {
                     url: 'https://mebieco.vn/policy-page',
                     title: 'Chính sách bảo mật',
                 }),
-            onboardingStep: 'ACCOUNT_PRIVACY' as AppStepKey,
         },
         {
             id: 'terms',
@@ -269,7 +196,6 @@ export const MenuScreens: React.FC = () => {
                     url: 'https://mebieco.vn/policy-page',
                     title: 'Điều khoản và điều kiện',
                 }),
-            onboardingStep: 'ACCOUNT_TERMS' as AppStepKey,
         },
     ];
 
@@ -279,7 +205,6 @@ export const MenuScreens: React.FC = () => {
             title: 'Xóa tài khoản',
             Icon: TrashIcon,
             onPress: () => navigation.navigate('DeleteAccount'),
-            onboardingStep: 'ACCOUNT_DELETE_ACCOUNT' as AppStepKey,
         },
         {
             id: 'logout',
@@ -287,7 +212,6 @@ export const MenuScreens: React.FC = () => {
             Icon: SignOutIcon,
             hideArrow: true,
             onPress: handleLogout,
-            onboardingStep: 'ACCOUNT_LOGOUT' as AppStepKey,
         },
     ];
 
@@ -305,9 +229,7 @@ export const MenuScreens: React.FC = () => {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Profile card */}
-                <OnboardingStep step="ACCOUNT_PROFILE">
-                    <ProfileCard onPress={handleProfilePress} userData={userData} />
-                </OnboardingStep>
+                <ProfileCard onPress={handleProfilePress} userData={userData} />
 
                 {/* Content Container (wrapping all menu sections and actions) */}
                 <View style={styles.contentContainer}>
