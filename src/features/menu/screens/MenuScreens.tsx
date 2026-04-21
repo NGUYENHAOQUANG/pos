@@ -89,12 +89,37 @@ export const MenuScreens: React.FC = () => {
     };
 
     const logout = useAuthStore(state => state.logout);
-    const { resetOnboarding, startOnboarding, hasCompletedAccount, _hasHydrated } =
-        useOnboardingStore();
+    const {
+        resetOnboarding,
+        startOnboarding,
+        hasCompletedAccount,
+        _hasHydrated,
+        activeModule,
+        currentStep,
+    } = useOnboardingStore();
+
+    const contentContainerY = React.useRef(0);
+    const recordsSectionRelativeY = React.useRef(0);
+
+    React.useEffect(() => {
+        if (activeModule === 'account') {
+            if (currentStep === 6 && contentContainerY.current > 0) {
+                // Scroll to "Quản lý hồ sơ"
+                const targetY = contentContainerY.current + recordsSectionRelativeY.current;
+                scrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - 60), animated: true });
+            } else if (currentStep < 5) {
+                // Reset scroll to top for earlier steps
+                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+            }
+        }
+    }, [activeModule, currentStep]);
 
     React.useEffect(() => {
         if (_hasHydrated && !hasCompletedAccount) {
-            startOnboarding('account');
+            const timer = setTimeout(() => {
+                startOnboarding('account');
+            }, 500);
+            return () => clearTimeout(timer);
         }
     }, [_hasHydrated, hasCompletedAccount, startOnboarding]);
 
@@ -271,9 +296,20 @@ export const MenuScreens: React.FC = () => {
                 <ProfileCard onPress={handleProfilePress} userData={userData} />
 
                 {/* Content Container (wrapping all menu sections and actions) */}
-                <View style={styles.contentContainer}>
+                <View
+                    style={styles.contentContainer}
+                    onLayout={e => {
+                        contentContainerY.current = e.nativeEvent.layout.y;
+                    }}
+                >
                     <MenuSection title="Vận hành trại nuôi" items={operationsItem} />
-                    <MenuSection title="Quản lý hồ sơ" items={recordsItem} />
+                    <View
+                        onLayout={e => {
+                            recordsSectionRelativeY.current = e.nativeEvent.layout.y;
+                        }}
+                    >
+                        <MenuSection title="Quản lý hồ sơ" items={recordsItem} />
+                    </View>
                     <MenuSection title="Quản lý bảo mật" items={securityItems} />
 
                     {/* Chatbot (Beta) - only show when enabled in Settings */}
