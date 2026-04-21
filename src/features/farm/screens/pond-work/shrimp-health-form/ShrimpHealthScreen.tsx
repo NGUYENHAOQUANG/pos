@@ -86,8 +86,6 @@ export const ShrimpHealthScreen: React.FC = () => {
         }
     }, [isEditMode, detailResponse, imageUris, currentDocIds]);
 
-    // Removed old useEffect watching aiHealthCheckResult from route params
-
     const isSaving =
         isDetailLoading ||
         createMutation.isPending ||

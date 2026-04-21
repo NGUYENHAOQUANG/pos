@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ChatbotFAB } from '@/features/menu/screens/chatbot/components/ChatbotFAB';
+import { ChatbotFAB } from '@/features/menu/components/chatbot/ChatbotFAB';
 
 // Main Tabs
 import { MainNavigator } from './MainNavigator';
@@ -102,6 +102,7 @@ import { Member } from '@/features/menu/types/menu.types';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { AIHealthCheckResult } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
+import { HarvestScaleMode } from '@/features/farm/types/harvestRecord.types';
 
 // Wrapped Menu screens - Now using components directly
 const PersonalInformationWithProvider = PersonalInformationScreens;
@@ -186,8 +187,13 @@ export type AppStackParamList = {
         warehouseId: string;
     };
     TransferLog: { pond: PondData };
-    HarvestFormScreen: { pond: PondData; itemToEdit?: JobExecution };
-    ScaleListScreen: undefined;
+    HarvestFormScreen: {
+        pondId: string;
+        cycleId: string;
+        harvestRecordId?: string;
+        scaleMode?: HarvestScaleMode;
+    };
+    ScaleListScreen: { cycleId: string; pondId?: string };
     HarvestLog: { pond: PondData };
     CycleDetailScreen: { pondId: string; zoneId: string; warehouseId: string; cycleId: string };
     PondCycleListScreen: { pondId: string; zoneId: string; warehouseId: string };

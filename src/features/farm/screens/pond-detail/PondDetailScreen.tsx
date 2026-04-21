@@ -35,6 +35,7 @@ import {
     usePondJobEditHandlers,
     usePondJobLogHandlers,
 } from '@/features/farm/hooks/usePondJobHandlers';
+import { HarvestModeSelectModal } from '@/features/farm/components/pondwork/harvest/HarvestModeSelectModal';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'PondDetail'>;
@@ -53,6 +54,7 @@ export const PondDetailScreen: React.FC = () => {
 
     const [selectedTab, setSelectedTab] = useState<string>('work');
     const [isMeasureSizeModalVisible, setIsMeasureSizeModalVisible] = useState(false);
+    const [isHarvestModalVisible, setIsHarvestModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
     const { setTabBarVisible } = useTabBarVisibility();
@@ -241,13 +243,20 @@ export const PondDetailScreen: React.FC = () => {
         warehouseId,
     ]);
 
+    const handleHarvest = useCallback(() => {
+        setIsHarvestModalVisible(true);
+    }, []);
+
     const navigateHandlers = usePondJobNavigateHandlers({
         pond,
+        cycleId: currentCycle?.id,
         handleTransferPond,
+        handleHarvest,
     });
 
     const editHandlers = usePondJobEditHandlers({
         pond,
+        cycleId: currentCycle?.id,
     });
 
     const logHandlers = usePondJobLogHandlers({
@@ -331,31 +340,49 @@ export const PondDetailScreen: React.FC = () => {
     }, [navigation, pond]);
 
     return (
-        <PondDetail
-            pond={pond}
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-            isLoading={isLoading}
-            isLoadingCycle={isLoadingCycle}
-            isRefetchingCycles={isRefetchingCycles}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            currentCycle={currentCycle}
-            filteredJobs={filteredJobs}
-            onBack={onBack}
-            onGoToPondInfo={onGoToPondInfo}
-            onGoToCycleList={onGoToCycleList}
-            onStartCycle={handleStartCycle}
-            onEditCycle={onEditCycle}
-            breedName={pondDetailService.getBreedName(currentCycle, shrimpSeeds)}
-            transferBreedName={pondDetailService.getTransferBreedName(currentCycle, shrimpSeeds)}
-            handleJobPress={handleJobPress}
-            handleAddJobItem={handleAddJobItem}
-            handleEditJobItem={handleEditJobItem}
-            isMeasureSizeModalVisible={isMeasureSizeModalVisible}
-            setIsMeasureSizeModalVisible={setIsMeasureSizeModalVisible}
-            onGoToMeasureSizeScreen={onGoToMeasureSizeScreen}
-            jobs={jobs}
-        />
+        <>
+            <PondDetail
+                pond={pond}
+                selectedTab={selectedTab}
+                setSelectedTab={setSelectedTab}
+                isLoading={isLoading}
+                isLoadingCycle={isLoadingCycle}
+                isRefetchingCycles={isRefetchingCycles}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                currentCycle={currentCycle}
+                filteredJobs={filteredJobs}
+                onBack={onBack}
+                onGoToPondInfo={onGoToPondInfo}
+                onGoToCycleList={onGoToCycleList}
+                onStartCycle={handleStartCycle}
+                onEditCycle={onEditCycle}
+                breedName={pondDetailService.getBreedName(currentCycle, shrimpSeeds)}
+                transferBreedName={pondDetailService.getTransferBreedName(
+                    currentCycle,
+                    shrimpSeeds
+                )}
+                handleJobPress={handleJobPress}
+                handleAddJobItem={handleAddJobItem}
+                handleEditJobItem={handleEditJobItem}
+                isMeasureSizeModalVisible={isMeasureSizeModalVisible}
+                setIsMeasureSizeModalVisible={setIsMeasureSizeModalVisible}
+                onGoToMeasureSizeScreen={onGoToMeasureSizeScreen}
+                jobs={jobs}
+            />
+            <HarvestModeSelectModal
+                visible={isHarvestModalVisible}
+                onClose={() => setIsHarvestModalVisible(false)}
+                onSelectMode={mode => {
+                    const activeCycleId = currentCycle?.id || pond?.cyclePond?.cycleId;
+                    if (!pond?.id || !activeCycleId) return;
+                    navigation.navigate('HarvestFormScreen', {
+                        pondId: pond.id,
+                        cycleId: activeCycleId,
+                        scaleMode: mode,
+                    });
+                }}
+            />
+        </>
     );
 };

@@ -300,7 +300,6 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                     <View style={styles.fieldContainer}>
                         <View style={styles.labelRow}>
                             <Text style={styles.label}>Ghi chú</Text>
-                            <RequiredDot />
                         </View>
                         <View style={styles.inputGroup}>
                             <Controller

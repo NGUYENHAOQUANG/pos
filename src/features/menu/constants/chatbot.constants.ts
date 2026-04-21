@@ -1,5 +1,5 @@
 /**
- * @file constants.ts
+ * @file chatbot.constants.ts
  * @description Hằng số dùng chung cho Chatbot feature
  */
 

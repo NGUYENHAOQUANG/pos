@@ -10,7 +10,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '@/styles/themeContext';
-import { DeviceControlData } from '@/features/menu/screens/chatbot/types';
+import { DeviceControlData } from '@/features/menu/types/chatbot.types';
 
 // ── Device Icon Mapping ─────────────────────────────────────────────────────────
 
@@ -40,7 +40,6 @@ export const DeviceControlWidget: React.FC<DeviceControlWidgetProps> = ({ data }
 
     const { device_name, device_id, device_type, status: initialStatus } = data;
 
-    // State local cho toggle (mock - trong thực tế sẽ gọi API)
     const [isOn, setIsOn] = useState(initialStatus === 'ON');
     const [isLoading, setIsLoading] = useState(false);
 

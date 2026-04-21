@@ -14,7 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 export interface ConfirmScaleBottomSheetProps {
     visible: boolean;
     onClose: () => void;
-    onConfirm?: () => void;
+    onConfirm?: () => Promise<void> | void;
     scaleName?: string;
     weight?: number;
     batchNumber?: number;
@@ -25,20 +25,32 @@ export const ConfirmScaleBottomSheet: React.FC<ConfirmScaleBottomSheetProps> = (
     visible,
     onClose,
     onConfirm,
-    scaleName = 'Cân 01 — Sân A',
-    weight = 36.6,
-    batchNumber = 5,
-    totalAfterConfirm = 36.6,
+    scaleName = '--',
+    weight = 0,
+    batchNumber = 0,
+    totalAfterConfirm = 0,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         if (!isConfirmed) {
-            setIsConfirmed(true);
-            if (onConfirm) onConfirm();
+            if (onConfirm) {
+                setIsSubmitting(true);
+                try {
+                    await onConfirm();
+                    setIsConfirmed(true);
+                } catch (_error) {
+                    handleClose();
+                } finally {
+                    setIsSubmitting(false);
+                }
+            } else {
+                setIsConfirmed(true);
+            }
         } else {
             handleClose();
         }
@@ -62,7 +74,9 @@ export const ConfirmScaleBottomSheet: React.FC<ConfirmScaleBottomSheetProps> = (
                     {/* Header */}
                     <View style={styles.header}>
                         <View style={styles.headerLeft}>
-                            <Text style={styles.headerTitle}>{scaleName}</Text>
+                            <Text style={styles.headerTitle} numberOfLines={2}>
+                                {scaleName}
+                            </Text>
                             <View style={styles.statusBadge}>
                                 <Text style={styles.statusBadgeText}>Sẵn sàng XN</Text>
                             </View>
@@ -78,7 +92,10 @@ export const ConfirmScaleBottomSheet: React.FC<ConfirmScaleBottomSheetProps> = (
                                 batchNumber={batchNumber}
                                 weight={weight}
                                 scaleName={scaleName}
-                                time="11:24"
+                                time={new Date().toLocaleTimeString('vi-VN', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
                             />
 
                             <View style={styles.successInfoCard}>
@@ -126,6 +143,7 @@ export const ConfirmScaleBottomSheet: React.FC<ConfirmScaleBottomSheetProps> = (
                         primaryTitle={`Xác nhận mẻ #${batchNumber} - ${weight.toFixed(1)}kg`}
                         onPrimaryPress={handleConfirm}
                         style={styles.buttonBar}
+                        isLoading={isSubmitting}
                     />
                 )}
             </View>
@@ -148,13 +166,16 @@ const getStyles = (theme: Colors) =>
         },
         header: {
             flexDirection: 'row',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'space-between',
         },
         headerLeft: {
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
+            flexWrap: 'wrap',
             gap: spacing.sm,
+            marginRight: spacing.md,
         },
         headerTitle: {
             fontSize: 18,

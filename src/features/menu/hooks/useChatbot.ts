@@ -8,11 +8,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Animated, PanResponder } from 'react-native';
 
-import { IChatMessage } from '@/features/menu/screens/chatbot/types';
-import { sendMessageToAI } from '@/features/menu/screens/chatbot/services/chatbotApi';
-import { BOT_USER, CURRENT_USER_ID } from '@/features/menu/screens/chatbot/constants';
+import { IChatMessage } from '@/features/menu/types/chatbot.types';
+import { sendMessageToAI } from '@/features/menu/services/chatbotApi';
+import { BOT_USER, CURRENT_USER_ID } from '@/features/menu/constants/chatbot.constants';
 
-import { ChatSession } from '@/features/menu/screens/chatbot/components/ChatHistoryBottomSheet';
+import { ChatSession } from '@/features/menu/components/chatbot/ChatHistoryBottomSheet';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 

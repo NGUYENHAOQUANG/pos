@@ -67,12 +67,14 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     React.useEffect(() => {
         if (results.length > 0) {
             const latest = results[results.length - 1];
-            const hasSick = latest.items.some(i => i.status !== 'HEALTHY');
-            AppToast(
-                hasSick
-                    ? TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.SICK
-                    : TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.HEALTHY
-            );
+            if (latest.totalCount > 0) {
+                const hasSick = latest.items.some(i => i.status !== 'HEALTHY');
+                AppToast(
+                    hasSick
+                        ? TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.SICK
+                        : TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.HEALTHY
+                );
+            }
         }
     }, [results]);
 
@@ -171,7 +173,11 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                                 ]);
                             }
 
-                            Toast.show(TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.SUCCESS);
+                            if (newResult.totalCount === 0) {
+                                Toast.show(TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.NO_SHRIMP_FOUND);
+                            } else {
+                                Toast.show(TOAST_MESSAGES_CONFIG.SHRIMP_HEALTH_AI.SUCCESS);
+                            }
                         } else if (data.status === 'Failed') {
                             setIsPolling(false);
                             Toast.show(TOAST_MESSAGES_CONFIG.AI_COMMON.UPLOAD_FAILED);

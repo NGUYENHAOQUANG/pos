@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -10,95 +10,306 @@ import { HarvestBatchDetailBottomSheet } from './HarvestBatchDetailBottomSheet';
 import { Button } from '@/shared/components/buttons/Button';
 import { FilterChips } from '@/shared/components/buttons/FilterChips';
 import { HarvestSummaryCards } from './HarvestSummaryCards';
+import { AppToast } from '@/features/farm/utils/toastMessages';
+import { useScaleRecords, useSoftDeleteScaleRecord } from '@/features/farm/hooks/useScaleRecord';
+import {
+    formatScaleTime,
+    mapScaleRecordToBatchDetail,
+} from '@/features/farm/services/pond-work/scale.service';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
-type FilterType = 'all' | 'completed' | 'deleted';
+import { HarvestScaleMode, HarvestFilterType } from '@/features/farm/types/harvestRecord.types';
+import { AddManualScaleBottomSheet } from './AddManualScaleBottomSheet';
+import { useScaleStore } from '@/features/farm/store/scaleStore';
 
-export const HarvestHistoryTab: React.FC = () => {
+export interface HarvestHistoryTabProps {
+    scaleMode?: HarvestScaleMode;
+    onChangeTotalWeightKg?: (val: number) => void;
+    scaleSessionId?: string;
+    recordId?: string;
+    isEditMode?: boolean;
+}
+
+export const HarvestHistoryTab: React.FC<HarvestHistoryTabProps> = ({
+    scaleMode,
+    onChangeTotalWeightKg,
+    scaleSessionId,
+    recordId,
+    isEditMode,
+}) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
     const insets = useSafeAreaInsets();
     const paddingBottom = Math.max(insets.bottom, 12);
 
-    const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+    const [activeFilter, setActiveFilter] = useState<HarvestFilterType>(HarvestFilterType.ALL);
     const [batchDetailVisible, setBatchDetailVisible] = useState(false);
+    const [selectedBatchItem, setSelectedBatchItem] = useState<any>(null);
+    const [isAddManualVisible, setIsAddManualVisible] = useState(false);
+
+    const { manualRecords, addManualRecord, updateManualRecord, deleteManualRecord } =
+        useScaleStore();
 
     const filterOptions = [
-        { label: 'Tất cả', value: 'all' },
-        { label: 'Hoàn tất', value: 'completed' },
-        { label: 'Xóa', value: 'deleted' },
+        { label: 'Tất cả', value: HarvestFilterType.ALL },
+        { label: 'Hoàn tất', value: HarvestFilterType.COMPLETED },
+        { label: 'Xóa', value: HarvestFilterType.DELETED },
     ];
+
+    const isManual = scaleMode === HarvestScaleMode.MANUAL;
+
+    const { data: recordsData, isLoading: isRecordsLoadingAPI } = useScaleRecords({
+        SessionId: !isEditMode && !isManual ? scaleSessionId : undefined,
+        RecordId: isEditMode && !isManual ? recordId : undefined,
+    });
+
+    const isRecordsLoading = isManual ? false : isRecordsLoadingAPI;
+
+    const apiEntries = useMemo(() => recordsData?.data?.items || [], [recordsData?.data?.items]);
+    const entries = isManual ? manualRecords : apiEntries;
+
+    const { mutate: deleteRecord, isPending: isDeleting } = useSoftDeleteScaleRecord();
+
+    const handleDeleteBatch = (id: string, onClose: () => void) => {
+        if (isManual) {
+            deleteManualRecord(id);
+            const activeWeight = manualRecords
+                .filter(r => r.id !== id)
+                .reduce((sum, r) => sum + (r.weight || 0), 0);
+            onChangeTotalWeightKg?.(activeWeight);
+            onClose();
+            return;
+        }
+
+        deleteRecord(
+            { id },
+            {
+                onSuccess: () => {
+                    onClose();
+                    AppToast({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đã hủy mẻ cân',
+                    } as any);
+                },
+            }
+        );
+    };
+
+    const handleSaveManualRecord = (weight: number) => {
+        let activeWeight = 0;
+        if (selectedBatchItem) {
+            updateManualRecord(selectedBatchItem.id, weight);
+            activeWeight = manualRecords
+                .map(r => (r.id === selectedBatchItem.id ? { ...r, weight } : r))
+                .reduce((sum, r) => sum + (r.weight || 0), 0);
+        } else {
+            const newRecord = {
+                id: `manual_${Date.now()}`,
+                weight,
+                status: 'completed' as const,
+                createdAt: new Date().toISOString(),
+                batchNo: manualRecords.length + 1,
+                scaleName: 'Cân thủ công',
+            };
+            addManualRecord(newRecord);
+            activeWeight = [...manualRecords, newRecord].reduce(
+                (sum, r) => sum + (r.weight || 0),
+                0
+            );
+        }
+        onChangeTotalWeightKg?.(activeWeight);
+        setIsAddManualVisible(false);
+        setSelectedBatchItem(null);
+    };
+
+    const { totalCount, completedCount, deletedCount, totalWeight, deletedWeight } = useMemo(() => {
+        let activeC = 0;
+        let delC = 0;
+        let activeW = 0;
+        let delW = 0;
+        entries.forEach(entry => {
+            const isDel = entry.status?.toLowerCase() === 'deleted';
+            const weight = entry.weight || 0;
+            if (isDel) {
+                delC++;
+                delW += weight;
+            } else {
+                activeC++;
+                activeW += weight;
+            }
+        });
+        return {
+            totalCount: entries.length,
+            completedCount: activeC,
+            deletedCount: delC,
+            totalWeight: activeW,
+            deletedWeight: delW,
+        };
+    }, [entries]);
+
+    const filteredEntries = useMemo(() => {
+        const filtered = entries.filter(entry => {
+            const isDeleted = entry.status?.toLowerCase() === 'deleted';
+            if (activeFilter === HarvestFilterType.COMPLETED) return !isDeleted;
+            if (activeFilter === HarvestFilterType.DELETED) return isDeleted;
+            return true;
+        });
+
+        // Sort decreasing (newest first)
+        return filtered.sort((a, b) => {
+            const timeA = new Date(a.deviceTimestamp || a.createdAt || 0).getTime();
+            const timeB = new Date(b.deviceTimestamp || b.createdAt || 0).getTime();
+            return timeB - timeA;
+        });
+    }, [entries, activeFilter]);
 
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.content}>
-                {/* Header text */}
-                <View style={styles.headerTextContainer}>
-                    <Text style={styles.headerText}>
-                        <Text style={styles.boldText}>5</Text> mẻ -{' '}
-                        <Text style={styles.boldText}>1</Text> đã hủy
-                    </Text>
-                </View>
+                {isRecordsLoading ? (
+                    <ActivityIndicator
+                        size="small"
+                        color={theme.primary}
+                        style={{ marginVertical: 40 }}
+                    />
+                ) : (
+                    <>
+                        {isManual ? (
+                            <HarvestSummaryCards
+                                containerStyle={{ marginTop: 0 }}
+                                cards={[
+                                    {
+                                        label: 'Tổng sản lượng',
+                                        value: totalWeight.toFixed(1),
+                                        unit: 'kg',
+                                    },
+                                    {
+                                        label: 'Mẻ xác nhận',
+                                        value: completedCount.toString(),
+                                        unit: 'mẻ',
+                                    },
+                                ]}
+                            />
+                        ) : (
+                            <>
+                                {/* Header text */}
+                                <View style={styles.headerTextContainer}>
+                                    <Text style={styles.headerText}>
+                                        <Text style={styles.boldText}>{totalCount}</Text> mẻ -{' '}
+                                        <Text style={styles.boldText}>{deletedCount}</Text> đã hủy
+                                    </Text>
+                                </View>
 
-                {/* Filters */}
-                <FilterChips
-                    options={filterOptions}
-                    activeValue={activeFilter}
-                    onValueChange={val => setActiveFilter(val as FilterType)}
-                />
+                                {/* Filters */}
+                                <FilterChips
+                                    options={filterOptions}
+                                    activeValue={activeFilter}
+                                    onValueChange={val => setActiveFilter(val as HarvestFilterType)}
+                                />
 
-                {/* Summary Boxes */}
-                <HarvestSummaryCards
-                    containerStyle={{ marginTop: 0 }}
-                    cards={[
-                        { label: 'Tổng (4 mẻ HT)', value: '65.6', unit: 'kg' },
-                        { label: 'Đã hủy (1 mẻ)', value: '- 18.1', unit: 'kg', isError: true },
-                    ]}
-                />
+                                {/* Summary Boxes */}
+                                <HarvestSummaryCards
+                                    containerStyle={{ marginTop: 0 }}
+                                    cards={[
+                                        {
+                                            label: `Tổng (${completedCount} mẻ HT)`,
+                                            value: totalWeight.toFixed(1),
+                                            unit: 'kg',
+                                        },
+                                        {
+                                            label: `Đã hủy (${deletedCount} mẻ)`,
+                                            value: `- ${deletedWeight.toFixed(1)}`,
+                                            unit: 'kg',
+                                            isError: true,
+                                        },
+                                    ]}
+                                />
+                            </>
+                        )}
 
-                <View style={styles.entriesList}>
-                    <HarvestEntryItem
-                        index="4"
-                        weight={18.1}
-                        subtitle="Cân 01 - 11:06"
-                        onPress={() => setBatchDetailVisible(true)}
-                    />
-                    <HarvestEntryItem
-                        index="4"
-                        weight={18.1}
-                        subtitle="Cân 02 - 10:58"
-                        status="deleted"
-                        onPress={() => setBatchDetailVisible(true)}
-                    />
-                    <HarvestEntryItem
-                        index="3"
-                        weight={13.1}
-                        subtitle="Cân 02 - 10:58"
-                        onPress={() => setBatchDetailVisible(true)}
-                    />
-                    <HarvestEntryItem
-                        index="2"
-                        weight={13.1}
-                        subtitle="Cân 02 - 10:58"
-                        onPress={() => setBatchDetailVisible(true)}
-                    />
-                    <HarvestEntryItem
-                        index="1"
-                        weight={13.1}
-                        subtitle="Cân 02 - 10:58"
-                        showDivider={false}
-                        onPress={() => setBatchDetailVisible(true)}
-                    />
-                </View>
+                        <View style={styles.entriesList}>
+                            {entries.length === 0 ? (
+                                <EmptyStateCard message="Chưa có lịch sử mẻ cân nào" />
+                            ) : filteredEntries.length === 0 ? (
+                                <EmptyStateCard message="Không tìm thấy mẻ cân phù hợp" />
+                            ) : (
+                                filteredEntries.map((entry, index) => {
+                                    const isDeleted = entry.status?.toLowerCase() === 'deleted';
+                                    const timeStr = entry.deviceTimestamp || entry.createdAt;
+                                    const timeFormat = formatScaleTime(timeStr);
+                                    return (
+                                        <HarvestEntryItem
+                                            key={entry.id}
+                                            index={entry.batchNo || index + 1}
+                                            weight={entry.weight}
+                                            subtitle={`${entry.scaleName || 'Cân'} - ${timeFormat}`}
+                                            status={isDeleted ? 'deleted' : 'completed'}
+                                            showDivider={index < filteredEntries.length - 1}
+                                            hideBadge={isManual}
+                                            onPress={() => {
+                                                setSelectedBatchItem(entry);
+                                                if (isManual) {
+                                                    setIsAddManualVisible(true);
+                                                } else {
+                                                    setBatchDetailVisible(true);
+                                                }
+                                            }}
+                                        />
+                                    );
+                                })
+                            )}
+                        </View>
+                    </>
+                )}
             </ScrollView>
 
             {/* Bottom Bar */}
-            <View style={[styles.bottomBar, { paddingBottom }]}>
-                <Button title="Kết thúc thu hoạch" variant="outline" fullWidth onPress={() => {}} />
-            </View>
+            {isManual && (
+                <View style={[styles.bottomBar, { paddingBottom }]}>
+                    <Button
+                        title="Cân thêm"
+                        variant="outline"
+                        fullWidth
+                        onPress={() => {
+                            setSelectedBatchItem(null);
+                            setIsAddManualVisible(true);
+                        }}
+                    />
+                </View>
+            )}
 
             <HarvestBatchDetailBottomSheet
                 visible={batchDetailVisible}
                 onClose={() => setBatchDetailVisible(false)}
+                data={mapScaleRecordToBatchDetail(selectedBatchItem)}
+                onDelete={isEditMode ? undefined : handleDeleteBatch}
+                isDeleting={isDeleting}
+            />
+
+            <AddManualScaleBottomSheet
+                visible={isAddManualVisible}
+                onClose={() => {
+                    setIsAddManualVisible(false);
+                    setSelectedBatchItem(null);
+                }}
+                onConfirm={handleSaveManualRecord}
+                batchNo={selectedBatchItem ? selectedBatchItem.batchNo : manualRecords.length + 1}
+                initialWeight={selectedBatchItem ? selectedBatchItem.weight : undefined}
+                title={
+                    selectedBatchItem
+                        ? `Cân ${String(selectedBatchItem.batchNo).padStart(2, '0')} — Sân A`
+                        : 'Thêm mẻ cân'
+                }
+                onDelete={
+                    selectedBatchItem && !isEditMode
+                        ? () =>
+                              handleDeleteBatch(selectedBatchItem.id, () => {
+                                  setIsAddManualVisible(false);
+                                  setSelectedBatchItem(null);
+                              })
+                        : undefined
+                }
             />
         </View>
     );
@@ -113,7 +324,7 @@ const getStyles = (theme: Colors) =>
         content: {
             padding: spacing.md,
             paddingBottom: 40,
-            gap: 12,
+            gap: 8,
         },
         headerTextContainer: {
             paddingHorizontal: 4,

@@ -1,5 +1,5 @@
 /**
- * @file types.ts
+ * @file chatbot.types.ts
  */
 export type WidgetType = 'POND_STATUS' | 'DEVICE_CONTROL';
 

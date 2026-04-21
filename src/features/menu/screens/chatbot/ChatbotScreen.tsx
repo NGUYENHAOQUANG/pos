@@ -3,18 +3,18 @@ import { View, Platform, FlatList } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { IChatMessage } from '@/features/menu/screens/chatbot/types';
-import { ChatBubble } from '@/features/menu/screens/chatbot/components/ChatBubble';
-import { ChatbotInputToolbar } from '@/features/menu/screens/chatbot/components/ChatbotInput';
+import { IChatMessage } from '@/features/menu/types/chatbot.types';
+import { ChatBubble } from '@/features/menu/components/chatbot/ChatBubble';
+import { ChatbotInputToolbar } from '@/features/menu/components/chatbot/ChatbotInput';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
-import { MessageTimeRow } from '@/features/menu/screens/chatbot/components/MessageTimeRow';
-import { TypingIndicator } from '@/features/menu/screens/chatbot/components/TypingIndicator';
-import { WelcomeContent } from '@/features/menu/screens/chatbot/components/WelcomeContent';
-import { useChatbot } from '@/features/menu/screens/chatbot/hooks/useChatbot';
-import { useChatbotStyles } from '@/features/menu/screens/chatbot/styles/chatbotStyles';
-import { ChatHistoryBottomSheet } from '@/features/menu/screens/chatbot/components/ChatHistoryBottomSheet';
-import { ChatbotShaderBackground } from '@/features/menu/screens/chatbot/animation/ChatbotShaderBackground';
-import { ChatbotHeader } from '@/features/menu/screens/chatbot/components/ChatbotHeader';
+import { MessageTimeRow } from '@/features/menu/components/chatbot/MessageTimeRow';
+import { TypingIndicator } from '@/features/menu/components/chatbot/TypingIndicator';
+import { WelcomeContent } from '@/features/menu/components/chatbot/WelcomeContent';
+import { useChatbot } from '@/features/menu/hooks/useChatbot';
+import { useChatbotStyles } from '@/features/menu/styles/chatbotStyles';
+import { ChatHistoryBottomSheet } from '@/features/menu/components/chatbot/ChatHistoryBottomSheet';
+import { ChatbotShaderBackground } from '@/features/menu/animation/ChatbotShaderBackground';
+import { ChatbotHeader } from '@/features/menu/components/chatbot/ChatbotHeader';
 
 export const ChatbotScreen: React.FC = () => {
     const insets = useSafeAreaInsets();

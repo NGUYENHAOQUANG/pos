@@ -14,7 +14,7 @@ import {
     LayoutAnimation,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { WELCOME_SUGGESTIONS } from '@/features/menu/screens/chatbot/constants';
+import { WELCOME_SUGGESTIONS } from '@/features/menu/constants/chatbot.constants';
 import { colors } from '@/styles/colors';
 import { borderRadius } from '@/styles';
 import { zoneApi } from '@/features/farm/api/zoneApi';
@@ -22,9 +22,9 @@ import { pondApi } from '@/features/farm/api/pondApi';
 import { pondCategoryApi } from '@/features/farm/api/pondCategoryApi';
 import { Zone, PondData } from '@/features/farm/types/farm.types';
 import { PondCategory } from '@/features/farm/types/pond-category.types';
-import { ChatbotAvatar } from '@/features/menu/screens/chatbot/animation/ChatbotAvatar';
-import { chatbotState } from '@/features/menu/screens/chatbot/services/chatbotState';
-import { AnimatedBgTipCard } from '@/features/menu/screens/chatbot/components/AnimatedBgTipCard';
+import { ChatbotAvatar } from '@/features/menu/animation/ChatbotAvatar';
+import { chatbotState } from '@/features/menu/services/chatbotState';
+import { AnimatedBgTipCard } from '@/features/menu/components/chatbot/AnimatedBgTipCard';
 import ArrowRightIcon from '@/assets/Icon/ArrowRight.svg';
 
 /** Staggered fade-in + slide-up wrapper for list items */

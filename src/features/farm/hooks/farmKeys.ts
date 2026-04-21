@@ -136,4 +136,10 @@ export const farmKeys = {
             [...farmKeys.scales.all(), 'list', ...(params ? [params] : [])] as const,
         detail: (id: string) => [...farmKeys.scales.all(), 'detail', id] as const,
     },
+    scaleRecords: {
+        all: () => [...farmKeys.all, 'scaleRecords'] as const,
+        list: (params?: unknown) =>
+            [...farmKeys.scaleRecords.all(), 'list', ...(params ? [params] : [])] as const,
+        detail: (id: string) => [...farmKeys.scaleRecords.all(), 'detail', id] as const,
+    },
 };
