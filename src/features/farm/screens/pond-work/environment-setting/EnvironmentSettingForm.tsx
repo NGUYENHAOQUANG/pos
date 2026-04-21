@@ -63,6 +63,7 @@ export const SettingEnvironmentForm: React.FC<SettingEnvironmentFormProps> = ({
                             parameters={parameters}
                             onToggleParameter={onToggleParameter}
                             onEdit={onEdit}
+                            onBoardingNextStep={onBack}
                         />
 
                         <EnvironmentParameterSection

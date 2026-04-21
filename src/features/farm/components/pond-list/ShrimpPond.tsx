@@ -237,13 +237,15 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                                 </View>
                             </OnboardingStep>
                         ) : (
-                            <TouchableOpacity
-                                style={styles.detailButton}
-                                onPress={onDetailPress}
-                                activeOpacity={0.7}
-                            >
-                                <Text style={styles.detailButtonText}>Xem chi tiết</Text>
-                            </TouchableOpacity>
+                            <View collapsable={false} style={{ width: '100%' }}>
+                                <TouchableOpacity
+                                    style={styles.detailButton}
+                                    onPress={onDetailPress}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+                                </TouchableOpacity>
+                            </View>
                         )}
                     </View>
                 </>

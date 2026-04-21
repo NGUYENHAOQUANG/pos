@@ -25,6 +25,7 @@ import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBa
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { AppStackParamList } from '@/app/navigation/AppStack';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -173,14 +174,24 @@ export const AquacultureManagementScreens: React.FC = () => {
                 title="Quản lý vụ nuôi"
                 onBack={handleGoBack}
                 rightAction={
-                    <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
-                        <Ionicons name="add" size={24} color={theme.text} />
-                    </TouchableOpacity>
+                    <OnboardingStep step="ACCOUNT_CYCLE_ADD" onNext={() => navigation.goBack()}>
+                        <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
+                            <Ionicons name="add" size={24} color={theme.text} />
+                        </TouchableOpacity>
+                    </OnboardingStep>
                 }
             />
 
             {/* Tabs */}
-            <HeadingBar tabs={tabs} selectedTab={selectedTab} onTabSelect={setSelectedTab} />
+            <OnboardingStep step="ACCOUNT_CYCLE_TABS" wrapperStyle={{ width: '100%' }}>
+                <View collapsable={false} style={{ width: '100%' }}>
+                    <HeadingBar
+                        tabs={tabs}
+                        selectedTab={selectedTab}
+                        onTabSelect={setSelectedTab}
+                    />
+                </View>
+            </OnboardingStep>
 
             {/* Dropdown Filter Section (White Background) */}
             <View style={styles.filterSection}>

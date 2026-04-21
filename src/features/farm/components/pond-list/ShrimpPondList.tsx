@@ -10,7 +10,6 @@ import { ShrimpPond } from '@/features/farm/components/pond-list/ShrimpPond';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { PondData } from '@/features/farm/types/farm.types';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
-import { useIsOnboardingActive } from '@/features/walkthrough/store/useOnboardingStore';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface ShrimpPondListProps {
@@ -46,7 +45,6 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
     ) => {
         const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
         const bottomBarHeight = useBottomTabBarHeight();
-        const isOnboardingActive = useIsOnboardingActive();
 
         const getStatus = (item: PondData): TagStatus | undefined => {
             if (item.status === 'Framing') return 'active';
@@ -84,7 +82,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                         })
                     }
                     onDetailPress={() => onPondPress?.(item)}
-                    showOnboardingDetail={index === 0 && isOnboardingActive}
+                    showOnboardingDetail={index === 0}
                     onDetailNavigate={() => onPondPress?.(item)}
                 />
             );
@@ -115,7 +113,6 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                 ListEmptyComponent={ListEmptyComponent}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                scrollEnabled={!isOnboardingActive}
             />
         );
     }

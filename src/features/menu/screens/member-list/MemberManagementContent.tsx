@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet, FlatList, ListRenderItem, ActivityIndicator } from 'react-native';
-import { spacing } from '@/styles';
+import { spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 
@@ -11,6 +11,8 @@ import {
 import { Input } from '@/shared/components/forms/Input';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { IUserAccount } from '@/features/menu/types/member.types';
@@ -54,6 +56,17 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+
+    // Auto-skip logic for empty states during onboarding
+    const currentStep = useOnboardingStore(s => s.currentStep);
+    const activeModule = useOnboardingStore(s => s.activeModule);
+    const nextStepAction = useOnboardingStore(s => s.nextStep);
+
+    useEffect(() => {
+        if (activeModule === 'account' && currentStep === 8 && members.length === 0) {
+            nextStepAction(); // Auto-skip step 8 (member action) if no member exists
+        }
+    }, [activeModule, currentStep, members.length, nextStepAction]);
 
     // Map Filter Options
     const roleOptions: DropDownItem[] = [
@@ -107,7 +120,7 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
     }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
     const renderItem: ListRenderItem<IUserAccount> = useCallback(
-        ({ item }) => (
+        ({ item, index }) => (
             <MemberItem
                 name={item.fullName || item.phoneNumber || 'Không có tên'}
                 phone={item.phoneNumber || 'Không có số điện thoại'}
@@ -118,6 +131,7 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
                 onSuspend={() => handleSuspendMemberRequest(item.userId)}
                 onActivate={() => handleActivateMemberRequest(item.userId)}
                 onResendInvite={() => handleResendInviteRequest(item.userId)}
+                isFirstItem={index === 0}
             />
         ),
         [
@@ -134,24 +148,28 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
     return (
         <View style={styles.container}>
             {/* Filters */}
-            <View style={styles.filterContainer}>
-                <View style={styles.searchInputWrapper}>
-                    <Input
-                        icon="search-outline"
-                        placeholder="Tìm kiếm tên, số điện thoại"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        containerStyle={styles.noMarginBottom}
-                    />
-                </View>
-                <View style={styles.filterWrapper}>
-                    <DropDownButton
-                        placeholder="Vai trò"
-                        data={roleOptions}
-                        style={styles.dropdown}
-                        onSelect={item => setSelectedRole(item.id.toString())}
-                    />
-                </View>
+            <View style={styles.filterOuter}>
+                <OnboardingStep step="ACCOUNT_MEMBER_FILTER">
+                    <View collapsable={false} style={styles.filterInner}>
+                        <View style={styles.searchInputWrapper}>
+                            <Input
+                                icon="search-outline"
+                                placeholder="Tìm kiếm tên, số điện thoại"
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                containerStyle={styles.noMarginBottom}
+                            />
+                        </View>
+                        <View style={styles.filterWrapper}>
+                            <DropDownButton
+                                placeholder="Vai trò"
+                                data={roleOptions}
+                                style={styles.dropdown}
+                                onSelect={item => setSelectedRole(item.id.toString())}
+                            />
+                        </View>
+                    </View>
+                </OnboardingStep>
             </View>
 
             {/* Content */}
@@ -254,11 +272,16 @@ const getStyles = (theme: Colors) =>
             flex: 1,
             backgroundColor: theme.backgroundPrimary,
         },
-        filterContainer: {
-            flexDirection: 'row',
+        filterOuter: {
             paddingHorizontal: spacing.md,
             paddingVertical: spacing.md,
+            zIndex: 1,
+        },
+        filterInner: {
+            flexDirection: 'row',
             gap: spacing.sm,
+            backgroundColor: theme.backgroundPrimary,
+            borderRadius: borderRadius.md,
         },
         searchInputWrapper: {
             flex: 2,

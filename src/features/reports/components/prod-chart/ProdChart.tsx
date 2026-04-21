@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { spacing } from '@/styles/spacing';
+import { borderRadius } from '@/styles';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Loading } from '@/shared/components/ui/Loading';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
@@ -12,6 +13,7 @@ import { ProdChartProps, ProdChartViewMode } from '../../types/production-distri
 import { useAppTheme } from '@/styles/themeContext';
 import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 import { SummaryCard, VisualChart, DEFAULT_BAR_WIDTH } from './ProdChartSubComponents';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -52,13 +54,23 @@ export const ProdChart = ({ zoneId, pondId, seasonId }: ProdChartProps) => {
 
     return (
         <View style={chartStyles.container}>
-            <BasicDropDownButton
-                prefixIcon={<ProdChartIcon width={20} height={20} />}
-                label="Biểu đồ sản lượng"
-                isExpanded={isExpanded}
-                onPress={handleToggle}
-                style={styles.header}
-            />
+            <OnboardingStep step="REPORT_CHART_PROD">
+                <View
+                    collapsable={false}
+                    style={{
+                        backgroundColor: theme.backgroundPrimary,
+                        borderRadius: borderRadius.sm,
+                    }}
+                >
+                    <BasicDropDownButton
+                        prefixIcon={<ProdChartIcon width={20} height={20} />}
+                        label="Biểu đồ sản lượng"
+                        isExpanded={isExpanded}
+                        onPress={handleToggle}
+                        style={styles.header}
+                    />
+                </View>
+            </OnboardingStep>
 
             {isExpanded && (
                 <View style={styles.content}>

@@ -25,6 +25,7 @@ import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { spacing } from '@/styles/spacing';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 import { useQueryClient } from '@tanstack/react-query';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 
 export const ReportsScreen = () => {
     const theme = useAppTheme();
@@ -54,6 +55,41 @@ export const ReportsScreen = () => {
         handleSelectPondType,
     } = useReportsScreen();
 
+    const { startOnboarding, hasCompletedReport, _hasHydrated, activeModule, currentStep } =
+        useOnboardingStore();
+
+    const envChartY = useRef(0);
+    const prodChartY = useRef(0);
+
+    React.useEffect(() => {
+        if (_hasHydrated && !hasCompletedReport) {
+            const timer = setTimeout(() => {
+                startOnboarding('report');
+            }, 500); // Add a small delay for better UX and layout stability
+            return () => clearTimeout(timer);
+        }
+    }, [_hasHydrated, hasCompletedReport, startOnboarding]);
+
+    React.useEffect(() => {
+        if (activeModule === 'report') {
+            if (currentStep === 3 && envChartY.current > 0) {
+                // REPORT_CHART_ENV
+                scrollViewRef.current?.scrollTo({
+                    y: Math.max(0, envChartY.current - 120),
+                    animated: true,
+                });
+            } else if (currentStep === 4 && prodChartY.current > 0) {
+                // REPORT_CHART_PROD
+                scrollViewRef.current?.scrollTo({
+                    y: Math.max(0, prodChartY.current - 120),
+                    animated: true,
+                });
+            } else if (currentStep < 3) {
+                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+            }
+        }
+    }, [activeModule, currentStep]);
+
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         await queryClient.invalidateQueries();
@@ -68,17 +104,29 @@ export const ReportsScreen = () => {
         <>
             <PondInfor />
             <OverView />
-            <CompilationEnvChart
-                zoneId={selectedZoneId?.toString() || ''}
-                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
-                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
-            />
+            <View
+                onLayout={e => {
+                    envChartY.current = e.nativeEvent.layout.y;
+                }}
+            >
+                <CompilationEnvChart
+                    zoneId={selectedZoneId?.toString() || ''}
+                    pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+                    seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
+                />
+            </View>
             <GrowthChart />
-            <ProdChart
-                zoneId={selectedZoneId?.toString() || ''}
-                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
-            />
+            <View
+                onLayout={e => {
+                    prodChartY.current = e.nativeEvent.layout.y;
+                }}
+            >
+                <ProdChart
+                    zoneId={selectedZoneId?.toString() || ''}
+                    pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                    seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
+                />
+            </View>
             <CompilationFeedProd
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
@@ -109,11 +157,17 @@ export const ReportsScreen = () => {
 
     const renderStandardContent = () => (
         <>
-            <CompilationEnvChart
-                zoneId={selectedZoneId?.toString() || ''}
-                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
-                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
-            />
+            <View
+                onLayout={e => {
+                    envChartY.current = e.nativeEvent.layout.y;
+                }}
+            >
+                <CompilationEnvChart
+                    zoneId={selectedZoneId?.toString() || ''}
+                    pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+                    seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
+                />
+            </View>
             <CompilationFeedProd
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
@@ -123,11 +177,17 @@ export const ReportsScreen = () => {
                 zoneId={selectedZoneId?.toString() || ''}
                 seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
             />
-            <ProdChart
-                zoneId={selectedZoneId?.toString() || ''}
-                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
-            />
+            <View
+                onLayout={e => {
+                    prodChartY.current = e.nativeEvent.layout.y;
+                }}
+            >
+                <ProdChart
+                    zoneId={selectedZoneId?.toString() || ''}
+                    pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                    seasonId={selectedSeason.id !== '1' ? selectedSeason.id?.toString() : undefined}
+                />
+            </View>
             <CompilationProfitChart
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}

@@ -332,7 +332,7 @@ export const FeedingFormScreens = () => {
                     </SafeInputLayout>
                 )}
             </View>
-            <OnboardingStep step="SAVE_BUTTON">
+            <OnboardingStep step="SAVE_BUTTON" onNext={() => navigation.popToTop()}>
                 <View collapsable={false} style={{ width: '100%' }}>
                     <ButtonBarFarm
                         primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}

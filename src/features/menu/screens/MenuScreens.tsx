@@ -76,6 +76,7 @@ export const MenuScreens: React.FC = () => {
     const styles = getStyles(theme);
     const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
     const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
+    const walkthroughEnabled = useSettingsStore(s => s.walkthroughEnabled);
 
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -88,7 +89,14 @@ export const MenuScreens: React.FC = () => {
     };
 
     const logout = useAuthStore(state => state.logout);
-    const { resetOnboarding } = useOnboardingStore();
+    const { resetOnboarding, startOnboarding, hasCompletedAccount, _hasHydrated } =
+        useOnboardingStore();
+
+    React.useEffect(() => {
+        if (_hasHydrated && !hasCompletedAccount) {
+            startOnboarding('account');
+        }
+    }, [_hasHydrated, hasCompletedAccount, startOnboarding]);
 
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
@@ -106,6 +114,8 @@ export const MenuScreens: React.FC = () => {
             title: 'Quản lý vụ nuôi',
             Icon: SwimmingPoolIcon,
             onPress: () => navigation.navigate('AquacultureManagement'),
+            onboardingStep: 'ACCOUNT_MENU_CYCLE',
+            onboardingNext: () => navigation.navigate('AquacultureManagement'),
         },
         // {
         //     id: 'device-maintenance',
@@ -118,6 +128,8 @@ export const MenuScreens: React.FC = () => {
             title: 'Thiết lập thông số môi trường',
             Icon: ChartBarIcon,
             onPress: () => navigation.navigate('SettingEnvironment' as any),
+            onboardingStep: 'ACCOUNT_MENU_ENV',
+            onboardingNext: () => navigation.navigate('SettingEnvironment' as any),
         },
         {
             id: 'shrimp-price',
@@ -149,6 +161,8 @@ export const MenuScreens: React.FC = () => {
             title: 'Quản lý thành viên',
             Icon: UsersIcon,
             onPress: () => navigation.navigate('MemberManagement'),
+            onboardingStep: 'ACCOUNT_MENU_MEMBER',
+            onboardingNext: () => navigation.navigate('MemberManagement'),
         },
         {
             id: 'settings',
@@ -156,24 +170,49 @@ export const MenuScreens: React.FC = () => {
             Icon: GearIcon,
             onPress: () => navigation.navigate('Settings'),
         },
-        {
-            id: 'tutorial-farm',
-            title: 'Hướng dẫn sử dụng Trại nuôi',
-            Icon: ArticleIcon,
-            onPress: () => {
-                resetOnboarding('farm');
-                navigation.navigate('Farm' as never);
-            },
-        },
-        {
-            id: 'tutorial-material',
-            title: 'Hướng dẫn Kho Vật tư',
-            Icon: ArticleIcon,
-            onPress: () => {
-                resetOnboarding('material');
-                navigation.navigate('Material' as never);
-            },
-        },
+        ...(walkthroughEnabled
+            ? [
+                  {
+                      id: 'tutorial-farm',
+                      title: 'Hướng dẫn sử dụng Trại nuôi',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('farm');
+                          navigation.navigate('Farm' as never);
+                      },
+                  },
+                  {
+                      id: 'tutorial-material',
+                      title: 'Hướng dẫn Kho Vật tư',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('material');
+                          navigation.navigate('Material' as never);
+                      },
+                  },
+                  {
+                      id: 'tutorial-account',
+                      title: 'Hướng dẫn Tài khoản',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('account');
+                      },
+                  },
+                  {
+                      id: 'tutorial-report',
+                      title: 'Hướng dẫn xem Báo cáo',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('report');
+                          navigation.navigate('Reports' as never);
+                      },
+                  },
+              ]
+            : []),
     ];
 
     const securityItems: MenuSectionItemData[] = [
@@ -319,6 +358,10 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             gap: 16,
+            backgroundColor: theme.backgroundPrimary,
+            padding: 8,
+            marginHorizontal: -8,
+            borderRadius: 12,
         },
         avatarContainer: {},
         avatar: {

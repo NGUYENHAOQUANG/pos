@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleProp, ViewStyle } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleProp, ViewStyle, InteractionManager } from 'react-native';
 import { WalkthroughTooltip } from '@/features/walkthrough/components/WalkthroughTooltip';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 import {
@@ -9,26 +9,12 @@ import {
 } from '@/features/walkthrough/constants/onboarding';
 
 interface OnboardingStepProps {
-    /** Step key from APP_STEPS config */
     step: AppStepKey;
-    /** Content to spotlight */
     children: React.ReactNode;
-    /** Optional callback that runs AFTER nextStep/completeOnboarding */
     onNext?: () => void;
-    /** Optional style override for the tooltip children wrapper */
     wrapperStyle?: StyleProp<ViewStyle>;
 }
 
-/**
- * Smart onboarding wrapper — replaces verbose WalkthroughTooltip + store usage.
- *
- * Usage:
- * ```tsx
- * <OnboardingStep step="FARM_SELECTOR">
- *     <DropDownButton ... />
- * </OnboardingStep>
- * ```
- */
 export const OnboardingStep: React.FC<OnboardingStepProps> = ({
     step,
     children,
@@ -36,42 +22,58 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
     wrapperStyle,
 }) => {
     const config: OnboardingStepConfig = APP_STEPS[step];
-    const { activeModule, currentStep, nextStep, completeOnboarding } = useOnboardingStore();
+    const isVisibleRaw = useOnboardingStore(
+        s => s.activeModule === config.module && s.currentStep === config.stepIndex
+    );
+    const completeOnboarding = useOnboardingStore(s => s.completeOnboarding);
+    const nextStepAction = useOnboardingStore(s => s.nextStep);
 
-    const isVisibleRaw = activeModule === config.module && currentStep === config.stepIndex;
-    const [isVisible, setIsVisible] = React.useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const mountedRef = useRef(true);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    React.useEffect(() => {
-        let timer: ReturnType<typeof setTimeout>;
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
 
+    useEffect(() => {
         if (isVisibleRaw) {
-            // Apply a default minimum delay of 400ms if visibilityDelay is not set.
-            // This safely outlasts the standard ~300ms RN scroll/layout animations,
-            // ensuring the Tooltip correctly measures the mounted and still element.
-            const delay = 400;
-            timer = setTimeout(() => {
-                setIsVisible(true);
-            }, delay);
-        } else {
-            // Immediately hide to start unmount process
-            setIsVisible(false);
+            const interactionHandle = InteractionManager.runAfterInteractions(() => {
+                timerRef.current = setTimeout(() => {
+                    if (mountedRef.current) {
+                        setIsVisible(true);
+                    }
+                }, 250);
+            });
+
+            return () => {
+                interactionHandle.cancel();
+                if (timerRef.current) {
+                    clearTimeout(timerRef.current);
+                    timerRef.current = null;
+                }
+            };
         }
 
-        return () => {
-            if (timer) clearTimeout(timer);
-        };
+        setIsVisible(false);
+        return undefined;
     }, [isVisibleRaw]);
 
     const handleNext = () => {
+        setIsVisible(false);
         if (config.isLastStep) {
             completeOnboarding(config.module);
         } else {
-            nextStep();
+            nextStepAction();
         }
         onNext?.();
     };
 
     const handleSkip = () => {
+        setIsVisible(false);
         completeOnboarding(config.module);
     };
 

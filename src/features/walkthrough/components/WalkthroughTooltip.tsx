@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -15,6 +15,12 @@ import { Colors } from '@/styles/colors';
 
 /** Stable no-op reference to prevent unnecessary re-renders */
 const NOOP = () => {};
+
+/** Stable display insets — avoids new object reference every render */
+const DISPLAY_INSETS = { top: 24, bottom: 24, left: 24, right: 24 };
+
+/** Pre-calculated Android top adjustment */
+const ANDROID_TOP_ADJUSTMENT = Platform.OS === 'android' ? -(StatusBar.currentHeight || 0) : 0;
 
 interface WalkthroughTooltipProps {
     isVisible: boolean;
@@ -42,19 +48,25 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
-    const content = (
-        <View style={styles.tooltipContent}>
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.description}>{description}</Text>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={onSkip} style={styles.skipButton}>
-                    <Text style={styles.skipText}>Bỏ qua</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onNext} style={styles.nextButton}>
-                    <Text style={styles.nextText}>{isLastStep ? 'Hoàn thành' : 'Tiếp tục'}</Text>
-                </TouchableOpacity>
+    // Memoize tooltip content to prevent re-measure on every render
+    const content = useMemo(
+        () => (
+            <View style={styles.tooltipContent}>
+                <Text style={styles.title}>{title}</Text>
+                <Text style={styles.description}>{description}</Text>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={onSkip} style={styles.skipButton}>
+                        <Text style={styles.skipText}>Bỏ qua</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={onNext} style={styles.nextButton}>
+                        <Text style={styles.nextText}>
+                            {isLastStep ? 'Hoàn thành' : 'Tiếp tục'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        ),
+        [styles, title, description, onSkip, onNext, isLastStep]
     );
 
     return (
@@ -66,8 +78,8 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
             backgroundColor="rgba(0,0,0,0.5)"
             contentStyle={styles.contentStyle}
             disableShadow={false}
-            displayInsets={{ top: 24, bottom: 24, left: 24, right: 24 }}
-            topAdjustment={Platform.OS === 'android' ? -(StatusBar.currentHeight || 0) : 0}
+            displayInsets={DISPLAY_INSETS}
+            topAdjustment={ANDROID_TOP_ADJUSTMENT}
             childrenWrapperStyle={childrenWrapperStyle}
             allowChildInteraction={false}
         >

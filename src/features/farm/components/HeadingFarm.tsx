@@ -4,7 +4,6 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { PondData, PondType } from '@/features/farm/types/farm.types';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
-import { useIsOnboardingActive } from '@/features/walkthrough/store/useOnboardingStore';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 export interface TabItem {
@@ -63,8 +62,6 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
     ];
 
     const tabs = customTabs || (tabType === 'pond-detail' ? pondDetailTabs : dashboardTabs);
-    const isOnboardingActive = useIsOnboardingActive();
-    const showTabOnboarding = tabType === 'dashboard' && isOnboardingActive;
 
     const headingBar = (
         <View collapsable={false} style={{ width: '100%' }}>
@@ -100,7 +97,7 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
                     menuOptions={menuOptions}
                 />
             )}
-            {showTabOnboarding ? (
+            {tabType === 'dashboard' ? (
                 <OnboardingStep step="STATUS_TABS" wrapperStyle={{ width: '100%' }}>
                     {headingBar}
                 </OnboardingStep>
