@@ -145,7 +145,7 @@ export const EditEquimentMaintenanceScreens = () => {
 
             <View style={styles.footer}>
                 <ButtonBarMenu
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     primaryTitle="Cập nhật thông tin"
                     onSecondaryPress={handleCancel}
                     onPrimaryPress={handleSave}

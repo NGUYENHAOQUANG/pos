@@ -201,7 +201,6 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     value={selectedUnit}
                     onChangeText={() => {}}
                     editable={false}
-                    required
                     disabled
                     containerStyle={{ marginBottom: 0 }}
                 />
@@ -210,7 +209,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             {/* Footer */}
             <View style={styles.footer}>
                 <Button
-                    title="Huỷ"
+                    title="Hủy"
                     variant="outline"
                     onPress={onClose}
                     style={[styles.footerButton, styles.cancelButtonOverride]}

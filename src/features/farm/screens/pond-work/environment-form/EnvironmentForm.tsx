@@ -244,7 +244,7 @@ export const EnvironmentForm: React.FC<EnvironmentFormProps> = ({
                     <View style={styles.footer}>
                         <ButtonBarFarm
                             primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                            secondaryTitle="Huỷ"
+                            secondaryTitle="Hủy"
                             onPrimaryPress={handleSubmit(handleFormSubmit, handleFormError)}
                             onSecondaryPress={onCancel}
                             primaryDisabled={isButtonDisabled}

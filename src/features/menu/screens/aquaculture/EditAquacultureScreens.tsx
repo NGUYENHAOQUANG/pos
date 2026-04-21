@@ -196,7 +196,7 @@ export const EditAquacultureScreens: React.FC = () => {
                     <ButtonBarMenu
                         primaryTitle="Cập nhật thông tin"
                         secondaryTitle={
-                            aquaculture.status === SeasonStatus.Closed ? 'Huỷ' : 'Đóng vụ nuôi'
+                            aquaculture.status === SeasonStatus.Closed ? 'Hủy' : 'Đóng vụ nuôi'
                         }
                         onPrimaryPress={handlePrimaryPress}
                         onSecondaryPress={handleSecondaryPress}

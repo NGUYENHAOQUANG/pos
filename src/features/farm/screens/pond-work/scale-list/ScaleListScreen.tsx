@@ -12,10 +12,12 @@ import { spacing } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import { ScaleCard, ScaleStatus } from '@/features/farm/components/pondwork/harvest/ScaleCard';
 import { AddScaleBottomSheet } from '@/features/farm/components/pondwork/harvest/AddScaleBottomSheet';
+import { ConfirmScaleBottomSheet } from '@/features/farm/components/pondwork/harvest/ConfirmScaleBottomSheet';
 import { AppToast, TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { ScaleActionBottomSheet } from '@/features/farm/components/pondwork/harvest/ScaleActionBottomSheet';
 import { EmergencyRevokeSuccessBottomSheet } from '@/features/farm/components/pondwork/harvest/EmergencyRevokeSuccessBottomSheet';
 import { useScales, useUpdateScaleUsageStatus } from '@/features/farm/hooks/useScales';
+import { useConfirmScaleRecord, useScaleRecords } from '@/features/farm/hooks/useScaleRecord';
 import { IScale, ScaleUsageStatus } from '@/features/farm/types/scale.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
@@ -45,9 +47,29 @@ export const ScaleListScreen: React.FC = () => {
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
     const [isEmergencySuccessVisible, setIsEmergencySuccessVisible] = useState(false);
 
+    // Confirm scale modal state
+    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+    const [selectedConfirmWeight, setSelectedConfirmWeight] = useState<number>(0);
+    const [selectedConfirmScaleName, setSelectedConfirmScaleName] = useState<string>('Cân');
+    const [selectedConfirmScaleItem, setSelectedConfirmScaleItem] = useState<IScale | null>(null);
+
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const scaleSessionCtx = useFarmStore(state =>
+        cycleId ? state.scaleSessions[cycleId] : undefined
+    );
+    const scaleSessionId = scaleSessionCtx?.sessionId;
 
     const { mutateAsync: updateUsageStatus } = useUpdateScaleUsageStatus();
+    const { mutateAsync: confirmRecord } = useConfirmScaleRecord();
+
+    const { data: recordsData } = useScaleRecords({
+        SessionId: scaleSessionId,
+    });
+
+    const entries = recordsData?.data?.items || [];
+    const validEntries = entries.filter(entry => entry.status?.toLowerCase() !== 'deleted');
+    const totalWeight = validEntries.reduce((sum, entry) => sum + (entry.weight || 0), 0);
+    const confirmedBatches = validEntries.length;
 
     const {
         data: scalesData,
@@ -57,6 +79,7 @@ export const ScaleListScreen: React.FC = () => {
     } = useScales({
         ZoneId: selectedZoneId || undefined,
         UsageStatus: ScaleUsageStatus.Using,
+        CurrentCycleId: cycleId,
     });
 
     const apiScales = scalesData?.data?.items || [];
@@ -66,6 +89,43 @@ export const ScaleListScreen: React.FC = () => {
         setSelectedScaleStatus(status);
         setIsActionModalVisible(true);
     }, []);
+
+    const handleConfirmPress = useCallback((scaleItem: IScale) => {
+        const randomWeight = +(Math.random() * (30 - 10) + 10).toFixed(1);
+        setSelectedConfirmWeight(randomWeight);
+        setSelectedConfirmScaleItem(scaleItem);
+        setSelectedConfirmScaleName(getScaleDisplayTitle(scaleItem));
+        setIsConfirmModalVisible(true);
+    }, []);
+
+    const handleConfirmAction = async () => {
+        if (!selectedConfirmScaleItem || !scaleSessionId || !cycleId) {
+            AppToast({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Vui lòng bắt đầu phiên thu hoạch trước',
+            } as any);
+            return;
+        }
+
+        try {
+            await confirmRecord({
+                cycleId,
+                scaleId: selectedConfirmScaleItem.id,
+                sessionId: scaleSessionId,
+                weight: selectedConfirmWeight,
+                deviceTimestamp: new Date().toISOString(),
+            });
+            setIsConfirmModalVisible(false);
+            AppToast({
+                type: 'success',
+                text1: 'Thành công',
+                text2: 'Đã xác nhận kết quả cân',
+            } as any);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const handleScaleToggle = useCallback(
         (val: boolean, scaleId: string) => {
@@ -137,7 +197,7 @@ export const ScaleListScreen: React.FC = () => {
                                     title={title}
                                     status={status}
                                     weight={scale.type === 'Kg500' ? 0 : 0}
-                                    onConfirmPress={() => {}}
+                                    onConfirmPress={() => handleConfirmPress(scale)}
                                     onPress={() => handlePressChevron(scale, status)}
                                     onToggle={val => handleScaleToggle(val, scale.id)}
                                 />
@@ -174,6 +234,16 @@ export const ScaleListScreen: React.FC = () => {
                     setIsActionModalVisible(false);
                     setTimeout(() => setIsEmergencySuccessVisible(true), 500);
                 }}
+            />
+
+            <ConfirmScaleBottomSheet
+                visible={isConfirmModalVisible}
+                onClose={() => setIsConfirmModalVisible(false)}
+                weight={selectedConfirmWeight}
+                scaleName={selectedConfirmScaleName}
+                batchNumber={confirmedBatches + 1}
+                totalAfterConfirm={totalWeight + selectedConfirmWeight}
+                onConfirm={handleConfirmAction}
             />
 
             <EmergencyRevokeSuccessBottomSheet

@@ -190,7 +190,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
             <View style={styles.footer}>
                 <ButtonBarFarm
                     primaryTitle="Lưu thông tin"
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={onBack}
                     primaryDisabled={isSubmitting}

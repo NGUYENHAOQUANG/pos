@@ -328,7 +328,7 @@ export const PersonalInformationScreens: React.FC = () => {
                 {/* Sticky Bottom Action Bar */}
                 <ButtonBarMenu
                     primaryTitle={isSaving ? 'Đang lưu thông tin...' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     onPrimaryPress={handleSubmit(handleFormSubmit)}
                     onSecondaryPress={handleCancel}
                     primaryDisabled={isSaving || (!isDirty && !avatarAsset)}

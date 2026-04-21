@@ -116,7 +116,7 @@ export const HarvestOverviewTab: React.FC<HarvestOverviewTabProps> = ({
                             ? 'Thu hoạch hết'
                             : 'Lưu thông tin'
                     }
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     primaryDisabled={isSubmitting || (isEditMode && !isDirty)}
                     onPrimaryPress={onSavePress}
                     onSecondaryPress={onCancel}

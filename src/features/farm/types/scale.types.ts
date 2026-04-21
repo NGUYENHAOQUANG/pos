@@ -19,22 +19,26 @@ export enum ScaleConnectionStatus {
 export interface IScale {
     id: string;
     no: number;
-    zoneId: string;
-    zoneName: string;
+    zoneId?: string;
+    occupiedByUserId?: string | null;
+    occupiedByUserName?: string | null;
+    currentCycleId?: string | null;
+    isOccupiedByCurrentUser?: boolean;
+    zoneName?: string;
     code: string;
     name: string;
     type: ScaleType;
     usageStatus: ScaleUsageStatus;
-    deviceId: string;
+    deviceId?: string | null;
     isInstalled: boolean;
-    installationDate: string;
+    installationDate?: string | null;
     connectionStatus: ScaleConnectionStatus;
-    creatorId: string | null;
-    editorId: string | null;
+    creatorId?: string | null;
+    editorId?: string | null;
     createdAt: string;
-    editedAt: string;
-    creator: ICreatorEditor | null;
-    editor: ICreatorEditor | null;
+    editedAt?: string | null;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
 }
 
 export interface IScaleParams {
@@ -44,6 +48,7 @@ export interface IScaleParams {
     UsageStatus?: ScaleUsageStatus;
     ConnectionStatus?: ScaleConnectionStatus;
     IsInstalled?: boolean;
+    CurrentCycleId?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
