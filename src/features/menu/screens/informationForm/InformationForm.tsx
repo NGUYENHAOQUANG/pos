@@ -200,7 +200,7 @@ export const InformationForm: React.FC<InformationFormProps> = ({
 
             <ButtonBarMenu
                 primaryTitle={isSubmitting ? 'Đang lưu thông tin...' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onPrimaryPress={handleSubmit(onSubmit)}
                 onSecondaryPress={onCancel}
                 primaryDisabled={isSubmitting}

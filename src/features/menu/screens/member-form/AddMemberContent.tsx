@@ -175,7 +175,7 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
                         : 'Thêm thành viên'
                 }
                 onPrimaryPress={isPaused ? onActivatePress : handleSubmit(onSubmit, onError)}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onSecondaryPress={onBack}
                 style={isEditMode ? styles.footerEdit : styles.footer}
             />

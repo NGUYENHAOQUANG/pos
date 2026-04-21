@@ -278,7 +278,7 @@ export const ShrimpHealthForm: React.FC<ShrimpHealthFormProps> = ({
             <View style={styles.footer}>
                 <ButtonBarFarm
                     primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     onPrimaryPress={handleSubmit(handleFormSubmit, handleFormError)}
                     onSecondaryPress={onBack}
                     primaryDisabled={

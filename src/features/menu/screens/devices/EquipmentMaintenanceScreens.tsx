@@ -70,7 +70,7 @@ export const EquipmentMaintenanceScreens = () => {
 
             <View style={styles.footer}>
                 <ButtonBarMenu
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     primaryTitle="Lưu thông tin"
                     onSecondaryPress={handleCancel}
                     onPrimaryPress={handleSave}
