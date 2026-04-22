@@ -346,16 +346,6 @@ export const FeedingFormScreens = () => {
                     />
                 </View>
             </OnboardingStep>
-            <ButtonBarFarm
-                primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Hủy"
-                onPrimaryPress={handlePrimaryPress}
-                onSecondaryPress={() => navigation.goBack()}
-                isLoading={isSavingActively}
-                secondaryDisabled={isSavingActively}
-                primaryDisabled={isSavingActively || (isEditMode && !formHasChanges)}
-                style={{ borderTopWidth: 1, borderTopColor: theme.defaultBorder }}
-            />
             {isEditMode && (
                 <ConfirmationModalUI
                     visible={showDeleteModal}
