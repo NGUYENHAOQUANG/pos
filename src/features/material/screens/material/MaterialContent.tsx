@@ -84,10 +84,15 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                     onDropdownSelect={handleDropdownSelect}
                     dropdownPlaceholder="Chọn kho"
                     rightComponent={
-                        <OnboardingStep step="MATERIAL_ADD_BTN" wrapperStyle={{ marginRight: 8 }}>
-                            <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <OnboardingStep
+                                step="MATERIAL_ADD_BTN"
+                                wrapperStyle={{ marginRight: 8 }}
+                            >
+                                <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
+                            </OnboardingStep>
                             <NotificationBadgeButton />
-                        </OnboardingStep>
+                        </View>
                     }
                 />
             </View>
