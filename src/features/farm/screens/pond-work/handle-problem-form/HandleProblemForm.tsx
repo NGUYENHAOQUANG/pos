@@ -193,7 +193,7 @@ export const HandleProblemForm = ({
 
             <ButtonBarFarm
                 primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
+                secondaryTitle="Hủy"
                 onPrimaryPress={handleSubmit(handleFormSubmit, handleFormError)}
                 onSecondaryPress={onBack}
                 isLoading={isSaving || isUploading}

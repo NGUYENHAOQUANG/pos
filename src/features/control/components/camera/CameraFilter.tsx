@@ -56,7 +56,16 @@ export const CameraFilter: React.FC<CameraFilterProps> = ({
             });
         }
 
-        return [allOption, ...catOptions];
+        return [
+            {
+                ...allOption,
+                label: `Tất cả (${allOption.count})`,
+            },
+            ...catOptions.map(cat => ({
+                ...cat,
+                label: `${cat.label} (${cat.count})`,
+            })),
+        ];
     }, [cameras]);
 
     return (
@@ -100,51 +109,16 @@ export const CameraFilter: React.FC<CameraFilterProps> = ({
                     })}
                 </ScrollView>
             </View>
-
-            {/* Stat Cards */}
-            <View>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.statsContainer}
-                >
-                    {filterOptions.map(option => (
-                        <View
-                            key={`stat-${option.key}`}
-                            style={[
-                                styles.statCard,
-                                {
-                                    backgroundColor: theme.background,
-                                    borderColor: theme.border,
-                                },
-                            ]}
-                        >
-                            <Text
-                                style={[styles.statLabel, { color: theme.text }]}
-                                numberOfLines={1}
-                            >
-                                {option.countLabel}
-                            </Text>
-                            <Text
-                                style={[styles.statValue, { color: theme.text }]}
-                                numberOfLines={1}
-                            >
-                                {option.count}
-                            </Text>
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 26,
+        marginBottom: 16,
     },
     pillsScrollWrapper: {
-        marginBottom: 12,
+        marginBottom: 8,
     },
     pillsContainer: {
         paddingHorizontal: 16,
@@ -161,25 +135,5 @@ const styles = StyleSheet.create({
     pillText: {
         fontSize: 14,
         fontWeight: '500',
-    },
-    statsContainer: {
-        paddingHorizontal: 16,
-        gap: 10,
-    },
-    statCard: {
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        minWidth: 84,
-    },
-    statLabel: {
-        fontSize: 12,
-        fontWeight: '400',
-        marginBottom: 8,
-    },
-    statValue: {
-        fontSize: 20,
-        fontWeight: '700',
     },
 });

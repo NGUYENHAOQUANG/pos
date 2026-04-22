@@ -186,7 +186,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = React.memo(
                 <ButtonBar
                     mode="double"
                     primaryTitle="Lưu thông tin"
-                    secondaryTitle="Huỷ"
+                    secondaryTitle="Hủy"
                     containerStyle={styles.buttonBarBorder}
                     onPrimaryPress={handleSubmit(onSubmit, onError)}
                     onSecondaryPress={onBackPress}

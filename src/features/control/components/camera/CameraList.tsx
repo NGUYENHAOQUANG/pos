@@ -140,7 +140,7 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
                                 }}
                             >
                                 <Text style={[styles.seeMoreText, { color: theme.primary }]}>
-                                    Xem thêm
+                                    Xem chi tiết
                                 </Text>
                             </TouchableOpacity>
                         )}
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     groupHeaderTitleContainer: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        gap: 8,
+        gap: 12,
     },
     groupTitle: {
         fontSize: 18,

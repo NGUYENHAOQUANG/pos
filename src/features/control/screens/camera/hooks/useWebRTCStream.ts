@@ -22,6 +22,11 @@ export const useWebRTCStream = (url: string, options?: UseWebRTCStreamOptions) =
     useEffect(() => {
         let isMounted = true;
 
+        // Reset state mỗi khi url thay đổi hoặc màn hình được focus lại
+        setIsConnected(false);
+        setStream(null);
+        setError(null);
+
         const clearFakeProgress = () => {
             if (progressIntervalRef.current) {
                 clearInterval(progressIntervalRef.current);

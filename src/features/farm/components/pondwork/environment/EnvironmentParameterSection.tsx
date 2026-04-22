@@ -5,6 +5,7 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
 import PencilSimpleLine from '@/assets/Icon/IconMenu/PencilSimpleLine.svg';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 export interface EnvironmentParameter {
     id: string;
@@ -23,6 +24,7 @@ interface EnvironmentParameterSectionProps {
     parameters: EnvironmentParameter[];
     onToggleParameter: (id: string) => void;
     onEdit?: (parameter: EnvironmentParameter) => void;
+    onBoardingNextStep?: () => void;
 }
 
 export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionProps> = ({
@@ -31,6 +33,7 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
     parameters,
     onToggleParameter,
     onEdit,
+    onBoardingNextStep,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -45,34 +48,64 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
 
             {/* Parameter Items */}
             <View style={styles.itemsList}>
-                {parameters.map(param => (
-                    <View key={param.id} style={styles.itemCard}>
-                        {/* Checkbox */}
-                        <Checkbox
-                            checked={param.isChecked}
-                            onToggle={() => onToggleParameter(param.id)}
-                            size="md"
-                            activeColor={theme.primaryOrange}
-                        />
-                        {/* Column with title and subtitle */}
-                        <View style={styles.childColumn}>
-                            <Text style={styles.childTitle}>{param.name}</Text>
-                            <View style={styles.subtitleRow}>
-                                <Text style={styles.subtitleLabel}>Giới hạn:</Text>
-                                <Text style={styles.childSubtitle}>{param.limit}</Text>
-                            </View>
-                        </View>
+                {parameters.map((param, index) => {
+                    const isFirstDefault = index === 0 && title === 'Nhóm mặc định';
 
-                        {/* Edit Button */}
+                    const checkboxElement = (
+                        <View style={{ backgroundColor: theme.background, borderRadius: 4 }}>
+                            <Checkbox
+                                checked={param.isChecked}
+                                onToggle={() => onToggleParameter(param.id)}
+                                size="md"
+                                activeColor={theme.primaryOrange}
+                            />
+                        </View>
+                    );
+
+                    const editBtnElement = (
                         <TouchableOpacity
-                            style={styles.editButton}
+                            style={[styles.editButton, { backgroundColor: theme.background }]}
                             activeOpacity={0.7}
                             onPress={() => onEdit && onEdit(param)}
                         >
                             <PencilSimpleLine width={16} height={16} color={theme.textSecondary} />
                         </TouchableOpacity>
-                    </View>
-                ))}
+                    );
+
+                    return (
+                        <View key={param.id} style={styles.itemCard}>
+                            {/* Checkbox */}
+                            {isFirstDefault ? (
+                                <OnboardingStep step="ACCOUNT_ENV_SETTING_TOGGLE">
+                                    <View collapsable={false}>{checkboxElement}</View>
+                                </OnboardingStep>
+                            ) : (
+                                checkboxElement
+                            )}
+
+                            {/* Column with title and subtitle */}
+                            <View style={styles.childColumn}>
+                                <Text style={styles.childTitle}>{param.name}</Text>
+                                <View style={styles.subtitleRow}>
+                                    <Text style={styles.subtitleLabel}>Giới hạn:</Text>
+                                    <Text style={styles.childSubtitle}>{param.limit}</Text>
+                                </View>
+                            </View>
+
+                            {/* Edit Button */}
+                            {isFirstDefault ? (
+                                <OnboardingStep
+                                    step="ACCOUNT_ENV_SETTING_EDIT"
+                                    onNext={onBoardingNextStep}
+                                >
+                                    <View collapsable={false}>{editBtnElement}</View>
+                                </OnboardingStep>
+                            ) : (
+                                editBtnElement
+                            )}
+                        </View>
+                    );
+                })}
             </View>
         </View>
     );

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors, spacing } from '@/styles';
@@ -36,16 +37,18 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
             </View>
 
             {/* Row 2: Dropdown full-width */}
-            <DropDownButtonBasic
-                data={dropdownData}
-                value={dropdownValue}
-                onSelect={onDropdownSelect}
-                placeholder={dropdownPlaceholder}
-                showIcon={false}
-                height={40}
-                borderRadius={12}
-                style={styles.dropdown}
-            />
+            <OnboardingStep step="MATERIAL_SELECTOR" wrapperStyle={{ borderRadius: 12 }}>
+                <DropDownButtonBasic
+                    data={dropdownData}
+                    value={dropdownValue}
+                    onSelect={onDropdownSelect}
+                    placeholder={dropdownPlaceholder}
+                    showIcon={false}
+                    height={40}
+                    borderRadius={12}
+                    style={styles.dropdown}
+                />
+            </OnboardingStep>
         </View>
     );
 };
