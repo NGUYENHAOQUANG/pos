@@ -48,9 +48,7 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
 
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
-        container: {
-            paddingHorizontal: spacing.md,
-        },
+        container: {},
         materialCard: {
             backgroundColor: theme.background,
             borderRadius: borderRadius.sm,

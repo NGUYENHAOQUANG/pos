@@ -17,6 +17,8 @@ interface ImportReceiptMaterialListProps {
     isFetchingNextPage?: boolean;
     hasNextPage?: boolean;
     onPressCreate?: () => void;
+    onApprove?: (id: string, code: string) => void;
+    onReject?: (id: string, code: string) => void;
 }
 
 export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps> = React.memo(
@@ -29,6 +31,8 @@ export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps>
         isFetchingNextPage,
         hasNextPage,
         onPressCreate,
+        onApprove,
+        onReject,
     }) => {
         const handleLoadMore = useCallback(() => {
             if (hasNextPage && !isFetchingNextPage && onLoadMore) {
@@ -39,9 +43,12 @@ export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps>
         const theme = useAppTheme();
         const materialListStyles = getMaterialListStyles(theme);
 
-        const renderItem = useCallback(({ item }: { item: ImportReceipt }) => {
-            return <ImportReceiptCard item={item} />;
-        }, []);
+        const renderItem = useCallback(
+            ({ item }: { item: ImportReceipt }) => {
+                return <ImportReceiptCard item={item} onApprove={onApprove} onReject={onReject} />;
+            },
+            [onApprove, onReject]
+        );
 
         const keyExtractor = useCallback((item: ImportReceipt) => item.id, []);
 

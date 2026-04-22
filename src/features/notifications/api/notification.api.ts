@@ -43,6 +43,14 @@ export const notificationApi = {
         );
         return data;
     },
+
+    getUnreadCount: async (): Promise<IApiResponse<number>> => {
+        const { data } = await apiClient.get<IApiResponse<number>>(
+            API_ENDPOINTS.NOTIFICATION.UNREAD_COUNT
+        );
+        return data;
+    },
 };
 
-export const { registerDeviceToken, markAsRead } = notificationApi;
+export const { registerDeviceToken, markAsRead, getNotifications, getUnreadCount } =
+    notificationApi;

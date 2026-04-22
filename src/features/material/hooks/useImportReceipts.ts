@@ -182,3 +182,27 @@ export const useUpdateImportReceiptItems = () => {
         onError: error => handleError(error),
     });
 };
+
+export const useApproveImportReceipt = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id }: { id: string; code: string }) => importReceiptApi.approve(id),
+        onSuccess: (_, variables) => {
+            showSuccessToast(`Đã duyệt phiếu ${variables.code} thành công`);
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+        },
+        onError: error => handleError(error),
+    });
+};
+
+export const useRejectImportReceipt = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id }: { id: string; code: string }) => importReceiptApi.reject(id, {}),
+        onSuccess: (_, variables) => {
+            showSuccessToast(`Đã từ chối phiếu ${variables.code}`);
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+        },
+        onError: error => handleError(error),
+    });
+};

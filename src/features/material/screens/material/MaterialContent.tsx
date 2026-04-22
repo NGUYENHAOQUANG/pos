@@ -8,6 +8,7 @@ import {
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
+import { NotificationBadgeButton } from '@/features/notifications/components/NotificationBadgeButton';
 import { ImportReceiptListScreen } from '@/features/material/screens/import_receipt_list/ImportReceiptListScreen';
 import { ExportWarehouseListScreen } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouse_item_list/WarehouseItemListScreen';
@@ -83,9 +84,15 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                     onDropdownSelect={handleDropdownSelect}
                     dropdownPlaceholder="Chọn kho"
                     rightComponent={
-                        <OnboardingStep step="MATERIAL_ADD_BTN" wrapperStyle={{ marginRight: 8 }}>
-                            <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
-                        </OnboardingStep>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <OnboardingStep
+                                step="MATERIAL_ADD_BTN"
+                                wrapperStyle={{ marginRight: 8 }}
+                            >
+                                <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
+                            </OnboardingStep>
+                            <NotificationBadgeButton />
+                        </View>
                     }
                 />
             </View>

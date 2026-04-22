@@ -61,9 +61,7 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
 
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
-        container: {
-            paddingHorizontal: spacing.md,
-        },
+        container: {},
         materialCard: {
             backgroundColor: theme.background,
             borderRadius: borderRadius.sm,

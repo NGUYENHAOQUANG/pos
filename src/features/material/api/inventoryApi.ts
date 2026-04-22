@@ -59,4 +59,19 @@ export const inventoryApi = {
         );
         return data;
     },
+
+    approve: async (id: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
+            API_ENDPOINTS.INVENTORY_CHECK.APPROVAL(id)
+        );
+        return data;
+    },
+
+    reject: async (id: string, command?: any): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
+            API_ENDPOINTS.INVENTORY_CHECK.REJECTION(id),
+            command
+        );
+        return data;
+    },
 };
