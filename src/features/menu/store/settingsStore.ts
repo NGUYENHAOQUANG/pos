@@ -77,7 +77,7 @@ export const useSettingsStore = create<SettingsStore>()(
             animatedBgType: 'bubbles-shader' as AnimatedBgType,
             weatherEnabled: true,
             chatbotEnabled: true,
-            walkthroughEnabled: true,
+            walkthroughEnabled: false,
             chatbotAnimatedBgEnabled: false,
             chatbotBgPromptDismissCount: 0,
             lockMethod: 'none' as LockMethod,
