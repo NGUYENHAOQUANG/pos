@@ -25,6 +25,7 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { feedingFormSchema, FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { handleFeedingFormError } from '@/features/farm/utils/toastMessages';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 export interface FeedingFormProps {
     isEditMode: boolean;
@@ -164,13 +165,21 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                             );
                         };
 
-                        return (
+                        const box = (
                             <MaterialSelectionBox
                                 selectedMaterials={selectedItems}
                                 onMaterialsChange={handleMaterialsChange}
                                 groupTypes={[MaterialGroupType.FARMING, MaterialGroupType.FEED]}
                                 specificType={SpecificType.ShrimpFeed}
                             />
+                        );
+
+                        return (
+                            <OnboardingStep step="MATERIAL_SELECTION">
+                                <View collapsable={false} style={{ width: '100%' }}>
+                                    {box}
+                                </View>
+                            </OnboardingStep>
                         );
                     }}
                 />

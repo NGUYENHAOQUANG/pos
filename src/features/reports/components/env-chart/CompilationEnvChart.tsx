@@ -14,6 +14,7 @@ import { useChartStyles } from '@/features/reports/styles/chart.styles';
 import { useEnvMeasurementChart } from '@/features/reports/hooks/useEnvMeasurementChart';
 import { useMetrics } from '@/features/farm/hooks/metric/useMetric';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 // Color palette for dynamically assigning colors to ponds
 const POND_COLOR_PALETTE = [
@@ -145,13 +146,23 @@ const CompilationEnvChart = ({ zoneId, pondIds, seasonId, cycleId }: Compilation
 
     return (
         <View style={chartStyles.container}>
-            <BasicDropDownButton
-                prefixIcon={<Peformance width={20} height={20} />}
-                label="Biểu đồ thông số môi trường"
-                isExpanded={isExpanded}
-                onPress={() => setIsExpanded(!isExpanded)}
-                style={styles.header}
-            />
+            <OnboardingStep step="REPORT_CHART_ENV">
+                <View
+                    collapsable={false}
+                    style={{
+                        backgroundColor: theme.backgroundPrimary,
+                        borderRadius: borderRadius.sm,
+                    }}
+                >
+                    <BasicDropDownButton
+                        prefixIcon={<Peformance width={20} height={20} />}
+                        label="Biểu đồ thông số môi trường"
+                        isExpanded={isExpanded}
+                        onPress={() => setIsExpanded(!isExpanded)}
+                        style={styles.header}
+                    />
+                </View>
+            </OnboardingStep>
 
             {isExpanded && (
                 <View style={styles.content}>

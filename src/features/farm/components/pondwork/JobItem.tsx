@@ -258,6 +258,7 @@ const getStyles = (theme: Colors) =>
             borderRadius: 16,
             marginBottom: 8,
             overflow: 'hidden',
+            width: '100%',
         },
         header: {
             flexDirection: 'row',

@@ -33,6 +33,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 
 interface ProfileCardProps {
     onPress: () => void;
@@ -75,6 +76,7 @@ export const MenuScreens: React.FC = () => {
     const styles = getStyles(theme);
     const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
     const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
+    const walkthroughEnabled = useSettingsStore(s => s.walkthroughEnabled);
 
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -87,6 +89,39 @@ export const MenuScreens: React.FC = () => {
     };
 
     const logout = useAuthStore(state => state.logout);
+    const {
+        resetOnboarding,
+        startOnboarding,
+        hasCompletedAccount,
+        _hasHydrated,
+        activeModule,
+        currentStep,
+    } = useOnboardingStore();
+
+    const contentContainerY = React.useRef(0);
+    const recordsSectionRelativeY = React.useRef(0);
+
+    React.useEffect(() => {
+        if (activeModule === 'account') {
+            if (currentStep === 6 && contentContainerY.current > 0) {
+                // Scroll to "Quản lý hồ sơ"
+                const targetY = contentContainerY.current + recordsSectionRelativeY.current;
+                scrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - 60), animated: true });
+            } else if (currentStep < 5) {
+                // Reset scroll to top for earlier steps
+                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+            }
+        }
+    }, [activeModule, currentStep]);
+
+    React.useEffect(() => {
+        if (_hasHydrated && !hasCompletedAccount) {
+            const timer = setTimeout(() => {
+                startOnboarding('account');
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [_hasHydrated, hasCompletedAccount, startOnboarding]);
 
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
@@ -104,6 +139,8 @@ export const MenuScreens: React.FC = () => {
             title: 'Quản lý vụ nuôi',
             Icon: SwimmingPoolIcon,
             onPress: () => navigation.navigate('AquacultureManagement'),
+            onboardingStep: 'ACCOUNT_MENU_CYCLE',
+            onboardingNext: () => navigation.navigate('AquacultureManagement'),
         },
         // {
         //     id: 'device-maintenance',
@@ -116,6 +153,8 @@ export const MenuScreens: React.FC = () => {
             title: 'Thiết lập thông số môi trường',
             Icon: ChartBarIcon,
             onPress: () => navigation.navigate('SettingEnvironment' as any),
+            onboardingStep: 'ACCOUNT_MENU_ENV',
+            onboardingNext: () => navigation.navigate('SettingEnvironment' as any),
         },
         {
             id: 'shrimp-price',
@@ -147,6 +186,8 @@ export const MenuScreens: React.FC = () => {
             title: 'Quản lý thành viên',
             Icon: UsersIcon,
             onPress: () => navigation.navigate('MemberManagement'),
+            onboardingStep: 'ACCOUNT_MENU_MEMBER',
+            onboardingNext: () => navigation.navigate('MemberManagement'),
         },
         {
             id: 'settings',
@@ -154,6 +195,49 @@ export const MenuScreens: React.FC = () => {
             Icon: GearIcon,
             onPress: () => navigation.navigate('Settings'),
         },
+        ...(walkthroughEnabled
+            ? [
+                  {
+                      id: 'tutorial-farm',
+                      title: 'Hướng dẫn sử dụng Trại nuôi',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('farm');
+                          navigation.navigate('Farm' as never);
+                      },
+                  },
+                  {
+                      id: 'tutorial-material',
+                      title: 'Hướng dẫn Kho Vật tư',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('material');
+                          navigation.navigate('Material' as never);
+                      },
+                  },
+                  {
+                      id: 'tutorial-account',
+                      title: 'Hướng dẫn Tài khoản',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('account');
+                      },
+                  },
+                  {
+                      id: 'tutorial-report',
+                      title: 'Hướng dẫn xem Báo cáo',
+                      Icon: ArticleIcon,
+                      onPress: () => {
+                          useSettingsStore.getState().setWalkthroughEnabled(true);
+                          resetOnboarding('report');
+                          navigation.navigate('Reports' as never);
+                      },
+                  },
+              ]
+            : []),
     ];
 
     const securityItems: MenuSectionItemData[] = [
@@ -212,9 +296,20 @@ export const MenuScreens: React.FC = () => {
                 <ProfileCard onPress={handleProfilePress} userData={userData} />
 
                 {/* Content Container (wrapping all menu sections and actions) */}
-                <View style={styles.contentContainer}>
+                <View
+                    style={styles.contentContainer}
+                    onLayout={e => {
+                        contentContainerY.current = e.nativeEvent.layout.y;
+                    }}
+                >
                     <MenuSection title="Vận hành trại nuôi" items={operationsItem} />
-                    <MenuSection title="Quản lý hồ sơ" items={recordsItem} />
+                    <View
+                        onLayout={e => {
+                            recordsSectionRelativeY.current = e.nativeEvent.layout.y;
+                        }}
+                    >
+                        <MenuSection title="Quản lý hồ sơ" items={recordsItem} />
+                    </View>
                     <MenuSection title="Quản lý bảo mật" items={securityItems} />
 
                     {/* Chatbot (Beta) - only show when enabled in Settings */}
@@ -299,6 +394,10 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             gap: 16,
+            backgroundColor: theme.backgroundPrimary,
+            padding: 8,
+            marginHorizontal: -8,
+            borderRadius: 12,
         },
         avatarContainer: {},
         avatar: {

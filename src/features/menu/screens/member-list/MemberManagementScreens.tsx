@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -13,6 +13,8 @@ import {
     useUpdateMemberStatus,
 } from '@/features/menu/hooks/useMember';
 import { IUserAccount } from '@/features/menu/types/member.types';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import PlusIcon from '@/assets/Icon/PlusBlack.svg';
 
 export const MemberManagementScreens: React.FC = () => {
     const theme = useAppTheme();
@@ -93,7 +95,27 @@ export const MemberManagementScreens: React.FC = () => {
             <HeaderSection
                 title="Quản lý thành viên"
                 onBack={() => navigation.goBack()}
-                onRightPress={() => navigation.navigate('AddMember')}
+                rightComponent={
+                    <OnboardingStep step="ACCOUNT_MEMBER_ADD" onNext={() => navigation.goBack()}>
+                        <View collapsable={false}>
+                            <TouchableOpacity
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: theme.backgroundButton,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderWidth: 1,
+                                    borderColor: theme.defaultBorder,
+                                }}
+                                onPress={() => navigation.navigate('AddMember')}
+                            >
+                                <PlusIcon width={20} height={20} color={theme.text} />
+                            </TouchableOpacity>
+                        </View>
+                    </OnboardingStep>
+                }
             />
 
             {/* Content */}

@@ -6,6 +6,7 @@ import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { JobCard, JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface JobData {
     type: JobType;
@@ -40,19 +41,37 @@ export const JobListCard: React.FC<JobListCardProps> = ({
 
             {/* Job List */}
             <View style={styles.listContainer}>
-                {jobs.map((job, index) => (
-                    <JobCard
-                        key={index}
-                        type={job.type}
-                        title={job.title}
-                        data={job.data}
-                        items={job.items}
-                        isLoading={job.isLoading}
-                        onPress={() => onPressJob?.(job.type)}
-                        onPressAdd={() => onPressAddJob?.(job.type)}
-                        onEditItem={item => onEditJobItem?.(job.type, item)}
-                    />
-                ))}
+                {jobs.map((job, index) => {
+                    const card = (
+                        <JobCard
+                            key={index}
+                            type={job.type}
+                            title={job.title}
+                            data={job.data}
+                            items={job.items}
+                            isLoading={job.isLoading}
+                            onPress={() => onPressJob?.(job.type)}
+                            onPressAdd={() => onPressAddJob?.(job.type)}
+                            onEditItem={item => onEditJobItem?.(job.type, item)}
+                        />
+                    );
+
+                    if (index === 0) {
+                        return (
+                            <OnboardingStep
+                                key={index}
+                                step="FEEDING_JOB"
+                                onNext={() => onPressAddJob?.(job.type)}
+                            >
+                                <View collapsable={false} style={{ width: '100%' }}>
+                                    {card}
+                                </View>
+                            </OnboardingStep>
+                        );
+                    }
+
+                    return card;
+                })}
             </View>
         </View>
     );

@@ -7,6 +7,7 @@ import { DropDownHeaderItem } from '@/shared/components/forms/DropdownHeaderButt
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
 import { Logo } from '@/shared/components/brand/Logo';
 import { NotificationBadgeButton } from '@/features/notifications/components/NotificationBadgeButton';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface HeadingReportsProps {
     farmData?: DropDownHeaderItem[];
@@ -55,43 +56,58 @@ export const HeadingReports = ({
             {/* Top Row: Logo and Notification Action */}
             <View style={styles.topRow}>
                 <Logo size="squareXs" />
-                <NotificationBadgeButton onPress={onRightPress} />
+                <OnboardingStep step="REPORT_NOTIFICATION">
+                    <NotificationBadgeButton onPress={onRightPress} />
+                </OnboardingStep>
             </View>
 
             {/* Row 1: Farm Selector */}
-            <View style={styles.row}>
-                <View style={styles.fullWidth}>
-                    <DropDownButtonBasic
-                        data={farmData}
-                        value={selectedFarm}
-                        onSelect={onSelectFarm}
-                        showIcon={false}
-                        height={40}
-                    />
-                </View>
+            <View style={styles.rowOuter}>
+                <OnboardingStep step="REPORT_FARM_SELECT">
+                    <View
+                        collapsable={false}
+                        style={{
+                            width: '100%',
+                            backgroundColor: theme.backgroundPrimary,
+                            borderRadius: 8,
+                        }}
+                    >
+                        <DropDownButtonBasic
+                            data={farmData}
+                            value={selectedFarm}
+                            onSelect={onSelectFarm}
+                            showIcon={false}
+                            height={40}
+                        />
+                    </View>
+                </OnboardingStep>
             </View>
 
             {/* Row 2: Pond Select and Season Select */}
-            <View style={styles.dropdownRow}>
-                <View style={styles.halfWidth}>
-                    <DropDownButtonBasic
-                        data={pondData}
-                        value={selectedPond}
-                        onSelect={onSelectPond}
-                        showIcon={false}
-                        height={40}
-                    />
-                </View>
-                <View style={styles.halfWidth}>
-                    <DropDownButtonBasic
-                        data={seasonData}
-                        value={selectedSeason}
-                        onSelect={onSelectSeason}
-                        showIcon={false}
-                        height={40}
-                        disabled={seasonDisabled}
-                    />
-                </View>
+            <View style={styles.dropdownRowOuter}>
+                <OnboardingStep step="REPORT_FILTER">
+                    <View collapsable={false} style={styles.dropdownRowInner}>
+                        <View style={styles.halfWidth}>
+                            <DropDownButtonBasic
+                                data={pondData}
+                                value={selectedPond}
+                                onSelect={onSelectPond}
+                                showIcon={false}
+                                height={40}
+                            />
+                        </View>
+                        <View style={styles.halfWidth}>
+                            <DropDownButtonBasic
+                                data={seasonData}
+                                value={selectedSeason}
+                                onSelect={onSelectSeason}
+                                showIcon={false}
+                                height={40}
+                                disabled={seasonDisabled}
+                            />
+                        </View>
+                    </View>
+                </OnboardingStep>
             </View>
         </View>
     );
@@ -110,21 +126,21 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
         paddingTop: spacing.md,
     },
-    row: {
+    rowOuter: {
         paddingHorizontal: 16,
         marginBottom: spacing.xs,
         zIndex: 2,
     },
-    fullWidth: {
-        width: '100%',
+    dropdownRowOuter: {
+        paddingHorizontal: 16,
+        zIndex: 1,
     },
-    dropdownRow: {
+    dropdownRowInner: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
         gap: spacing.xs,
-        zIndex: 1,
+        width: '100%',
     },
     halfWidth: {
         flex: 1,

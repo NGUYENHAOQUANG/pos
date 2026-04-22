@@ -4,8 +4,14 @@ import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { MenuItem, MenuItemProps } from './MenuItem';
+import { AppStepKey } from '@/features/walkthrough/constants/onboarding';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
-export type MenuSectionItemData = MenuItemProps & { id: string | number };
+export type MenuSectionItemData = MenuItemProps & {
+    id: string | number;
+    onboardingStep?: AppStepKey;
+    onboardingNext?: () => void;
+};
 
 export interface MenuSectionProps {
     title?: string;
@@ -20,17 +26,33 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ title, items }) => {
         <View style={styles.container}>
             {title && <Text style={styles.headerTitle}>{title}</Text>}
             <View style={styles.card}>
-                {items.map((item, index) => (
-                    <React.Fragment key={item.id}>
+                {items.map((item, index) => {
+                    const menuItem = (
                         <MenuItem
                             Icon={item.Icon}
                             title={item.title}
                             onPress={item.onPress}
                             hideArrow={item.hideArrow}
                         />
-                        {index < items.length - 1 && <View style={styles.separator} />}
-                    </React.Fragment>
-                ))}
+                    );
+
+                    const wrappedItem = item.onboardingStep ? (
+                        <OnboardingStep step={item.onboardingStep} onNext={item.onboardingNext}>
+                            <View collapsable={false} style={{ width: '100%' }}>
+                                {menuItem}
+                            </View>
+                        </OnboardingStep>
+                    ) : (
+                        menuItem
+                    );
+
+                    return (
+                        <React.Fragment key={item.id}>
+                            {wrappedItem}
+                            {index < items.length - 1 && <View style={styles.separator} />}
+                        </React.Fragment>
+                    );
+                })}
             </View>
         </View>
     );

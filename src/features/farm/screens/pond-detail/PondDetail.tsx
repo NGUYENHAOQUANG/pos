@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { IconFarmVector } from '@/assets/icons';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { Text } from '@/shared/components/typography/Text';
@@ -20,6 +20,7 @@ import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkel
 import { PondDetailHeaderSkeleton } from '@/features/farm/components/skeleton/PondDetailHeaderSkeleton';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface PondDetailProps {
     pond: PondData | undefined;
@@ -84,6 +85,8 @@ export const PondDetail: React.FC<PondDetailProps> = ({
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
+    const { width: windowWidth } = useWindowDimensions();
+
     return (
         <View style={styles.container}>
             {isLoading ? (
@@ -145,11 +148,18 @@ export const PondDetail: React.FC<PondDetailProps> = ({
 
                                 {!isSettlingPond && currentCycle ? (
                                     <View style={styles.cycleCardWrapper}>
-                                        <CycleCard
-                                            cycle={currentCycle}
-                                            breedName={breedName}
-                                            onPress={onEditCycle}
-                                        />
+                                        <OnboardingStep step="CYCLE_INFO">
+                                            <View
+                                                collapsable={false}
+                                                style={{ width: windowWidth - 32 }}
+                                            >
+                                                <CycleCard
+                                                    cycle={currentCycle}
+                                                    breedName={breedName}
+                                                    onPress={onEditCycle}
+                                                />
+                                            </View>
+                                        </OnboardingStep>
                                     </View>
                                 ) : !isSettlingPond ? (
                                     <EmptyStateCard

@@ -6,6 +6,7 @@ import {
     MaterialMenuOverlay,
 } from '@/features/material/components/material/ButtonMaterial';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
 import { NotificationBadgeButton } from '@/features/notifications/components/NotificationBadgeButton';
 import { ImportReceiptListScreen } from '@/features/material/screens/import_receipt_list/ImportReceiptListScreen';
@@ -83,25 +84,29 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                     onDropdownSelect={handleDropdownSelect}
                     dropdownPlaceholder="Chọn kho"
                     rightComponent={
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <OnboardingStep step="MATERIAL_ADD_BTN" wrapperStyle={{ marginRight: 8 }}>
                             <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
                             <NotificationBadgeButton />
-                        </View>
+                        </OnboardingStep>
                     }
                 />
             </View>
-            <HeadingBar
-                tabs={[
-                    { key: TabType.Material, label: 'Danh sách vật tư' },
-                    { key: TabType.Warehouse, label: 'Danh sách tồn kho' },
-                    { key: TabType.Import, label: 'Lịch sử nhập kho' },
-                    { key: TabType.Export, label: 'Lịch sử xuất kho' },
-                    { key: TabType.Inventory, label: 'Kiểm kê' },
-                ]}
-                selectedTab={selectedTab}
-                onTabSelect={key => handleTabSelect(key as TabType)}
-                flexTabs={false}
-            />
+            <OnboardingStep step="MATERIAL_MAIN_TABS" wrapperStyle={{ width: '100%' }}>
+                <View collapsable={false} style={{ width: '100%' }}>
+                    <HeadingBar
+                        tabs={[
+                            { key: TabType.Material, label: 'Danh sách vật tư' },
+                            { key: TabType.Warehouse, label: 'Danh sách tồn kho' },
+                            { key: TabType.Import, label: 'Lịch sử nhập kho' },
+                            { key: TabType.Export, label: 'Lịch sử xuất kho' },
+                            { key: TabType.Inventory, label: 'Kiểm kê' },
+                        ]}
+                        selectedTab={selectedTab}
+                        onTabSelect={key => handleTabSelect(key as TabType)}
+                        flexTabs={false}
+                    />
+                </View>
+            </OnboardingStep>
             <SearchBarMeterial
                 onSearch={handleSearch}
                 onFilterPress={handleFilterPress}
