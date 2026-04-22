@@ -305,6 +305,7 @@ const ExportWarehouseFormInner: React.FC<ExportWarehouseFormProps> = ({
                 visible={confirmModalVisible}
                 onClose={handleCloseConfirmModal}
                 onConfirm={handleConfirmSubmit}
+                title="Xác Nhận Gửi Phiếu Xuất Kho"
             />
 
             <ConfirmationModalUI

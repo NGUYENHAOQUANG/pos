@@ -28,6 +28,8 @@ export {
     useCreateExportReceipt,
     useUpdateExportReceipt,
     useDeleteExportReceipt,
+    useApproveExportReceipt,
+    useRejectExportReceipt,
 } from '@/features/material/hooks/useExportReceipt';
 export {
     useExportReceiptItems,
@@ -46,6 +48,8 @@ export {
     useDeleteImportReceipt,
     useAddImportReceiptItems,
     useUpdateImportReceiptItems,
+    useApproveImportReceipt,
+    useRejectImportReceipt,
 } from '@/features/material/hooks/useImportReceipts';
 
 // ─── Inventory ─────────────────────────────────────────
@@ -57,6 +61,8 @@ export {
     useUpdateInventoryCheck,
     useInventoryDetail,
     useInventoryItems,
+    useApproveInventoryCheck,
+    useRejectInventoryCheck,
 } from '@/features/material/hooks/useInventory';
 
 // ─── Warehouse ─────────────────────────────────────────

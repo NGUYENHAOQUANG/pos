@@ -2,7 +2,7 @@
  * @file useNotifications.ts
  * @description Hook to fetch and manage notifications
  */
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { notificationApi } from '@/features/notifications/api/notification.api';
 import {
     GetNotificationsParams,
@@ -10,10 +10,15 @@ import {
 } from '@/features/notifications/types/notification.types';
 import { useMemo } from 'react';
 import { handleError } from '@/shared/utils/errorHandler';
+import {
+    useNotificationStore,
+    selectHasPermission,
+} from '@/features/notifications/store/notificationStore';
 
 export const notificationKeys = {
     all: ['notifications'] as const,
     list: (params?: GetNotificationsParams) => ['notifications', 'list', params] as const,
+    unreadCount: () => ['notifications', 'unread-count'] as const,
 };
 
 export const useNotifications = (
@@ -72,5 +77,22 @@ export const useMarkNotificationAsRead = () => {
         onError: error => {
             handleError(error);
         },
+    });
+};
+
+export const useUnreadNotificationCount = () => {
+    const hasPermission = useNotificationStore(selectHasPermission);
+
+    return useQuery({
+        queryKey: notificationKeys.unreadCount(),
+        queryFn: async () => {
+            const response = await notificationApi.getUnreadCount();
+            if (response.success && response.data !== undefined) {
+                return response.data;
+            }
+            return 0;
+        },
+        // Only poll if the device doesn't have push notification permission
+        refetchInterval: hasPermission ? false : 60000,
     });
 };

@@ -23,16 +23,19 @@ import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { useInventoryItems } from '@/features/material/hooks';
 import { DetailRow } from '@/features/material/components/DetailRow';
-import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
+import { Button } from '@/shared/components/buttons/Button';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
+import { ApproveInventoryReceiptBottomSheet } from '@/features/material/components/ApproveBottomSheet';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 interface InventoryCardProps {
     data: IInventoryCheck;
+    onApprove?: (id: string, code: string) => void;
+    onReject?: (id: string, code: string) => void;
 }
 
-export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
+export const InventoryCard: React.FC<InventoryCardProps> = ({ data, onApprove, onReject }) => {
     const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -46,6 +49,8 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     );
 
     const items = React.useMemo(() => fetchedItems || data.items || [], [fetchedItems, data.items]);
+
+    const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -83,9 +88,10 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
             </View>
             {/* Edit Button (Only for Draft and Rejected) */}
             {['Draft', 'Rejected'].includes(data.status) && (
-                <ButtonMaterialList
+                <Button
                     title="Sửa thông tin"
-                    icon={<EditIcon />}
+                    variant="outline"
+                    renderLeftIcon={<EditIcon />}
                     style={styles.editButton}
                     onPress={() => {
                         navigation.navigate('AddInventory', {
@@ -150,6 +156,35 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                     color={theme.primary}
                 />
             </TouchableOpacity>
+            {/* Pending Actions */}
+            {data.status === 'Pending' && (
+                <View style={styles.actionButtonsRow}>
+                    <Button
+                        title="Từ chối"
+                        variant="outline"
+                        iconLeft="ban-outline"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => setIsApproveModalVisible(true)}
+                    />
+                    <Button
+                        title="Duyệt"
+                        variant="outline"
+                        iconLeft="checkmark-done"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => setIsApproveModalVisible(true)}
+                    />
+                </View>
+            )}
+
+            <ApproveInventoryReceiptBottomSheet
+                visible={isApproveModalVisible}
+                onClose={() => setIsApproveModalVisible(false)}
+                item={data}
+                onApprove={onApprove ? () => onApprove(data.id, data.checkCode || '') : undefined}
+                onReject={onReject ? () => onReject(data.id, data.checkCode || '') : undefined}
+            />
         </View>
     );
 };
@@ -290,5 +325,15 @@ const getStyles = (theme: Colors) =>
             fontSize: 14,
             color: theme.text,
             fontWeight: '500',
+        },
+        actionButtonsRow: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: spacing.sm,
+        },
+        actionButton: {
+            flex: 1,
+            marginTop: 0,
+            height: 44,
         },
     });

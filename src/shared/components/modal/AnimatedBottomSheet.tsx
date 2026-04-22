@@ -94,20 +94,18 @@ export const AnimatedBottomSheet: React.FC<AnimatedBottomSheetProps> = ({
             statusBarTranslucent={statusBarTranslucent}
             onRequestClose={onClose}
         >
-            <Pressable onPress={onClose} style={{ flex: 1 }}>
-                <View style={[themedStyles.overlay, overlayStyle]}>
-                    <Animated.View
-                        style={[
-                            themedStyles.container,
-                            containerStyle,
-                            { transform: [{ translateY: slideAnim }] },
-                        ]}
-                        onStartShouldSetResponder={() => true}
-                    >
-                        {children}
-                    </Animated.View>
-                </View>
-            </Pressable>
+            <View style={[themedStyles.overlay, overlayStyle]}>
+                <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+                <Animated.View
+                    style={[
+                        themedStyles.container,
+                        containerStyle,
+                        { transform: [{ translateY: slideAnim }] },
+                    ]}
+                >
+                    {children}
+                </Animated.View>
+            </View>
         </Modal>
     );
 };

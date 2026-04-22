@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { ImportReceiptMaterialList } from '@/features/material/screens/import_receipt_list/ImportReceiptListContent';
-import { useInfiniteImportReceipts, useMaterialListState } from '@/features/material/hooks';
+import {
+    useInfiniteImportReceipts,
+    useMaterialListState,
+    useApproveImportReceipt,
+    useRejectImportReceipt,
+} from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
 
 import { useNavigation } from '@react-navigation/native';
@@ -44,6 +49,9 @@ export const ImportReceiptListScreen: React.FC = () => {
         isFetchingNextPage,
     } = useInfiniteImportReceipts(warehouseParams);
 
+    const approveMutation = useApproveImportReceipt();
+    const rejectMutation = useRejectImportReceipt();
+
     const { showSkeleton, isRefreshing } = getListState({
         isLoading,
         isRefetching,
@@ -65,6 +73,8 @@ export const ImportReceiptListScreen: React.FC = () => {
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}
             onPressCreate={handleEmptyPress}
+            onApprove={(id, code) => approveMutation.mutate({ id, code })}
+            onReject={(id, code) => rejectMutation.mutate({ id, code })}
         />
     );
 };

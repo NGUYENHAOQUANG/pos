@@ -27,6 +27,7 @@ import { InventoryFooter } from '@/features/material/components/inventory/Invent
 import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 
 export type InventoryFormProps = {
     isEditMode: boolean;
@@ -55,6 +56,7 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
 }) => {
     // ─── State & Refs ──────────────────────────────────────
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const scrollViewRef = useRef<Animated.ScrollView>(null);
     const initializedRef = useRef(false);
     const initialSnapshotRef = useRef<string | null>(null);
@@ -122,9 +124,18 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
         [handleSubmit, processSubmit, onError]
     );
     const triggerSubmitValidation = useMemo(
-        () => handleSubmit(data => processSubmit(data, false), onError),
-        [handleSubmit, processSubmit, onError]
+        () => handleSubmit(() => setConfirmModalVisible(true), onError),
+        [handleSubmit, onError]
     );
+
+    const handleConfirmSubmit = useCallback(() => {
+        setConfirmModalVisible(false);
+        setTimeout(() => {
+            handleSubmit(data => processSubmit(data, false), onError)();
+        }, 500);
+    }, [handleSubmit, processSubmit, onError]);
+
+    const handleCloseConfirmModal = useCallback(() => setConfirmModalVisible(false), []);
 
     const handleDateChange = useCallback((newDate: Date) => setValue('date', newDate), [setValue]);
     const handleNoteChange = useCallback((val: string) => setValue('note', val), [setValue]);
@@ -204,6 +215,13 @@ const InventoryFormComponent: React.FC<InventoryFormProps> = ({
                     title="Xóa phiếu kiểm kho"
                     message="Bạn có chắc chắn muốn xóa phiếu kiểm kho này không?"
                     showSuccessToast={false}
+                />
+
+                <ConfirmSubmiss
+                    visible={confirmModalVisible}
+                    onClose={handleCloseConfirmModal}
+                    onConfirm={handleConfirmSubmit}
+                    title="Xác Nhận Gửi Phiếu Kiểm Kê"
                 />
             </View>
         </>
