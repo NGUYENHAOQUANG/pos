@@ -6,12 +6,13 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useCreateStockTransfer } from '@/features/farm/hooks/useStockTransfer';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useAllPondsByZone } from '@/features/farm/hooks/usePonds';
+import { useAllPondsByZone, usePondDetail } from '@/features/farm/hooks/usePonds';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { useSizeMeasurements } from '@/features/farm/hooks/useSizeMeasurement';
 import { useCurrentShrimpBreed } from '@/features/material/hooks/useShrimpSeeds';
 import { stockTransferService } from '@/features/farm/services/pond-work/stock-transfer.service';
 import { stockTransferFormSchema } from '@/features/farm/schemas/stockTransferFormSchema';
+import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { StockTransferSkeleton } from '@/features/farm/components/skeleton/StockTransferSkeleton';
 import { useAppTheme } from '@/styles/themeContext';
@@ -46,15 +47,42 @@ export const StockTransferFormScreen: React.FC = () => {
         useSizeMeasurements(pondId);
     const { breedName, cycleData } = useCurrentShrimpBreed(pondId, cycleId, warehouseId);
 
+    const { data: currentPondData } = usePondDetail(zoneId!, pondId!);
+
+    // Resolve pond type name (from type.name or via pondCategoryId + categories)
+    const currentPondTypeName = useMemo(() => {
+        if (currentPondData?.type?.name) return currentPondData.type.name;
+        if (currentPondData?.pondCategoryId && categoriesResponse?.items) {
+            const cat = categoriesResponse.items.find(
+                (c: any) => c.id === currentPondData.pondCategoryId
+            );
+            return cat?.name;
+        }
+        return undefined;
+    }, [currentPondData, categoriesResponse]);
+
     const pondOptions = useMemo(
         () =>
             stockTransferService.getReceivingPondOptions(
                 pondsByZoneData ?? [],
                 pondId || '',
-                categoriesResponse?.items
+                categoriesResponse?.items,
+                currentPondTypeName
             ),
-        [pondsByZoneData, pondId, categoriesResponse]
+        [pondsByZoneData, pondId, categoriesResponse, currentPondTypeName]
     );
+
+    // Map pondId → typeName for receiving pond type checks
+    const pondTypeMap = useMemo(() => {
+        const map = new Map<string, string>();
+        const categoryMap = new Map<string, string>();
+        categoriesResponse?.items?.forEach((c: any) => categoryMap.set(c.id, c.name));
+        pondsByZoneData?.forEach(p => {
+            const typeName = p.type?.name ?? categoryMap.get(p.pondCategoryId ?? '');
+            if (typeName) map.set(p.id, typeName);
+        });
+        return map;
+    }, [pondsByZoneData, categoriesResponse]);
 
     const actualStockingQuantity = cycleData?.totalStocking ?? 0;
 
@@ -135,6 +163,10 @@ export const StockTransferFormScreen: React.FC = () => {
             isSubmitting={isCreating}
             onBack={handleBack}
             onSubmit={handleSubmit}
+            currentPondName={currentPondData?.name}
+            cultureDays={pondDetailService.calculateDOC(cycleData?.createdAt)}
+            pondTypeName={currentPondTypeName}
+            pondTypeMap={pondTypeMap}
         />
     );
 };

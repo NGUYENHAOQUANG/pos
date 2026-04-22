@@ -7,7 +7,8 @@ import { Colors } from '@/styles/colors';
 import { spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import DeleteBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
-import { IconError } from '@/assets/icons';
+import DangerIcon from '@/assets/Icon/Danger.svg';
+import WarningCircleIcon from '@/assets/Icon/WarningCircle-yellow.svg';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { DropdownPondItem } from '@/features/farm/components/DropdownPondItem';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
@@ -28,6 +29,9 @@ interface TransferInfoBoxProps {
     totalEstimatedShrimp?: number;
     pondOptions: DropDownItem[];
     containerStyle?: ViewStyle;
+    currentPondName?: string;
+    cultureDays?: number;
+    showCultureDaysWarning?: boolean;
 }
 
 export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
@@ -39,6 +43,9 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     totalEstimatedShrimp,
     pondOptions,
     containerStyle,
+    currentPondName,
+    cultureDays,
+    showCultureDaysWarning,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -160,7 +167,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
             {/* Error Warning */}
             {showError && totalEstimatedShrimp && (
                 <View style={styles.errorBox}>
-                    <IconError width={16} height={16} />
+                    <DangerIcon width={20} height={20} style={{ marginTop: 2 }} />
                     <Text style={styles.errorText}>
                         Tổng số lượng tôm chuyển đi phải bằng tổng tôm dự kiến trong ao (
                         {formatNumber(totalEstimatedShrimp.toString())}).{' '}
@@ -171,6 +178,17 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                             : `Thiếu ${formatNumber(
                                   (totalEstimatedShrimp - totalQuantity).toString()
                               )} con.`}
+                    </Text>
+                </View>
+            )}
+
+            {/* Culture Days Warning */}
+            {showCultureDaysWarning && cultureDays !== undefined && (
+                <View style={styles.warningBox}>
+                    <WarningCircleIcon width={20} height={20} />
+                    <Text style={styles.warningText}>
+                        {currentPondName || ''} chưa đủ điều kiện sang ao Nuôi. Tôm cần được nuôi
+                        tối thiểu 15 ngày, hiện tại mới được {cultureDays} ngày.
                     </Text>
                 </View>
             )}
@@ -252,40 +270,37 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
         transferMethodContainer: {
-            gap: spacing.sm,
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
         },
         label: {
             fontSize: 14,
             fontWeight: '400',
             color: theme.text,
-            lineHeight: 22,
         },
         labelWrapper: {
             flexDirection: 'row',
             alignItems: 'center',
         },
-        required: {
-            color: theme.error,
-        },
         pillButton: {
             height: 22,
             backgroundColor: theme.blue[50],
             paddingHorizontal: spacing.sm,
-            borderRadius: borderRadius.xs,
+            borderRadius: borderRadius.md,
             borderColor: theme.blue[400],
             borderWidth: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         pillButtonText: {
             fontSize: 12,
             fontWeight: '400',
             color: theme.primary,
-            lineHeight: 20,
         },
         errorBox: {
             flexDirection: 'row',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             backgroundColor: theme.errorBackground,
             borderWidth: 1,
             borderColor: theme.error,
@@ -298,8 +313,25 @@ const getStyles = (theme: Colors) =>
             fontWeight: '400',
             fontStyle: 'normal',
             fontSize: 14,
-            lineHeight: 22,
-            color: theme.text,
+            color: theme.error,
+            flex: 1,
+        },
+        warningBox: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            backgroundColor: theme.background,
+            borderWidth: 1,
+            borderColor: theme.border,
+            borderRadius: borderRadius.sm,
+            paddingVertical: 12,
+            paddingLeft: 12,
+            paddingRight: 8,
+            gap: 8,
+        },
+        warningText: {
+            fontWeight: '400',
+            fontSize: 14,
+            color: theme.textSecondary,
             flex: 1,
         },
         rowContainer: {
@@ -336,7 +368,7 @@ const getStyles = (theme: Colors) =>
         addLink: {
             flexDirection: 'row',
             alignItems: 'center',
-            alignSelf: 'flex-start',
+            alignSelf: 'center',
             marginTop: spacing.xs,
         },
         addLinkText: {

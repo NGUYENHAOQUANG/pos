@@ -8,12 +8,16 @@ import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasi
 
 export const stockTransferService = {
     /**
-     * Filter ao nhận: chỉ lấy Ao nuôi và Ao sẵn sàng, loại trừ ao hiện tại
+     * Filter ao nhận dựa trên loại ao nguồn:
+     * - Ao nuôi → chỉ Ao nuôi
+     * - Ao vèo → Ao vèo + Ao nuôi
+     * - Khác → Ao nuôi + Ao sẵn sàng
      */
     getReceivingPondOptions: (
         allPonds: PondData[],
         currentPondId: string,
-        categories?: PondCategory[]
+        categories?: PondCategory[],
+        sourcePondTypeName?: string
     ): DropDownItem[] => {
         if (allPonds.length === 0) return [];
 
@@ -26,7 +30,13 @@ export const stockTransferService = {
             return p.type?.name ?? categoryMap.get(p.pondCategoryId ?? '');
         };
 
-        const allowedTypes: string[] = [POND_TYPES.CULTIVATION, POND_TYPES.READY];
+        // Determine allowed receiving pond types based on source pond type
+        const allowedTypes: string[] =
+            sourcePondTypeName === POND_TYPES.CULTIVATION
+                ? [POND_TYPES.CULTIVATION]
+                : sourcePondTypeName === POND_TYPES.NURSERY
+                ? [POND_TYPES.NURSERY, POND_TYPES.CULTIVATION]
+                : [POND_TYPES.CULTIVATION, POND_TYPES.READY];
 
         return allPonds
             .filter(p => {
@@ -34,6 +44,15 @@ export const stockTransferService = {
 
                 // Exclude ponds that already have an active cycle
                 if (p.cyclePond != null) return false;
+
+                // When source is 'Ao nuôi' or 'Ao vèo', always enforce type filter
+                if (
+                    sourcePondTypeName === POND_TYPES.CULTIVATION ||
+                    sourcePondTypeName === POND_TYPES.NURSERY
+                ) {
+                    const typeName = getPondTypeName(p);
+                    return typeName ? allowedTypes.includes(typeName) : false;
+                }
 
                 if (typeof p.canStockTransfer === 'boolean') {
                     return p.canStockTransfer;

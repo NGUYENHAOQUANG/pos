@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { POND_TYPES } from '@/features/farm/types/farm.types';
 import { View, StyleSheet } from 'react-native';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -14,7 +15,10 @@ import {
     TransferInfoBox,
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
-import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+import {
+    StockTransferConfirmationModal,
+    PondConfirmItem,
+} from '@/features/farm/components/bottom-sheet/StockTransferModal';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
@@ -29,6 +33,10 @@ export interface StockTransferFormProps {
     isSubmitting: boolean;
     onBack: () => void;
     onSubmit: (data: StockTransferFormData) => void;
+    currentPondName?: string;
+    cultureDays?: number;
+    pondTypeName?: string;
+    pondTypeMap?: Map<string, string>;
 }
 
 export interface StockTransferFormData {
@@ -48,6 +56,10 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     isSubmitting,
     onBack,
     onSubmit,
+    currentPondName,
+    cultureDays,
+    pondTypeName,
+    pondTypeMap,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -59,9 +71,43 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
         { id: Date.now().toString(), quantity: '' },
     ]);
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+    const [showWarnings, setShowWarnings] = useState(false);
     const hasInitialized = useRef(false);
     const scrollRef = useRef<KeyboardAwareScrollView>(null);
     const transferInfoY = useRef(0);
+
+    // Culture days warning: only for Ao vèo source (Ao nuôi → Ao nuôi always allowed)
+    const isNurseryPond = pondTypeName === POND_TYPES.NURSERY;
+    const hasCultureDaysWarning = isNurseryPond && cultureDays !== undefined && cultureDays < 15;
+
+    // Check shrimp count error
+    const totalQuantity = useMemo(() => {
+        return receivingPonds.reduce((sum, pond) => {
+            const qty = parseFloat(pond.quantity.replace(/\D/g, '')) || 0;
+            return sum + qty;
+        }, 0);
+    }, [receivingPonds]);
+    const hasShrimpCountError = useMemo(() => {
+        if (!totalShrimpCount || totalShrimpCount === 0) return false;
+        if (totalQuantity === 0) return false;
+        return totalQuantity !== totalShrimpCount;
+    }, [totalQuantity, totalShrimpCount]);
+
+    // Check if any selected receiving pond is "Ao nuôi"
+    const hasAnyCultivationReceiving = useMemo(() => {
+        if (!pondTypeMap) return false;
+        return receivingPonds.some(p => {
+            if (!p.receivingPond) return false;
+            return pondTypeMap.get(p.receivingPond) === POND_TYPES.CULTIVATION;
+        });
+    }, [receivingPonds, pondTypeMap]);
+
+    const hasPondSelected = useMemo(() => {
+        return receivingPonds.some(p => !!p.receivingPond);
+    }, [receivingPonds]);
+
+    // Disable: only when no pond selected or shrimp count error
+    const isSaveDisabled = isSubmitting || !hasPondSelected || hasShrimpCountError;
 
     const hasChanges = useMemo(() => {
         const hasPondSelected = receivingPonds.some(p => !!p.receivingPond);
@@ -123,8 +169,12 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     }, [latestShrimpSize]);
 
     const handleSavePress = useCallback(() => {
+        if (hasCultureDaysWarning && hasAnyCultivationReceiving) {
+            setShowWarnings(true);
+            return;
+        }
         setIsConfirmationModalVisible(true);
-    }, []);
+    }, [hasCultureDaysWarning, hasAnyCultivationReceiving]);
 
     const handleConfirmSave = useCallback(() => {
         setIsConfirmationModalVisible(false);
@@ -143,6 +193,19 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     const handleCancelConfirmation = useCallback(() => {
         setIsConfirmationModalVisible(false);
     }, []);
+
+    const confirmPonds: PondConfirmItem[] = useMemo(() => {
+        return receivingPonds
+            .filter(p => !!p.receivingPond)
+            .map(p => {
+                const option = pondOptions.find(o => String(o.value) === p.receivingPond);
+                return {
+                    id: p.id,
+                    label: option?.label ?? p.receivingPond ?? '',
+                    quantity: parseFloat(p.quantity.replace(/\D/g, '')) || 0,
+                };
+            });
+    }, [receivingPonds, pondOptions]);
 
     return (
         <View style={styles.container}>
@@ -181,6 +244,11 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                         onReceivingPondPress={_id => {}}
                         totalEstimatedShrimp={totalShrimpCount}
                         pondOptions={pondOptions}
+                        currentPondName={currentPondName}
+                        cultureDays={cultureDays}
+                        showCultureDaysWarning={
+                            showWarnings && hasCultureDaysWarning && hasAnyCultivationReceiving
+                        }
                     />
                 </View>
 
@@ -193,22 +261,18 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={onBack}
-                    primaryDisabled={isSubmitting}
+                    primaryDisabled={isSaveDisabled}
                 />
             </View>
 
             {UnsavedChangesModal}
-            <ConfirmationModalUI
+            <StockTransferConfirmationModal
                 visible={isConfirmationModalVisible}
                 onConfirm={handleConfirmSave}
                 onCancel={handleCancelConfirmation}
-                title="Xác nhận sang ao"
-                message={`Việc sang ao sẽ kết thúc chu kỳ hiện tại ở ao vèo và tiếp tục giai đoạn nuôi ở ao nuôi.
-Sau khi thực hiện, bạn sẽ không thể chỉnh sửa lại dữ liệu của giai đoạn vèo.
-Bạn có chắc muốn sang ao không?`}
-                confirmText="Sang ao"
-                cancelText="Không"
-                showSuccessToast={false}
+                receivingPonds={confirmPonds}
+                currentPondName={currentPondName}
+                cultureDays={cultureDays}
             />
         </View>
     );

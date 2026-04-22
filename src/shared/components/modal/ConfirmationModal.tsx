@@ -14,7 +14,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 
 export type ConfirmationModalType =
-    | 'transfer'
     | 'harvest_full'
     | 'harvest_close_cycle'
     | 'measure_size_required'
@@ -33,14 +32,6 @@ interface ConfirmationConfig {
 }
 
 const CONFIRMATION_CONFIGS: Record<ConfirmationModalType, ConfirmationConfig> = {
-    transfer: {
-        title: 'Xác nhận sang ao',
-        message: `Việc sang ao sẽ kết thúc chu kỳ hiện tại ở ao vèo và tiếp tục giai đoạn nuôi ở ao nuôi.
-Sau khi thực hiện, bạn sẽ không thể chỉnh sửa lại dữ liệu của giai đoạn vèo.
-Bạn có chắc muốn sang ao không?`,
-        confirmText: 'Sang ao',
-        cancelText: 'Không',
-    },
     harvest_full: {
         title: 'Xác nhận thu hoạch hết',
         message: `Việc thu hoạch hết sẽ kết thúc chu kỳ nuôi hiện tại và không thể hoàn tác.
