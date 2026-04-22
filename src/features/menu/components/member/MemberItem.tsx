@@ -8,6 +8,7 @@ import { Colors } from '@/styles/colors';
 import { TagStatus } from '../Tag';
 import { ActionMenu, getMenuPosition } from '@/shared/components/buttons/ActionMenuButton';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface MemberItemProps {
     name: string;
@@ -19,6 +20,7 @@ interface MemberItemProps {
     onSuspend?: () => void;
     onActivate?: () => void;
     onResendInvite?: () => void;
+    isFirstItem?: boolean;
 }
 
 export const MemberItem = React.memo<MemberItemProps>(
@@ -32,6 +34,7 @@ export const MemberItem = React.memo<MemberItemProps>(
         onSuspend,
         onActivate,
         onResendInvite,
+        isFirstItem,
     }) => {
         const theme = useAppTheme();
         const styles = getStyles(theme);
@@ -126,9 +129,21 @@ export const MemberItem = React.memo<MemberItemProps>(
                     </View>
                 </View>
 
-                <View ref={buttonRef} collapsable={false}>
-                    <MoreButton onPress={handlePressOption} color={theme.text} />
-                </View>
+                {isFirstItem ? (
+                    <OnboardingStep step="ACCOUNT_MEMBER_ACTION">
+                        <View
+                            ref={buttonRef}
+                            collapsable={false}
+                            style={{ backgroundColor: theme.background, borderRadius: 20 }}
+                        >
+                            <MoreButton onPress={handlePressOption} color={theme.text} />
+                        </View>
+                    </OnboardingStep>
+                ) : (
+                    <View ref={buttonRef} collapsable={false}>
+                        <MoreButton onPress={handlePressOption} color={theme.text} />
+                    </View>
+                )}
 
                 <ActionMenu
                     visible={menuVisible}

@@ -10,6 +10,7 @@ import { useZones } from '@/features/farm/hooks';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { MaterialView } from './MaterialContent';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 
 export const MaterialScreen = () => {
     // 1. Navigation & Route Params
@@ -73,6 +74,18 @@ export const MaterialScreen = () => {
             }
         }
     }, [zonesData, selectedZoneId, setSelectedZoneId]);
+
+    // Onboarding Auto-Trigger
+    const { hasCompletedMaterial, startOnboarding, _hasHydrated } = useOnboardingStore();
+    useEffect(() => {
+        const isReadyToStart = _hasHydrated && zonesData.length > 0 && !!selectedZoneId;
+        if (isReadyToStart && !hasCompletedMaterial) {
+            const timer = setTimeout(() => {
+                startOnboarding('material');
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [_hasHydrated, hasCompletedMaterial, zonesData.length, selectedZoneId, startOnboarding]);
 
     // 5. Header Menu State
     const [menuOpen, setMenuOpen] = useState(false);

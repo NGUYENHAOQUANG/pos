@@ -19,6 +19,7 @@ import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { IconInfomation } from '@/assets/icons';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface HeaderFarmProps {
     // Common
@@ -226,17 +227,19 @@ export const HeaderFarm = ({
                     <Text style={styles.listTitle}>Trại Nuôi</Text>
                     {rightTopComponent}
                 </View>
-                <View style={styles.dropdownRow}>
-                    <DropDownButtonBasic
-                        data={data}
-                        value={value}
-                        onSelect={onSelect}
-                        style={{ flex: 1 }}
-                    />
-                    <View ref={buttonRef} collapsable={false}>
-                        <MoreButton onPress={onMenuPress || openMenu} />
+                <OnboardingStep step="FARM_SELECTOR">
+                    <View style={styles.dropdownRow}>
+                        <DropDownButtonBasic
+                            data={data}
+                            value={value}
+                            onSelect={onSelect}
+                            style={{ flex: 1 }}
+                        />
+                        <View ref={buttonRef} collapsable={false}>
+                            <MoreButton onPress={onMenuPress || openMenu} />
+                        </View>
                     </View>
-                </View>
+                </OnboardingStep>
             </View>
         );
     }

@@ -191,6 +191,8 @@ export const SettingsScreen: React.FC = () => {
     const toggleLogoLoading = useSettingsStore(s => s.toggleLogoLoading);
     const weatherEnabled = useSettingsStore(s => s.weatherEnabled);
     const toggleWeather = useSettingsStore(s => s.toggleWeather);
+    const walkthroughEnabled = useSettingsStore(s => s.walkthroughEnabled);
+    const toggleWalkthrough = useSettingsStore(s => s.toggleWalkthrough);
     const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
     const toggleChatbot = useSettingsStore(s => s.toggleChatbot);
     const chatbotAnimatedBgEnabled = useSettingsStore(s => s.chatbotAnimatedBgEnabled);
@@ -355,6 +357,14 @@ export const SettingsScreen: React.FC = () => {
                     {/* Feature Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Tính năng</Text>
+                        <View style={styles.card}>
+                            <SettingRow
+                                title="Hướng dẫn sử dụng"
+                                subtitle="Hiển thị hướng dẫn các tính năng mới bằng Spotlights"
+                                value={walkthroughEnabled}
+                                onValueChange={toggleWalkthrough}
+                            />
+                        </View>
                         <View style={styles.card}>
                             <SettingRow
                                 title="Dự báo thời tiết"

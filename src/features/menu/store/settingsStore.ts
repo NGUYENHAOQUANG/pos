@@ -26,6 +26,7 @@ interface SettingsState {
     animatedBgType: AnimatedBgType;
     weatherEnabled: boolean;
     chatbotEnabled: boolean;
+    walkthroughEnabled: boolean;
     chatbotAnimatedBgEnabled: boolean;
     chatbotBgPromptDismissCount: number;
     lockMethod: LockMethod;
@@ -48,6 +49,7 @@ interface SettingsActions {
     setAnimatedBgType: (type: AnimatedBgType) => void;
     toggleWeather: () => void;
     toggleChatbot: () => void;
+    toggleWalkthrough: () => void;
     toggleChatbotAnimatedBg: () => void;
     incrementChatbotBgPromptDismiss: () => void;
     setLockMethod: (method: LockMethod) => void;
@@ -56,6 +58,7 @@ interface SettingsActions {
     setSoundEnabled: (enabled: boolean) => void;
     setHapticEnabled: (enabled: boolean) => void;
     setThemeMode: (mode: ThemeMode) => void;
+    setWalkthroughEnabled: (enabled: boolean) => void;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -74,6 +77,7 @@ export const useSettingsStore = create<SettingsStore>()(
             animatedBgType: 'bubbles-shader' as AnimatedBgType,
             weatherEnabled: true,
             chatbotEnabled: true,
+            walkthroughEnabled: true,
             chatbotAnimatedBgEnabled: false,
             chatbotBgPromptDismissCount: 0,
             lockMethod: 'none' as LockMethod,
@@ -146,6 +150,11 @@ export const useSettingsStore = create<SettingsStore>()(
                     state.chatbotEnabled = !state.chatbotEnabled;
                 }),
 
+            toggleWalkthrough: () =>
+                set(state => {
+                    state.walkthroughEnabled = !state.walkthroughEnabled;
+                }),
+
             toggleChatbotAnimatedBg: () =>
                 set(state => {
                     state.chatbotAnimatedBgEnabled = !state.chatbotAnimatedBgEnabled;
@@ -184,6 +193,11 @@ export const useSettingsStore = create<SettingsStore>()(
             setThemeMode: (mode: ThemeMode) =>
                 set(state => {
                     state.themeMode = mode;
+                }),
+
+            setWalkthroughEnabled: (enabled: boolean) =>
+                set(state => {
+                    state.walkthroughEnabled = enabled;
                 }),
         })),
         {

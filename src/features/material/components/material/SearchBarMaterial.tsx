@@ -9,6 +9,7 @@ import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { Input } from '@/shared/components/forms/Input';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface SearchBarMeterialProps {
     onSearch?: (text: string) => void;
@@ -121,31 +122,34 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
     return (
         <View style={styles.container}>
-            <View style={styles.topRow}>
-                <View style={styles.searchInputWrapper}>
-                    <Input
-                        icon="search-outline"
-                        placeholder="Tìm kiếm tên vật tư​"
-                        value={localSearchText}
-                        onChangeText={setLocalSearchText}
-                        iconRight={localSearchText.length > 0 ? 'close-circle' : undefined}
-                        onIconPress={handleClearSearch}
-                        containerStyle={styles.inputContainer}
-                        inputContainerStyle={styles.inputInnerContainer}
-                    />
-                </View>
+            <OnboardingStep step="MATERIAL_SEARCH" wrapperStyle={{ borderRadius: 12 }}>
+                <View collapsable={false} style={styles.topRow}>
+                    <View style={styles.searchInputWrapper}>
+                        <Input
+                            icon="search-outline"
+                            placeholder="Tìm kiếm tên vật tư​"
+                            value={localSearchText}
+                            onChangeText={setLocalSearchText}
+                            iconRight={localSearchText.length > 0 ? 'close-circle' : undefined}
+                            onIconPress={handleClearSearch}
+                            containerStyle={styles.inputContainer}
+                            inputContainerStyle={styles.inputInnerContainer}
+                        />
+                    </View>
 
-                <TouchableOpacity
-                    style={[styles.moreButton, isExpanded && styles.moreButtonActive]}
-                    onPress={handleToggleExpand}
-                >
-                    <Ionicons
-                        name="ellipsis-horizontal"
-                        size={20}
-                        color={isExpanded ? theme.primary : theme.text}
-                    />
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity
+                        style={[styles.moreButton, isExpanded && styles.moreButtonActive]}
+                        onPress={handleToggleExpand}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="ellipsis-horizontal"
+                            size={20}
+                            color={isExpanded ? theme.primary : theme.text}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </OnboardingStep>
 
             {isExpanded && (
                 <View style={styles.expandedContent}>

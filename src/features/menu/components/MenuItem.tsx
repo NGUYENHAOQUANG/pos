@@ -36,6 +36,8 @@ const getStyles = (theme: Colors) =>
             height: 44,
             paddingHorizontal: 16,
             gap: 16,
+            backgroundColor: theme.background,
+            borderRadius: 12,
         },
         iconWrapper: {
             justifyContent: 'center',
