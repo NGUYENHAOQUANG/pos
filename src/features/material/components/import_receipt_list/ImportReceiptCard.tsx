@@ -23,12 +23,10 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { Button } from '@/shared/components/buttons/Button';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
-import { ApproveImportReceiptBottomSheet } from '@/features/material/components/ApproveBottomSheet';
+import { ApproveImportReceiptBottomSheet } from '@/features/material/components/import_receipt_list/ApproveImportReceiptBottomSheet';
 
 interface ImportReceiptCardProps {
     item: ImportReceipt;
-    onApprove?: (id: string, code: string) => void;
-    onReject?: (id: string, code: string) => void;
 }
 
 const arePropsEqual = (prevProps: ImportReceiptCardProps, nextProps: ImportReceiptCardProps) => {
@@ -45,163 +43,151 @@ const arePropsEqual = (prevProps: ImportReceiptCardProps, nextProps: ImportRecei
     );
 };
 
-export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(
-    ({ item, onApprove, onReject }) => {
-        const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-        const [isExpanded, setIsExpanded] = useState(false);
+export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+    const [isExpanded, setIsExpanded] = useState(false);
 
-        const theme = useAppTheme();
-        const styles = getStyles(theme);
+    const theme = useAppTheme();
+    const styles = getStyles(theme);
 
-        const { data: fetchedItems, isLoading: isFetchingItems } = useImportReceiptItems(
-            isExpanded ? item.id : '',
-            { PageSize: 1000 }
-        );
+    const { data: fetchedItems, isLoading: isFetchingItems } = useImportReceiptItems(
+        isExpanded ? item.id : '',
+        { PageSize: 1000 }
+    );
 
-        // Fetch suppliers to get supplier name from supplierId if not available
-        const { data: suppliers = [] } = useSuppliers();
+    // Fetch suppliers to get supplier name from supplierId if not available
+    const { data: suppliers = [] } = useSuppliers();
 
-        const toggleExpand = () => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setIsExpanded(!isExpanded);
-        };
+    const toggleExpand = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setIsExpanded(!isExpanded);
+    };
 
-        const getStatusLabel = (status?: ImportReceiptStatus | string): MaterialGroupType => {
-            switch (status) {
-                case ImportReceiptStatus.Draft:
-                    return MaterialGroupType.DRAFT;
-                case ImportReceiptStatus.Pending:
-                    return MaterialGroupType.PENDING;
-                case ImportReceiptStatus.Approved:
-                    return MaterialGroupType.COMPLETED;
-                case ImportReceiptStatus.Rejected:
-                    return MaterialGroupType.REJECTED;
-                default:
-                    return (status as MaterialGroupType) || MaterialGroupType.DRAFT;
-            }
-        };
+    const getStatusLabel = (status?: ImportReceiptStatus | string): MaterialGroupType => {
+        switch (status) {
+            case ImportReceiptStatus.Draft:
+                return MaterialGroupType.DRAFT;
+            case ImportReceiptStatus.Pending:
+                return MaterialGroupType.PENDING;
+            case ImportReceiptStatus.Approved:
+                return MaterialGroupType.COMPLETED;
+            case ImportReceiptStatus.Rejected:
+                return MaterialGroupType.REJECTED;
+            default:
+                return (status as MaterialGroupType) || MaterialGroupType.DRAFT;
+        }
+    };
 
-        const displayItems = fetchedItems?.items || [];
+    const displayItems = fetchedItems?.items || [];
 
-        // Get supplier name: use supplierName from API if available, otherwise lookup from suppliers list
-        const supplierName =
-            item.supplierName || suppliers.find(s => s.id === item.supplierId)?.name || '---';
+    // Get supplier name: use supplierName from API if available, otherwise lookup from suppliers list
+    const supplierName =
+        item.supplierName || suppliers.find(s => s.id === item.supplierId)?.name || '---';
 
-        const [isApproveModalVisible, setIsApproveModalVisible] = React.useState(false);
+    const [isApproveModalVisible, setIsApproveModalVisible] = React.useState(false);
 
-        return (
-            <View style={styles.card}>
-                {/* Header Info */}
-                <View style={styles.detailRow}>
-                    <View style={styles.row}>
-                        <Text style={styles.detailLabel}>Trạng thái:</Text>
-                        <MaterialGroup group={getStatusLabel(item.status)} />
-                    </View>
-                    <DetailRow
-                        label="Nhập kho:"
-                        value={item.editedAt ? formatMaterialDateTime(item.editedAt) : '---'}
-                    />
-                    <DetailRow
-                        label="Tạo phiếu:"
-                        value={item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
-                    />
-                    <DetailRow label="Tổng hàng hóa:" value={item.totalItems ?? '---'} />
-                    <DetailRow
-                        label="Tổng giá trị:"
-                        value={formatCurrency(item.totalAmount ?? 0)}
-                    />
+    return (
+        <View style={styles.card}>
+            {/* Header Info */}
+            <View style={styles.detailRow}>
+                <View style={styles.row}>
+                    <Text style={styles.detailLabel}>Trạng thái:</Text>
+                    <MaterialGroup group={getStatusLabel(item.status)} />
                 </View>
-                {/* Edit Button (Only for Draft) */}
-                {item.status === ImportReceiptStatus.Draft && (
+                <DetailRow
+                    label="Nhập kho:"
+                    value={item.editedAt ? formatMaterialDateTime(item.editedAt) : '---'}
+                />
+                <DetailRow
+                    label="Tạo phiếu:"
+                    value={item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
+                />
+                <DetailRow label="Tổng hàng hóa:" value={item.totalItems ?? '---'} />
+                <DetailRow label="Tổng giá trị:" value={formatCurrency(item.totalAmount ?? 0)} />
+            </View>
+            {/* Edit Button (Only for Draft) */}
+            {item.status === ImportReceiptStatus.Draft && (
+                <Button
+                    title="Sửa thông tin"
+                    variant="outline"
+                    renderLeftIcon={<EditIcon />}
+                    style={styles.editButton}
+                    onPress={() => {
+                        navigation.navigate('ImportReceiptFormScreen', {
+                            importReceiptId: item.id,
+                            availableMaterials: [],
+                        });
+                    }}
+                />
+            )}
+
+            {isExpanded && (
+                <DetailRow
+                    label="Nhà cung cấp:"
+                    value={supplierName}
+                    style={styles.detailRowItem}
+                />
+            )}
+
+            {/* Expanded Details */}
+            {isExpanded && (
+                <View style={styles.detailsContainer}>
+                    {isFetchingItems ? (
+                        <ActivityIndicator
+                            size="small"
+                            color={theme.primary}
+                            style={{ margin: spacing.md }}
+                        />
+                    ) : (
+                        <ImportReceiptItems materials={displayItems} />
+                    )}
+                </View>
+            )}
+
+            {/* Expand Button */}
+            <TouchableOpacity style={styles.expandButton} onPress={toggleExpand}>
+                <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
+                <Ionicons
+                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={16}
+                    color={theme.primary}
+                />
+            </TouchableOpacity>
+
+            {/* Pending Actions */}
+            {item.status === ImportReceiptStatus.Pending && (
+                <View style={styles.actionButtonsRow}>
                     <Button
-                        title="Sửa thông tin"
+                        title="Từ chối"
                         variant="outline"
-                        renderLeftIcon={<EditIcon />}
-                        style={styles.editButton}
+                        iconLeft="ban-outline"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
                         onPress={() => {
-                            navigation.navigate('ImportReceiptFormScreen', {
-                                importReceiptId: item.id,
-                                availableMaterials: [],
-                            });
+                            setIsApproveModalVisible(true);
                         }}
                     />
-                )}
-
-                {isExpanded && (
-                    <DetailRow
-                        label="Nhà cung cấp:"
-                        value={supplierName}
-                        style={styles.detailRowItem}
+                    <Button
+                        title="Duyệt"
+                        variant="outline"
+                        iconLeft="checkmark-done"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => {
+                            setIsApproveModalVisible(true);
+                        }}
                     />
-                )}
+                </View>
+            )}
 
-                {/* Expanded Details */}
-                {isExpanded && (
-                    <View style={styles.detailsContainer}>
-                        {isFetchingItems ? (
-                            <ActivityIndicator
-                                size="small"
-                                color={theme.primary}
-                                style={{ margin: spacing.md }}
-                            />
-                        ) : (
-                            <ImportReceiptItems materials={displayItems} />
-                        )}
-                    </View>
-                )}
-
-                {/* Expand Button */}
-                <TouchableOpacity style={styles.expandButton} onPress={toggleExpand}>
-                    <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
-                    <Ionicons
-                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={16}
-                        color={theme.primary}
-                    />
-                </TouchableOpacity>
-
-                {/* Pending Actions */}
-                {item.status === ImportReceiptStatus.Pending && (
-                    <View style={styles.actionButtonsRow}>
-                        <Button
-                            title="Từ chối"
-                            variant="outline"
-                            iconLeft="ban-outline"
-                            style={styles.actionButton}
-                            textStyle={{ fontWeight: '500', fontSize: 14 }}
-                            onPress={() => {
-                                setIsApproveModalVisible(true);
-                            }}
-                        />
-                        <Button
-                            title="Duyệt"
-                            variant="outline"
-                            iconLeft="checkmark-done"
-                            style={styles.actionButton}
-                            textStyle={{ fontWeight: '500', fontSize: 14 }}
-                            onPress={() => {
-                                setIsApproveModalVisible(true);
-                            }}
-                        />
-                    </View>
-                )}
-
-                <ApproveImportReceiptBottomSheet
-                    visible={isApproveModalVisible}
-                    onClose={() => setIsApproveModalVisible(false)}
-                    item={item}
-                    onApprove={
-                        onApprove ? () => onApprove(item.id, item.receiptCode || '') : undefined
-                    }
-                    onReject={
-                        onReject ? () => onReject(item.id, item.receiptCode || '') : undefined
-                    }
-                />
-            </View>
-        );
-    },
-    arePropsEqual
-);
+            <ApproveImportReceiptBottomSheet
+                visible={isApproveModalVisible}
+                onClose={() => setIsApproveModalVisible(false)}
+                id={item.id}
+            />
+        </View>
+    );
+}, arePropsEqual);
 
 const getStyles = (theme: Colors) =>
     StyleSheet.create({

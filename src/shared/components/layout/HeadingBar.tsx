@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
     View,
     TouchableOpacity,
@@ -58,6 +58,10 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
     const indicatorWidth = useSharedValue(0);
     const [isReady, setIsReady] = useState(false);
 
+    // Auto-scroll logic
+    const scrollViewRef = useRef<ScrollView>(null);
+    const [scrollViewWidth, setScrollViewWidth] = useState(0);
+
     // Measure each tab's layout
     const handleTabLayout = useCallback((key: string, event: LayoutChangeEvent) => {
         const { x, width } = event.nativeEvent.layout;
@@ -79,7 +83,16 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
             indicatorX.value = withSpring(layout.x, SPRING_CONFIG);
             indicatorWidth.value = withSpring(layout.width, SPRING_CONFIG);
         }
-    }, [selectedTab, tabLayouts, indicatorX, indicatorWidth, isReady]);
+
+        // Auto-scroll to center
+        if (scrollViewRef.current && scrollViewWidth > 0 && !flexTabs) {
+            const targetX = layout.x + layout.width / 2 - scrollViewWidth / 2;
+            scrollViewRef.current.scrollTo({
+                x: Math.max(0, targetX),
+                animated: true,
+            });
+        }
+    }, [selectedTab, tabLayouts, indicatorX, indicatorWidth, isReady, scrollViewWidth, flexTabs]);
 
     // Animated style for the sliding indicator
     const indicatorStyle = useAnimatedStyle(() => ({
@@ -123,9 +136,11 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
                         </View>
                     ) : (
                         <ScrollView
+                            ref={scrollViewRef}
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={[styles.scrollContent, { flexGrow: 1 }]}
+                            onLayout={e => setScrollViewWidth(e.nativeEvent.layout.width)}
                         >
                             {/* Sliding indicator inside ScrollView content */}
                             {isReady && (
