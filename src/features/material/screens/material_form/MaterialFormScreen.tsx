@@ -72,7 +72,6 @@ export const MaterialFormScreen: React.FC = () => {
 
     const unitOptions = useMemo(() => units.map(u => ({ label: u.name, value: u.id })), [units]);
 
-    // ─── Handlers ──────────────────────────────────────────
     const handleGroupChange = useCallback((groupName: string) => {
         setSelectedGroupId(groupName);
     }, []);

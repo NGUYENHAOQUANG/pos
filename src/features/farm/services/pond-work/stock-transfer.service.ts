@@ -108,4 +108,45 @@ export const stockTransferService = {
     getLatestShrimpSizeFromMeasurement: (measurementDetail: any): string | undefined => {
         return measurementDetail?.shrimpSizePcsPerKg?.toString();
     },
+
+    /**
+     * Phân loại lỗi từ BE để quyết định cách hiển thị trên UI.
+     * - 'modal': Hiện ConfirmationModalUI (ví dụ: cần đo kích thước tôm)
+     * - 'warning': Hiện warning box màu vàng trong form (ví dụ: chưa đủ ngày)
+     * - 'silent': Không hiển thị gì (FE đã xử lý realtime, ví dụ: số lượng không khớp)
+     * - 'toast': Hiện toast đỏ mặc định
+     */
+    classifyError: (message: string): StockTransferErrorType => {
+        const msg = message.toLowerCase();
+
+        for (const rule of STOCK_TRANSFER_ERROR_RULES) {
+            if (rule.keywords.some(kw => msg.includes(kw))) {
+                return rule.type;
+            }
+        }
+
+        return 'toast';
+    },
 };
+
+// ─── Error Classification ───────────────────────────────
+export type StockTransferErrorType = 'modal' | 'warning' | 'silent' | 'toast';
+
+interface ErrorRule {
+    type: StockTransferErrorType;
+    keywords: string[];
+}
+
+/**
+ * Bảng ánh xạ lỗi BE → loại UI hiển thị.
+ * Thứ tự quan trọng: rule đầu tiên khớp sẽ được sử dụng.
+ * Khi BE thêm lỗi mới, chỉ cần thêm 1 dòng vào đây.
+ */
+const STOCK_TRANSFER_ERROR_RULES: ErrorRule[] = [
+    // Modal: cần đi đo kích thước tôm
+    { type: 'modal', keywords: ['không tìm thấy record', 'đo kích thước', '24 giờ', '24h'] },
+    // Warning box: chưa đủ ngày nuôi
+    { type: 'warning', keywords: ['15 ngày', 'chưa đủ điều kiện'] },
+    // Silent: FE đã hiển thị realtime error
+    { type: 'silent', keywords: ['tổng số lượng chuyển không khớp'] },
+];

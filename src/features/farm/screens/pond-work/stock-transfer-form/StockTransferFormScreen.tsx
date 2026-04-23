@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,6 +18,8 @@ import { StockTransferSkeleton } from '@/features/farm/components/skeleton/Stock
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import Toast from 'react-native-toast-message';
+import { NormalizedError } from '@/core/api/errorHandler';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import {
     StockTransferForm,
     StockTransferFormData,
@@ -30,8 +32,13 @@ export const StockTransferFormScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { mutateAsync: createStockTransfer, isPending: isCreating } = useCreateStockTransfer();
+    const { mutateAsync: createStockTransfer, isPending: isCreating } = useCreateStockTransfer({
+        suppressErrorToast: true,
+    });
     const theme = useAppTheme();
+    const [serverWarning, setServerWarning] = useState<string | undefined>();
+    const [showMeasureModal, setShowMeasureModal] = useState(false);
+    const [measureModalMessage, setMeasureModalMessage] = useState('');
     const styles = getStyles(theme);
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
@@ -71,18 +78,6 @@ export const StockTransferFormScreen: React.FC = () => {
             ),
         [pondsByZoneData, pondId, categoriesResponse, currentPondTypeName]
     );
-
-    // Map pondId → typeName for receiving pond type checks
-    const pondTypeMap = useMemo(() => {
-        const map = new Map<string, string>();
-        const categoryMap = new Map<string, string>();
-        categoriesResponse?.items?.forEach((c: any) => categoryMap.set(c.id, c.name));
-        pondsByZoneData?.forEach(p => {
-            const typeName = p.type?.name ?? categoryMap.get(p.pondCategoryId ?? '');
-            if (typeName) map.set(p.id, typeName);
-        });
-        return map;
-    }, [pondsByZoneData, categoriesResponse]);
 
     const actualStockingQuantity = cycleData?.totalStocking ?? 0;
 
@@ -138,8 +133,37 @@ export const StockTransferFormScreen: React.FC = () => {
                 notes
             );
 
-            await createStockTransfer({ pondId, data: apiRequestData, zoneId });
-            navigation.goBack();
+            try {
+                await createStockTransfer({ pondId, data: apiRequestData, zoneId });
+                navigation.goBack();
+            } catch (error) {
+                const normalizedError = error as NormalizedError;
+                let msg = normalizedError.message || 'Có lỗi xảy ra';
+
+                if (normalizedError.type === 'VALIDATION_ERROR' && normalizedError.fields) {
+                    const firstFieldKey = Object.keys(normalizedError.fields)[0];
+                    if (firstFieldKey && normalizedError.fields[firstFieldKey]?.length > 0) {
+                        msg = normalizedError.fields[firstFieldKey][0];
+                    }
+                }
+                const errorType = stockTransferService.classifyError(msg);
+
+                switch (errorType) {
+                    case 'modal':
+                        setMeasureModalMessage(msg);
+                        setShowMeasureModal(true);
+                        break;
+                    case 'warning':
+                        setServerWarning(msg);
+                        break;
+                    case 'silent':
+                        break;
+                    case 'toast':
+                    default:
+                        Toast.show({ type: 'error', text1: msg, visibilityTime: 4000 });
+                        break;
+                }
+            }
         },
         [pondId, zoneId, totalEstimatedShrimp, createStockTransfer, navigation]
     );
@@ -154,20 +178,34 @@ export const StockTransferFormScreen: React.FC = () => {
     }
 
     return (
-        <StockTransferForm
-            totalShrimpCount={totalEstimatedShrimp}
-            shrimpBreed={breedName}
-            actualStockingQuantity={actualStockingQuantity}
-            latestShrimpSize={latestShrimpSize}
-            pondOptions={pondOptions}
-            isSubmitting={isCreating}
-            onBack={handleBack}
-            onSubmit={handleSubmit}
-            currentPondName={currentPondData?.name}
-            cultureDays={pondDetailService.calculateDOC(cycleData?.createdAt)}
-            pondTypeName={currentPondTypeName}
-            pondTypeMap={pondTypeMap}
-        />
+        <>
+            <StockTransferForm
+                totalShrimpCount={totalEstimatedShrimp}
+                shrimpBreed={breedName}
+                actualStockingQuantity={actualStockingQuantity}
+                latestShrimpSize={latestShrimpSize}
+                pondOptions={pondOptions}
+                isSubmitting={isCreating}
+                serverWarningMessage={serverWarning}
+                onBack={handleBack}
+                onSubmit={handleSubmit}
+                currentPondName={currentPondData?.name}
+                cultureDays={pondDetailService.calculateDOC(cycleData?.createdAt)}
+            />
+            <ConfirmationModalUI
+                visible={showMeasureModal}
+                title="Xác nhận sang ao"
+                message={measureModalMessage}
+                confirmText="Đo ngay"
+                cancelText="Hủy"
+                showSuccessToast={false}
+                onConfirm={() => {
+                    setShowMeasureModal(false);
+                    navigation.replace('MeasureShrimpSizeScreen', { pondId });
+                }}
+                onCancel={() => setShowMeasureModal(false)}
+            />
+        </>
     );
 };
 

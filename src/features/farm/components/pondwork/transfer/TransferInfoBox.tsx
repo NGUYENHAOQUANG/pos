@@ -30,8 +30,7 @@ interface TransferInfoBoxProps {
     pondOptions: DropDownItem[];
     containerStyle?: ViewStyle;
     currentPondName?: string;
-    cultureDays?: number;
-    showCultureDaysWarning?: boolean;
+    serverWarningMessage?: string;
 }
 
 export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
@@ -43,9 +42,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     totalEstimatedShrimp,
     pondOptions,
     containerStyle,
-    currentPondName,
-    cultureDays,
-    showCultureDaysWarning,
+    serverWarningMessage,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -182,14 +179,11 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                 </View>
             )}
 
-            {/* Culture Days Warning */}
-            {showCultureDaysWarning && cultureDays !== undefined && (
+            {/* Server Warning Box */}
+            {serverWarningMessage && (
                 <View style={styles.warningBox}>
                     <WarningCircleIcon width={20} height={20} />
-                    <Text style={styles.warningText}>
-                        {currentPondName || ''} chưa đủ điều kiện sang ao Nuôi. Tôm cần được nuôi
-                        tối thiểu 15 ngày, hiện tại mới được {cultureDays} ngày.
-                    </Text>
+                    <Text style={styles.warningText}>{serverWarningMessage}</Text>
                 </View>
             )}
 

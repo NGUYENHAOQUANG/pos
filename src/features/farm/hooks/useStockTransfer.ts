@@ -63,7 +63,7 @@ export const useStockTransferDetail = (pondId: string, id: string) => {
     });
 };
 
-export const useCreateStockTransfer = () => {
+export const useCreateStockTransfer = (options?: { suppressErrorToast?: boolean }) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -104,7 +104,11 @@ export const useCreateStockTransfer = () => {
             queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
             queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
-        onError: error => handleError(error),
+        onError: error => {
+            if (!options?.suppressErrorToast) {
+                handleError(error);
+            }
+        },
     });
 };
 

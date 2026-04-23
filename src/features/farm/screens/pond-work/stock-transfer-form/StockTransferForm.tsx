@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { POND_TYPES } from '@/features/farm/types/farm.types';
 import { View, StyleSheet } from 'react-native';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
@@ -35,8 +34,7 @@ export interface StockTransferFormProps {
     onSubmit: (data: StockTransferFormData) => void;
     currentPondName?: string;
     cultureDays?: number;
-    pondTypeName?: string;
-    pondTypeMap?: Map<string, string>;
+    serverWarningMessage?: string;
 }
 
 export interface StockTransferFormData {
@@ -58,8 +56,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     onSubmit,
     currentPondName,
     cultureDays,
-    pondTypeName,
-    pondTypeMap,
+    serverWarningMessage,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -71,43 +68,16 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
         { id: Date.now().toString(), quantity: '' },
     ]);
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
-    const [showWarnings, setShowWarnings] = useState(false);
     const hasInitialized = useRef(false);
     const scrollRef = useRef<KeyboardAwareScrollView>(null);
     const transferInfoY = useRef(0);
-
-    // Culture days warning: only for Ao vèo source (Ao nuôi → Ao nuôi always allowed)
-    const isNurseryPond = pondTypeName === POND_TYPES.NURSERY;
-    const hasCultureDaysWarning = isNurseryPond && cultureDays !== undefined && cultureDays < 15;
-
-    // Check shrimp count error
-    const totalQuantity = useMemo(() => {
-        return receivingPonds.reduce((sum, pond) => {
-            const qty = parseFloat(pond.quantity.replace(/\D/g, '')) || 0;
-            return sum + qty;
-        }, 0);
-    }, [receivingPonds]);
-    const hasShrimpCountError = useMemo(() => {
-        if (!totalShrimpCount || totalShrimpCount === 0) return false;
-        if (totalQuantity === 0) return false;
-        return totalQuantity !== totalShrimpCount;
-    }, [totalQuantity, totalShrimpCount]);
-
-    // Check if any selected receiving pond is "Ao nuôi"
-    const hasAnyCultivationReceiving = useMemo(() => {
-        if (!pondTypeMap) return false;
-        return receivingPonds.some(p => {
-            if (!p.receivingPond) return false;
-            return pondTypeMap.get(p.receivingPond) === POND_TYPES.CULTIVATION;
-        });
-    }, [receivingPonds, pondTypeMap]);
 
     const hasPondSelected = useMemo(() => {
         return receivingPonds.some(p => !!p.receivingPond);
     }, [receivingPonds]);
 
-    // Disable: only when no pond selected or shrimp count error
-    const isSaveDisabled = isSubmitting || !hasPondSelected || hasShrimpCountError;
+    // Disable: only when no pond selected
+    const isSaveDisabled = isSubmitting || !hasPondSelected;
 
     const hasChanges = useMemo(() => {
         const hasPondSelected = receivingPonds.some(p => !!p.receivingPond);
@@ -169,12 +139,8 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     }, [latestShrimpSize]);
 
     const handleSavePress = useCallback(() => {
-        if (hasCultureDaysWarning && hasAnyCultivationReceiving) {
-            setShowWarnings(true);
-            return;
-        }
         setIsConfirmationModalVisible(true);
-    }, [hasCultureDaysWarning, hasAnyCultivationReceiving]);
+    }, []);
 
     const handleConfirmSave = useCallback(() => {
         setIsConfirmationModalVisible(false);
@@ -245,10 +211,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                         totalEstimatedShrimp={totalShrimpCount}
                         pondOptions={pondOptions}
                         currentPondName={currentPondName}
-                        cultureDays={cultureDays}
-                        showCultureDaysWarning={
-                            showWarnings && hasCultureDaysWarning && hasAnyCultivationReceiving
-                        }
+                        serverWarningMessage={serverWarningMessage}
                     />
                 </View>
 
