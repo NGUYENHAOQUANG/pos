@@ -23,10 +23,11 @@ export const API_ENDPOINTS = {
     MEMBER: {
         LIST: '/auth/users',
         DETAIL: (id: string) => `/auth/users/${id}`,
-        CREATE: '/auth/users',
+        CREATE: '/auth/admin/create-user',
         UPDATE: (id: string) => `/auth/users/${id}`,
-        DELETE: (id: string) => `/auth/users/${id}`,
+        DELETE: (id: string) => `/auth/admin/users/${id}`,
         UPDATE_STATUS: (id: string) => `/auth/users/${id}/status`,
+        UPDATE_ADMIN: (id: string) => `/auth/admin/users/${id}`,
         ROLES: '/auth/admin/roles',
     },
     CAMERA: {

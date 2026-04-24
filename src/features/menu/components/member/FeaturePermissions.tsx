@@ -5,6 +5,7 @@ import { borderRadius, spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { RequiredDot } from '@/shared/components/forms/Input';
 import { IRole } from '@/features/menu/types/member.types';
 import { PERMISSION_GROUPS, PERMISSION_COLUMNS } from '@/features/menu/constants/member.constants';
@@ -115,14 +116,6 @@ const FeatureGroup = React.memo(
     }
 );
 
-const ALL_PERMISSION_KEYS = PERMISSION_GROUPS.reduce((acc, group) => {
-    const groupKeys = group.items.reduce((itemAcc, item) => {
-        const itemKeys = PERMISSION_COLUMNS.map(col => `${item.id}_${col.key}`);
-        return itemAcc.concat(itemKeys);
-    }, [] as string[]);
-    return acc.concat(groupKeys);
-}, [] as string[]);
-
 export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
     selectedRoles = [],
     onRolesChange = () => {},
@@ -133,19 +126,6 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
-
-    const isAllSelected = selectedPermissions.length === ALL_PERMISSION_KEYS.length;
-
-    const toggleRole = useCallback(
-        (roleId: string) => {
-            if (disabled) return;
-            const nextRoles = selectedRoles.includes(roleId)
-                ? selectedRoles.filter(id => id !== roleId)
-                : [...selectedRoles, roleId];
-            onRolesChange(nextRoles);
-        },
-        [disabled, selectedRoles, onRolesChange]
-    );
 
     const togglePermission = useCallback(
         (permId: string) => {
@@ -183,11 +163,6 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
         [disabled, selectedPermissions, onPermissionsChange]
     );
 
-    const toggleAll = useCallback(() => {
-        if (disabled) return;
-        onPermissionsChange(isAllSelected ? [] : ALL_PERMISSION_KEYS);
-    }, [disabled, isAllSelected, onPermissionsChange]);
-
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -203,51 +178,48 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                         <RequiredDot />
                     </View>
                     <View style={styles.rolesList}>
-                        {availableRoles.map(role => (
-                            <Checkbox
-                                key={role.id}
-                                label={role.name}
-                                checked={selectedRoles.includes(role.id)}
-                                onToggle={() => toggleRole(role.id)}
-                                disabled={disabled}
-                                style={styles.marginBotCheckBox}
-                                labelStyle={styles.checkboxLabel}
-                                activeColor={theme.primaryOrange}
-                            />
-                        ))}
-                    </View>
-                </View>
-
-                {/* Operations Layer */}
-                <View style={styles.sectionNoBot}>
-                    <View style={styles.rowBetween}>
-                        <View style={styles.fieldLabelWrapper}>
-                            <Text style={styles.fieldLabelText}>Quyền thao tác</Text>
-                            <RequiredDot />
-                        </View>
-                        <Checkbox
-                            label="Chọn tất cả"
-                            checked={isAllSelected}
-                            onToggle={toggleAll}
+                        <RadioButton
+                            options={availableRoles.map(role => ({
+                                label: role.name,
+                                value: role.id,
+                            }))}
+                            value={selectedRoles[0]}
+                            onValueChange={val => {
+                                if (!disabled) {
+                                    onRolesChange([val as string]);
+                                }
+                            }}
                             disabled={disabled}
+                            direction="column"
+                            gap={spacing.sm}
                             labelStyle={styles.checkboxLabel}
-                            activeColor={theme.primaryOrange}
                         />
                     </View>
-
-                    <View style={styles.matrixContainer}>
-                        {PERMISSION_GROUPS.map(group => (
-                            <FeatureGroup
-                                key={group.id}
-                                group={group}
-                                selectedPermissions={selectedPermissions}
-                                onTogglePermission={togglePermission}
-                                onToggleGroup={toggleGroup}
-                                disabled={disabled}
-                            />
-                        ))}
-                    </View>
                 </View>
+
+                {/* Operations Layer - only visible when a role is selected */}
+                {selectedRoles.length > 0 && (
+                    <View style={styles.sectionNoBot}>
+                        <View style={styles.rowBetween}>
+                            <View style={styles.fieldLabelWrapper}>
+                                <Text style={styles.fieldLabelText}>Quyền thao tác</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.matrixContainer}>
+                            {PERMISSION_GROUPS.map(group => (
+                                <FeatureGroup
+                                    key={group.id}
+                                    group={group}
+                                    selectedPermissions={selectedPermissions}
+                                    onTogglePermission={togglePermission}
+                                    onToggleGroup={toggleGroup}
+                                    disabled={true}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                )}
             </View>
         </View>
     );

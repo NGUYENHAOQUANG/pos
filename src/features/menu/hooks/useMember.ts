@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { memberApi } from '../api/member.api';
-import { GetUsersParams } from '../types/member.types';
+import { GetUsersParams, CreateUserPayload } from '../types/member.types';
 import { handleError } from '@/shared/utils/errorHandler';
 import Toast from 'react-native-toast-message';
 
@@ -54,7 +54,7 @@ export const useCreateMember = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (payload: any) => {
+        mutationFn: async (payload: CreateUserPayload) => {
             return await memberApi.createMember(payload);
         },
         onSuccess: () => {
@@ -91,13 +91,36 @@ export const useUpdateMember = () => {
 export const useUpdateMemberStatus = () => {
     const queryClient = useQueryClient();
 
+    interface UpdateStatusParams {
+        id: string;
+        status: string;
+        fullName: string;
+        roleId?: string;
+        zoneId?: string;
+    }
+
     return useMutation({
-        mutationFn: async ({ id, status }: { id: string; status: string }) => {
-            return await memberApi.updateStatus(id, status);
+        mutationFn: async ({ id, status, fullName, roleId, zoneId }: UpdateStatusParams) => {
+            const isActive = status === 'active';
+            return await memberApi.updateMemberAdmin(id, {
+                fullName,
+                roleId,
+                isActive,
+                zoneId,
+            });
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: memberKeys.lists() });
             queryClient.invalidateQueries({ queryKey: memberKeys.detail(variables.id) });
+            const message =
+                variables.status === 'active'
+                    ? 'Đã kích hoạt lại tài khoản'
+                    : 'Đã tạm ngưng tài khoản';
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: message,
+            });
         },
         onError: error => {
             handleError(error);
@@ -114,6 +137,34 @@ export const useDeleteMember = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: memberKeys.lists() });
+        },
+        onError: error => {
+            handleError(error);
+        },
+    });
+};
+
+export const useUpdateMemberAdmin = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            id,
+            payload,
+        }: {
+            id: string;
+            payload: import('../types/member.types').UpdateUserPayload;
+        }) => {
+            return await memberApi.updateMemberAdmin(id, payload);
+        },
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: memberKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: memberKeys.detail(variables.id) });
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: 'Đã cập nhật vai trò thành viên',
+            });
         },
         onError: error => {
             handleError(error);

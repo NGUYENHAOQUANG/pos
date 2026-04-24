@@ -7,6 +7,8 @@ import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { GeneralInformation } from '@/features/menu/components/member/GeneralInformation';
 import { FeaturePermissions } from '@/features/menu/components/member/FeaturePermissions';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
+import { Loading } from '@/shared/components/ui/Loading';
+import { useZones } from '@/features/farm/hooks/useZones';
 import { Button } from '@/shared/components/buttons/Button';
 import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
@@ -22,6 +24,7 @@ interface AddMemberContentProps {
     availableRoles: IRole[];
     isPaused: boolean;
     isPending: boolean;
+    isSubmitting?: boolean;
 
     setModalVisible?: (visible: boolean) => void;
 
@@ -39,6 +42,7 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
     availableRoles,
     isPaused,
     isPending,
+    isSubmitting,
     onSubmit,
     onBack,
     onSuspendPress,
@@ -61,10 +65,18 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
 
     const formValues = useWatch({
         control,
-        name: ['name', 'contact', 'roles', 'permissions'],
+        name: ['name', 'contact', 'roles', 'permissions', 'zoneId'],
     });
 
-    const [name, contact, roles, permissions] = formValues as [string, string, string[], string[]];
+    const [name, contact, roles, permissions, zoneId] = formValues as [
+        string,
+        string,
+        string[],
+        string[],
+        string | undefined
+    ];
+    const { data: zones } = useZones();
+    const zoneOptions = zones?.map(zone => ({ id: zone.id, label: zone.name })) || [];
 
     const onError = (formErrors: FieldErrors<MemberFormValues>) => {
         if (formErrors.name) {
@@ -83,9 +95,15 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
         [setValue]
     );
     const handleContactChange = React.useCallback(
-        (val: string) => setValue('contact', val, { shouldValidate: true }),
+        (val: string) => setValue('contact', val, { shouldValidate: true, shouldDirty: true }),
         [setValue]
     );
+
+    const handleZoneIdChange = React.useCallback(
+        (val: string) => setValue('zoneId', val, { shouldValidate: true, shouldDirty: true }),
+        [setValue]
+    );
+
     const handleRolesChange = React.useCallback(
         (val: string[]) => setValue('roles', val, { shouldValidate: true }),
         [setValue]
@@ -122,64 +140,80 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
     }
 
     return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={isEditMode ? styles.contentEdit : styles.content}>
-                <GeneralInformation
-                    name={name}
-                    onNameChange={handleNameChange}
-                    contact={contact}
-                    onContactChange={handleContactChange}
-                    disabled={isEditMode && isPaused}
+        <Loading isLoading={isSubmitting} transparent>
+            <View style={styles.container}>
+                <ScrollView
+                    contentContainerStyle={isEditMode ? styles.contentEdit : styles.content}
+                >
+                    <GeneralInformation
+                        name={name}
+                        onNameChange={handleNameChange}
+                        contact={contact}
+                        onContactChange={handleContactChange}
+                        zoneId={zoneId}
+                        onZoneIdChange={handleZoneIdChange}
+                        zones={zoneOptions}
+                        disabled={isEditMode && isPaused}
+                    />
+
+                    <FeaturePermissions
+                        selectedRoles={roles}
+                        onRolesChange={handleRolesChange}
+                        availableRoles={availableRoles}
+                        selectedPermissions={permissions}
+                        onPermissionsChange={handlePermissionsChange}
+                        disabled={isEditMode && isPaused}
+                    />
+
+                    {isEditMode && (
+                        <View style={styles.actionContainer}>
+                            {isPaused ? (
+                                <Button
+                                    title="Kích hoạt tài khoản"
+                                    onPress={onActivatePress}
+                                    variant="outline"
+                                    fullWidth
+                                    style={styles.actionButton}
+                                    textStyle={styles.actionButtonText}
+                                />
+                            ) : isPending ? (
+                                <Button
+                                    title="Gửi lại lời mời"
+                                    onPress={onResendPress}
+                                    variant="outline"
+                                    fullWidth
+                                    style={styles.actionButton}
+                                    textStyle={styles.actionButtonText}
+                                />
+                            ) : (
+                                <Button
+                                    title="Tạm ngưng tài khoản"
+                                    onPress={onSuspendPress}
+                                    variant="outline"
+                                    fullWidth
+                                    style={styles.actionButton}
+                                    textStyle={styles.actionButtonText}
+                                />
+                            )}
+                        </View>
+                    )}
+                </ScrollView>
+
+                <ButtonBarMenu
+                    primaryTitle={
+                        isEditMode
+                            ? isPaused
+                                ? 'Kích hoạt'
+                                : 'Cập nhật thông tin'
+                            : 'Thêm thành viên'
+                    }
+                    onPrimaryPress={isPaused ? onActivatePress : handleSubmit(onSubmit, onError)}
+                    secondaryTitle="Hủy"
+                    onSecondaryPress={onBack}
+                    style={isEditMode ? styles.footerEdit : styles.footer}
                 />
-
-                <FeaturePermissions
-                    selectedRoles={roles}
-                    onRolesChange={handleRolesChange}
-                    availableRoles={availableRoles}
-                    selectedPermissions={permissions}
-                    onPermissionsChange={handlePermissionsChange}
-                    disabled={isEditMode && isPaused}
-                />
-
-                {isEditMode && !isPaused && (
-                    <View style={styles.actionContainer}>
-                        {isPending ? (
-                            <Button
-                                title="Gửi lại lời mời"
-                                onPress={onResendPress}
-                                variant="outline"
-                                fullWidth
-                                style={styles.actionButton}
-                                textStyle={styles.actionButtonText}
-                            />
-                        ) : (
-                            <Button
-                                title="Tạm ngưng tài khoản"
-                                onPress={onSuspendPress}
-                                variant="outline"
-                                fullWidth
-                                style={styles.actionButton}
-                                textStyle={styles.actionButtonText}
-                            />
-                        )}
-                    </View>
-                )}
-            </ScrollView>
-
-            <ButtonBarMenu
-                primaryTitle={
-                    isEditMode
-                        ? isPaused
-                            ? 'Kích hoạt lại'
-                            : 'Cập nhật thông tin'
-                        : 'Thêm thành viên'
-                }
-                onPrimaryPress={isPaused ? onActivatePress : handleSubmit(onSubmit, onError)}
-                secondaryTitle="Hủy"
-                onSecondaryPress={onBack}
-                style={isEditMode ? styles.footerEdit : styles.footer}
-            />
-        </View>
+            </View>
+        </Loading>
     );
 };
 
@@ -222,7 +256,7 @@ const getStyles = (theme: Colors) =>
         actionButton: {
             borderWidth: 1,
             borderColor: theme.border,
-            backgroundColor: theme.white,
+            backgroundColor: theme.background,
         },
         actionButtonText: {
             color: theme.text,

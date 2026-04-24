@@ -5,12 +5,19 @@ import { borderRadius, spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { Input } from '@/shared/components/forms/Input';
+import {
+    DropDownButtonBasic as DropDownButton,
+    DropDownItem,
+} from '@/features/farm/components/DropDownButtonBasic';
 
 interface GeneralInformationProps {
     name: string;
     onNameChange: (text: string) => void;
     contact: string;
     onContactChange: (text: string) => void;
+    zoneId?: string;
+    onZoneIdChange?: (text: string) => void;
+    zones?: DropDownItem[];
     disabled?: boolean;
 }
 
@@ -19,6 +26,9 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     onNameChange,
     contact,
     onContactChange,
+    zoneId,
+    onZoneIdChange,
+    zones = [],
     disabled = false,
 }) => {
     const theme = useAppTheme();
@@ -40,7 +50,6 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     value={name}
                     onChangeText={onNameChange}
                     placeholder="Tên"
-                    inputContainerStyle={disabled ? styles.inputDisabled : undefined}
                     editable={!disabled}
                     disabled={disabled}
                 />
@@ -52,10 +61,21 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     value={contact}
                     onChangeText={onContactChange}
                     placeholder="Số điện thoại hoặc Email"
-                    inputContainerStyle={disabled ? styles.inputDisabled : undefined}
                     editable={!disabled}
                     disabled={disabled}
                 />
+
+                {/* Zone Input */}
+                <View style={{ marginBottom: spacing.md }}>
+                    <Text style={styles.label}>Trại nuôi (Tùy chọn)</Text>
+                    <DropDownButton
+                        placeholder="Chọn trại nuôi"
+                        data={zones}
+                        value={zones.find(z => z.id.toString() === zoneId)}
+                        onSelect={(item: DropDownItem) => onZoneIdChange?.(item.id.toString())}
+                        disabled={disabled}
+                    />
+                </View>
             </View>
         </View>
     );
@@ -86,7 +106,10 @@ const getStyles = (theme: Colors) =>
         disabledContent: {
             // opacity: 0.6, // Removed to keep text dark
         },
-        inputDisabled: {
-            backgroundColor: theme.gray[200],
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.textSecondary,
+            marginBottom: 8,
         },
     });

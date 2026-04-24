@@ -6,9 +6,12 @@ export interface IUserAccount {
     fullName: string | null;
     avatar: string | null;
     status: string;
+    isActive?: boolean;
     roleId: string | null;
     roleCode: string | null;
     roleName: string | null;
+    zoneId?: string;
+    zoneName?: string;
     policies: string[];
     lastLoginAt: string | null;
     phoneNumberConfirmed: boolean;
@@ -17,6 +20,7 @@ export interface IUserAccount {
 
 export interface GetUsersParams {
     SearchText?: string;
+    ZoneId?: string;
     Page?: number;
     PageSize?: number;
 }
@@ -28,11 +32,37 @@ export interface IRole {
     description: string;
     priority: number;
     isSystemRole: boolean;
+    policies?: string[];
 }
 
 export enum RoleType {
-    ADMIN = 'Admin',
-    MANAGER = 'Manager',
-    EMPLOYEE = 'Employee',
-    FARMER = 'Farmer',
+    ADMIN = 'ADMIN',
+    MANAGER = 'MANAGER',
+    EMPLOYEE_MANAGER = 'EMPLOYEE_MANAGER',
+    EMPLOYEE_WAREHOUSE = 'EMPLOYEE_WAREHOUSE',
+    FARMER = 'FARMER',
+}
+
+export interface UpdateUserPayload {
+    fullName?: string;
+    roleId?: string;
+    isActive?: boolean;
+    zoneId?: string;
+}
+
+export interface CreateUserPayload {
+    fullName: string;
+    phoneNumber: string;
+    roleId: string;
+    zoneId?: string;
+}
+
+export interface UpdateUserAdminResponse {
+    id: string;
+    fullName: string;
+    roleId: string;
+    roleName: string;
+    isActive: boolean;
+    zoneId: string | null;
+    zoneName: string | null;
 }

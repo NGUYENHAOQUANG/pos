@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { spacing, borderRadius } from '@/styles';
+import { borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 
@@ -74,7 +74,7 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
                     label: getLabel(),
                     color: theme.green[600],
                     backgroundColor: theme.green[50],
-                    borderColor: theme.green[300],
+                    borderColor: theme.green[200],
                 };
             case 'preparing':
                 return {
@@ -87,14 +87,14 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
                 return {
                     label: getLabel(),
                     color: theme.text,
-                    backgroundColor: theme.gray[100],
+                    backgroundColor: theme.backgroundSecondary,
                     borderColor: theme.borderDark,
                 };
             case 'ended':
                 return {
                     label: getLabel(),
                     color: theme.text,
-                    backgroundColor: theme.isDark ? theme.backgroundButtonActive : theme.gray[100],
+                    backgroundColor: theme.backgroundSecondary,
                     borderColor: theme.borderDark,
                 };
             case 'installed':
@@ -140,17 +140,17 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
 const getStyles = (theme: Colors) =>
     StyleSheet.create({
         container: {
-            height: 32,
+            height: 24,
             borderRadius: borderRadius.full,
             borderWidth: 1,
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.xs,
+            paddingHorizontal: 8,
+            paddingVertical: 2,
             alignSelf: 'flex-start',
             justifyContent: 'center',
             alignItems: 'center',
         },
         text: {
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: '400',
             color: theme.white,
         },

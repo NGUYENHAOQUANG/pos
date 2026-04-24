@@ -5,7 +5,7 @@ import Avatar from '@/assets/Icon/IconMenu/Avatar.svg';
 import { spacing, borderRadius } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { TagStatus } from '../Tag';
+import { Tag, TagStatus } from '../Tag';
 import { ActionMenu, getMenuPosition } from '@/shared/components/buttons/ActionMenuButton';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
@@ -65,7 +65,7 @@ export const MemberItem = React.memo<MemberItemProps>(
 
         if (status === 'active') {
             menuItems.push({
-                label: 'Tạm ngưng',
+                label: 'Tạm ngưng hoạt động',
                 onPress: () => {
                     setMenuVisible(false);
                     setTimeout(() => onSuspend?.(), 100);
@@ -119,6 +119,13 @@ export const MemberItem = React.memo<MemberItemProps>(
                     </View>
 
                     <View style={styles.info}>
+                        {status && (
+                            <Tag
+                                status={status as TagStatus}
+                                type="member"
+                                style={styles.tagSpacing}
+                            />
+                        )}
                         <Text style={[styles.name, { color: theme.text }]}>{name}</Text>
                         <Text style={[styles.details, { color: theme.textSecondary }]}>
                             {phone}
@@ -189,9 +196,12 @@ const getStyles = (theme: Colors) =>
             justifyContent: 'center',
             paddingVertical: 4,
         },
+        tagSpacing: {
+            marginBottom: 2,
+        },
         name: {
-            fontSize: 16,
-            fontWeight: '600',
+            fontSize: 14,
+            fontWeight: '500',
         },
         details: {
             fontSize: 14,
