@@ -7,6 +7,14 @@ import { Colors } from '@/styles/colors';
 import { JobCard, JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import { AppStepKey } from '@/features/walkthrough/constants/onboarding';
+import { triggerOnboardingStep } from '@/features/walkthrough/store/useOnboardingStore';
+
+/** Map JobType to its corresponding OnboardingStep key */
+const JOB_ONBOARDING_MAP: Partial<Record<JobType, AppStepKey>> = {
+    FEED: 'FEEDING_JOB',
+    TRANSFER_POND: 'TRANSFER_POND_JOB',
+};
 
 interface JobData {
     type: JobType;
@@ -51,17 +59,28 @@ export const JobListCard: React.FC<JobListCardProps> = ({
                             items={job.items}
                             isLoading={job.isLoading}
                             onPress={() => onPressJob?.(job.type)}
-                            onPressAdd={() => onPressAddJob?.(job.type)}
+                            onPressAdd={() => {
+                                onPressAddJob?.(job.type);
+                                if (['FEED', 'TRANSFER_POND'].includes(job.type)) {
+                                    triggerOnboardingStep('farm');
+                                }
+                            }}
                             onEditItem={item => onEditJobItem?.(job.type, item)}
                         />
                     );
 
-                    if (index === 0) {
+                    const onboardingStep = JOB_ONBOARDING_MAP[job.type];
+                    if (onboardingStep) {
                         return (
                             <OnboardingStep
                                 key={index}
-                                step="FEEDING_JOB"
-                                onNext={() => onPressAddJob?.(job.type)}
+                                step={onboardingStep}
+                                onNext={
+                                    // FEED and TRANSFER_POND navigates to Form for next steps
+                                    job.type === 'FEED' || job.type === 'TRANSFER_POND'
+                                        ? () => onPressAddJob?.(job.type)
+                                        : undefined
+                                }
                             >
                                 <View collapsable={false} style={{ width: '100%' }}>
                                     {card}

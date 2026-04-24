@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { IconFarmVector } from '@/assets/icons';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
@@ -21,6 +21,8 @@ import { PondDetailHeaderSkeleton } from '@/features/farm/components/skeleton/Po
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
+import { APP_STEPS } from '@/features/walkthrough/constants/onboarding';
 
 interface PondDetailProps {
     pond: PondData | undefined;
@@ -87,6 +89,18 @@ export const PondDetail: React.FC<PondDetailProps> = ({
 
     const { width: windowWidth } = useWindowDimensions();
 
+    const scrollRef = useRef<ScrollView>(null);
+    const { activeModule, currentStep } = useOnboardingStore();
+
+    useEffect(() => {
+        const transferStep = APP_STEPS.TRANSFER_POND_JOB.stepIndex;
+        if (activeModule === 'farm' && currentStep === transferStep) {
+            setTimeout(() => {
+                scrollRef.current?.scrollToEnd({ animated: true });
+            }, 300);
+        }
+    }, [activeModule, currentStep]);
+
     return (
         <View style={styles.container}>
             {isLoading ? (
@@ -116,6 +130,7 @@ export const PondDetail: React.FC<PondDetailProps> = ({
             <View style={styles.content}>
                 {selectedTab === 'work' ? (
                     <ScrollView
+                        ref={scrollRef}
                         contentContainerStyle={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
                         refreshControl={
@@ -231,7 +246,7 @@ const getStyles = (theme: Colors) =>
             flex: 1,
         },
         scrollContent: {
-            paddingBottom: 100,
+            paddingBottom: 160,
             flexGrow: 1,
         },
         footer: {

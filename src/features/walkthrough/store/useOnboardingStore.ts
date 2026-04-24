@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 
-type OnboardingModule = 'farm' | 'material' | 'account' | 'report' | 'none';
+export type OnboardingModule = 'farm' | 'material' | 'account' | 'report' | 'none';
 
 interface OnboardingState {
     // Persisted state
@@ -28,8 +28,7 @@ interface OnboardingState {
 
 export const useOnboardingStore = create<OnboardingState>()(
     persist(
-        set => ({
-            // Persisted
+        (set, get) => ({
             hasCompletedFarm: false,
             hasCompletedMaterial: false,
             hasCompletedAccount: false,
@@ -47,18 +46,12 @@ export const useOnboardingStore = create<OnboardingState>()(
             },
             nextStep: () =>
                 set((state: OnboardingState) => ({ currentStep: state.currentStep + 1 })),
-            skipOnboarding: () =>
-                set((state: OnboardingState) => {
-                    const updates: Partial<OnboardingState> = {
-                        activeModule: 'none',
-                        currentStep: 0,
-                    };
-                    if (state.activeModule === 'farm') updates.hasCompletedFarm = true;
-                    if (state.activeModule === 'material') updates.hasCompletedMaterial = true;
-                    if (state.activeModule === 'account') updates.hasCompletedAccount = true;
-                    if (state.activeModule === 'report') updates.hasCompletedReport = true;
-                    return updates;
-                }),
+            skipOnboarding: () => {
+                const { activeModule, completeOnboarding } = get();
+                if (activeModule !== 'none') {
+                    completeOnboarding(activeModule);
+                }
+            },
             completeOnboarding: module => {
                 const updates: Partial<OnboardingState> = { activeModule: 'none', currentStep: 0 };
                 if (module === 'farm') updates.hasCompletedFarm = true;
@@ -105,6 +98,13 @@ export const useOnboardingStore = create<OnboardingState>()(
     )
 );
 
-/** Selector: check if any onboarding is currently active (for scroll lock, etc.) */
-export const useIsOnboardingActive = () =>
-    useOnboardingStore(state => state.activeModule !== 'none');
+/**
+ * Helper to manually advance to the next step from an interactive UI element.
+ * Safe to call anywhere - only advances if the correct module is currently active.
+ */
+export const triggerOnboardingStep = (expectedModule: OnboardingModule) => {
+    const { activeModule, nextStep } = useOnboardingStore.getState();
+    if (activeModule === expectedModule) {
+        nextStep();
+    }
+};

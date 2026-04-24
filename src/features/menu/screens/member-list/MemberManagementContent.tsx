@@ -13,6 +13,7 @@ import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { ListFooterLoader } from '@/shared/components/ui/ListFooterLoader';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
+import { APP_STEPS } from '@/features/walkthrough/constants/onboarding';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { IUserAccount } from '@/features/menu/types/member.types';
@@ -63,7 +64,11 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
     const nextStepAction = useOnboardingStore(s => s.nextStep);
 
     useEffect(() => {
-        if (activeModule === 'account' && currentStep === 8 && members.length === 0) {
+        if (
+            activeModule === 'account' &&
+            currentStep === APP_STEPS.ACCOUNT_MEMBER_ACTION.stepIndex &&
+            members.length === 0
+        ) {
             nextStepAction(); // Auto-skip step 8 (member action) if no member exists
         }
     }, [activeModule, currentStep, members.length, nextStepAction]);

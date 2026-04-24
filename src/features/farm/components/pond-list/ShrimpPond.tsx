@@ -15,6 +15,7 @@ import {
     ActionMenuPosition,
 } from '@/shared/components/buttons/ActionMenuButton';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import { triggerOnboardingStep } from '@/features/walkthrough/store/useOnboardingStore';
 
 // Old imports — kept for reference
 // import { useCurrentShrimpBreed } from '@/features/material/hooks/useShrimpSeeds';
@@ -229,7 +230,10 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                                 <View collapsable={false} style={{ width: '100%' }}>
                                     <TouchableOpacity
                                         style={styles.detailButton}
-                                        onPress={onDetailPress}
+                                        onPress={() => {
+                                            onDetailPress?.();
+                                            triggerOnboardingStep('farm');
+                                        }}
                                         activeOpacity={1}
                                     >
                                         <Text style={styles.detailButtonText}>Xem chi tiết</Text>

@@ -104,10 +104,10 @@ export const ShrimpPondListScreens: React.FC = () => {
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);
 
-    const { hasCompletedFarm, startOnboarding, _hasHydrated } = useOnboardingStore();
+    const { hasCompletedFarm, startOnboarding, _hasHydrated, activeModule } = useOnboardingStore();
     useEffect(() => {
         const isReadyToStart = _hasHydrated && !isLoadingZones && !!selectedZoneId && !isLoadingAll;
-        if (isReadyToStart && !hasCompletedFarm) {
+        if (isReadyToStart && !hasCompletedFarm && activeModule === 'none') {
             const timer = setTimeout(() => {
                 startOnboarding('farm');
             }, 500); // Add a small delay for better UX
@@ -116,6 +116,7 @@ export const ShrimpPondListScreens: React.FC = () => {
     }, [
         _hasHydrated,
         hasCompletedFarm,
+        activeModule,
         isLoadingZones,
         selectedZoneId,
         isLoadingAll,

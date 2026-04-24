@@ -15,6 +15,7 @@ import {
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
@@ -160,42 +161,52 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                     disabledDate={true}
                 />
 
-                <CurrentPondInfoBox
-                    shrimpBreed={shrimpBreed}
-                    shrimpSize={shrimpSize}
-                    onShrimpSizeChange={setShrimpSize}
-                    totalEstimatedShrimp={totalShrimpCount}
-                    actualStockingQuantity={actualStockingQuantity}
-                />
+                <OnboardingStep step="TRANSFER_CURRENT_POND_INFO">
+                    <View collapsable={false} style={{ width: '100%' }}>
+                        <CurrentPondInfoBox
+                            shrimpBreed={shrimpBreed}
+                            shrimpSize={shrimpSize}
+                            onShrimpSizeChange={setShrimpSize}
+                            totalEstimatedShrimp={totalShrimpCount}
+                            actualStockingQuantity={actualStockingQuantity}
+                        />
+                    </View>
+                </OnboardingStep>
 
-                <View
-                    onLayout={e => {
-                        transferInfoY.current = e.nativeEvent.layout.y;
-                    }}
-                >
-                    <TransferInfoBox
-                        transferMethod={transferMethod}
-                        onTransferMethodPress={() => {}}
-                        receivingPonds={receivingPonds}
-                        onReceivingPondsChange={setReceivingPonds}
-                        onReceivingPondPress={_id => {}}
-                        totalEstimatedShrimp={totalShrimpCount}
-                        pondOptions={pondOptions}
-                    />
-                </View>
+                <OnboardingStep step="TRANSFER_FORM_INFO">
+                    <View
+                        collapsable={false}
+                        style={{ width: '100%' }}
+                        onLayout={e => {
+                            transferInfoY.current = e.nativeEvent.layout.y;
+                        }}
+                    >
+                        <TransferInfoBox
+                            transferMethod={transferMethod}
+                            onTransferMethodPress={() => {}}
+                            receivingPonds={receivingPonds}
+                            onReceivingPondsChange={setReceivingPonds}
+                            onReceivingPondPress={_id => {}}
+                            totalEstimatedShrimp={totalShrimpCount}
+                            pondOptions={pondOptions}
+                        />
+                    </View>
+                </OnboardingStep>
 
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </SafeInputLayout>
 
-            <View style={styles.footer}>
-                <ButtonBarFarm
-                    primaryTitle="Lưu thông tin"
-                    secondaryTitle="Hủy"
-                    onPrimaryPress={handleSavePress}
-                    onSecondaryPress={onBack}
-                    primaryDisabled={isSubmitting}
-                />
-            </View>
+            <OnboardingStep step="TRANSFER_FORM_SAVE" onNext={onBack}>
+                <View collapsable={false} style={[styles.footer, { width: '100%' }]}>
+                    <ButtonBarFarm
+                        primaryTitle="Lưu thông tin"
+                        secondaryTitle="Hủy"
+                        onPrimaryPress={handleSavePress}
+                        onSecondaryPress={onBack}
+                        primaryDisabled={isSubmitting}
+                    />
+                </View>
+            </OnboardingStep>
 
             {UnsavedChangesModal}
             <ConfirmationModalUI
