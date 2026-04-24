@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
 import { useAppTheme } from '@/styles/themeContext';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
+import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
@@ -21,11 +22,24 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { PondInfor } from '@/features/reports/components/PondInfor';
 import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
+import { RealTimeEnvList } from '@/features/reports/components/real-time-env/RealTimeEnvList';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { spacing } from '@/styles/spacing';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
+
+/** Report screen tab keys */
+const REPORT_TAB_KEYS = {
+    ENV: 'env',
+    OVERVIEW: 'overview',
+} as const;
+
+/** HeadingBar tabs for report screen */
+const REPORT_TABS: HeadingBarItem[] = [
+    { key: REPORT_TAB_KEYS.ENV, label: 'Thông số môi trường' },
+    { key: REPORT_TAB_KEYS.OVERVIEW, label: 'Tổng quan' },
+];
 
 export const ReportsScreen = () => {
     const theme = useAppTheme();
@@ -37,6 +51,7 @@ export const ReportsScreen = () => {
     useScrollToTop(scrollViewRef as any);
 
     const [refreshing, setRefreshing] = useState(false);
+    const [selectedTab, setSelectedTab] = useState<string>(REPORT_TAB_KEYS.OVERVIEW);
 
     const {
         selectedZoneId,
@@ -239,6 +254,14 @@ export const ReportsScreen = () => {
                 seasonDisabled={isSeasonDisabled}
             />
 
+            <HeadingBar
+                tabs={REPORT_TABS}
+                selectedTab={selectedTab}
+                onTabSelect={setSelectedTab}
+                flexTabs
+                containerStyle={{ marginBottom: spacing.sm }}
+            />
+
             <View style={styles.content}>
                 <ScrollView
                     ref={scrollViewRef}
@@ -248,9 +271,19 @@ export const ReportsScreen = () => {
                         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
                     }
                 >
-                    {selectedPondType.label === 'Ao vèo'
-                        ? renderAoVeoContent()
-                        : renderStandardContent()}
+                    {selectedTab === REPORT_TAB_KEYS.OVERVIEW ? (
+                        selectedPondType.label === 'Ao vèo' ? (
+                            renderAoVeoContent()
+                        ) : (
+                            renderStandardContent()
+                        )
+                    ) : (
+                        <RealTimeEnvList
+                            pondId={
+                                selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined
+                            }
+                        />
+                    )}
                 </ScrollView>
             </View>
         </View>

@@ -14,15 +14,19 @@ import { CameraFilter } from '@/features/control/components/camera/CameraFilter'
 import { useAppTheme } from '@/styles/themeContext';
 import { spacing } from '@/styles';
 
+type CameraViewMode = 'grid' | 'list';
+
 interface CameraListProps {
     onCameraPress: (camera: CameraItem) => void;
+    /** Layout mode: 'grid' = 2-col preview, 'list' = 1-col full cards */
+    viewMode?: CameraViewMode;
 }
 
 /**
  * Scrollable list of camera cards for the Camera tab.
  * Fetches data from API via useCameras hook.
  */
-export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
+export const CameraList: React.FC<CameraListProps> = ({ onCameraPress, viewMode = 'grid' }) => {
     const theme = useAppTheme();
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { data: cameras = [], isLoading, isRefetching, refetch } = useCameras();
@@ -114,8 +118,11 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
     }, [cameras, selectedCategory]);
 
     const renderCategoryGroup = useCallback(
-        ({ item: group }: { item: any }) => {
+        ({ item: group }: { item: (typeof groupedData)[number] }) => {
             const isGroupVisible = visibleGroupIds.has(group.id);
+            const isGridMode = viewMode === 'grid';
+            // In grid mode: show max 2 cameras preview. In list mode: show all
+            const camerasToShow = isGridMode ? group.cameras.slice(0, 2) : group.cameras;
 
             return (
                 <View style={styles.groupContainer}>
@@ -129,7 +136,8 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
                                 {group.pondCount} ao - {group.cameras.length} cameras
                             </Text>
                         </View>
-                        {group.cameras.length > 0 && (
+                        {/* Only show "Xem chi tiết" in grid mode */}
+                        {isGridMode && group.cameras.length > 0 && (
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 onPress={() => {
@@ -146,14 +154,14 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
                         )}
                     </View>
 
-                    {/* 2-Column Grid of Cameras (Limited to 2 items in Preview Mode) */}
-                    <View style={styles.gridContainer}>
-                        {group.cameras.slice(0, 2).map((cam: CameraItem) => (
+                    {/* Camera cards container: grid = 2-col, list = 1-col */}
+                    <View style={isGridMode ? styles.gridContainer : styles.listContainer}>
+                        {camerasToShow.map((cam: CameraItem) => (
                             <CameraCard
                                 key={cam.deviceCode}
                                 camera={cam}
                                 onPress={onCameraPress}
-                                isGrid
+                                isGrid={isGridMode}
                                 isVisible={isGroupVisible}
                             />
                         ))}
@@ -161,7 +169,7 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
                 </View>
             );
         },
-        [visibleGroupIds, theme, navigation, onCameraPress]
+        [visibleGroupIds, theme, navigation, onCameraPress, viewMode]
     );
 
     if (isLoading) {
@@ -234,5 +242,9 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         rowGap: 8,
+    },
+    listContainer: {
+        flexDirection: 'column',
+        gap: 10,
     },
 });

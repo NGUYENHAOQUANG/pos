@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors } from '@/styles';
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 
 interface VideoTopBarProps {
     /** Pond name badge text */
@@ -49,7 +50,7 @@ export const VideoTopBar: React.FC<VideoTopBarProps> = ({
         </View>
         <View style={styles.badgesRow}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Text style={styles.closeText}>✕</Text>
+                <CloseIcon width={20} height={20} color={colors.white} />
             </TouchableOpacity>
         </View>
     </View>
@@ -91,10 +92,5 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlayBadge,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    closeText: {
-        color: colors.white,
-        fontSize: 18,
-        fontWeight: '600',
     },
 });
