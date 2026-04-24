@@ -30,6 +30,9 @@ export const API_ENDPOINTS = {
         UPDATE_ADMIN: (id: string) => `/auth/admin/users/${id}`,
         ROLES: '/auth/admin/roles',
     },
+    IDENTITY: {
+        ROLE_POLICIES: (roleId: string) => `/identity/${roleId}/policies`,
+    },
     CAMERA: {
         LIST: '/camera',
         STREAM: (sn: string, isHd: boolean) => `/camera/${sn}/stream?isHd=${isHd}`,

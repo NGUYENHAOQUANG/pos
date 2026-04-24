@@ -66,3 +66,19 @@ export interface UpdateUserAdminResponse {
     zoneId: string | null;
     zoneName: string | null;
 }
+
+export interface RolePolicy {
+    codeId: string;
+    codeValue: string;
+    codeName: string;
+    codeNo: number;
+    type: string;
+    hasPermission: boolean;
+}
+
+export interface RolePolicyModule {
+    moduleGroup: string;
+    module: string;
+    moduleName: string;
+    policies: RolePolicy[];
+}

@@ -8,6 +8,7 @@ import {
     UpdateUserPayload,
     UpdateUserAdminResponse,
     CreateUserPayload,
+    RolePolicyModule,
 } from '../types/member.types';
 
 export const memberApi = {
@@ -63,6 +64,13 @@ export const memberApi = {
         const { data } = await apiClient.put<IApiResponse<UpdateUserAdminResponse>>(
             API_ENDPOINTS.MEMBER.UPDATE_ADMIN(id),
             payload
+        );
+        return data;
+    },
+
+    getRolePolicies: async (roleId: string): Promise<IApiResponse<RolePolicyModule[]>> => {
+        const { data } = await apiClient.get<IApiResponse<RolePolicyModule[]>>(
+            API_ENDPOINTS.IDENTITY.ROLE_POLICIES(roleId)
         );
         return data;
     },

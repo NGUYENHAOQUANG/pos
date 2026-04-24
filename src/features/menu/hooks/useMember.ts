@@ -1,3 +1,4 @@
+import React from 'react';
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { memberApi } from '../api/member.api';
 import { GetUsersParams, CreateUserPayload } from '../types/member.types';
@@ -11,6 +12,7 @@ export const memberKeys = {
     details: () => [...memberKeys.all, 'detail'] as const,
     detail: (id: string) => [...memberKeys.details(), id] as const,
     roles: () => [...memberKeys.all, 'roles'] as const,
+    rolePolicies: (roleId: string) => [...memberKeys.all, 'rolePolicies', roleId] as const,
 };
 
 export const useRoles = () => {
@@ -27,6 +29,39 @@ export const useRoles = () => {
             }
         },
     });
+};
+
+export const useRolePolicies = (roleId: string | undefined) => {
+    return useQuery({
+        queryKey: memberKeys.rolePolicies(roleId || ''),
+        queryFn: async () => {
+            const response = await memberApi.getRolePolicies(roleId!);
+            return response.data;
+        },
+        enabled: !!roleId,
+        staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    });
+};
+
+/**
+ * Prefetch policies for all available roles in parallel.
+ * Call this when the form mounts so switching roles is instant.
+ */
+export const usePrefetchRolePolicies = (roleIds: string[]) => {
+    const queryClient = useQueryClient();
+
+    React.useEffect(() => {
+        roleIds.forEach((id: string) => {
+            queryClient.prefetchQuery({
+                queryKey: memberKeys.rolePolicies(id),
+                queryFn: async () => {
+                    const response = await memberApi.getRolePolicies(id);
+                    return response.data;
+                },
+                staleTime: 10 * 60 * 1000,
+            });
+        });
+    }, [roleIds, queryClient]);
 };
 
 export const useMembers = (params?: GetUsersParams) => {

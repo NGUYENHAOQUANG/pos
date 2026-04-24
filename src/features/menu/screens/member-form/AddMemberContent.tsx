@@ -13,7 +13,8 @@ import { Button } from '@/shared/components/buttons/Button';
 import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
-import { IRole } from '@/features/menu/types/member.types';
+import { IRole, RolePolicyModule, RolePolicy } from '@/features/menu/types/member.types';
+import { useRolePolicies, usePrefetchRolePolicies } from '@/features/menu/hooks/useMember';
 import { memberSchema, MemberFormValues } from '@/features/menu/schemas/member.schema';
 import { memberService } from '@/features/menu/services/memberService';
 
@@ -75,6 +76,36 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
         string[],
         string | undefined
     ];
+
+    // Prefetch policies for all roles on mount (instant switch)
+    const allRoleIds = React.useMemo(
+        () => availableRoles.map((r: IRole) => r.id),
+        [availableRoles]
+    );
+    usePrefetchRolePolicies(allRoleIds);
+
+    // Fetch policies for the selected role
+    const selectedRoleId = roles?.[0];
+    const { data: rolePolicies } = useRolePolicies(selectedRoleId);
+
+    // Auto-populate permissions when role policies are fetched
+    React.useEffect(() => {
+        if (rolePolicies && rolePolicies.length > 0) {
+            const permissionKeys: string[] = [];
+            rolePolicies.forEach((mod: RolePolicyModule) => {
+                mod.policies.forEach((p: RolePolicy) => {
+                    if (p.hasPermission) {
+                        permissionKeys.push(p.codeValue);
+                    }
+                });
+            });
+            setValue('permissions', permissionKeys, { shouldValidate: true });
+        } else if (selectedRoleId) {
+            // Role selected but no policies returned yet, clear
+            setValue('permissions', [], { shouldValidate: true });
+        }
+    }, [rolePolicies, selectedRoleId, setValue]);
+
     const { data: zones } = useZones();
     const zoneOptions = zones?.map(zone => ({ id: zone.id, label: zone.name })) || [];
 
@@ -162,6 +193,7 @@ export const AddMemberContent: React.FC<AddMemberContentProps> = ({
                         availableRoles={availableRoles}
                         selectedPermissions={permissions}
                         onPermissionsChange={handlePermissionsChange}
+                        rolePolicies={rolePolicies}
                         disabled={isEditMode && isPaused}
                     />
 
