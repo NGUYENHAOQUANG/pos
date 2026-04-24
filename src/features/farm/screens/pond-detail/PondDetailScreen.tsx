@@ -11,6 +11,7 @@ import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle'
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { PondDetail } from '@/features/farm/screens/pond-detail/PondDetail';
+import { HarvestScaleMode } from '@/features/farm/types/harvestRecord.types';
 
 import { JobExecution, JOB_TYPES } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
@@ -27,7 +28,7 @@ import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/pondwork/feed/use
 import { useHarvestRecordsAsJobs } from '@/features/farm/hooks/useHarvestRecord';
 import { useStockTransfersAsJobs } from '@/features/farm/hooks/useStockTransfer';
 import { usePondOperations } from '@/features/farm/hooks/usePondOperations';
-import { usePondDetail } from '@/features/farm/hooks/usePonds';
+import { usePondDetail, useStockTransferReadiness } from '@/features/farm/hooks/usePonds';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { pondListService } from '@/features/farm/services/pond-list.service';
 import {
@@ -36,6 +37,7 @@ import {
     usePondJobLogHandlers,
 } from '@/features/farm/hooks/usePondJobHandlers';
 import { HarvestModeSelectModal } from '@/features/farm/components/pondwork/harvest/HarvestModeSelectModal';
+import { UnfinishedSessionModal } from '@/features/farm/components/pondwork/harvest/UnfinishedSessionModal';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'PondDetail'>;
@@ -55,6 +57,7 @@ export const PondDetailScreen: React.FC = () => {
     const [selectedTab, setSelectedTab] = useState<string>('work');
     const [isMeasureSizeModalVisible, setIsMeasureSizeModalVisible] = useState(false);
     const [isHarvestModalVisible, setIsHarvestModalVisible] = useState(false);
+    const [isUnfinishedSessionModalVisible, setIsUnfinishedSessionModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
     const { setTabBarVisible } = useTabBarVisibility();
@@ -219,8 +222,39 @@ export const PondDetailScreen: React.FC = () => {
         }
     }, [refetchCycles, queryClient]);
 
-    const handleTransferPond = useCallback(() => {
+    const { refetch: fetchReadiness } = useStockTransferReadiness(pond?.id, { enabled: false });
+
+    const checkActiveSession = useCallback(async (): Promise<boolean> => {
+        try {
+            const response = await fetchReadiness();
+            const readinessData = response?.data;
+            const isReady = readinessData?.isReady ?? true;
+            if (!isReady) {
+                const issues = readinessData?.issues || [];
+                const hasPendingSession = issues.some(
+                    issue => issue.issueType === 'ScaleSessionPending'
+                );
+                if (hasPendingSession) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (error) {
+            console.error('Check readiness failed:', error);
+            return false; // Fallback to false if API fails
+        }
+    }, [fetchReadiness]);
+
+    const handleTransferPond = useCallback(async () => {
         if (!pond || !pond.id) return;
+        const activeCycleId = currentCycle?.id || pond?.cyclePond?.cycleId;
+        if (!activeCycleId) return;
+
+        const hasActiveSession = await checkActiveSession();
+        if (hasActiveSession) {
+            setIsUnfinishedSessionModalVisible(true);
+            return;
+        }
 
         const measureSizeItems = apiMeasureSizeJobs;
         if (measureSizeItems.length === 0) {
@@ -229,23 +263,33 @@ export const PondDetailScreen: React.FC = () => {
         }
 
         navigation.navigate('StockTransferFormScreen', {
-            pondId: pondId,
-            cycleId: currentCycle?.id || '',
+            pondId: pond.id,
+            cycleId: activeCycleId,
             warehouseId: warehouseId || '',
         });
     }, [
         pond,
+        checkActiveSession,
         apiMeasureSizeJobs,
         setIsMeasureSizeModalVisible,
         navigation,
         currentCycle?.id,
-        pondId,
         warehouseId,
     ]);
 
-    const handleHarvest = useCallback(() => {
+    const handleHarvest = useCallback(async () => {
+        const activeCycleId = currentCycle?.id || pond?.cyclePond?.cycleId;
+        if (!activeCycleId) return;
+
+        const hasActiveSession = await checkActiveSession();
+
+        if (hasActiveSession) {
+            setIsUnfinishedSessionModalVisible(true);
+            return;
+        }
+
         setIsHarvestModalVisible(true);
-    }, []);
+    }, [currentCycle, pond, checkActiveSession]);
 
     const navigateHandlers = usePondJobNavigateHandlers({
         pond,
@@ -380,6 +424,20 @@ export const PondDetailScreen: React.FC = () => {
                         pondId: pond.id,
                         cycleId: activeCycleId,
                         scaleMode: mode,
+                    });
+                }}
+            />
+            <UnfinishedSessionModal
+                visible={isUnfinishedSessionModalVisible}
+                onClose={() => setIsUnfinishedSessionModalVisible(false)}
+                onGoToSession={() => {
+                    const activeCycleId = currentCycle?.id || pond?.cyclePond?.cycleId;
+                    if (!pond?.id || !activeCycleId) return;
+                    setIsUnfinishedSessionModalVisible(false);
+                    navigation.navigate('HarvestFormScreen', {
+                        pondId: pond.id,
+                        cycleId: activeCycleId,
+                        scaleMode: HarvestScaleMode.AUTO,
                     });
                 }}
             />

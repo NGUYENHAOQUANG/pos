@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { scaleRecordApi } from '@/features/farm/api/scaleRecordApi';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
-import { AppToast } from '@/features/farm/utils/toastMessages';
+import { handleError } from '@/shared/utils/errorHandler';
 import {
     IStartScaleSessionRequest,
     IScaleRecordParams,
@@ -12,14 +12,15 @@ import {
 export const useStartScaleSession = () => {
     return useMutation({
         mutationFn: (data: IStartScaleSessionRequest) => scaleRecordApi.startSession(data),
+        onError: handleError,
     });
 };
 
-export const useScaleRecords = (params?: IScaleRecordParams) => {
+export const useScaleRecords = (params?: IScaleRecordParams, options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: farmKeys.scaleRecords.list(params),
         queryFn: () => scaleRecordApi.getAll(params),
-        enabled: !!params?.SessionId || !!params?.RecordId,
+        enabled: options?.enabled,
     });
 };
 
@@ -30,13 +31,7 @@ export const useConfirmScaleRecord = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.scaleRecords.all() });
         },
-        onError: () => {
-            AppToast({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Lỗi khi xác nhận mẻ cân',
-            } as any);
-        },
+        onError: handleError,
     });
 };
 
@@ -48,13 +43,7 @@ export const useFinishScaleSession = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.scaleRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.scales.all() });
         },
-        onError: () => {
-            AppToast({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Lỗi khi kết thúc phiên cân',
-            } as any);
-        },
+        onError: handleError,
     });
 };
 
@@ -66,13 +55,7 @@ export const useSoftDeleteScaleRecord = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.scaleRecords.all() });
         },
-        onError: () => {
-            AppToast({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Lỗi khi hủy mẻ cân',
-            } as any);
-        },
+        onError: handleError,
     });
 };
 
@@ -84,12 +67,6 @@ export const useDiscardScaleSession = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.scaleRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.scales.all() });
         },
-        onError: () => {
-            AppToast({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Lỗi khi xóa phiên cân',
-            } as any);
-        },
+        onError: handleError,
     });
 };

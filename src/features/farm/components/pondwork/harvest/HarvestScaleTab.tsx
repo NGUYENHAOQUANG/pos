@@ -85,17 +85,27 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
 
     const zoneId = useFarmStore(state => state.selectedZoneId) ?? undefined;
 
-    const { data: scalesData } = useScales({
-        ZoneId: zoneId,
-        UsageStatus: ScaleUsageStatus.Using,
-        CurrentCycleId: cycleId,
-    });
+    const { data: scalesData } = useScales(
+        {
+            ZoneId: zoneId,
+            UsageStatus: ScaleUsageStatus.Using,
+            CurrentCycleId: cycleId,
+        },
+        {
+            refetchInterval: 5000,
+        }
+    );
     const activeScales = scalesData?.data?.items || [];
 
-    const { data: recordsData, isLoading: isRecordsLoading } = useScaleRecords({
-        SessionId: !isEditMode ? scaleSessionId : undefined,
-        RecordId: isEditMode ? recordId : undefined,
-    });
+    const { data: recordsData, isLoading: isRecordsLoading } = useScaleRecords(
+        {
+            SessionId: !isEditMode ? scaleSessionId : undefined,
+            RecordId: isEditMode ? recordId : undefined,
+        },
+        {
+            enabled: isEditMode ? !!recordId : !!scaleSessionId,
+        }
+    );
     const entries = useMemo(() => recordsData?.data?.items || [], [recordsData?.data?.items]);
 
     const [isDeleteSessionVisible, setIsDeleteSessionVisible] = useState(false);
@@ -148,9 +158,8 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
         [updateUsageStatus, cycleId]
     );
 
-    const handleConfirmPress = useCallback((scaleItem: IScale) => {
-        const randomWeight = +(Math.random() * (30 - 10) + 10).toFixed(1);
-        setSelectedConfirmWeight(randomWeight);
+    const handleConfirmPress = useCallback((scaleItem: IScale, netWeight: number) => {
+        setSelectedConfirmWeight(netWeight);
         setSelectedConfirmScaleItem(scaleItem);
         setSelectedConfirmScaleName(getScaleDisplayTitle(scaleItem));
         setIsConfirmModalVisible(true);
@@ -245,6 +254,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
     };
 
     const handleDeleteSession = async () => {
+        console.log('handleDeleteSession', scaleSessionId);
         if (!scaleSessionId) return;
 
         try {
@@ -308,9 +318,11 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                                     <ScaleCard
                                         key={scale.id}
                                         title={getScaleDisplayTitle(scale)}
-                                        status={status}
                                         weight={0}
-                                        onConfirmPress={() => handleConfirmPress(scale)}
+                                        scale={scale}
+                                        onConfirmPress={netWeight =>
+                                            handleConfirmPress(scale, netWeight)
+                                        }
                                         onPress={() => handlePressChevron(status, scale)}
                                         onToggle={val => handleScaleToggle(val, scale.id)}
                                     />
@@ -416,7 +428,7 @@ export const HarvestScaleTab: React.FC<HarvestScaleTabProps> = ({
                 onClose={() => setIsConfirmModalVisible(false)}
                 weight={selectedConfirmWeight}
                 scaleName={selectedConfirmScaleName}
-                batchNumber={confirmedBatches + 1}
+                batchNumber={confirmedBatches}
                 totalAfterConfirm={totalWeight + selectedConfirmWeight}
                 onConfirm={handleConfirmAction}
             />

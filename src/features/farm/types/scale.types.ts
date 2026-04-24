@@ -66,3 +66,26 @@ export interface IUpdateScaleUsageStatusRequest {
     status: ScaleUsageStatus | string;
     cycleId: string;
 }
+
+export enum LiveWeightState {
+    Connected = 'Connected',
+    Disconnected = 'Disconnected',
+    Standby = 'Standby',
+    Measuring = 'Measuring',
+    Stable = 'Stable',
+    Error = 'Error',
+    Zero = 'Zero',
+    Tare = 'Tare',
+}
+
+export interface ILiveWeight {
+    deviceId: string;
+    sessionId: string | null;
+    gross: number;
+    net: number;
+    unit: string;
+    state: LiveWeightState;
+    canConfirm: boolean;
+    freshnessSeconds: number;
+    lastUpdatedUtc: string;
+}

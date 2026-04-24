@@ -134,6 +134,7 @@ export const API_ENDPOINTS = {
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
             CREATE: (pondId: string) => `/pond/${pondId}/stock-transfer`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
+            READINESS: (pondId: string) => `/pond/${pondId}/stock-transfer/readiness`,
         },
         RECORD: {
             LIST: (pondId: string) => `/pond/${pondId}/record`,
@@ -168,6 +169,7 @@ export const API_ENDPOINTS = {
         LIST: '/scale',
         DETAIL: (id: string) => `/scale/${id}`,
         USAGE_STATUS: '/scale/usage-status',
+        LIVE_WEIGHT: (id: string) => `/scale/${id}/live-weight`,
     },
     SCALE_RECORD: {
         LIST: '/scalerecord',
