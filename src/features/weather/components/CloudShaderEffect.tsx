@@ -8,7 +8,6 @@ import Animated, {
     withTiming,
     Easing,
     useAnimatedStyle,
-    interpolate,
     SharedValue,
 } from 'react-native-reanimated';
 
@@ -121,7 +120,6 @@ interface CloudShaderEffectProps {
 const CloudShaderEffect: React.FC<CloudShaderEffectProps> = ({
     weatherCode,
     isDay,
-    scrollY,
     zIndex = 5,
 }) => {
     const { width, height } = useWindowDimensions();
@@ -158,10 +156,7 @@ const CloudShaderEffect: React.FC<CloudShaderEffectProps> = ({
     }, [width, canvasHeight, coverage, isDay]);
 
     const animatedStyle = useAnimatedStyle(() => {
-        if (!scrollY) return {};
-        // Parallax: clouds move up slower than content
-        const translateY = interpolate(scrollY.value, [0, height], [0, -height * 0.4]);
-        return { transform: [{ translateY }] };
+        return {};
     });
 
     if (!cloudShader || coverage === 0) return null;

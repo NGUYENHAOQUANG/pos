@@ -100,11 +100,6 @@ const WeatherScreen: React.FC = () => {
         };
     });
 
-    const blurLayerStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(scrollY.value, [0, 150], [0, 1], 'clamp');
-        return { opacity, position: 'absolute', width: '100%', height: '100%' };
-    });
-
     const overlayStyle = useAnimatedStyle(() => {
         const opacity = interpolate(scrollY.value, [0, 200], [0, 0.4], 'clamp');
         return {
@@ -220,14 +215,6 @@ const WeatherScreen: React.FC = () => {
                 source={getBackgroundImageSource(weatherData.current.weatherCode, isDay)}
                 style={[styles.bgImage, animatedBgStyle]}
             />
-            {/* Lớp nền mờ thay thế dần lớp nền rõ */}
-            <Animated.View style={blurLayerStyle} pointerEvents="none">
-                <Animated.Image
-                    source={getBackgroundImageSource(weatherData.current.weatherCode, isDay)}
-                    style={[styles.bgImage, animatedBgStyle]}
-                    blurRadius={15}
-                />
-            </Animated.View>
 
             {weatherData.current.weatherCode >= 51 && (
                 <RainShaderBackground weatherCode={weatherData.current.weatherCode} />

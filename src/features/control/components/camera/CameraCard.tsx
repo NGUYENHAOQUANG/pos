@@ -72,40 +72,41 @@ export const CameraCard: React.FC<CameraCardProps> = ({
     const skeletonColor = theme.isDark ? theme.background : theme.gray[200];
     const skeletonBadgeColor = theme.isDark ? theme.border : theme.gray[300];
 
+    // State to track when WebRTC has actually decoded its first frame
+    const [isVideoReady, setIsVideoReady] = useState(false);
+
     // Animation state for skeleton fade-out
     const fadeAnim = useRef(new Animated.Value(1)).current;
     const [isSkeletonVisible, setIsSkeletonVisible] = useState(hasLiveUrl && isOnline);
 
     useEffect(() => {
-        let timeoutId: ReturnType<typeof setTimeout>;
-
         if (!hasLiveUrl || !isOnline) {
             fadeAnim.setValue(0);
             setIsSkeletonVisible(false);
             return;
         }
 
-        if (isConnected) {
-            // WebRTC Connected but first frame usually takes 1-2s to decode depending on network/device
-            // Increase artificial delay to 2500ms to guarantee image is ready before fading
-            timeoutId = setTimeout(() => {
-                Animated.timing(fadeAnim, {
-                    toValue: 0,
-                    duration: 600, // Smooth 0.6s fade
-                    useNativeDriver: true,
-                }).start(() => {
-                    setIsSkeletonVisible(false);
-                });
-            }, 2500); // 2.5s delay to wait for first video frame
+        // WebRTC stream has resolved its dimensions, meaning the first frame is rendered!
+        if (isVideoReady) {
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 400, // Smooth 0.4s fade
+                useNativeDriver: true,
+            }).start(() => {
+                setIsSkeletonVisible(false);
+            });
         } else {
             fadeAnim.setValue(1);
             setIsSkeletonVisible(true);
         }
+    }, [isVideoReady, hasLiveUrl, isOnline, fadeAnim]);
 
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId);
-        };
-    }, [isConnected, hasLiveUrl, isOnline, fadeAnim]);
+    // Reset video ready state when stream disconnects
+    useEffect(() => {
+        if (!isConnected) {
+            setIsVideoReady(false);
+        }
+    }, [isConnected]);
 
     return (
         <TouchableOpacity
@@ -123,6 +124,11 @@ export const CameraCard: React.FC<CameraCardProps> = ({
                         style={styles.snapshotImage}
                         objectFit="cover"
                         zOrder={0}
+                        onDimensionsChange={e => {
+                            if (e.nativeEvent.width > 0 && e.nativeEvent.height > 0) {
+                                setIsVideoReady(true);
+                            }
+                        }}
                     />
                 ) : (
                     // Fallback placeholder SVG (no snapshot available)

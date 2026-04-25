@@ -14,6 +14,7 @@ export interface HeaderSectionProps {
     includeSafeArea?: boolean;
     containerStyle?: StyleProp<ViewStyle>;
     transparent?: boolean;
+    hideLeftSpace?: boolean;
 
     // Content
     title?: string;
@@ -42,6 +43,7 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     includeSafeArea = true,
     containerStyle,
     transparent = false,
+    hideLeftSpace = false,
     title,
     titleAlign = 'center',
     titleStyle,
@@ -142,12 +144,13 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
                 containerStyle,
             ]}
         >
-            <View style={styles.leftContainer}>{renderLeft()}</View>
+            {!hideLeftSpace && <View style={styles.leftContainer}>{renderLeft()}</View>}
 
             <View
                 style={[
                     styles.centerContainer,
                     titleAlign === 'left' && { alignItems: 'flex-start' },
+                    hideLeftSpace && { marginLeft: 0 },
                 ]}
             >
                 {renderCenter()}
@@ -173,18 +176,21 @@ const getStyles = (theme: Colors) =>
         },
         leftContainer: {
             minWidth: 40,
+            minHeight: 40,
             alignItems: 'flex-start',
             justifyContent: 'center',
             // margin right handled by padding/centering
         },
         centerContainer: {
             flex: 1,
+            minHeight: 40,
             alignItems: 'center',
             justifyContent: 'center',
             marginHorizontal: 8,
         },
         rightContainer: {
             minWidth: 40,
+            minHeight: 40,
             alignItems: 'flex-end',
             justifyContent: 'center',
             overflow: 'visible',

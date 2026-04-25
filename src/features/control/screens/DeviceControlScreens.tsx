@@ -1,15 +1,21 @@
 import React, { useMemo, useState, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { RefreshControl } from '@/shared/components/layout/RefreshControl';
-import { Text } from '@/shared/components/typography/Text';
 import { useNetInfo } from '@react-native-community/netinfo';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import {
     DropdownHeaderButton,
     DropDownHeaderItem,
 } from '@/shared/components/forms/DropdownHeaderButton';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+    runOnJS,
+} from 'react-native-reanimated';
 
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { DevicesStatus } from '@/features/control/components/DevicesStatus';
@@ -42,9 +48,15 @@ import { CameraItem } from '@/features/control/api/cameraApi';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const keyExtractor = (item: any) => item.id.toString();
 
+/** Camera layout mode */
+type CameraViewMode = 'grid' | 'list';
+
+/** Fade animation durations (ms) */
+const FADE_OUT_DURATION = 120;
+const FADE_IN_DURATION = 180;
+
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
-    const insets = useSafeAreaInsets();
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
@@ -69,7 +81,34 @@ export const DeviceControlScreens = () => {
     const helpModalRef = useRef<HelpOptionsModalRef>(null);
 
     const [selectedAppTab, setSelectedAppTab] = useState('thiet-bi');
+    const [cameraViewMode, setCameraViewMode] = useState<CameraViewMode>('grid');
     const moreButtonRef = useRef<View>(null);
+
+    // Reanimated opacity for smooth camera list fade transition
+    const cameraListOpacity = useSharedValue(1);
+    const cameraListAnimStyle = useAnimatedStyle(() => ({
+        opacity: cameraListOpacity.value,
+    }));
+
+    /** Fade animation durations (ms) */
+    const SETTLE_DELAY = 150; // Wait for RTCView to re-render at new size
+
+    /** Toggle viewMode with fade out → switch → wait → fade in to avoid RTCView black flash */
+    const handleToggleViewMode = useCallback(() => {
+        const applyNewMode = () => {
+            setCameraViewMode(prev => (prev === 'grid' ? 'list' : 'grid'));
+            // Delay fade-in so RTCView has time to settle at new dimensions
+            setTimeout(() => {
+                cameraListOpacity.value = withTiming(1, { duration: FADE_IN_DURATION });
+            }, SETTLE_DELAY);
+        };
+
+        cameraListOpacity.value = withTiming(0, { duration: FADE_OUT_DURATION }, finished => {
+            if (finished) {
+                runOnJS(applyNewMode)();
+            }
+        });
+    }, [cameraListOpacity]);
 
     // Track previous zone to detect switches
     const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
@@ -275,9 +314,22 @@ export const DeviceControlScreens = () => {
 
     return (
         <View style={styles.container}>
-            <View style={[styles.headerContainer, { paddingTop: insets.top + 12 }]}>
-                <Text style={styles.headerTitle}>Điều Khiển Thiết Bị</Text>
-            </View>
+            <HeaderSection
+                title="Điều Khiển Thiết Bị"
+                titleAlign="left"
+                showBackButton={false}
+                hideLeftSpace={true}
+                onRightPress={selectedAppTab === 'camera' ? handleToggleViewMode : undefined}
+                rightIcon={
+                    selectedAppTab === 'camera' ? (
+                        <Ionicons
+                            name={cameraViewMode === 'grid' ? 'list-outline' : 'grid-outline'}
+                            size={22}
+                            color={theme.text}
+                        />
+                    ) : undefined
+                }
+            />
             <HeadingBar
                 tabs={[
                     { key: 'thiet-bi', label: 'Thiết bị' },
@@ -360,11 +412,14 @@ export const DeviceControlScreens = () => {
                     )}
                 </>
             ) : (
-                <CameraList
-                    onCameraPress={(camera: CameraItem) => {
-                        navigation.navigate('CameraDetail', { camera });
-                    }}
-                />
+                <Animated.View style={[{ flex: 1 }, cameraListAnimStyle]}>
+                    <CameraList
+                        viewMode={cameraViewMode}
+                        onCameraPress={(camera: CameraItem) => {
+                            navigation.navigate('CameraDetail', { camera });
+                        }}
+                    />
+                </Animated.View>
             )}
 
             <HelpOptionsModal
@@ -393,10 +448,23 @@ const getStyles = (theme: Colors) =>
             paddingBottom: 16,
             backgroundColor: 'transparent',
         },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
         headerTitle: {
             fontSize: 20,
             fontWeight: '600',
             color: theme.text,
+        },
+        viewToggleButton: {
+            width: 40,
+            height: 40,
+            borderRadius: 30,
+            backgroundColor: theme.backgroundTertiary,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         headingBarContainer: {
             marginBottom: 16,
