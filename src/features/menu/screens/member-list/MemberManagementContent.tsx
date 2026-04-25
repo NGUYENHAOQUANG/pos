@@ -15,21 +15,27 @@ import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { IUserAccount } from '@/features/menu/types/member.types';
+import { IUserAccount, RoleType } from '@/features/menu/types/member.types';
 import { TagStatus } from '@/features/menu/components/Tag';
+import { useAuthStore } from '@/features/auth/store/authStore';
+import { useZones } from '@/features/farm/hooks/useZones';
 
 export interface MemberManagementContentProps {
     members: IUserAccount[];
     onAddMember: () => void;
     onEditMember: (member: IUserAccount) => void;
     onDeleteMember: (id: string) => void;
-    onUpdateMemberStatus: (id: string, status: 'active' | 'paused') => void;
+    onUpdateMemberStatus: (member: IUserAccount, status: 'active' | 'paused') => void;
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
     onLoadMore?: () => void;
     isFetchingNextPage?: boolean;
     hasNextPage?: boolean;
+    searchQuery: string;
+    onSearchChange: (text: string) => void;
+    selectedZoneId: string;
+    onZoneChange: (zoneId: string) => void;
 }
 
 export const MemberManagementContent: React.FC<MemberManagementContentProps> = ({
@@ -44,6 +50,10 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
     onLoadMore,
     isFetchingNextPage,
     hasNextPage,
+    searchQuery,
+    onSearchChange,
+    selectedZoneId,
+    onZoneChange,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -53,7 +63,17 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
     const [resendModalVisible, setResendModalVisible] = useState(false);
     const [activateModalVisible, setActivateModalVisible] = useState(false);
     const [selectedRole, setSelectedRole] = useState<string>('all');
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const { data: zones } = useZones();
+
+    const user = useAuthStore(state => state.user);
+    const hasAddMemberPermission = React.useMemo(() => {
+        if (!user?.roles) return false;
+        const rolesArray = Array.isArray(user.roles) ? user.roles : [user.roles];
+        return rolesArray.some(r => {
+            const role = r.toUpperCase();
+            return role === 'ADMIN' || role === 'MANAGER' || role === 'EMPLOYEE_MANAGER';
+        });
+    }, [user]);
 
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
@@ -68,23 +88,42 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
         }
     }, [activeModule, currentStep, members.length, nextStepAction]);
 
-    // Map Filter Options
+    // Map Filter Options from RoleType enum
+    const ROLE_LABELS: Record<string, string> = {
+        [RoleType.ADMIN]: 'Quản trị viên',
+        [RoleType.MANAGER]: 'Chủ trại',
+        [RoleType.EMPLOYEE_MANAGER]: 'Nhân viên Kỹ thuật',
+        [RoleType.EMPLOYEE_WAREHOUSE]: 'Nhân viên Thủ kho',
+        [RoleType.FARMER]: 'Nông dân (Farmer)',
+    };
+
     const roleOptions: DropDownItem[] = [
         { id: 'all', label: 'Tất cả vai trò' },
-        { id: 'Quản lý', label: 'Quản lý' },
-        { id: 'Nhân viên', label: 'Nhân viên' },
+        ...Object.values(RoleType).map(role => ({
+            id: role,
+            label: ROLE_LABELS[role] || role,
+        })),
     ];
 
-    const filteredMembers = members.filter(item => {
-        const matchRole = selectedRole === 'all' || item.roleName === selectedRole;
-        const searchQueryLower = searchQuery.trim().toLowerCase();
-        const matchSearch =
-            searchQueryLower === '' ||
-            (item.fullName && item.fullName.toLowerCase().includes(searchQueryLower)) ||
-            (item.phoneNumber && item.phoneNumber.toLowerCase().includes(searchQueryLower));
+    const zoneOptions: DropDownItem[] = [
+        { id: 'all', label: 'Tất cả trại nuôi' },
+        ...(zones?.map((zone: any) => ({
+            id: zone.id,
+            label: zone.name,
+        })) || []),
+    ];
 
-        return matchRole && matchSearch;
-    });
+    // Role filter remains FE-side (API doesn't support role param)
+    // API roleCode is UPPERCASE (e.g. "FARMER", "EMPLOYEE_WAREHOUSE")
+    // so we use case-insensitive startsWith to match variants
+    const filteredMembers =
+        selectedRole === 'all'
+            ? members
+            : members.filter(item => {
+                  const code = (item.roleCode || '').toUpperCase();
+                  const selected = selectedRole.toUpperCase();
+                  return code === selected || code.startsWith(`${selected}_`);
+              });
 
     const handleEditMember = useCallback(
         (member: IUserAccount) => {
@@ -125,7 +164,12 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
                 name={item.fullName || item.phoneNumber || 'Không có tên'}
                 phone={item.phoneNumber || 'Không có số điện thoại'}
                 roleName={item.roleName || 'Chưa phân quyền'}
-                status={(item.status ? item.status.toLowerCase() : 'pending') as TagStatus}
+                status={
+                    item.isActive === false ||
+                    ['deactivated', 'paused', 'inactive'].includes(item.status?.toLowerCase() || '')
+                        ? 'paused'
+                        : ((item.status ? item.status.toLowerCase() : 'pending') as TagStatus)
+                }
                 onPressOption={() => handleEditMember(item)}
                 onDelete={() => handleDeleteMemberRequest(item.userId)}
                 onSuspend={() => handleSuspendMemberRequest(item.userId)}
@@ -151,22 +195,41 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
             <View style={styles.filterOuter}>
                 <OnboardingStep step="ACCOUNT_MEMBER_FILTER">
                     <View collapsable={false} style={styles.filterInner}>
-                        <View style={styles.searchInputWrapper}>
-                            <Input
-                                icon="search-outline"
-                                placeholder="Tìm kiếm tên, số điện thoại"
-                                value={searchQuery}
-                                onChangeText={setSearchQuery}
-                                containerStyle={styles.noMarginBottom}
+                        <View style={{ zIndex: 10, marginBottom: 8, width: '100%' }}>
+                            <DropDownButton
+                                placeholder="Trại nuôi"
+                                data={zoneOptions}
+                                value={zoneOptions.find(z => z.id.toString() === selectedZoneId)}
+                                style={{ width: '100%' }}
+                                onSelect={(item: DropDownItem) => onZoneChange(item.id.toString())}
                             />
                         </View>
-                        <View style={styles.filterWrapper}>
-                            <DropDownButton
-                                placeholder="Vai trò"
-                                data={roleOptions}
-                                style={styles.dropdown}
-                                onSelect={item => setSelectedRole(item.id.toString())}
-                            />
+                        <View style={styles.row}>
+                            <View
+                                style={[
+                                    styles.searchInputWrapper,
+                                    { flex: 1, marginRight: spacing.sm },
+                                ]}
+                            >
+                                <Input
+                                    icon="search-outline"
+                                    placeholder="Tìm kiếm tên, SĐT"
+                                    value={searchQuery}
+                                    onChangeText={onSearchChange}
+                                    containerStyle={styles.noMarginBottom}
+                                />
+                            </View>
+                            <View style={[styles.filterWrapper, { flex: 0.6 }]}>
+                                <DropDownButton
+                                    placeholder="Vai trò"
+                                    data={roleOptions}
+                                    value={roleOptions.find(r => r.id.toString() === selectedRole)}
+                                    style={styles.dropdown}
+                                    onSelect={(item: DropDownItem) =>
+                                        setSelectedRole(item.id.toString())
+                                    }
+                                />
+                            </View>
                         </View>
                     </View>
                 </OnboardingStep>
@@ -197,8 +260,8 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
                     ListEmptyComponent={
                         <EmptyStateCard
                             message="Chưa có thành viên nào"
-                            buttonTitle="Thêm thành viên"
-                            onPress={onAddMember}
+                            buttonTitle={hasAddMemberPermission ? 'Thêm thành viên' : undefined}
+                            onPress={hasAddMemberPermission ? onAddMember : undefined}
                         />
                     }
                 />
@@ -222,7 +285,8 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
                 visible={suspendModalVisible}
                 onConfirm={() => {
                     if (selectedMemberId) {
-                        onUpdateMemberStatus(selectedMemberId, 'paused');
+                        const member = members.find(m => m.userId === selectedMemberId);
+                        if (member) onUpdateMemberStatus(member, 'paused');
                         setSuspendModalVisible(false);
                     }
                 }}
@@ -251,7 +315,8 @@ export const MemberManagementContent: React.FC<MemberManagementContentProps> = (
                 visible={activateModalVisible}
                 onConfirm={() => {
                     if (selectedMemberId) {
-                        onUpdateMemberStatus(selectedMemberId, 'active');
+                        const member = members.find(m => m.userId === selectedMemberId);
+                        if (member) onUpdateMemberStatus(member, 'active');
                         setActivateModalVisible(false);
                     }
                 }}
@@ -278,10 +343,13 @@ const getStyles = (theme: Colors) =>
             zIndex: 1,
         },
         filterInner: {
-            flexDirection: 'row',
-            gap: spacing.sm,
+            flexDirection: 'column',
             backgroundColor: theme.backgroundPrimary,
             borderRadius: borderRadius.md,
+        },
+        row: {
+            flexDirection: 'row',
+            width: '100%',
         },
         searchInputWrapper: {
             flex: 2,

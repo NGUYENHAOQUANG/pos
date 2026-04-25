@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
@@ -15,6 +15,7 @@ import {
 import { IUserAccount } from '@/features/menu/types/member.types';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 import PlusIcon from '@/assets/Icon/PlusBlack.svg';
+import { useAuthStore } from '@/features/auth/store/authStore';
 
 export const MemberManagementScreens: React.FC = () => {
     const theme = useAppTheme();
@@ -22,6 +23,19 @@ export const MemberManagementScreens: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { setTabBarVisible } = useTabBarVisibility();
+
+    const user = useAuthStore(state => state.user);
+    const hasAddMemberPermission = React.useMemo(() => {
+        if (!user?.roles) return false;
+        const rolesArray = Array.isArray(user.roles) ? user.roles : [user.roles];
+        return rolesArray.some(r => {
+            const role = r.toUpperCase();
+            return role === 'ADMIN' || role === 'MANAGER' || role === 'EMPLOYEE_MANAGER';
+        });
+    }, [user]);
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedZoneId, setSelectedZoneId] = useState<string>('all');
 
     const {
         data: memberData,
@@ -31,7 +45,10 @@ export const MemberManagementScreens: React.FC = () => {
         isLoading,
         isRefetching,
         refetch,
-    } = useMembers();
+    } = useMembers({
+        SearchText: searchQuery.trim() || undefined,
+        ZoneId: selectedZoneId === 'all' ? undefined : selectedZoneId,
+    });
 
     const members =
         memberData?.pages.reduce(
@@ -61,8 +78,14 @@ export const MemberManagementScreens: React.FC = () => {
     );
 
     const handleUpdateMemberStatus = React.useCallback(
-        (id: string, status: 'active' | 'paused') => {
-            updateMemberStatus({ id, status });
+        (member: IUserAccount, status: 'active' | 'paused') => {
+            updateMemberStatus({
+                id: member.userId,
+                status,
+                fullName: member.fullName || '',
+                roleId: member.roleId || undefined,
+                zoneId: member.zoneId || undefined,
+            });
         },
         [updateMemberStatus]
     );
@@ -96,25 +119,30 @@ export const MemberManagementScreens: React.FC = () => {
                 title="Quản lý thành viên"
                 onBack={() => navigation.goBack()}
                 rightComponent={
-                    <OnboardingStep step="ACCOUNT_MEMBER_ADD" onNext={() => navigation.goBack()}>
-                        <View collapsable={false}>
-                            <TouchableOpacity
-                                style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 20,
-                                    backgroundColor: theme.backgroundButton,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    borderWidth: 1,
-                                    borderColor: theme.defaultBorder,
-                                }}
-                                onPress={() => navigation.navigate('AddMember')}
-                            >
-                                <PlusIcon width={20} height={20} color={theme.text} />
-                            </TouchableOpacity>
-                        </View>
-                    </OnboardingStep>
+                    hasAddMemberPermission ? (
+                        <OnboardingStep
+                            step="ACCOUNT_MEMBER_ADD"
+                            onNext={() => navigation.goBack()}
+                        >
+                            <View collapsable={false}>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: 20,
+                                        backgroundColor: theme.backgroundButton,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        borderWidth: 1,
+                                        borderColor: theme.defaultBorder,
+                                    }}
+                                    onPress={() => navigation.navigate('AddMember')}
+                                >
+                                    <PlusIcon width={20} height={20} color={theme.text} />
+                                </TouchableOpacity>
+                            </View>
+                        </OnboardingStep>
+                    ) : undefined
                 }
             />
 
@@ -131,6 +159,10 @@ export const MemberManagementScreens: React.FC = () => {
                 onEditMember={handleEditMember}
                 onDeleteMember={handleDeleteMember}
                 onUpdateMemberStatus={handleUpdateMemberStatus}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedZoneId={selectedZoneId}
+                onZoneChange={setSelectedZoneId}
             />
         </View>
     );

@@ -4,7 +4,6 @@ import { MemberFormValues } from '@/features/menu/schemas/member.schema';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
-import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -12,7 +11,12 @@ import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { useRoles } from '@/features/menu/hooks/useMember';
+import {
+    useRoles,
+    useUpdateMemberAdmin,
+    useCreateMember,
+    useUpdateMemberStatus,
+} from '@/features/menu/hooks/useMember';
 import { AddMemberContent } from './AddMemberContent';
 import { memberService } from '@/features/menu/services/memberService';
 
@@ -30,6 +34,9 @@ export const AddMemberScreens: React.FC = () => {
 
     const { data: rolesResponse, isLoading: isRolesLoading } = useRoles();
     const availableRoles = React.useMemo(() => rolesResponse || [], [rolesResponse]);
+    const { mutate: updateMemberAdmin, isPending: isUpdating } = useUpdateMemberAdmin();
+    const { mutate: createMember, isPending: isCreating } = useCreateMember();
+    const { mutate: updateMemberStatus } = useUpdateMemberStatus();
 
     useFocusEffect(
         React.useCallback(() => {
@@ -61,41 +68,112 @@ export const AddMemberScreens: React.FC = () => {
     };
 
     const onSubmit = (data: MemberFormValues) => {
-        console.log('[MOCK API] Submit Payload:', data);
-
-        if (isEditMode) {
-            Toast.show(ToastMessages.Member.UPDATE_SUCCESS);
-            navigation.navigate('MemberManagement');
+        if (isEditMode && member) {
+            // Edit mode: update via PUT /auth/admin/users/{userId}
+            const newRoleId = data.roles?.[0];
+            if (newRoleId) {
+                updateMemberAdmin(
+                    {
+                        id: member.userId,
+                        payload: {
+                            fullName: data.name,
+                            roleId: newRoleId,
+                            isActive: !isPaused,
+                            zoneId: data.zoneId,
+                        },
+                    },
+                    {
+                        onSuccess: () => {
+                            navigation.navigate('MemberManagement');
+                        },
+                    }
+                );
+            }
         } else {
-            Toast.show({ type: 'success', text1: 'Thành công', text2: 'Đã thêm thành viên mới' });
-            navigation.navigate('MemberManagement', { showSuccess: true } as any);
+            // Create mode
+            const roleId = data.roles?.[0];
+            if (roleId) {
+                createMember(
+                    {
+                        fullName: data.name,
+                        phoneNumber: data.contact,
+                        roleId: roleId,
+                        zoneId: data.zoneId,
+                    },
+                    {
+                        onSuccess: () => {
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Thành công',
+                                text2: 'Đã thêm thành viên mới',
+                            });
+                            navigation.navigate('MemberManagement', { showSuccess: true } as any);
+                        },
+                    }
+                );
+            } else {
+                Toast.show({ type: 'error', text1: 'Lỗi', text2: 'Vui lòng chọn chức vụ' });
+            }
         }
     };
 
     const handleConfirmDelete = () => {
-        console.log('[MOCK API] Delete member:', member?.id);
         setDeleteModalVisible(false);
         navigation.navigate('MemberManagement');
     };
 
     const handleConfirmSuspend = () => {
-        console.log('[MOCK API] Suspend member:', member?.id);
-        setSuspendModalVisible(false);
-        navigation.navigate('MemberManagement');
+        if (member?.userId) {
+            updateMemberStatus(
+                {
+                    id: member.userId,
+                    status: 'paused',
+                    fullName: member.fullName || '',
+                    roleId: member.roleId || undefined,
+                    zoneId: member.zoneId || undefined,
+                },
+                {
+                    onSuccess: () => {
+                        setSuspendModalVisible(false);
+                        navigation.navigate('MemberManagement');
+                    },
+                }
+            );
+        }
     };
 
     const handleConfirmActivate = () => {
-        console.log('[MOCK API] Activate member:', member?.id);
-        Toast.show(ToastMessages.Member.ACTIVATE_SUCCESS);
-        setActivateModalVisible(false);
-        navigation.navigate('MemberManagement');
+        if (member?.userId) {
+            updateMemberStatus(
+                {
+                    id: member.userId,
+                    status: 'active',
+                    fullName: member.fullName || '',
+                    roleId: member.roleId || undefined,
+                    zoneId: member.zoneId || undefined,
+                },
+                {
+                    onSuccess: () => {
+                        setActivateModalVisible(false);
+                        navigation.navigate('MemberManagement');
+                    },
+                }
+            );
+        }
     };
 
-    const isPending = member?.status === 'pending' || member?.status === 'Chờ xác nhận';
+    const statusStr = String(member?.status || '')
+        .toLowerCase()
+        .trim();
+    const isActiveStr = String(member?.isActive).toLowerCase().trim();
+
+    // Dựa trên UserStatusEnum từ BE: 1 = Pending, 2 = Active, 3 = Deactivated
+    const isPending = statusStr === 'pending';
     const isPaused =
-        member?.status === 'paused' ||
-        member?.status === 'Tạm ngưng' ||
-        member?.status === 'suspended';
+        statusStr === 'deactivated' ||
+        isActiveStr === 'false' ||
+        statusStr === 'paused' ||
+        statusStr === 'inactive';
 
     if (isRolesLoading) {
         return (
@@ -133,6 +211,7 @@ export const AddMemberScreens: React.FC = () => {
                 initialData={initialData}
                 availableRoles={availableRoles}
                 onSubmit={onSubmit}
+                isSubmitting={isUpdating || isCreating}
                 onSuspendPress={() => setSuspendModalVisible(true)}
                 onResendPress={() => setResendModalVisible(true)}
                 onActivatePress={() => setActivateModalVisible(true)}
