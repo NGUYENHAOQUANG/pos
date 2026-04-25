@@ -76,16 +76,24 @@ export const MaterialScreen = () => {
     }, [zonesData, selectedZoneId, setSelectedZoneId]);
 
     // Onboarding Auto-Trigger
-    const { hasCompletedMaterial, startOnboarding, _hasHydrated } = useOnboardingStore();
+    const { hasCompletedMaterial, startOnboarding, _hasHydrated, activeModule } =
+        useOnboardingStore();
     useEffect(() => {
         const isReadyToStart = _hasHydrated && zonesData.length > 0 && !!selectedZoneId;
-        if (isReadyToStart && !hasCompletedMaterial) {
+        if (isReadyToStart && !hasCompletedMaterial && activeModule === 'none') {
             const timer = setTimeout(() => {
                 startOnboarding('material');
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [_hasHydrated, hasCompletedMaterial, zonesData.length, selectedZoneId, startOnboarding]);
+    }, [
+        _hasHydrated,
+        hasCompletedMaterial,
+        activeModule,
+        zonesData.length,
+        selectedZoneId,
+        startOnboarding,
+    ]);
 
     // 5. Header Menu State
     const [menuOpen, setMenuOpen] = useState(false);

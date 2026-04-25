@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import CaretDownIcon from '@/assets/Icon/IconReport/CaretDown.svg';
 import { colors, typography } from '@/styles';
@@ -23,7 +23,6 @@ export const TransferItemCard = ({ item }: Props) => {
     const [expanded, setExpanded] = useState(false);
 
     const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpanded(!expanded);
     };
 
@@ -164,7 +163,6 @@ const styles = StyleSheet.create({
     },
     expandedContent: {
         gap: 6,
-        marginTop: 2,
     },
     row: {
         flexDirection: 'row',

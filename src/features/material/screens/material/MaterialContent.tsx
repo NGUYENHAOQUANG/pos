@@ -7,6 +7,7 @@ import {
 } from '@/features/material/components/material/ButtonMaterial';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import { triggerOnboardingStep } from '@/features/walkthrough/store/useOnboardingStore';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
 import { NotificationBadgeButton } from '@/features/notifications/components/NotificationBadgeButton';
 import { ImportReceiptListScreen } from '@/features/material/screens/import_receipt_list/ImportReceiptListScreen';
@@ -89,7 +90,13 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                                 step="MATERIAL_ADD_BTN"
                                 wrapperStyle={{ marginRight: 8 }}
                             >
-                                <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
+                                <ButtonMetaerial
+                                    onShowMenu={pos => {
+                                        handleShowMenu(pos);
+                                        triggerOnboardingStep('material');
+                                    }}
+                                    isOpen={menuOpen}
+                                />
                             </OnboardingStep>
                             <NotificationBadgeButton />
                         </View>

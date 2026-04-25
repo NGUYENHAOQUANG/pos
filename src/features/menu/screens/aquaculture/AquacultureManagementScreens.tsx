@@ -26,6 +26,7 @@ import { AquacultureItem } from '@/features/menu/components/aquaculture/Aquacult
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
+import { triggerOnboardingStep } from '@/features/walkthrough/store/useOnboardingStore';
 
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
@@ -175,7 +176,13 @@ export const AquacultureManagementScreens: React.FC = () => {
                 onBack={handleGoBack}
                 rightAction={
                     <OnboardingStep step="ACCOUNT_CYCLE_ADD" onNext={() => navigation.goBack()}>
-                        <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={() => {
+                                handleAddNavigate();
+                                triggerOnboardingStep('account');
+                            }}
+                        >
                             <Ionicons name="add" size={24} color={theme.text} />
                         </TouchableOpacity>
                     </OnboardingStep>

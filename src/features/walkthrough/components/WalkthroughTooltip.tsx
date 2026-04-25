@@ -12,14 +12,9 @@ import Tooltip from 'react-native-walkthrough-tooltip';
 import { Text } from '@/shared/components/typography/Text';
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-/** Stable no-op reference to prevent unnecessary re-renders */
 const NOOP = () => {};
-
-/** Stable display insets — avoids new object reference every render */
-const DISPLAY_INSETS = { top: 24, bottom: 24, left: 24, right: 24 };
-
-/** Pre-calculated Android top adjustment */
 const ANDROID_TOP_ADJUSTMENT = Platform.OS === 'android' ? -(StatusBar.currentHeight || 0) : 0;
 
 interface WalkthroughTooltipProps {
@@ -32,6 +27,7 @@ interface WalkthroughTooltipProps {
     placement?: 'top' | 'bottom' | 'left' | 'right';
     isLastStep?: boolean;
     childrenWrapperStyle?: StyleProp<ViewStyle>;
+    allowChildInteraction?: boolean;
 }
 
 export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
@@ -44,11 +40,22 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
     placement = 'bottom',
     isLastStep = false,
     childrenWrapperStyle,
+    allowChildInteraction = false,
 }) => {
     const theme = useAppTheme();
-    const styles = getStyles(theme);
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
-    // Memoize tooltip content to prevent re-measure on every render
+    const insets = useSafeAreaInsets();
+    const dynamicInsets = useMemo(
+        () => ({
+            top: Math.max(insets.top, 24) + 16,
+            bottom: Math.max(insets.bottom, 24) + 16,
+            left: Math.max(insets.left, 24) + 16,
+            right: Math.max(insets.right, 24) + 16,
+        }),
+        [insets]
+    );
+
     const content = useMemo(
         () => (
             <View style={styles.tooltipContent}>
@@ -75,13 +82,13 @@ export const WalkthroughTooltip: React.FC<WalkthroughTooltipProps> = ({
             content={content}
             placement={placement}
             onClose={NOOP}
-            backgroundColor="rgba(0,0,0,0.5)"
+            backgroundColor={theme.overlay}
             contentStyle={styles.contentStyle}
             disableShadow={false}
-            displayInsets={DISPLAY_INSETS}
+            displayInsets={dynamicInsets}
             topAdjustment={ANDROID_TOP_ADJUSTMENT}
             childrenWrapperStyle={childrenWrapperStyle}
-            allowChildInteraction={false}
+            allowChildInteraction={allowChildInteraction}
         >
             {children}
         </Tooltip>
@@ -118,7 +125,7 @@ const getStyles = (theme: Colors) =>
         },
         skipText: {
             fontSize: 14,
-            color: theme.textSecondary || '#666',
+            color: theme.textSecondary,
         },
         nextButton: {
             backgroundColor: theme.primary,
@@ -128,7 +135,7 @@ const getStyles = (theme: Colors) =>
         },
         nextText: {
             fontSize: 14,
-            color: '#FFFFFF',
+            color: theme.textInverse,
             fontWeight: '600',
         },
         contentStyle: {

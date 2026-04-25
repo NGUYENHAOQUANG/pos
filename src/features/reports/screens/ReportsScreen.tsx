@@ -28,6 +28,7 @@ import { spacing } from '@/styles/spacing';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
+import { APP_STEPS } from '@/features/walkthrough/constants/onboarding';
 
 /** Report screen tab keys */
 const REPORT_TAB_KEYS = {
@@ -70,36 +71,42 @@ export const ReportsScreen = () => {
         handleSelectPondType,
     } = useReportsScreen();
 
-    const { startOnboarding, hasCompletedReport, _hasHydrated, activeModule, currentStep } =
-        useOnboardingStore();
+    const startOnboarding = useOnboardingStore(s => s.startOnboarding);
+    const hasCompletedReport = useOnboardingStore(s => s.hasCompletedReport);
+    const _hasHydrated = useOnboardingStore(s => s._hasHydrated);
+    const activeModule = useOnboardingStore(s => s.activeModule);
+    const currentStep = useOnboardingStore(s => s.currentStep);
 
     const envChartY = useRef(0);
     const prodChartY = useRef(0);
 
     React.useEffect(() => {
-        if (_hasHydrated && !hasCompletedReport) {
+        if (_hasHydrated && !hasCompletedReport && activeModule === 'none') {
             const timer = setTimeout(() => {
                 startOnboarding('report');
             }, 500); // Add a small delay for better UX and layout stability
             return () => clearTimeout(timer);
         }
-    }, [_hasHydrated, hasCompletedReport, startOnboarding]);
+    }, [_hasHydrated, hasCompletedReport, activeModule, startOnboarding]);
 
     React.useEffect(() => {
         if (activeModule === 'report') {
-            if (currentStep === 3 && envChartY.current > 0) {
+            if (currentStep === APP_STEPS.REPORT_CHART_ENV.stepIndex && envChartY.current > 0) {
                 // REPORT_CHART_ENV
                 scrollViewRef.current?.scrollTo({
                     y: Math.max(0, envChartY.current - 120),
                     animated: true,
                 });
-            } else if (currentStep === 4 && prodChartY.current > 0) {
+            } else if (
+                currentStep === APP_STEPS.REPORT_CHART_PROD.stepIndex &&
+                prodChartY.current > 0
+            ) {
                 // REPORT_CHART_PROD
                 scrollViewRef.current?.scrollTo({
                     y: Math.max(0, prodChartY.current - 120),
                     animated: true,
                 });
-            } else if (currentStep < 3) {
+            } else if (currentStep < APP_STEPS.REPORT_CHART_ENV.stepIndex) {
                 scrollViewRef.current?.scrollTo({ y: 0, animated: true });
             }
         }

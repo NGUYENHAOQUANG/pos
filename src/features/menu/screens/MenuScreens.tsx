@@ -34,6 +34,7 @@ import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserPr
 import { useQueryClient } from '@tanstack/react-query';
 import { useSettingsStore } from '@/features/menu/store/settingsStore';
 import { useOnboardingStore } from '@/features/walkthrough/store/useOnboardingStore';
+import { APP_STEPS } from '@/features/walkthrough/constants/onboarding';
 
 interface ProfileCardProps {
     onPress: () => void;
@@ -99,25 +100,26 @@ export const MenuScreens: React.FC = () => {
     };
 
     const logout = useAuthStore(state => state.logout);
-    const {
-        resetOnboarding,
-        startOnboarding,
-        hasCompletedAccount,
-        _hasHydrated,
-        activeModule,
-        currentStep,
-    } = useOnboardingStore();
+    const resetOnboarding = useOnboardingStore(s => s.resetOnboarding);
+    const startOnboarding = useOnboardingStore(s => s.startOnboarding);
+    const hasCompletedAccount = useOnboardingStore(s => s.hasCompletedAccount);
+    const _hasHydrated = useOnboardingStore(s => s._hasHydrated);
+    const activeModule = useOnboardingStore(s => s.activeModule);
+    const currentStep = useOnboardingStore(s => s.currentStep);
 
     const contentContainerY = React.useRef(0);
     const recordsSectionRelativeY = React.useRef(0);
 
     React.useEffect(() => {
         if (activeModule === 'account') {
-            if (currentStep === 6 && contentContainerY.current > 0) {
+            if (
+                currentStep === APP_STEPS.ACCOUNT_MENU_MEMBER.stepIndex &&
+                contentContainerY.current > 0
+            ) {
                 // Scroll to "Quản lý hồ sơ"
                 const targetY = contentContainerY.current + recordsSectionRelativeY.current;
                 scrollViewRef.current?.scrollTo({ y: Math.max(0, targetY - 60), animated: true });
-            } else if (currentStep < 5) {
+            } else if (currentStep < APP_STEPS.ACCOUNT_ENV_SETTING_EDIT.stepIndex) {
                 // Reset scroll to top for earlier steps
                 scrollViewRef.current?.scrollTo({ y: 0, animated: true });
             }
@@ -125,13 +127,13 @@ export const MenuScreens: React.FC = () => {
     }, [activeModule, currentStep]);
 
     React.useEffect(() => {
-        if (_hasHydrated && !hasCompletedAccount) {
+        if (_hasHydrated && !hasCompletedAccount && activeModule === 'none') {
             const timer = setTimeout(() => {
                 startOnboarding('account');
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [_hasHydrated, hasCompletedAccount, startOnboarding]);
+    }, [_hasHydrated, hasCompletedAccount, activeModule, startOnboarding]);
 
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
@@ -219,6 +221,8 @@ export const MenuScreens: React.FC = () => {
                           useSettingsStore.getState().setWalkthroughEnabled(true);
                           resetOnboarding('farm');
                           navigation.navigate('Farm' as never);
+                          // Trigger after navigation settles
+                          setTimeout(() => startOnboarding('farm'), 600);
                       },
                   },
                   {
@@ -229,6 +233,8 @@ export const MenuScreens: React.FC = () => {
                           useSettingsStore.getState().setWalkthroughEnabled(true);
                           resetOnboarding('material');
                           navigation.navigate('Material' as never);
+                          // Trigger after navigation settles
+                          setTimeout(() => startOnboarding('material'), 600);
                       },
                   },
                   {
@@ -249,6 +255,8 @@ export const MenuScreens: React.FC = () => {
                           useSettingsStore.getState().setWalkthroughEnabled(true);
                           resetOnboarding('report');
                           navigation.navigate('Reports' as never);
+                          // Trigger after navigation settles
+                          setTimeout(() => startOnboarding('report'), 600);
                       },
                   },
               ]
