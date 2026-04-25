@@ -8,12 +8,16 @@ import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasi
 
 export const stockTransferService = {
     /**
-     * Filter ao nhận: chỉ lấy Ao nuôi và Ao sẵn sàng, loại trừ ao hiện tại
+     * Filter ao nhận dựa trên loại ao nguồn:
+     * - Ao nuôi → chỉ Ao nuôi
+     * - Ao vèo → Ao vèo + Ao nuôi
+     * - Khác → Ao nuôi + Ao sẵn sàng
      */
     getReceivingPondOptions: (
         allPonds: PondData[],
         currentPondId: string,
-        categories?: PondCategory[]
+        categories?: PondCategory[],
+        sourcePondTypeName?: string
     ): DropDownItem[] => {
         if (allPonds.length === 0) return [];
 
@@ -26,7 +30,13 @@ export const stockTransferService = {
             return p.type?.name ?? categoryMap.get(p.pondCategoryId ?? '');
         };
 
-        const allowedTypes: string[] = [POND_TYPES.CULTIVATION, POND_TYPES.READY];
+        // Determine allowed receiving pond types based on source pond type
+        const allowedTypes: string[] =
+            sourcePondTypeName === POND_TYPES.CULTIVATION
+                ? [POND_TYPES.CULTIVATION]
+                : sourcePondTypeName === POND_TYPES.NURSERY
+                ? [POND_TYPES.NURSERY, POND_TYPES.CULTIVATION]
+                : [POND_TYPES.CULTIVATION, POND_TYPES.READY];
 
         return allPonds
             .filter(p => {
@@ -34,6 +44,15 @@ export const stockTransferService = {
 
                 // Exclude ponds that already have an active cycle
                 if (p.cyclePond != null) return false;
+
+                // When source is 'Ao nuôi' or 'Ao vèo', always enforce type filter
+                if (
+                    sourcePondTypeName === POND_TYPES.CULTIVATION ||
+                    sourcePondTypeName === POND_TYPES.NURSERY
+                ) {
+                    const typeName = getPondTypeName(p);
+                    return typeName ? allowedTypes.includes(typeName) : false;
+                }
 
                 if (typeof p.canStockTransfer === 'boolean') {
                     return p.canStockTransfer;
@@ -89,4 +108,45 @@ export const stockTransferService = {
     getLatestShrimpSizeFromMeasurement: (measurementDetail: any): string | undefined => {
         return measurementDetail?.shrimpSizePcsPerKg?.toString();
     },
+
+    /**
+     * Phân loại lỗi từ BE để quyết định cách hiển thị trên UI.
+     * - 'modal': Hiện ConfirmationModalUI (ví dụ: cần đo kích thước tôm)
+     * - 'warning': Hiện warning box màu vàng trong form (ví dụ: chưa đủ ngày)
+     * - 'silent': Không hiển thị gì (FE đã xử lý realtime, ví dụ: số lượng không khớp)
+     * - 'toast': Hiện toast đỏ mặc định
+     */
+    classifyError: (message: string): StockTransferErrorType => {
+        const msg = message.toLowerCase();
+
+        for (const rule of STOCK_TRANSFER_ERROR_RULES) {
+            if (rule.keywords.some(kw => msg.includes(kw))) {
+                return rule.type;
+            }
+        }
+
+        return 'toast';
+    },
 };
+
+// ─── Error Classification ───────────────────────────────
+export type StockTransferErrorType = 'modal' | 'warning' | 'silent' | 'toast';
+
+interface ErrorRule {
+    type: StockTransferErrorType;
+    keywords: string[];
+}
+
+/**
+ * Bảng ánh xạ lỗi BE → loại UI hiển thị.
+ * Thứ tự quan trọng: rule đầu tiên khớp sẽ được sử dụng.
+ * Khi BE thêm lỗi mới, chỉ cần thêm 1 dòng vào đây.
+ */
+const STOCK_TRANSFER_ERROR_RULES: ErrorRule[] = [
+    // Modal: cần đi đo kích thước tôm
+    { type: 'modal', keywords: ['không tìm thấy record', 'đo kích thước', '24 giờ', '24h'] },
+    // Warning box: chưa đủ ngày nuôi
+    { type: 'warning', keywords: ['15 ngày', 'chưa đủ điều kiện'] },
+    // Silent: FE đã hiển thị realtime error
+    { type: 'silent', keywords: ['tổng số lượng chuyển không khớp'] },
+];

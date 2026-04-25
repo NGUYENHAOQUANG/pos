@@ -14,7 +14,10 @@ import {
     TransferInfoBox,
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
-import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
+import {
+    StockTransferConfirmationModal,
+    PondConfirmItem,
+} from '@/features/farm/components/bottom-sheet/StockTransferModal';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import type { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
@@ -29,6 +32,9 @@ export interface StockTransferFormProps {
     isSubmitting: boolean;
     onBack: () => void;
     onSubmit: (data: StockTransferFormData) => void;
+    currentPondName?: string;
+    cultureDays?: number;
+    serverWarningMessage?: string;
 }
 
 export interface StockTransferFormData {
@@ -48,6 +54,9 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     isSubmitting,
     onBack,
     onSubmit,
+    currentPondName,
+    cultureDays,
+    serverWarningMessage,
 }) => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
@@ -62,6 +71,13 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     const hasInitialized = useRef(false);
     const scrollRef = useRef<KeyboardAwareScrollView>(null);
     const transferInfoY = useRef(0);
+
+    const hasPondSelected = useMemo(() => {
+        return receivingPonds.some(p => !!p.receivingPond);
+    }, [receivingPonds]);
+
+    // Disable: only when no pond selected
+    const isSaveDisabled = isSubmitting || !hasPondSelected;
 
     const hasChanges = useMemo(() => {
         const hasPondSelected = receivingPonds.some(p => !!p.receivingPond);
@@ -144,6 +160,19 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
         setIsConfirmationModalVisible(false);
     }, []);
 
+    const confirmPonds: PondConfirmItem[] = useMemo(() => {
+        return receivingPonds
+            .filter(p => !!p.receivingPond)
+            .map(p => {
+                const option = pondOptions.find(o => String(o.value) === p.receivingPond);
+                return {
+                    id: p.id,
+                    label: option?.label ?? p.receivingPond ?? '',
+                    quantity: parseFloat(p.quantity.replace(/\D/g, '')) || 0,
+                };
+            });
+    }, [receivingPonds, pondOptions]);
+
     return (
         <View style={styles.container}>
             <HeaderSection title="Sang ao" onBack={onBack} />
@@ -181,6 +210,8 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                         onReceivingPondPress={_id => {}}
                         totalEstimatedShrimp={totalShrimpCount}
                         pondOptions={pondOptions}
+                        currentPondName={currentPondName}
+                        serverWarningMessage={serverWarningMessage}
                     />
                 </View>
 
@@ -193,22 +224,18 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                     secondaryTitle="Hủy"
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={onBack}
-                    primaryDisabled={isSubmitting}
+                    primaryDisabled={isSaveDisabled}
                 />
             </View>
 
             {UnsavedChangesModal}
-            <ConfirmationModalUI
+            <StockTransferConfirmationModal
                 visible={isConfirmationModalVisible}
                 onConfirm={handleConfirmSave}
                 onCancel={handleCancelConfirmation}
-                title="Xác nhận sang ao"
-                message={`Việc sang ao sẽ kết thúc chu kỳ hiện tại ở ao vèo và tiếp tục giai đoạn nuôi ở ao nuôi.
-Sau khi thực hiện, bạn sẽ không thể chỉnh sửa lại dữ liệu của giai đoạn vèo.
-Bạn có chắc muốn sang ao không?`}
-                confirmText="Sang ao"
-                cancelText="Không"
-                showSuccessToast={false}
+                receivingPonds={confirmPonds}
+                currentPondName={currentPondName}
+                cultureDays={cultureDays}
             />
         </View>
     );

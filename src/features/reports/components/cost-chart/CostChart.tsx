@@ -8,29 +8,16 @@ import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { CostItem } from './costChartData';
 
-// Truncate to N decimal places without rounding
-const truncateToDecimals = (value: number, decimals: number): number => {
-    const factor = Math.pow(10, decimals);
-    return Math.trunc(value * factor) / factor;
-};
-
 const formatCompactCurrency = (value: number): string => {
-    if (value === 0) return '0 đ';
-    const absValue = Math.abs(value);
+    if (value === 0) return '0 Tỉ';
     const sign = value < 0 ? '-' : '';
-    if (absValue >= 1e9) {
-        const val = truncateToDecimals(absValue / 1e9, 2);
-        return `${sign}${val.toLocaleString('vi-VN')} Tỉ`;
-    }
-    if (absValue >= 1e6) {
-        const val = truncateToDecimals(absValue / 1e6, 2);
-        return `${sign}${val.toLocaleString('vi-VN')} Tr`;
-    }
-    if (absValue >= 1e3) {
-        const val = truncateToDecimals(absValue / 1e3, 2);
-        return `${sign}${val.toLocaleString('vi-VN')} K`;
-    }
-    return `${sign}${truncateToDecimals(absValue, 2).toLocaleString('vi-VN')} đ`;
+    const absValue = Math.abs(value);
+    const val = Math.trunc((absValue / 1e9) * 1e5) / 1e5;
+    const formattedVal = val.toLocaleString('vi-VN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 5,
+    });
+    return `${sign}${formattedVal} Tỉ`;
 };
 
 interface CostChartProps {
