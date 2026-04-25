@@ -6,26 +6,15 @@ export const memberService = {
         name: '',
         contact: '',
         roles: [],
+        zoneId: undefined,
         permissions: [],
     }),
 
-    mapDetailToForm: (member: any, rolesResponse: IRole[]): MemberFormValues => {
-        const roleStr = member.role;
-        let mappedRoleId: string | null = null;
-        if (roleStr && rolesResponse) {
-            let matchingCode = '';
-            if (roleStr === 'Admin') matchingCode = 'ADMIN';
-            else if (roleStr === 'Quản lý' || roleStr === 'Manager') matchingCode = 'MANAGER';
-            else if (roleStr === 'Nhân viên' || roleStr === 'Employee') matchingCode = 'EMPLOYEE';
-            else if (roleStr === 'Farmer') matchingCode = 'USER';
+    mapDetailToForm: (member: any, _rolesResponse: IRole[]): MemberFormValues => {
+        // Use roleId directly from API response
+        const roles = member.roleId ? [member.roleId] : [];
 
-            const found = rolesResponse.find(r => r.code === matchingCode);
-            if (found) mappedRoleId = found.id;
-        }
-
-        const newRoles = member.roleIds ? member.roleIds : mappedRoleId ? [mappedRoleId] : [];
-
-        const mappedPermissions = (member.permissions || []).map((p: string) => {
+        const mappedPermissions = (member.policies || []).map((p: string) => {
             switch (p) {
                 case 'manage_member':
                     return 'member_management';
@@ -41,9 +30,10 @@ export const memberService = {
         });
 
         return {
-            name: member.name || '',
-            contact: member.email || member.phone || '',
-            roles: newRoles,
+            name: member.fullName || '',
+            contact: member.phoneNumber || member.email || '',
+            roles,
+            zoneId: member.zoneId || undefined,
             permissions: mappedPermissions,
         };
     },

@@ -1,9 +1,14 @@
 import React from 'react';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, UseQueryOptions } from '@tanstack/react-query';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { farmKeys } from './farmKeys';
 import { APP_CONFIG } from '@/shared/constants';
-import { PondData, PondStatus, GetPondsParams } from '@/features/farm/types/pond.types';
+import {
+    PondData,
+    PondStatus,
+    GetPondsParams,
+    IStockTransferReadiness,
+} from '@/features/farm/types/pond.types';
 
 export const usePondsByZone = (zoneId: string | null, status?: PondStatus | null) => {
     const key = farmKeys.ponds.byZone(zoneId || 'all');
@@ -122,5 +127,21 @@ export const useAllPondsByZone = (zoneId: string, params: GetPondsParams = {}) =
         },
         enabled: !!zoneId,
         staleTime: 10 * 60 * 1000,
+    });
+};
+
+export const useStockTransferReadiness = (
+    pondId: string | undefined,
+    options?: Omit<UseQueryOptions<IStockTransferReadiness | undefined>, 'queryKey' | 'queryFn'>
+) => {
+    return useQuery({
+        queryKey: farmKeys.stockTransfer.readiness(pondId || ''),
+        queryFn: async () => {
+            if (!pondId) throw new Error('Pond ID is required');
+            const response = await pondApi.getStockTransferReadiness(pondId);
+            return response.data;
+        },
+        enabled: !!pondId && (options?.enabled ?? true),
+        ...options,
     });
 };

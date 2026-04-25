@@ -115,7 +115,7 @@ export const HeadingReports = ({
 
 const styles = StyleSheet.create({
     container: {
-        paddingBottom: spacing.md,
+        paddingBottom: spacing.sm,
         zIndex: 100,
     },
     topRow: {

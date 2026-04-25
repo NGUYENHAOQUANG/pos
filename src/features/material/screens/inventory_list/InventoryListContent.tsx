@@ -17,8 +17,6 @@ interface InventoryListContentProps {
     isFetchingNextPage?: boolean;
     hasNextPage?: boolean;
     onPressCreate?: () => void;
-    onApprove?: (id: string, code: string) => void;
-    onReject?: (id: string, code: string) => void;
 }
 
 export const InventoryListContent: React.FC<InventoryListContentProps> = React.memo(
@@ -31,8 +29,6 @@ export const InventoryListContent: React.FC<InventoryListContentProps> = React.m
         isFetchingNextPage,
         hasNextPage,
         onPressCreate,
-        onApprove,
-        onReject,
     }) => {
         const theme = useAppTheme();
         const materialListStyles = getMaterialListStyles(theme);
@@ -43,12 +39,9 @@ export const InventoryListContent: React.FC<InventoryListContentProps> = React.m
             }
         }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
-        const renderItem = React.useCallback(
-            ({ item }: { item: IInventoryCheck }) => {
-                return <InventoryCard data={item} onApprove={onApprove} onReject={onReject} />;
-            },
-            [onApprove, onReject]
-        );
+        const renderItem = React.useCallback(({ item }: { item: IInventoryCheck }) => {
+            return <InventoryCard data={item} />;
+        }, []);
 
         const keyExtractor = React.useCallback((item: IInventoryCheck) => item.id, []);
 

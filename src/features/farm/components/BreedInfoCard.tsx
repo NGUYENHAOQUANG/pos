@@ -29,7 +29,7 @@ const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier, remaini
             <View style={styles.content}>
                 <DetailRow label="Mã vật tư:" value={materialCode} />
                 <DetailRow label="Giá tôm:" value={`${formatNumber(price)} VND/con`} />
-                <DetailRow label="Nhãn hiệu:" value={supplier} />
+                <DetailRow label="Nhãn hàng:" value={supplier} />
 
                 {remainingQuantity !== undefined && (
                     <DetailRow label="Số lượng còn lại:" value={formatNumber(remainingQuantity)} />

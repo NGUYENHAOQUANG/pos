@@ -295,9 +295,7 @@ const SunShaderEffect: React.FC<SunShaderEffectProps> = ({
     const animatedStyle = useAnimatedStyle(() => {
         // Combine fade-in with scroll opacity
         const scrollOpacity = scrollY ? interpolate(scrollY.value, [0, 200], [1, 0], 'clamp') : 1;
-        const translateY = scrollY ? interpolate(scrollY.value, [0, 300], [0, -80], 'clamp') : 0;
         return {
-            transform: [{ translateY }],
             opacity: fadeIn.value * scrollOpacity,
         };
     });

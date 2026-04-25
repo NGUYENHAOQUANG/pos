@@ -5,6 +5,7 @@ import {
     IScaleParams,
     ScaleResponse,
     IUpdateScaleUsageStatusRequest,
+    ILiveWeight,
 } from '@/features/farm/types/scale.types';
 import { IApiResponse } from '@/shared/types/common.types';
 
@@ -27,6 +28,13 @@ export const scaleApi = {
         const response = await apiClient.patch<IApiResponse<null>>(
             API_ENDPOINTS.SCALE.USAGE_STATUS,
             data
+        );
+        return response.data;
+    },
+
+    getLiveWeight: async (id: string): Promise<IApiResponse<ILiveWeight>> => {
+        const response = await apiClient.get<IApiResponse<ILiveWeight>>(
+            API_ENDPOINTS.SCALE.LIVE_WEIGHT(id)
         );
         return response.data;
     },

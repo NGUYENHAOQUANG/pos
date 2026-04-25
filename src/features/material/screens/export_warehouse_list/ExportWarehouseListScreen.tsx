@@ -1,11 +1,6 @@
 import React from 'react';
 import { ExportWarehouseListContent } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListContent';
-import {
-    useInfiniteExportWarehouse,
-    useMaterialListState,
-    useApproveExportReceipt,
-    useRejectExportReceipt,
-} from '@/features/material/hooks';
+import { useInfiniteExportWarehouse, useMaterialListState } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
 
 import { useNavigation } from '@react-navigation/native';
@@ -54,9 +49,6 @@ export const ExportWarehouseListScreen: React.FC = () => {
         isFetchingNextPage,
     } = useInfiniteExportWarehouse(exportWarehouseParams);
 
-    const approveMutation = useApproveExportReceipt();
-    const rejectMutation = useRejectExportReceipt();
-
     const { showSkeleton, isRefreshing } = getListState({
         isLoading,
         isRefetching,
@@ -78,8 +70,6 @@ export const ExportWarehouseListScreen: React.FC = () => {
             onLoadMore={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}
-            onApprove={(id, code) => approveMutation.mutate({ id, code })}
-            onReject={(id, code) => rejectMutation.mutate({ id, code })}
         />
     );
 };

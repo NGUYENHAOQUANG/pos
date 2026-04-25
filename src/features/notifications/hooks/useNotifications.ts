@@ -71,11 +71,53 @@ export const useMarkNotificationAsRead = () => {
 
     return useMutation({
         mutationFn: (id: string) => notificationApi.markAsRead(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+        onMutate: async (id: string) => {
+            await queryClient.cancelQueries({ queryKey: notificationKeys.all });
+
+            queryClient.setQueriesData({ queryKey: notificationKeys.all }, (oldData: any) => {
+                if (!oldData || !oldData.pages) return oldData;
+
+                return {
+                    ...oldData,
+                    pages: oldData.pages.map((page: any) => {
+                        if (!page.data || !page.data.items) return page;
+
+                        let hasChanges = false;
+                        const newItems = page.data.items.map((item: INotification) => {
+                            if (item.id === id && !item.isRead) {
+                                hasChanges = true;
+                                return { ...item, isRead: true };
+                            }
+                            return item;
+                        });
+
+                        if (!hasChanges) return page;
+
+                        return {
+                            ...page,
+                            data: {
+                                ...page.data,
+                                items: newItems,
+                            },
+                        };
+                    }),
+                };
+            });
+
+            queryClient.setQueryData(notificationKeys.unreadCount(), (oldData: any) => {
+                if (typeof oldData === 'number' && oldData > 0) {
+                    return oldData - 1;
+                }
+                return oldData;
+            });
         },
         onError: error => {
             handleError(error);
+            queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+            queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() });
         },
     });
 };
@@ -92,7 +134,6 @@ export const useUnreadNotificationCount = () => {
             }
             return 0;
         },
-        // Only poll if the device doesn't have push notification permission
         refetchInterval: hasPermission ? false : 60000,
     });
 };

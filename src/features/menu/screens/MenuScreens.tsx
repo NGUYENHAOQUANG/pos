@@ -79,6 +79,16 @@ export const MenuScreens: React.FC = () => {
     const chatbotEnabled = useSettingsStore(s => s.chatbotEnabled);
     const walkthroughEnabled = useSettingsStore(s => s.walkthroughEnabled);
 
+    const user = useAuthStore(state => state.user);
+    const hasMemberManagementPermission = React.useMemo(() => {
+        if (!user?.roles) return false;
+        const rolesArray = Array.isArray(user.roles) ? user.roles : [user.roles];
+        return rolesArray.some(r => {
+            const role = r.toUpperCase();
+            return role === 'ADMIN' || role === 'MANAGER' || role === 'EMPLOYEE_MANAGER';
+        });
+    }, [user]);
+
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
     useScrollToTop(scrollViewRef as any);
@@ -183,14 +193,18 @@ export const MenuScreens: React.FC = () => {
             Icon: UserIcon,
             onPress: () => navigation.navigate('PersonalInformation'),
         },
-        {
-            id: 'members',
-            title: 'Quản lý thành viên',
-            Icon: UsersIcon,
-            onPress: () => navigation.navigate('MemberManagement'),
-            onboardingStep: 'ACCOUNT_MENU_MEMBER',
-            onboardingNext: () => navigation.navigate('MemberManagement'),
-        },
+        ...(hasMemberManagementPermission
+            ? [
+                  {
+                      id: 'members',
+                      title: 'Quản lý thành viên',
+                      Icon: UsersIcon,
+                      onPress: () => navigation.navigate('MemberManagement'),
+                      onboardingStep: 'ACCOUNT_MENU_MEMBER' as const,
+                      onboardingNext: () => navigation.navigate('MemberManagement'),
+                  },
+              ]
+            : []),
         {
             id: 'settings',
             title: 'Cài đặt',
@@ -274,6 +288,12 @@ export const MenuScreens: React.FC = () => {
 
     const actionItems: MenuSectionItemData[] = [
         {
+            id: 'survey',
+            title: 'Khảo sát người dùng',
+            Icon: ArticleIcon,
+            onPress: () => navigation.navigate('Survey'),
+        },
+        {
             id: 'delete-account',
             title: 'Xóa tài khoản',
             Icon: TrashIcon,
@@ -349,8 +369,9 @@ export const MenuScreens: React.FC = () => {
 
                     {/* Bottom Actions - each as individual card */}
                     <View style={styles.actionGroup}>
-                        <MenuSection items={[actionItems[0]]} />
-                        <MenuSection items={[actionItems[1]]} />
+                        {actionItems.map(item => (
+                            <MenuSection key={item.id} items={[item]} />
+                        ))}
                     </View>
 
                     <View style={styles.versionContainer}>
@@ -482,7 +503,7 @@ const getStyles = (theme: Colors) =>
             paddingHorizontal: 12,
             gap: 12,
             backgroundColor: theme.background,
-            borderRadius: 8,
+            borderRadius: 16,
             borderWidth: 1,
             borderColor: theme.border,
         },

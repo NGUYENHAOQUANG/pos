@@ -25,17 +25,15 @@ import { useInventoryItems } from '@/features/material/hooks';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { Button } from '@/shared/components/buttons/Button';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
-import { ApproveInventoryReceiptBottomSheet } from '@/features/material/components/ApproveBottomSheet';
+import { ApproveInventoryReceiptBottomSheet } from '@/features/material/components/inventory_list/ApproveInventoryReceiptBottomSheet';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 interface InventoryCardProps {
     data: IInventoryCheck;
-    onApprove?: (id: string, code: string) => void;
-    onReject?: (id: string, code: string) => void;
 }
 
-export const InventoryCard: React.FC<InventoryCardProps> = ({ data, onApprove, onReject }) => {
+export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -181,9 +179,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data, onApprove, o
             <ApproveInventoryReceiptBottomSheet
                 visible={isApproveModalVisible}
                 onClose={() => setIsApproveModalVisible(false)}
-                item={data}
-                onApprove={onApprove ? () => onApprove(data.id, data.checkCode || '') : undefined}
-                onReject={onReject ? () => onReject(data.id, data.checkCode || '') : undefined}
+                id={data.id}
             />
         </View>
     );

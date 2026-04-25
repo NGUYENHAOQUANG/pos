@@ -3,6 +3,12 @@
  * @description Types for notifications API and models
  */
 import { ICreatorEditor } from '@/shared/types/common.types';
+import {
+    NotificationScreen,
+    NotificationType,
+    NotificationMode,
+    NotificationActionType,
+} from '../constants/notification.constants';
 
 export enum DevicePlatform {
     iOS = 'iOS',
@@ -20,6 +26,17 @@ export interface GetNotificationsParams {
     OrderBy?: string;
 }
 
+export interface INotificationPayload {
+    notificationType?: NotificationType | string;
+    targetUrl?: string;
+    createdAt?: string;
+    screen?: NotificationScreen | string;
+    mode?: NotificationMode | string;
+    id?: string;
+    type?: NotificationActionType | string;
+    [key: string]: any;
+}
+
 export interface INotification {
     id: string;
     title: string;
@@ -27,6 +44,7 @@ export interface INotification {
     type: string;
     isRead: boolean;
     targetUrl?: string | null;
+    payload?: INotificationPayload | null;
     no?: number;
     creatorId?: string | null;
     editorId?: string | null;

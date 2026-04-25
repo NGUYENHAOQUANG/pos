@@ -23,19 +23,13 @@ import { useExportReceiptItems } from '@/features/material/hooks';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { Button } from '@/shared/components/buttons/Button';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
-import { ApproveExportReceiptBottomSheet } from '@/features/material/components/ApproveBottomSheet';
+import { ApproveExportReceiptBottomSheet } from '@/features/material/components/export_warehouse_list/ApproveExportReceiptBottomSheet';
 
 interface ExportWarehouseReceiptCardProps {
     item: ExportReceipt;
-    onApprove?: (id: string, code: string) => void;
-    onReject?: (id: string, code: string) => void;
 }
 
-export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProps> = ({
-    item,
-    onApprove,
-    onReject,
-}) => {
+export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProps> = ({ item }) => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -189,9 +183,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
             <ApproveExportReceiptBottomSheet
                 visible={isApproveModalVisible}
                 onClose={() => setIsApproveModalVisible(false)}
-                item={item}
-                onApprove={onApprove ? () => onApprove(item.id, item.receiptCode || '') : undefined}
-                onReject={onReject ? () => onReject(item.id, item.receiptCode || '') : undefined}
+                id={item.id}
             />
         </View>
     );

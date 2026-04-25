@@ -76,11 +76,16 @@ export const ScaleListScreen: React.FC = () => {
         isLoading,
         refetch,
         isRefetching,
-    } = useScales({
-        ZoneId: selectedZoneId || undefined,
-        UsageStatus: ScaleUsageStatus.Using,
-        CurrentCycleId: cycleId,
-    });
+    } = useScales(
+        {
+            ZoneId: selectedZoneId || undefined,
+            UsageStatus: ScaleUsageStatus.Using,
+            CurrentCycleId: cycleId,
+        },
+        {
+            refetchInterval: 5000,
+        }
+    );
 
     const apiScales = scalesData?.data?.items || [];
 
@@ -90,9 +95,8 @@ export const ScaleListScreen: React.FC = () => {
         setIsActionModalVisible(true);
     }, []);
 
-    const handleConfirmPress = useCallback((scaleItem: IScale) => {
-        const randomWeight = +(Math.random() * (30 - 10) + 10).toFixed(1);
-        setSelectedConfirmWeight(randomWeight);
+    const handleConfirmPress = useCallback((scaleItem: IScale, netWeight: number) => {
+        setSelectedConfirmWeight(netWeight);
         setSelectedConfirmScaleItem(scaleItem);
         setSelectedConfirmScaleName(getScaleDisplayTitle(scaleItem));
         setIsConfirmModalVisible(true);
@@ -190,14 +194,15 @@ export const ScaleListScreen: React.FC = () => {
                                 scale.connectionStatus,
                                 scale.usageStatus
                             );
-                            const title = getScaleDisplayTitle(scale);
                             return (
                                 <ScaleCard
                                     key={scale.id}
-                                    title={title}
-                                    status={status}
+                                    title={getScaleDisplayTitle(scale)}
                                     weight={scale.type === 'Kg500' ? 0 : 0}
-                                    onConfirmPress={() => handleConfirmPress(scale)}
+                                    scale={scale}
+                                    onConfirmPress={netWeight =>
+                                        handleConfirmPress(scale, netWeight)
+                                    }
                                     onPress={() => handlePressChevron(scale, status)}
                                     onToggle={val => handleScaleToggle(val, scale.id)}
                                 />
@@ -241,7 +246,7 @@ export const ScaleListScreen: React.FC = () => {
                 onClose={() => setIsConfirmModalVisible(false)}
                 weight={selectedConfirmWeight}
                 scaleName={selectedConfirmScaleName}
-                batchNumber={confirmedBatches + 1}
+                batchNumber={confirmedBatches}
                 totalAfterConfirm={totalWeight + selectedConfirmWeight}
                 onConfirm={handleConfirmAction}
             />

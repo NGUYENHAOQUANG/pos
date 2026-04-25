@@ -117,6 +117,8 @@ const HistoryDevicesWithProvider = HistoryDevicesScreens;
 const EquipmentMaintenanceWithProvider = EquipmentMaintenanceScreens;
 const EditEquimentMaintenanceWithProvider = EditEquimentMaintenanceScreens;
 
+import { SurveyScreen } from '@/features/survey/screens/SurveyScreen';
+
 // Root Stack Param List - All screens in the app
 export type AppStackParamList = {
     // Main Tabs (Tab Bar visible)
@@ -305,6 +307,7 @@ export type AppStackParamList = {
     Chatbot: undefined;
     Ingest: undefined;
     NotificationList: undefined;
+    Survey: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -444,6 +447,7 @@ export const AppStack: React.FC = () => {
                 <Stack.Screen name="Ingest" component={IngestScreen} />
                 <Stack.Screen name="ShrimpPrice" component={ShrimpPriceScreen} />
                 <Stack.Screen name="NotificationList" component={NotificationListScreen} />
+                <Stack.Screen name="Survey" component={SurveyScreen} />
             </Stack.Navigator>
 
             {/* Chatbot FAB - overlays all screens */}

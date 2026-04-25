@@ -18,8 +18,6 @@ interface ExportWarehouseMaterialListProps {
     onLoadMore?: () => void;
     isFetchingNextPage?: boolean;
     hasNextPage?: boolean;
-    onApprove?: (id: string, code: string) => void;
-    onReject?: (id: string, code: string) => void;
 }
 
 export const ExportWarehouseListContent: React.FC<ExportWarehouseMaterialListProps> = React.memo(
@@ -32,8 +30,6 @@ export const ExportWarehouseListContent: React.FC<ExportWarehouseMaterialListPro
         onLoadMore,
         isFetchingNextPage,
         hasNextPage,
-        onApprove,
-        onReject,
     }) => {
         const theme = useAppTheme();
         const materialListStyles = getMaterialListStyles(theme);
@@ -44,18 +40,9 @@ export const ExportWarehouseListContent: React.FC<ExportWarehouseMaterialListPro
             }
         }, [hasNextPage, isFetchingNextPage, onLoadMore]);
 
-        const renderItem = React.useCallback(
-            ({ item }: { item: ExportReceipt }) => {
-                return (
-                    <ExportWarehouseReceiptCard
-                        item={item}
-                        onApprove={onApprove}
-                        onReject={onReject}
-                    />
-                );
-            },
-            [onApprove, onReject]
-        );
+        const renderItem = React.useCallback(({ item }: { item: ExportReceipt }) => {
+            return <ExportWarehouseReceiptCard item={item} />;
+        }, []);
 
         const keyExtractor = React.useCallback((item: ExportReceipt) => item.id, []);
 

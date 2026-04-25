@@ -1,7 +1,15 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
-import { IUserAccount, GetUsersParams, IRole } from '../types/member.types';
+import {
+    IUserAccount,
+    GetUsersParams,
+    IRole,
+    UpdateUserPayload,
+    UpdateUserAdminResponse,
+    CreateUserPayload,
+    RolePolicyModule,
+} from '../types/member.types';
 
 export const memberApi = {
     getRoles: async (): Promise<IApiResponse<IRole[]>> => {
@@ -18,7 +26,7 @@ export const memberApi = {
         return data;
     },
 
-    createMember: async (payload: any): Promise<IApiResponse<IUserAccount>> => {
+    createMember: async (payload: CreateUserPayload): Promise<IApiResponse<IUserAccount>> => {
         const { data } = await apiClient.post<IApiResponse<IUserAccount>>(
             API_ENDPOINTS.MEMBER.CREATE,
             payload
@@ -45,6 +53,24 @@ export const memberApi = {
     deleteMember: async (id: string): Promise<IApiResponse<null>> => {
         const { data } = await apiClient.delete<IApiResponse<null>>(
             API_ENDPOINTS.MEMBER.DELETE(id)
+        );
+        return data;
+    },
+
+    updateMemberAdmin: async (
+        id: string,
+        payload: UpdateUserPayload
+    ): Promise<IApiResponse<UpdateUserAdminResponse>> => {
+        const { data } = await apiClient.put<IApiResponse<UpdateUserAdminResponse>>(
+            API_ENDPOINTS.MEMBER.UPDATE_ADMIN(id),
+            payload
+        );
+        return data;
+    },
+
+    getRolePolicies: async (roleId: string): Promise<IApiResponse<RolePolicyModule[]>> => {
+        const { data } = await apiClient.get<IApiResponse<RolePolicyModule[]>>(
+            API_ENDPOINTS.IDENTITY.ROLE_POLICIES(roleId)
         );
         return data;
     },

@@ -198,8 +198,8 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                     />
 
                     <Input
-                        label="Nhãn hiệu"
-                        placeholder="Nhập nhãn hiệu"
+                        label="Nhãn hàng"
+                        placeholder="Nhập nhãn hàng"
                         placeholderTextColor={theme.textSecondary}
                         value={manufacturer}
                         onChangeText={onManufacturerChange}

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { Storage } from '@/core/services/storage.service';
 import { ScaleSessionAction } from '@/features/farm/types/harvestRecord.types';
 
 // Core Slices
@@ -22,19 +24,26 @@ export type FarmState = PondListStore &
     };
 
 export const useFarmStore = create<FarmState>()(
-    immer((...a) => ({
-        ...createPondListStore(...a),
-        ...createZoneStore(...a),
-        scaleSessions: {},
-        setScaleSessionId: (cycleId, id, status = ScaleSessionAction.ACTIVE) =>
-            a[0](state => {
-                if (id === null) {
-                    delete state.scaleSessions[cycleId];
-                } else {
-                    state.scaleSessions[cycleId] = { sessionId: id, status };
-                }
-            }),
-    }))
+    persist(
+        immer((...a) => ({
+            ...createPondListStore(...a),
+            ...createZoneStore(...a),
+            scaleSessions: {},
+            setScaleSessionId: (cycleId, id, status = ScaleSessionAction.ACTIVE) =>
+                a[0](state => {
+                    if (id === null) {
+                        delete state.scaleSessions[cycleId];
+                    } else {
+                        state.scaleSessions[cycleId] = { sessionId: id, status };
+                    }
+                }),
+        })),
+        {
+            name: 'farm-storage',
+            storage: createJSONStorage(() => Storage),
+            partialize: state => ({ scaleSessions: state.scaleSessions }),
+        }
+    )
 );
 
 export const useFarm = () => {

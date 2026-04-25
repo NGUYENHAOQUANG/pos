@@ -16,16 +16,16 @@ export const CURRENT_USER_ID = 1;
 
 // ── Suggestion Chips cho Welcome (hiển thị khi chưa có message) ─────────────
 export const WELCOME_SUGGESTIONS = [
-    { id: '1', text: 'Xem thông số Trại/Ao' },
-    { id: '2', text: 'Điều khiển thiết bị' },
-    { id: '3', text: 'Báo cáo tổng quan' },
-    { id: '4', text: 'Hỗ trợ kỹ thuật' },
+    { id: '1', text: 'Làm sao để nuôi tôm hiệu quả?' },
+    { id: '2', text: 'Quản lý kho như thế nào?' },
+    { id: '3', text: 'Mebieco có những thiết bị gì?' },
+    { id: '4', text: 'Hiện có cảnh báo nào không?' },
 ];
 
 // ── Quick Reply Suggestions (hiển thị khi đã có message) ────────────────────
 export const QUICK_REPLIES = [
-    { id: '1', text: 'Xem thông số Trại/Ao' },
-    { id: '2', text: 'Điều khiển thiết bị' },
-    { id: '3', text: 'Báo cáo tổng quan' },
-    { id: '4', text: 'Hỗ trợ kỹ thuật' },
+    { id: '1', text: 'Làm sao để nuôi tôm hiệu quả?' },
+    { id: '2', text: 'Quản lý kho như thế nào?' },
+    { id: '3', text: 'Mebieco có những thiết bị gì?' },
+    { id: '4', text: 'Hiện có cảnh báo nào không?' },
 ];

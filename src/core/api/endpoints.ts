@@ -23,11 +23,15 @@ export const API_ENDPOINTS = {
     MEMBER: {
         LIST: '/auth/users',
         DETAIL: (id: string) => `/auth/users/${id}`,
-        CREATE: '/auth/users',
+        CREATE: '/auth/admin/create-user',
         UPDATE: (id: string) => `/auth/users/${id}`,
-        DELETE: (id: string) => `/auth/users/${id}`,
+        DELETE: (id: string) => `/auth/admin/users/${id}`,
         UPDATE_STATUS: (id: string) => `/auth/users/${id}/status`,
+        UPDATE_ADMIN: (id: string) => `/auth/admin/users/${id}`,
         ROLES: '/auth/admin/roles',
+    },
+    IDENTITY: {
+        ROLE_POLICIES: (roleId: string) => `/identity/${roleId}/policies`,
     },
     CAMERA: {
         LIST: '/camera',
@@ -134,6 +138,7 @@ export const API_ENDPOINTS = {
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
             CREATE: (pondId: string) => `/pond/${pondId}/stock-transfer`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
+            READINESS: (pondId: string) => `/pond/${pondId}/stock-transfer/readiness`,
         },
         RECORD: {
             LIST: (pondId: string) => `/pond/${pondId}/record`,
@@ -168,6 +173,7 @@ export const API_ENDPOINTS = {
         LIST: '/scale',
         DETAIL: (id: string) => `/scale/${id}`,
         USAGE_STATUS: '/scale/usage-status',
+        LIVE_WEIGHT: (id: string) => `/scale/${id}/live-weight`,
     },
     SCALE_RECORD: {
         LIST: '/scalerecord',
@@ -286,6 +292,11 @@ export const API_ENDPOINTS = {
     CHATBOT: {
         CHAT: '/api/v1/chat',
         INGEST: '/api/v1/ingest',
+    },
+    SURVEY: {
+        SUBMIT: '/survey/submit',
+        STATUS: (userId: string) => `/survey/status/${userId}`,
+        RESULTS: (surveyId: string) => `/survey/results/${surveyId}`,
     },
     NOTIFICATION: {
         DEVICE_TOKEN: '/notification/device-token',
