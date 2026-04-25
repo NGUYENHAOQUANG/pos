@@ -289,6 +289,11 @@ export const API_ENDPOINTS = {
         CHAT: '/api/v1/chat',
         INGEST: '/api/v1/ingest',
     },
+    SURVEY: {
+        SUBMIT: '/survey/submit',
+        STATUS: (userId: string) => `/survey/status/${userId}`,
+        RESULTS: (surveyId: string) => `/survey/results/${surveyId}`,
+    },
     NOTIFICATION: {
         DEVICE_TOKEN: '/notification/device-token',
         LIST: '/notification',

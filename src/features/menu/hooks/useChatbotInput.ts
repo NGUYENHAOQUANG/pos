@@ -14,13 +14,11 @@ import { PondCategory } from '@/features/farm/types/pond-category.types';
 import { chatbotState } from '@/features/menu/services/chatbotState';
 
 // ── Types ──
-export type ActionIntent = 'POND_STATUS' | 'DEVICE_CONTROL' | 'REPORTS';
+export type ActionIntent = 'POND_STATUS' | 'DEVICE_CONTROL' | 'REPORTS' | 'ALERTS';
 export type SelectionStep = 'SUGGESTIONS' | 'SELECT_ZONE' | 'SELECT_CATEGORY' | 'SELECT_POND';
 
 export const ZONE_FLOW_MAP: Record<string, ActionIntent> = {
-    'Xem thông số Trại/Ao': 'POND_STATUS',
-    'Điều khiển thiết bị': 'DEVICE_CONTROL',
-    'Báo cáo tổng quan': 'REPORTS',
+    'Hiện có cảnh báo nào không?': 'ALERTS',
 };
 
 interface UseChatbotInputParams {
@@ -209,6 +207,14 @@ export const useChatbotInput = ({ onSend, onQuickAction, resetKey }: UseChatbotI
         chatbotState.selectedZoneId = zone.id;
         chatbotState.selectedZoneName = zone.name;
         setActiveZoneName(zone.name);
+
+        // ALERTS intent: send directly after zone selection, no category/pond needed
+        if (actionIntent === 'ALERTS') {
+            onQuickAction(`Hiện có cảnh báo nào không? Trại ${zone.name}`);
+            resetFlow();
+            return;
+        }
+
         setStep('SELECT_CATEGORY');
         setIsLoading(true);
         try {

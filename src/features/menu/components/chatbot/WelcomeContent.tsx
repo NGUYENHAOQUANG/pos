@@ -88,7 +88,7 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
     const [selectedCategory, setSelectedCategory] = useState<PondCategory | null>(null);
     const [isFetchingPonds, setIsFetchingPonds] = useState(false);
     const [actionIntent, setActionIntent] = useState<
-        'POND_STATUS' | 'DEVICE_CONTROL' | 'REPORTS' | null
+        'POND_STATUS' | 'DEVICE_CONTROL' | 'REPORTS' | 'ALERTS' | null
     >(null);
 
     // Sync: when zone is cleared from input chip → reset welcome flow
@@ -199,15 +199,9 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
 
     // ── Logic ──
     const handleSuggestionPress = async (item: (typeof WELCOME_SUGGESTIONS)[0]) => {
-        if (
-            item.text === 'Xem thông số Trại/Ao' ||
-            item.text === 'Điều khiển thiết bị' ||
-            item.text === 'Báo cáo tổng quan'
-        ) {
-            if (item.text === 'Xem thông số Trại/Ao') setActionIntent('POND_STATUS');
-            else if (item.text === 'Điều khiển thiết bị') setActionIntent('DEVICE_CONTROL');
-            else setActionIntent('REPORTS');
-
+        // Alert question requires zone selection first
+        if (item.text === 'Hiện có cảnh báo nào không?') {
+            setActionIntent('ALERTS');
             setStep('SELECT_ZONE');
             if (zones.length === 0) {
                 try {
@@ -217,9 +211,10 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
                     console.error('Error fetching zones:', error);
                 }
             }
-        } else {
-            onSuggestionPress(item.text);
+            return;
         }
+        // Other suggestions are direct questions
+        onSuggestionPress(item.text);
     };
 
     const handleZonePress = async (zone: Zone) => {
@@ -227,6 +222,13 @@ export const WelcomeContent: React.FC<WelcomeContentProps> = ({ userName, onSugg
         // Sync to chatbotState so API sends correct farm_id
         chatbotState.selectedZoneId = zone.id;
         chatbotState.selectedZoneName = zone.name;
+
+        // ALERTS intent: send directly after zone selection
+        if (actionIntent === 'ALERTS') {
+            onSuggestionPress(`Hiện có cảnh báo nào không? Trại ${zone.name}`);
+            return;
+        }
+
         setStep('SELECT_CATEGORY');
         if (categories.length === 0) {
             try {
