@@ -224,6 +224,7 @@ export const MenuScreens: React.FC = () => {
                       onPress: () => {
                           useSettingsStore.getState().setWalkthroughEnabled(true);
                           resetOnboarding('account');
+                          setTimeout(() => startOnboarding('account'), 500);
                       },
                   },
                   {

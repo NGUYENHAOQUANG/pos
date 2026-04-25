@@ -8,6 +8,8 @@ import {
     OnboardingStepConfig,
 } from '@/features/walkthrough/constants/onboarding';
 
+import { useIsFocused } from '@react-navigation/native';
+
 interface OnboardingStepProps {
     step: AppStepKey;
     children: React.ReactNode;
@@ -21,10 +23,12 @@ export const OnboardingStep: React.FC<OnboardingStepProps> = ({
     onNext,
     wrapperStyle,
 }) => {
+    const isFocused = useIsFocused();
     const config: OnboardingStepConfig = APP_STEPS[step];
-    const isVisibleRaw = useOnboardingStore(
-        s => s.activeModule === config.module && s.currentStep === config.stepIndex
-    );
+    const isVisibleRaw =
+        useOnboardingStore(
+            s => s.activeModule === config.module && s.currentStep === config.stepIndex
+        ) && isFocused;
     const completeOnboarding = useOnboardingStore(s => s.completeOnboarding);
     const nextStepAction = useOnboardingStore(s => s.nextStep);
 
