@@ -6,6 +6,7 @@ module.exports = [
     {
         ignores: [
             '**/node_modules/**',
+            'vendor/**',
             'build/**',
             'dist/**',
             '*.log',
