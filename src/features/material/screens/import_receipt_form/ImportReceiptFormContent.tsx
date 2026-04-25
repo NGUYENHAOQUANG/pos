@@ -255,6 +255,7 @@ const ImportReceiptForm: React.FC<ImportReceiptFormContentProps> = ({
                     visible={isConfirmModalVisible}
                     onClose={handleCloseConfirmModal}
                     onConfirm={handleConfirmSubmit}
+                    title="Xác Nhận Gửi Phiếu Nhập Kho"
                 />
 
                 <ConfirmationModalUI

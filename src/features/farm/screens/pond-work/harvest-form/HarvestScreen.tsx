@@ -18,6 +18,7 @@ import {
     useDeleteHarvestRecord,
     useHarvestRecord,
 } from '@/features/farm/hooks/useHarvestRecord';
+import { useStartScaleSession } from '@/features/farm/hooks/useScaleRecord';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { harvestService } from '@/features/farm/services/pond-work/harvest.service';
 import { HarvestFormData, getHarvestTypeDisplay } from '@/features/farm/schemas/harvestFormSchema';
@@ -44,6 +45,7 @@ export const HarvestFormScreen: React.FC = () => {
     const createHarvestMutation = useCreateHarvestRecord();
     const updateHarvestMutation = useUpdateHarvestRecord();
     const deleteHarvestMutation = useDeleteHarvestRecord();
+    const startSessionMutation = useStartScaleSession();
 
     const { scaleSessionId, setScaleSessionId, selectedZoneId } = useFarmStore(state => ({
         scaleSessionId: cycleId ? state.scaleSessions[cycleId]?.sessionId : undefined,
@@ -79,9 +81,41 @@ export const HarvestFormScreen: React.FC = () => {
                     visibilityTime: 4000,
                     type: 'success',
                 });
+            } else if (cycleId) {
+                startSessionMutation
+                    .mutateAsync({ cycleId })
+                    .then(res => {
+                        if (res.data?.sessionId) {
+                            setScaleSessionId(cycleId, res.data.sessionId);
+                        }
+                    })
+                    .catch((error: any) => {
+                        const errorData = error?.data;
+                        if (
+                            error?.statusCode === 409 ||
+                            errorData?.errorCode === 'ALREADY_EXISTS'
+                        ) {
+                            if (errorData?.data?.sessionId) {
+                                setScaleSessionId(cycleId, errorData.data.sessionId);
+                            } else {
+                                AppToast({
+                                    type: 'error',
+                                    text1: 'Lỗi',
+                                    text2: 'Không thể khởi tạo phiên cân mới',
+                                });
+                            }
+                        } else {
+                            console.log(error);
+                            AppToast({
+                                type: 'error',
+                                text1: 'Lỗi',
+                                text2: 'Không thể khởi tạo phiên cân mới',
+                            });
+                        }
+                    });
             }
         }
-    }, [cycleId, isEditMode, scaleMode, scaleSessionId]);
+    }, [cycleId, isEditMode, scaleMode, scaleSessionId, setScaleSessionId, startSessionMutation]);
 
     const initialData = useMemo(() => {
         return harvestService.mapRecordToForm(recordDetail);

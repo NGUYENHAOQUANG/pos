@@ -8,11 +8,12 @@ import {
 } from '@/features/farm/types/scale.types';
 import { APP_CONFIG } from '@/shared/constants';
 
-export const useScales = (params?: IScaleParams) => {
+export const useScales = (params?: IScaleParams, options?: { refetchInterval?: number }) => {
     return useQuery({
         queryKey: farmKeys.scales.list(params),
         queryFn: () => scaleApi.getAll(params),
         enabled: !!params?.ZoneId || !!params?.CurrentCycleId,
+        refetchInterval: options?.refetchInterval,
     });
 };
 
@@ -42,5 +43,14 @@ export const useUpdateScaleUsageStatus = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.scales.all() });
         },
+    });
+};
+
+export const useLiveWeight = (id: string, options?: { enabled?: boolean }) => {
+    return useQuery({
+        queryKey: farmKeys.scales.liveWeight(id),
+        queryFn: () => scaleApi.getLiveWeight(id),
+        enabled: !!id && (options?.enabled ?? true),
+        refetchInterval: 1000,
     });
 };

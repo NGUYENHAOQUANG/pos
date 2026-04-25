@@ -6,6 +6,7 @@ import {
     GetPondByIdResponse,
     GetPondsParams,
     GetPondsResponse,
+    GetStockTransferReadinessResponse,
 } from '@/features/farm/types/pond.types';
 
 const parseApiResponse = <T>(responseData: unknown): T[] => {
@@ -53,5 +54,14 @@ export const pondApi = {
     getPondTypes: async (): Promise<PondType[]> => {
         const response = await apiClient.get(API_ENDPOINTS.POND_TYPES.LIST);
         return parseApiResponse<PondType>(response.data);
+    },
+
+    getStockTransferReadiness: async (
+        pondId: string
+    ): Promise<GetStockTransferReadinessResponse> => {
+        const { data } = await apiClient.get<GetStockTransferReadinessResponse>(
+            API_ENDPOINTS.POND.STOCK_TRANSFER.READINESS(pondId)
+        );
+        return data;
     },
 };

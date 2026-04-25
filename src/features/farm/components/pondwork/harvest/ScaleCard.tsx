@@ -6,6 +6,8 @@ import { ButtonDevices } from '@/features/control/components/devices/ButtonDevic
 import { useAppTheme } from '@/styles/themeContext';
 import { Colors } from '@/styles/colors';
 import { spacing } from '@/styles';
+import { useLiveWeight } from '@/features/farm/hooks/useScales';
+import { ScaleConnectionStatus, IScale, LiveWeightState } from '@/features/farm/types/scale.types';
 
 export enum ScaleStatus {
     READY = 'ready',
@@ -16,17 +18,17 @@ export enum ScaleStatus {
 
 export interface ScaleCardProps {
     title: string;
-    status: ScaleStatus;
     weight: number | null;
-    onConfirmPress?: () => void;
+    scale?: IScale;
+    onConfirmPress?: (weight: number) => void;
     onPress?: () => void;
     onToggle?: (val: boolean) => void;
 }
 
 export const ScaleCard: React.FC<ScaleCardProps> = ({
     title,
-    status,
     weight,
+    scale,
     onConfirmPress,
     onPress,
     onToggle,
@@ -34,14 +36,24 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
     const theme = useAppTheme();
     const styles = getStyles(theme);
 
-    const [isToggled, setIsToggled] = useState(
-        status === ScaleStatus.READY || status === ScaleStatus.WAITING
-    );
+    const shouldFetchLiveWeight =
+        scale?.deviceId != null && scale?.connectionStatus === ScaleConnectionStatus.Connected;
+
+    const { data: liveWeightResponse } = useLiveWeight(scale?.id || '', {
+        enabled: shouldFetchLiveWeight,
+    });
+
+    const liveWeightData = liveWeightResponse?.data;
+    const canConfirm = liveWeightData?.canConfirm ?? false;
+    const currentNetWeight =
+        shouldFetchLiveWeight && liveWeightData?.net !== undefined ? liveWeightData.net : weight;
+
+    const [isToggled, setIsToggled] = useState(true);
 
     // Sync state if parent status changes
     useEffect(() => {
-        setIsToggled(status === ScaleStatus.READY || status === ScaleStatus.WAITING);
-    }, [status]);
+        setIsToggled(true);
+    }, [scale?.usageStatus]);
 
     const handleToggle = useCallback(
         (val: boolean) => {
@@ -54,36 +66,52 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
     );
 
     const statusProps = useMemo(() => {
-        switch (status) {
-            case ScaleStatus.READY:
-                return {
-                    text: 'Sẵn sàng XN',
-                    style: styles.statusReady,
-                    textStyle: styles.statusReadyText,
-                };
-            case ScaleStatus.WAITING:
-                return {
-                    text: 'Chờ ổn định',
-                    style: styles.statusWaiting,
-                    textStyle: styles.statusWaitingText,
-                };
-            case ScaleStatus.DISCONNECTED:
-                return {
-                    text: 'Mất kết nối',
-                    style: styles.statusDisconnected,
-                    textStyle: styles.statusDisconnectedText,
-                };
-            case ScaleStatus.EMPTY:
-            default:
-                return {
-                    text: 'Trống',
-                    style: styles.statusEmpty,
-                    textStyle: styles.statusEmptyText,
-                };
-        }
-    }, [status, styles]);
+        const liveState = liveWeightData?.state;
 
-    const displayWeight = weight !== null ? weight.toFixed(1) : '-';
+        if (liveState) {
+            switch (liveState) {
+                case LiveWeightState.Disconnected:
+                    return {
+                        text: 'Mất kết nối',
+                        style: styles.statusDisconnected,
+                        textStyle: styles.statusDisconnectedText,
+                    };
+                case LiveWeightState.Measuring:
+                    return {
+                        text: 'Chờ ổn định',
+                        style: styles.statusWaiting,
+                        textStyle: styles.statusWaitingText,
+                    };
+                case LiveWeightState.Stable:
+                    return {
+                        text: 'Sẵn sàng XN',
+                        style: styles.statusReady,
+                        textStyle: styles.statusReadyText,
+                    };
+                case LiveWeightState.Zero:
+                    return {
+                        text: 'Trống',
+                        style: styles.statusEmpty,
+                        textStyle: styles.statusEmptyText,
+                    };
+            }
+        }
+
+        return {
+            text: 'Mất kết nối',
+            style: styles.statusDisconnected,
+            textStyle: styles.statusDisconnectedText,
+        };
+    }, [liveWeightData?.state, styles]);
+
+    const isDisconnected =
+        liveWeightData?.state === LiveWeightState.Disconnected || !scale?.deviceId;
+
+    const displayWeight = isDisconnected
+        ? '-'
+        : currentNetWeight !== null
+        ? currentNetWeight.toFixed(1)
+        : '-';
 
     return (
         <TouchableOpacity
@@ -125,7 +153,13 @@ export const ScaleCard: React.FC<ScaleCardProps> = ({
                                 title="Xác nhận"
                                 variant="outline"
                                 size="small"
-                                onPress={onConfirmPress}
+                                onPress={() => onConfirmPress(currentNetWeight ?? 0)}
+                                disabled={
+                                    isDisconnected ||
+                                    (shouldFetchLiveWeight
+                                        ? currentNetWeight === 0 || !canConfirm
+                                        : false)
+                                }
                             />
                         )}
                     </View>

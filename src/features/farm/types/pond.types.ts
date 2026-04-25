@@ -90,3 +90,25 @@ export type GetPondTypesResponse = IApiResponse<PondType[]>;
 export type GetPondOperationTypesResponse = IApiResponse<OperationType[]>;
 export type GetPondTypeOperationsResponse = IApiResponse<PondTypeOperation[]>;
 export type GetPondByIdResponse = IApiResponse<PondData>;
+
+export interface IStockTransferReadinessIssue {
+    issueType: string;
+    message: string;
+    detail?: {
+        totalPendingSessions?: number;
+        totalPendingBatches?: number;
+        totalPendingWeight?: number;
+        sessions?: {
+            sessionId: string;
+            totalBatches: number;
+            totalWeight: number;
+        }[];
+    };
+}
+
+export interface IStockTransferReadiness {
+    isReady: boolean;
+    issues: IStockTransferReadinessIssue[];
+}
+
+export type GetStockTransferReadinessResponse = IApiResponse<IStockTransferReadiness>;

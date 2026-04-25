@@ -134,6 +134,7 @@ export const API_ENDPOINTS = {
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
             CREATE: (pondId: string) => `/pond/${pondId}/stock-transfer`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
+            READINESS: (pondId: string) => `/pond/${pondId}/stock-transfer/readiness`,
         },
         RECORD: {
             LIST: (pondId: string) => `/pond/${pondId}/record`,
@@ -168,6 +169,7 @@ export const API_ENDPOINTS = {
         LIST: '/scale',
         DETAIL: (id: string) => `/scale/${id}`,
         USAGE_STATUS: '/scale/usage-status',
+        LIVE_WEIGHT: (id: string) => `/scale/${id}/live-weight`,
     },
     SCALE_RECORD: {
         LIST: '/scalerecord',
@@ -212,6 +214,8 @@ export const API_ENDPOINTS = {
         DELETE_ITEM: (checkId: string, itemId: string) =>
             `/inventorycheck/${checkId}/items/${itemId}`,
         SUBMISSION: (id: string) => `/inventorycheck/${id}/submission`,
+        APPROVAL: (id: string) => `/inventorycheck/${id}/approval`,
+        REJECTION: (id: string) => `/inventorycheck/${id}/rejection`,
     },
     PARAMETER_SETTING: {
         LIST: (zoneId: string) => `/zone/${zoneId}/settings`,
@@ -289,5 +293,6 @@ export const API_ENDPOINTS = {
         DEVICE_TOKEN: '/notification/device-token',
         LIST: '/notification',
         READ: (id: string) => `/notification/${id}/read`,
+        UNREAD_COUNT: '/notification/unread-count',
     },
 } as const;

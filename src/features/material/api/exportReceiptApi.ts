@@ -104,4 +104,19 @@ export const exportReceiptApi = {
         );
         return data;
     },
+
+    approve: async (id: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
+            API_ENDPOINTS.EXPORT_RECEIPT.APPROVAL(id)
+        );
+        return data;
+    },
+
+    reject: async (id: string, command?: any): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
+            API_ENDPOINTS.EXPORT_RECEIPT.REJECTION(id),
+            command
+        );
+        return data;
+    },
 };

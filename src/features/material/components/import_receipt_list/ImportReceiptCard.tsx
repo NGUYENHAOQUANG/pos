@@ -20,9 +20,10 @@ import { ImportReceiptItems } from '@/features/material/components/import_receip
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
+import { Button } from '@/shared/components/buttons/Button';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
+import { ApproveImportReceiptBottomSheet } from '@/features/material/components/import_receipt_list/ApproveImportReceiptBottomSheet';
 
 interface ImportReceiptCardProps {
     item: ImportReceipt;
@@ -83,51 +84,50 @@ export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) =
     const supplierName =
         item.supplierName || suppliers.find(s => s.id === item.supplierId)?.name || '---';
 
+    const [isApproveModalVisible, setIsApproveModalVisible] = React.useState(false);
+
     return (
         <View style={styles.card}>
-            <View style={styles.cardContent}>
-                {/* Header Info */}
-                <View style={styles.detailRow}>
-                    <View style={styles.row}>
-                        <Text style={styles.detailLabel}>Trạng thái:</Text>
-                        <MaterialGroup group={getStatusLabel(item.status)} />
-                    </View>
-                    <DetailRow
-                        label="Nhập kho:"
-                        value={item.createdAt ? formatMaterialDateTime(item.editedAt) : '---'}
-                    />
-                    <DetailRow
-                        label="Tạo phiếu:"
-                        value={item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
-                    />
-                    <DetailRow label="Tổng hàng hóa:" value={item.totalItems ?? '---'} />
-                    <DetailRow
-                        label="Tổng giá trị:"
-                        value={formatCurrency(item.totalAmount ?? 0)}
-                    />
+            {/* Header Info */}
+            <View style={styles.detailRow}>
+                <View style={styles.row}>
+                    <Text style={styles.detailLabel}>Trạng thái:</Text>
+                    <MaterialGroup group={getStatusLabel(item.status)} />
                 </View>
-                {/* Edit Button (Only for Draft) */}
-                {item.status === ImportReceiptStatus.Draft && (
-                    <ButtonMaterialList
-                        title="Sửa thông tin"
-                        icon={<EditIcon />}
-                        style={styles.editButton}
-                        onPress={() => {
-                            navigation.navigate('ImportReceiptFormScreen', {
-                                importReceiptId: item.id,
-                                availableMaterials: [],
-                            });
-                        }}
-                    />
-                )}
-                {isExpanded && (
-                    <DetailRow
-                        label="Nhà cung cấp:"
-                        value={supplierName}
-                        style={styles.detailRowItem}
-                    />
-                )}
+                <DetailRow
+                    label="Nhập kho:"
+                    value={item.editedAt ? formatMaterialDateTime(item.editedAt) : '---'}
+                />
+                <DetailRow
+                    label="Tạo phiếu:"
+                    value={item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
+                />
+                <DetailRow label="Tổng hàng hóa:" value={item.totalItems ?? '---'} />
+                <DetailRow label="Tổng giá trị:" value={formatCurrency(item.totalAmount ?? 0)} />
             </View>
+            {/* Edit Button (Only for Draft) */}
+            {item.status === ImportReceiptStatus.Draft && (
+                <Button
+                    title="Sửa thông tin"
+                    variant="outline"
+                    renderLeftIcon={<EditIcon />}
+                    style={styles.editButton}
+                    onPress={() => {
+                        navigation.navigate('ImportReceiptFormScreen', {
+                            importReceiptId: item.id,
+                            availableMaterials: [],
+                        });
+                    }}
+                />
+            )}
+
+            {isExpanded && (
+                <DetailRow
+                    label="Nhà cung cấp:"
+                    value={supplierName}
+                    style={styles.detailRowItem}
+                />
+            )}
 
             {/* Expanded Details */}
             {isExpanded && (
@@ -153,6 +153,38 @@ export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) =
                     color={theme.primary}
                 />
             </TouchableOpacity>
+
+            {/* Pending Actions */}
+            {item.status === ImportReceiptStatus.Pending && (
+                <View style={styles.actionButtonsRow}>
+                    <Button
+                        title="Từ chối"
+                        variant="outline"
+                        iconLeft="ban-outline"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => {
+                            setIsApproveModalVisible(true);
+                        }}
+                    />
+                    <Button
+                        title="Duyệt"
+                        variant="outline"
+                        iconLeft="checkmark-done"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => {
+                            setIsApproveModalVisible(true);
+                        }}
+                    />
+                </View>
+            )}
+
+            <ApproveImportReceiptBottomSheet
+                visible={isApproveModalVisible}
+                onClose={() => setIsApproveModalVisible(false)}
+                id={item.id}
+            />
         </View>
     );
 }, arePropsEqual);
@@ -162,14 +194,10 @@ const getStyles = (theme: Colors) =>
         card: {
             backgroundColor: theme.background,
             borderRadius: borderRadius.md,
+            padding: spacing.md,
             marginBottom: spacing.sm,
-            paddingBottom: spacing.sm,
             borderWidth: 1,
             borderColor: theme.border,
-        },
-        cardContent: {
-            padding: spacing.md,
-            paddingBottom: 0,
         },
         row: {
             flexDirection: 'row',
@@ -197,8 +225,9 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            paddingVertical: spacing.sm,
+            paddingTop: spacing.sm,
             gap: 4,
+            marginTop: spacing.xs,
         },
         expandText: {
             fontSize: 14,
@@ -207,9 +236,11 @@ const getStyles = (theme: Colors) =>
         },
         detailsContainer: {
             backgroundColor: theme.background,
+            marginTop: spacing.sm,
+            paddingTop: spacing.xs,
         },
         editButton: {
-            marginTop: spacing.sm,
+            marginTop: 12,
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
@@ -238,5 +269,15 @@ const getStyles = (theme: Colors) =>
             fontSize: 14,
             color: theme.text,
             fontWeight: '500',
+        },
+        actionButtonsRow: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: spacing.sm,
+        },
+        actionButton: {
+            flex: 1,
+            marginTop: 0,
+            height: 44,
         },
     });

@@ -167,3 +167,27 @@ export const useInventoryItems = (inventoryId?: string, params?: GetInventoryChe
         refetchOnWindowFocus: false,
     });
 };
+
+export const useApproveInventoryCheck = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id }: { id: string; code: string }) => inventoryApi.approve(id),
+        onSuccess: (_, variables) => {
+            showSuccessToast(`Đã duyệt phiếu ${variables.code} thành công`);
+            queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'inventory'] });
+        },
+        onError: error => handleError(error),
+    });
+};
+
+export const useRejectInventoryCheck = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id }: { id: string; code: string }) => inventoryApi.reject(id, {}),
+        onSuccess: (_, variables) => {
+            showSuccessToast(`Đã từ chối phiếu ${variables.code}`);
+            queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'inventory'] });
+        },
+        onError: error => handleError(error),
+    });
+};

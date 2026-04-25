@@ -175,10 +175,10 @@ export const MaterialScreen = () => {
 
     // 8. Navigation Params & TabBar
     useEffect(() => {
-        const params = route.params as { selectedTab?: TabType } | undefined;
-        if (params?.selectedTab) {
-            setSelectedTab(params.selectedTab);
-            navigation.setParams({ selectedTab: undefined } as any);
+        const params = route.params as { selectedTab?: TabType | null } | undefined;
+        if (params?.selectedTab && Object.values(TabType).includes(params.selectedTab as TabType)) {
+            setSelectedTab(params.selectedTab as TabType);
+            navigation.setParams({ selectedTab: null } as any);
         }
     }, [route.params, navigation, setSelectedTab]);
 

@@ -38,5 +38,10 @@ export const handleError = (err: unknown) => {
         return;
     }
 
+    // Ignore 409 ALREADY_EXISTS globally since we handle it in the UI logic
+    if (error.statusCode === 409 || error.data?.errorCode === 'ALREADY_EXISTS') {
+        return;
+    }
+
     Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
 };

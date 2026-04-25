@@ -23,11 +23,15 @@ import { INotification } from '@/features/notifications/types/notification.types
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { NotificationSkeleton } from '@/features/notifications/components/NotificationSkeleton';
+import { useNotificationRouter } from '@/features/notifications/hooks/useNotificationRouter';
+import { NotificationBottomSheet } from '@/features/notifications/components/NotificationBottomSheet';
 
 export const NotificationListScreen: React.FC = () => {
     const theme = useAppTheme();
     const styles = getStyles(theme);
     const navigation = useNavigation();
+
+    const { navigateFromPayload, approvePayload, clearApprovePayload } = useNotificationRouter();
 
     const {
         data: notifications,
@@ -67,7 +71,8 @@ export const NotificationListScreen: React.FC = () => {
         if (!item.isRead) {
             markAsReadMutate(item.id);
         }
-        // TODO: Map item.targetUrl to deep linking navigation later if needed
+
+        navigateFromPayload(item.payload);
     };
 
     const renderItem = ({ item }: { item: INotification }) => {
@@ -168,6 +173,9 @@ export const NotificationListScreen: React.FC = () => {
                     }
                 />
             )}
+
+            {/* Modal for approving material receipts right from notification list */}
+            <NotificationBottomSheet payload={approvePayload} onClose={clearApprovePayload} />
         </View>
     );
 };

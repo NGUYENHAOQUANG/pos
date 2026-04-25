@@ -21,8 +21,9 @@ import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ExportReceipt, ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
 import { useExportReceiptItems } from '@/features/material/hooks';
 import { DetailRow } from '@/features/material/components/DetailRow';
-import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
+import { Button } from '@/shared/components/buttons/Button';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
+import { ApproveExportReceiptBottomSheet } from '@/features/material/components/export_warehouse_list/ApproveExportReceiptBottomSheet';
 
 interface ExportWarehouseReceiptCardProps {
     item: ExportReceipt;
@@ -69,6 +70,8 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
     const displayTotalAmount =
         item.totalAmount && item.totalAmount > 0 ? item.totalAmount : calculatedTotal;
 
+    const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
+
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
@@ -91,55 +94,45 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
 
     return (
         <View style={styles.card}>
-            <View style={styles.cardContent}>
-                {/* Header Info */}
+            {/* Header Info */}
+            <View style={styles.detailRow}>
                 <View style={styles.row}>
                     <Text style={styles.label}>Trạng thái:</Text>
                     <MaterialGroup group={getStatusLabel(item.status)} />
                 </View>
-                <View style={styles.detailRow}>
-                    <DetailRow
-                        label="Xuất kho:"
-                        value={formatMaterialDateTime(item.createdAt || '')}
-                    />
-                    <DetailRow
-                        label="Tạo phiếu:"
-                        value={formatMaterialDateTime(item.createdAt || '')}
-                    />
-                    <DetailRow
-                        label="Tổng hàng hoá:"
-                        value={item.totalItems ?? finalItems.length}
-                    />
-                    <DetailRow
-                        label="Tổng giá trị:"
-                        value={formatCurrency(displayTotalAmount || 0)}
-                    />
-                </View>
-
-                {/* Farm Info - Visible when Expanded */}
-                {isExpanded && (
-                    <DetailRow
-                        label="Ao yêu cầu:"
-                        value={item.pondName || item.warehouseName || '---'}
-                        style={{ marginTop: 12 }}
-                    />
-                )}
-
-                {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}
-                {(item.status === 'Draft' || !item.status) && (
-                    <ButtonMaterialList
-                        title="Sửa thông tin"
-                        icon={<EditIcon />}
-                        style={styles.editButton}
-                        onPress={() => {
-                            navigation.navigate('ExportWarehouseForm', {
-                                exportReceiptId: item.id,
-                                availableMaterials: [],
-                            });
-                        }}
-                    />
-                )}
+                <DetailRow label="Xuất kho:" value={formatMaterialDateTime(item.createdAt || '')} />
+                <DetailRow
+                    label="Tạo phiếu:"
+                    value={formatMaterialDateTime(item.createdAt || '')}
+                />
+                <DetailRow label="Tổng hàng hoá:" value={item.totalItems ?? finalItems.length} />
+                <DetailRow label="Tổng giá trị:" value={formatCurrency(displayTotalAmount || 0)} />
             </View>
+
+            {/* Farm Info - Visible when Expanded */}
+            {isExpanded && (
+                <DetailRow
+                    label="Ao yêu cầu:"
+                    value={item.pondName || item.warehouseName || '---'}
+                    style={{ marginTop: 12 }}
+                />
+            )}
+
+            {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}
+            {(item.status === 'Draft' || !item.status) && (
+                <Button
+                    title="Sửa thông tin"
+                    renderLeftIcon={<EditIcon />}
+                    variant="outline"
+                    style={styles.editButton}
+                    onPress={() => {
+                        navigation.navigate('ExportWarehouseForm', {
+                            exportReceiptId: item.id,
+                            availableMaterials: [],
+                        });
+                    }}
+                />
+            )}
 
             {/* Expanded Details */}
             {isExpanded && (
@@ -165,6 +158,33 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                     color={theme.primary}
                 />
             </TouchableOpacity>
+            {/* Pending Actions */}
+            {item.status === 'Pending' && (
+                <View style={styles.actionButtonsRow}>
+                    <Button
+                        title="Từ chối"
+                        variant="outline"
+                        iconLeft="ban-outline"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => setIsApproveModalVisible(true)}
+                    />
+                    <Button
+                        title="Duyệt"
+                        variant="outline"
+                        iconLeft="checkmark-done"
+                        style={styles.actionButton}
+                        textStyle={{ fontWeight: '500', fontSize: 14 }}
+                        onPress={() => setIsApproveModalVisible(true)}
+                    />
+                </View>
+            )}
+
+            <ApproveExportReceiptBottomSheet
+                visible={isApproveModalVisible}
+                onClose={() => setIsApproveModalVisible(false)}
+                id={item.id}
+            />
         </View>
     );
 };
@@ -174,21 +194,15 @@ const getStyles = (theme: Colors) =>
         card: {
             backgroundColor: theme.background,
             borderRadius: borderRadius.md,
+            padding: spacing.md,
             marginBottom: spacing.sm,
-            overflow: 'hidden',
-            paddingBottom: spacing.sm,
             borderWidth: 1,
             borderColor: theme.border,
-        },
-        cardContent: {
-            padding: spacing.md,
-            paddingBottom: 0,
         },
         row: {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 12,
         },
         label: {
             fontWeight: '400',
@@ -213,8 +227,9 @@ const getStyles = (theme: Colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            paddingVertical: spacing.sm,
+            paddingTop: spacing.sm,
             gap: 4,
+            marginTop: spacing.xs,
         },
         expandText: {
             fontSize: 14,
@@ -223,10 +238,11 @@ const getStyles = (theme: Colors) =>
         },
         detailsContainer: {
             backgroundColor: theme.background,
-            marginTop: spacing.md,
+            marginTop: spacing.sm,
+            paddingTop: spacing.xs,
         },
         editButton: {
-            marginTop: spacing.sm,
+            marginTop: 12,
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
@@ -235,5 +251,15 @@ const getStyles = (theme: Colors) =>
         },
         detailRow: {
             gap: 12,
+        },
+        actionButtonsRow: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: spacing.sm,
+        },
+        actionButton: {
+            flex: 1,
+            marginTop: 0,
+            height: 44,
         },
     });

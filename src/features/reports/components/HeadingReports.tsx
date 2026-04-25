@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { spacing, borderRadius } from '@/styles';
+import { spacing } from '@/styles';
 import { useAppTheme } from '@/styles/themeContext';
 import { DropDownHeaderItem } from '@/shared/components/forms/DropdownHeaderButton';
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
 import { Logo } from '@/shared/components/brand/Logo';
+import { NotificationBadgeButton } from '@/features/notifications/components/NotificationBadgeButton';
 import { OnboardingStep } from '@/features/walkthrough/components/OnboardingStep';
 
 interface HeadingReportsProps {
@@ -57,20 +57,7 @@ export const HeadingReports = ({
             <View style={styles.topRow}>
                 <Logo size="squareXs" />
                 <OnboardingStep step="REPORT_NOTIFICATION">
-                    <View collapsable={false}>
-                        <TouchableOpacity
-                            style={[
-                                styles.notificationButton,
-                                {
-                                    backgroundColor: theme.background,
-                                    borderColor: theme.borderDark,
-                                },
-                            ]}
-                            onPress={onRightPress}
-                        >
-                            <Ionicons name="notifications-outline" size={20} color={theme.text} />
-                        </TouchableOpacity>
-                    </View>
+                    <NotificationBadgeButton onPress={onRightPress} />
                 </OnboardingStep>
             </View>
 
@@ -138,14 +125,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.md,
         paddingTop: spacing.md,
-    },
-    notificationButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
     },
     rowOuter: {
         paddingHorizontal: 16,

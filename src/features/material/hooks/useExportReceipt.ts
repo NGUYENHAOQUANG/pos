@@ -152,3 +152,27 @@ export const useDeleteExportReceipt = () => {
         },
     });
 };
+
+export const useApproveExportReceipt = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id }: { id: string; code: string }) => exportReceiptApi.approve(id),
+        onSuccess: (_, variables) => {
+            showSuccessToast(`Đã duyệt phiếu ${variables.code} thành công`);
+            queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'export-warehouse'] });
+        },
+        onError: error => handleError(error),
+    });
+};
+
+export const useRejectExportReceipt = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id }: { id: string; code: string }) => exportReceiptApi.reject(id, {}),
+        onSuccess: (_, variables) => {
+            showSuccessToast(`Đã từ chối phiếu ${variables.code}`);
+            queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'export-warehouse'] });
+        },
+        onError: error => handleError(error),
+    });
+};
